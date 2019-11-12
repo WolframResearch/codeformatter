@@ -1,0 +1,36 @@
+
+
+
+# Design
+
+Formatting will not change semantics
+
+concerned with character encoding and tokens
+
+
+
+
+Still warn about ; and . on different lines, These are usually typos
+
+
+
+
+
+
+format:
+f [x]
+into
+f[x]
+
+
+
+
+format:
+f [x] [y]
+into
+f[x][y]
+
+
+
+
+

@@ -32,20 +32,20 @@ formatTest[fileIn_String, i_Integer, OptionsPattern[]] :=
     
     If[FileType[file] === File,
      If[FileByteCount[file] > limit[[2]],
-      ast = 
-      Failure["FileTooLarge", <|"FileName" -> file, 
+      ast =
+      Failure["FileTooLarge", <|"FileName" -> file,
         "FileSize" -> FileSize[file]|>];
      Throw[ast]
      ];
      If[FileByteCount[file] < limit[[1]],
-      ast = 
-      Failure["FileTooSmall", <|"FileName" -> file, 
+      ast =
+      Failure["FileTooSmall", <|"FileName" -> file,
         "FileSize" -> FileSize[file]|>];
      Throw[ast]
      ];
      ];
 
-  FormatFile[file]
+  FormatFile[file, AirynessLevel -> 1.0]
 
 ]]
 

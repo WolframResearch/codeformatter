@@ -2,7 +2,16 @@ BeginPackage["Format`Utils`"]
 
 SourceTake
 
+
+shadows
+
+
 Begin["`Private`"]
+
+Needs["Format`"]
+Needs["AST`"]
+Needs["AST`Utils`"]
+
 
 (*
 input:
@@ -21,6 +30,37 @@ Module[{lines},
 			StringTake[lines[[line2]], ;; col2]}, "\n"]]
 	]
 ]
+
+
+
+
+
+
+
+(*
+shadows[action1, action2] => True means action1 is less severe and is contained by action2; we will get rid of issue1
+*)
+shadows[action1:CodeTextAction[_, command1_, data1_], action2:CodeTextAction[_, command2_, data2_]] :=
+	Which[
+		action1 === action2,
+			False,
+		command1 =!= command2,
+			False,
+		SourceMemberQ[data2[ Source ], data1[ Source ] ],
+			True,
+		True,
+			False
+	]
+
+shadows[args___] := Failure["InternalUnhandled", <|"Function" -> shadows, "Arguments" -> HoldForm[{args}]|>]
+
+
+
+
+
+
+
+
 
 End[]
 

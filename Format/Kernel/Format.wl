@@ -49,6 +49,8 @@ $lineLimit = 5000
 
 
 
+
+
 $existsTest = Not @* KeyExistsQ[AirynessLevel]
 
 
@@ -62,7 +64,8 @@ FormatFile::longlines = "File `1` has long lines. Formatting will be truncated."
 Options[FormatFile] = {
 	AirynessLevel :> $AirynessLevel,
 	"DryRun" -> False,
-	PerformanceGoal -> "Speed"
+	PerformanceGoal -> "Speed",
+	"Tau" -> 2
 }
 
 FormatFile[file_String | File[file_String], opts:OptionsPattern[]] :=
@@ -76,11 +79,12 @@ formatFile[file_String, opts:OptionsPattern[]] :=
 Catch[
 Module[{cst, cstAndIssues, issues, last, lastSrc, lastSrcLine, actions, newCST, str, bytes,
 	actionfulIssues, actionlessIssues, srcPosMap, badIssues, airynessTest, airyness, shadowing,
-	groupedActions, lines, newLines, dryRun, performanceGoal},
+	groupedActions, lines, newLines, dryRun, performanceGoal, tau},
 
 	airyness = OptionValue[AirynessLevel];
 	dryRun = OptionValue["DryRun"];
 	performanceGoal = OptionValue[PerformanceGoal];
+	tau = OptionValue["Tau"];
 
 	bytes = Import[file, "Byte"];
 
@@ -92,7 +96,7 @@ Module[{cst, cstAndIssues, issues, last, lastSrc, lastSrcLine, actions, newCST, 
 
    {cst, issues} = cstAndIssues;
 
-	issues = formatCST[cst, issues];
+	issues = formatCST[cst, issues, "Tau" -> tau];
 
 	(*
 	File only
@@ -143,7 +147,10 @@ Module[{cst, cstAndIssues, issues, last, lastSrc, lastSrcLine, actions, newCST, 
 	groupedActions = GroupBy[actions, #[[3, Key[Source], 1, 1]]&];
 
 	If[$Debug,
-		Print["actions: ", actions];
+		Print["actions Length: ", Length[actions]];
+		If[$Debug2,
+			Print["actions: ", actions];
+		];
 	];
 
 
@@ -198,7 +205,8 @@ FormatString::longlines = "String has long lines. Formatting will be truncated."
 
 Options[FormatString] = {
 	AirynessLevel :> $AirynessLevel,
-	PerformanceGoal -> "Speed"
+	PerformanceGoal -> "Speed",
+	"Tau" -> 2
 }
 
 FormatString[str_String, opts:OptionsPattern[]] :=
@@ -210,12 +218,13 @@ Options[formatString] = Options[FormatString]
 formatString[strIn_String, opts:OptionsPattern[]] :=
 Module[{cst, cstAndIssues, issues, actions, newCST, str,
 	actionfulIssues, actionlessIssues, srcPosMap, badIssues, airynessTest, airyness, shadowing,
-	lines, newLines, groupedActions, bytes, newStr, performanceGoal},
+	lines, newLines, groupedActions, bytes, newStr, performanceGoal, tau},
 
 	str = strIn;
 
 	airyness = OptionValue[AirynessLevel];
 	performanceGoal = OptionValue[PerformanceGoal];
+	tau = OptionValue["Tau"];
 
 	cstAndIssues = ConcreteParseString[str, {StringNode[String, #[[1]], <||>], Cases[#[[2]], FormatIssue[___]]}&];
 
@@ -225,7 +234,7 @@ Module[{cst, cstAndIssues, issues, actions, newCST, str,
 
    {cst, issues} = cstAndIssues;
 
-	issues = formatCST[cst, issues];
+	issues = formatCST[cst, issues, "Tau" -> tau];
 
 	If[$Debug,
 		Print["issues: ", issues];
@@ -262,7 +271,10 @@ Module[{cst, cstAndIssues, issues, actions, newCST, str,
 	*)
 
 	If[$Debug,
-		Print["actions: ", actions];
+		Print["actions Length: ", Length[actions]];
+		If[$Debug2,
+			Print["actions: ", actions];
+		];
 	];
 
 
@@ -304,7 +316,8 @@ FormatBytes::longlines = "Bytes has long lines. Formatting will be truncated."
 
 Options[FormatBytes] = {
 	AirynessLevel :> $AirynessLevel,
-	PerformanceGoal -> "Speed"
+	PerformanceGoal -> "Speed",
+	"Tau" -> 2
 }
 
 FormatBytes[bytes_List, opts:OptionsPattern[]] :=
@@ -317,12 +330,13 @@ formatBytes[bytesIn_List, opts:OptionsPattern[]] :=
 Catch[
 Module[{cst, cstAndIssues, issues, actions, newCST, str,
 	actionfulIssues, actionlessIssues, bytes, bytesOut, badIssues, airynessTest, airyness, shadowing,
-	groupedActions, performanceGoal},
+	groupedActions, performanceGoal, tau},
 
 	bytes = bytesIn;
 
 	airyness = OptionValue[AirynessLevel];
 	performanceGoal = OptionValue[PerformanceGoal];
+	tau = OptionValue["Tau"];
 
 	If[$Debug,
 		Print["concrete parse"];
@@ -343,7 +357,7 @@ Module[{cst, cstAndIssues, issues, actions, newCST, str,
 		Print["formatCST"];
 	];
 
-	issues = formatCST[cst, issues];
+	issues = formatCST[cst, issues, "Tau" -> tau];
 
 		If[$Debug,
 		Print["formatCST done"];
@@ -370,13 +384,12 @@ Module[{cst, cstAndIssues, issues, actions, newCST, str,
 
 	actions = Flatten[lowerToText[#, cst]& /@ actions];
 
-	(*
-	actions = SortBy[actions, -#[[3, Key[Source]]]&];
-
 	If[$Debug,
 		Print["actions Length: ", Length[actions]];
+		If[$Debug2,
+			Print["actions: ", actions];
+		];
 	];
-	*)
 
 	groupedActions = GroupBy[actions, #[[3, Key[Source], 1, 1]]&];
 
@@ -415,6 +428,10 @@ Module[{cst, cstAndIssues, issues, actions, newCST, str,
 
 
 
+Options[formatCST] = {
+	"Tau" -> 2
+}
+
 (*
 	gather concrete issues
 
@@ -426,12 +443,17 @@ Module[{cst, cstAndIssues, issues, actions, newCST, str,
 	remove trailing whitespace at end of lines
 
 	*)
-formatCST[cstIn_, issuesIn_] :=
+formatCST[cstIn_, issuesIn_, OptionsPattern[]] :=
 Catch[
-Module[{cst, issues, agg, ast, trailing, trailingIssues, astIssues, rulesIssues},
+Module[{cst, issues, agg, ast, trailing, trailingIssues, astIssues, rulesIssues, tabIssues, tabs,
+	tau, tabReplacement},
 
 	cst = cstIn;
 	issues = issuesIn;
+
+	tau = OptionValue["Tau"];
+
+	tabReplacement = StringJoin[Table[" ", tau]];
 
 	rulesIssues = {};
 
@@ -460,17 +482,46 @@ Module[{cst, issues, agg, ast, trailing, trailingIssues, astIssues, rulesIssues}
 
 	trailing = trailingWhitespace[cst];
 
+	If[$Debug2,
+		Print["trailing: ", trailing]
+	];
+
 	trailingIssues = FormatIssue["TrailingWhitespace", "Trailing whitespace", "Formatting",
 							<|	Source -> #[[3, Key[Source] ]],
 								CodeActions -> { CodeAction["Remove", DeleteTriviaNode,
 														<|Source -> #[[3, Key[Source] ]]|>] },
 								AirynessLevel -> 0.0|>]& /@ trailing;
 
-	If[$Debug,
-		xPrint["trailingIssues: ", trailingIssues]
+	If[$Debug2,
+		Print["trailingIssues: ", trailingIssues]
 	];
 
-	issues = issues ~Join~ rulesIssues ~Join~ astIssues ~Join~ trailingIssues;
+
+
+	tabs = Cases[cst, LeafNode[Token`WhiteSpace, "\t", _], -1];
+
+	(*
+	if a tab is also trailing, then just let trailingIssues remove it
+	*)
+	tabs = Complement[tabs, trailing];
+
+	tabIssues = FormatIssue["TabsToSpaces", "Tabs to spaces", "Formatting",
+						<| Source -> #[[3, Key[Source] ]],
+							CodeActions -> { CodeAction["replace", ReplaceText,
+													<| Source -> #[[3, Key[Source] ]],
+														"ReplacementText" -> tabReplacement |>] },
+							AirynessLevel -> 0.1
+						|>]& /@ tabs;
+	If[$Debug2,
+		Print["tabIssues: ", tabIssues]
+	];
+
+
+	issues = issues ~Join~
+					rulesIssues ~Join~
+					astIssues ~Join~
+					trailingIssues ~Join~
+					tabIssues;
 
 	If[$Debug,
 		xPrint["issues: ", issues];
@@ -498,7 +549,7 @@ Module[{cst, toks, lines},
 	cst = cstIn;
 
 	(* linearize *)
-	toks = Cases[cst, _LeafNode, Infinity];
+	toks = Cases[cst, _LeafNode, -1];
 
 	lines = Split[toks, #1[[1]] =!= Token`Newline && #1[[1]] =!= Token`LineContinuation&];
 
@@ -599,6 +650,9 @@ leave text-based actions alone
 lowerToText[CodeAction[label_, DeleteText, data_], _] := { CodeTextAction[label, DeleteText, data] }
 
 lowerToText[CodeAction[label_, InsertText, data_], _] := { CodeTextAction[label, InsertText, data] }
+
+lowerToText[CodeAction[label_, ReplaceText, data_], _] := { CodeTextAction[label, ReplaceText, data] }
+
 
 (*
 lower DeleteTrivia to { DeleteText }
@@ -730,9 +784,10 @@ Module[{sorted, shadowing, actions},
 	sorted = SortBy[actions, -#[[3, Key[Source]]]&];
 
 	Fold[Switch[#2[[2]],
-			InsertText,      StringInsert[#1, #2[[3, Key["InsertionText"] ]], #2[[3, Key[Source], 1, 2]] + 1 ],
-			InsertTextAfter, StringInsert[#1, #2[[3, Key["InsertionText"] ]], #2[[3, Key[Source], 2, 2]] + 1 ],
-			DeleteText,      StringReplacePart[#1, "", #2[[3, Key[Source], All, 2]] + 1 ]]&, line, sorted]
+			InsertText,      StringInsert[     #1,   #2[[3, Key["InsertionText"] ]], #2[[3, Key[Source],   1, 2]] + 1 ],
+			InsertTextAfter, StringInsert[     #1,   #2[[3, Key["InsertionText"] ]], #2[[3, Key[Source],   2, 2]] + 1 ],
+			DeleteText,      StringReplacePart[#1,                               "", #2[[3, Key[Source], All, 2]] + 1 ],
+			ReplaceText,     StringReplacePart[#1, #2[[3, Key["ReplacementText"] ]], #2[[3, Key[Source], All, 2]] + 1 ]]&, line, sorted]
 ]
 
 

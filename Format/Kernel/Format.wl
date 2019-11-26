@@ -37,8 +37,17 @@ Needs["AST`Utils`"]
 
 $AirynessLevel = 1.0
 
+(*
+Number of characters per line to consider "long"
+*)
+$lineLengthLimit = 200
 
-$lineLengthLimit = 1000
+(*
+Number of lines to consider "long"
+*)
+$lineLimit = 5000
+
+
 
 $existsTest = Not @* KeyExistsQ[AirynessLevel]
 
@@ -46,11 +55,14 @@ $existsTest = Not @* KeyExistsQ[AirynessLevel]
 
 FormatFile::usage = "FormatFile[file] formats the WL input file."
 
+FormatFile::long = "File `1` is long. Formatting will be truncated."
+
 FormatFile::longlines = "File `1` has long lines. Formatting will be truncated."
 
 Options[FormatFile] = {
 	AirynessLevel :> $AirynessLevel,
-	"DryRun" -> False
+	"DryRun" -> False,
+	PerformanceGoal -> "Speed"
 }
 
 FormatFile[file_String | File[file_String], opts:OptionsPattern[]] :=
@@ -64,10 +76,11 @@ formatFile[file_String, opts:OptionsPattern[]] :=
 Catch[
 Module[{cst, cstAndIssues, issues, last, lastSrc, lastSrcLine, actions, newCST, str, bytes,
 	actionfulIssues, actionlessIssues, srcPosMap, badIssues, airynessTest, airyness, shadowing,
-	groupedActions, lines, newLines, dryRun},
+	groupedActions, lines, newLines, dryRun, performanceGoal},
 
 	airyness = OptionValue[AirynessLevel];
 	dryRun = OptionValue["DryRun"];
+	performanceGoal = OptionValue[PerformanceGoal];
 
 	bytes = Import[file, "Byte"];
 
@@ -139,15 +152,22 @@ Module[{cst, cstAndIssues, issues, last, lastSrc, lastSrcLine, actions, newCST, 
 
 	lines = ("\n" <> #)& /@ StringSplit[str, {"\r\n", "\n", "\r"}, All];
 
-	If[AnyTrue[lines, StringLength[#] > $lineLengthLimit&],
-		Message[FormatFile::longlines, file]
+	If[performanceGoal == "Speed",
+
+		If[Length[lines] > $lineLimit,
+			Message[FormatFile::long, file]
+		];
+
+		If[AnyTrue[lines, StringLength[#] > $lineLengthLimit&],
+			Message[FormatFile::longlines, file]
+		];
 	];
 
 	If[$Debug,
 		xPrint["lines: ", lines // InputForm];
 	];
 
-	newLines = ApplyCodeTextActions[groupedActions, lines];
+	newLines = ApplyCodeTextActions[groupedActions, lines, performanceGoal];
 
 	str = StringDrop[StringJoin[newLines], 1];
 
@@ -172,10 +192,13 @@ Module[{cst, cstAndIssues, issues, last, lastSrc, lastSrcLine, actions, newCST, 
 
 FormatString::usage = "FormatString[string] formats the WL input string."
 
+FormatString::long = "String is long. Formatting will be truncated."
+
 FormatString::longlines = "String has long lines. Formatting will be truncated."
 
 Options[FormatString] = {
-	AirynessLevel :> $AirynessLevel
+	AirynessLevel :> $AirynessLevel,
+	PerformanceGoal -> "Speed"
 }
 
 FormatString[str_String, opts:OptionsPattern[]] :=
@@ -187,11 +210,12 @@ Options[formatString] = Options[FormatString]
 formatString[strIn_String, opts:OptionsPattern[]] :=
 Module[{cst, cstAndIssues, issues, actions, newCST, str,
 	actionfulIssues, actionlessIssues, srcPosMap, badIssues, airynessTest, airyness, shadowing,
-	lines, newLines, groupedActions, bytes, newStr},
+	lines, newLines, groupedActions, bytes, newStr, performanceGoal},
 
 	str = strIn;
 
 	airyness = OptionValue[AirynessLevel];
+	performanceGoal = OptionValue[PerformanceGoal];
 
 	cstAndIssues = ConcreteParseString[str, {StringNode[String, #[[1]], <||>], Cases[#[[2]], FormatIssue[___]]}&];
 
@@ -245,15 +269,22 @@ Module[{cst, cstAndIssues, issues, actions, newCST, str,
 
 	lines = ("\n" <> #)& /@ StringSplit[str, {"\r\n", "\n", "\r"}, All];
 
-	If[AnyTrue[lines, StringLength[#] > $lineLengthLimit&],
-		Message[FormatString::longlines]
+	If[performanceGoal == "Speed",
+
+		If[Length[lines] > $lineLimit,
+			Message[FormatString::long]
+		];
+
+		If[AnyTrue[lines, StringLength[#] > $lineLengthLimit&],
+			Message[FormatString::longlines]
+		];
 	];
 
 	If[$Debug,
 		xPrint["lines: ", lines // InputForm];
 	];
 
-	newLines = ApplyCodeTextActions[groupedActions, lines];
+	newLines = ApplyCodeTextActions[groupedActions, lines, performanceGoal];
 
 	newStr = StringDrop[StringJoin[newLines], 1];
 
@@ -267,10 +298,13 @@ Module[{cst, cstAndIssues, issues, actions, newCST, str,
 
 FormatBytes::usage = "FormatBytes[bytes] formats the WL input bytes."
 
+FormatBytes::long = "Bytes is long. Formatting will be truncated."
+
 FormatBytes::longlines = "Bytes has long lines. Formatting will be truncated."
 
 Options[FormatBytes] = {
-	AirynessLevel :> $AirynessLevel
+	AirynessLevel :> $AirynessLevel,
+	PerformanceGoal -> "Speed"
 }
 
 FormatBytes[bytes_List, opts:OptionsPattern[]] :=
@@ -283,12 +317,13 @@ formatBytes[bytesIn_List, opts:OptionsPattern[]] :=
 Catch[
 Module[{cst, cstAndIssues, issues, actions, newCST, str,
 	actionfulIssues, actionlessIssues, bytes, bytesOut, badIssues, airynessTest, airyness, shadowing,
-	groupedActions},
+	groupedActions, performanceGoal},
 
 	bytes = bytesIn;
 
 	airyness = OptionValue[AirynessLevel];
-	
+	performanceGoal = OptionValue[PerformanceGoal];
+
 	If[$Debug,
 		Print["concrete parse"];
 	];
@@ -353,15 +388,22 @@ Module[{cst, cstAndIssues, issues, actions, newCST, str,
 
 	lines = ("\n" <> #)& /@ StringSplit[str, {"\r\n", "\n", "\r"}, All];
 
-	If[AnyTrue[lines, StringLength[#] > $lineLengthLimit&],
-		Message[FormatBytes::longlines]
+	If[performanceGoal == "Speed",
+
+		If[Length[lines] > $lineLimit,
+			Message[FormatBytes::long]
+		];
+
+		If[AnyTrue[lines, StringLength[#] > $lineLengthLimit&],
+			Message[FormatBytes::longlines]
+		];
 	];
 
 	If[$Debug,
 		xPrint["lines: ", lines // InputForm];
 	];
 
-	newLines = ApplyCodeTextActions[groupedActions, lines];
+	newLines = ApplyCodeTextActions[groupedActions, lines, performanceGoal];
 
 	str = StringDrop[StringJoin[newLines], 1];
 
@@ -638,7 +680,7 @@ Module[{actionSrc},
 
 
 
-ApplyCodeTextActions[groupedActions_, lines_] :=
+ApplyCodeTextActions[groupedActions_, lines_, performanceGoal_] :=
 Module[{},
 	
 	If[$Debug2,
@@ -646,11 +688,11 @@ Module[{},
 		MapIndexed[Print["line ", #2[[1]], " ", #1 // InputForm]&, lines];
 	];
 
-	MapIndexed[(If[$Debug, xPrint["line ", #2[[1]]]]; apply[Lookup[groupedActions, #2[[1]], {}], #1])&, lines]
+	MapIndexed[(If[$Debug, xPrint["line ", #2[[1]]]]; apply[Lookup[groupedActions, #2[[1]], {}], #1, performanceGoal])&, lines]
 ]
 
 
-apply[actionsIn_, line_] :=
+apply[actionsIn_, line_, performanceGoal_] :=
 Module[{sorted, shadowing, actions},
 
 	If[$Debug2,
@@ -664,8 +706,14 @@ Module[{sorted, shadowing, actions},
 	*)
 	actions = DeleteDuplicatesBy[actions, {#[[2]], #[[3]]}&];
 
-	actions = DeleteCases[actions,
-					CodeTextAction[_, _, KeyValuePattern[Source -> {{_, _}, {_, col2_ /; col2 > $lineLengthLimit}}]]];
+	If[performanceGoal == "Speed",
+
+		actions = DeleteCases[actions,
+						CodeTextAction[_, _, KeyValuePattern[Source -> {{line1_ /; line1 > $lineLimit, _}, {_, _}}]]];
+
+		actions = DeleteCases[actions,
+						CodeTextAction[_, _, KeyValuePattern[Source -> {{_, _}, {_, col2_ /; col2 > $lineLengthLimit}}]]];
+	];
 
 	If[$Debug2,
 	    Print["actions: ", actions];

@@ -77,8 +77,8 @@ Options[formatFile] = Options[FormatFile]
 
 formatFile[file_String, opts:OptionsPattern[]] :=
 Catch[
-Module[{cst, cstAndIssues, issues, last, lastSrc, lastSrcLine, actions, newCST, str, bytes,
-	actionfulIssues, actionlessIssues, srcPosMap, badIssues, airynessTest, airyness, shadowing,
+Module[{cst, cstAndIssues, issues, last, lastSrc, lastSrcLine, actions, str, bytes,
+	actionfulIssues, actionlessIssues, badIssues, airynessTest, airyness,
 	groupedActions, lines, newLines, dryRun, performanceGoal, tau},
 
 	airyness = OptionValue[AirynessLevel];
@@ -216,9 +216,9 @@ FormatString[str_String, opts:OptionsPattern[]] :=
 Options[formatString] = Options[FormatString]
 
 formatString[strIn_String, opts:OptionsPattern[]] :=
-Module[{cst, cstAndIssues, issues, actions, newCST, str,
-	actionfulIssues, actionlessIssues, srcPosMap, badIssues, airynessTest, airyness, shadowing,
-	lines, newLines, groupedActions, bytes, newStr, performanceGoal, tau},
+Module[{cst, cstAndIssues, issues, actions, str,
+	actionfulIssues, actionlessIssues, badIssues, airynessTest, airyness,
+	lines, newLines, groupedActions, newStr, performanceGoal, tau},
 
 	str = strIn;
 
@@ -328,8 +328,8 @@ Options[formatBytes] = Options[FormatBytes]
 
 formatBytes[bytesIn_List, opts:OptionsPattern[]] :=
 Catch[
-Module[{cst, cstAndIssues, issues, actions, newCST, str,
-	actionfulIssues, actionlessIssues, bytes, bytesOut, badIssues, airynessTest, airyness, shadowing,
+Module[{cst, cstAndIssues, issues, actions, str,
+	actionfulIssues, actionlessIssues, bytes, bytesOut, badIssues, airynessTest, airyness,
 	groupedActions, performanceGoal, tau},
 
 	bytes = bytesIn;

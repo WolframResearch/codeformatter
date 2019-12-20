@@ -498,7 +498,7 @@ Module[{cst, issues, agg, ast, trailing, trailingIssues, astIssues, rulesIssues,
 
 
 
-  tabs = Cases[cst, LeafNode[Token`WhiteSpace, "\t", _], -1];
+  tabs = Cases[cst, LeafNode[Whitespace, "\t", _], -1];
 
   (*
   if a tab is also trailing, then just let trailingIssues remove it
@@ -540,7 +540,7 @@ Module[{cst, issues, agg, ast, trailing, trailingIssues, astIssues, rulesIssues,
 
 
 (*
-Return WhiteSpace nodes that are before Newline nodes
+Return Whitespace nodes that are before Newline nodes
 *)
 trailingWhitespace[cstIn_] :=
 Catch[
@@ -578,13 +578,13 @@ Switch[line,
 
     if toplevel, then remove
   *)
-  {LeafNode[Token`WhiteSpace, _, _]..., LeafNode[Token`Newline | Token`LineContinuation, _, _]},
+  {LeafNode[Whitespace, _, _]..., LeafNode[Token`Newline | Token`LineContinuation, _, _]},
     
     (*
     super slow:
-    cases = SequenceCases[line, {ws:LeafNode[Token`WhiteSpace, _, _]..., LeafNode[Token`Newline | Token`LineContinuation, _, _]} :> ws];
+    cases = SequenceCases[line, {ws:LeafNode[Whitespace, _, _]..., LeafNode[Token`Newline | Token`LineContinuation, _, _]} :> ws];
     *)
-    cases = Reverse[TakeWhile[Reverse[line[[1 ;; -2]]], MatchQ[#, LeafNode[Token`WhiteSpace, _, _]]&]];
+    cases = Reverse[TakeWhile[Reverse[line[[1 ;; -2]]], MatchQ[#, LeafNode[Whitespace, _, _]]&]];
 
     cases = Select[cases, toplevelQ[#, cst]&];
 
@@ -595,13 +595,13 @@ Switch[line,
     
     remove whitespace after something
   *)
-  {___, LeafNode[Except[Token`WhiteSpace], _, _], LeafNode[Token`WhiteSpace, _, _]..., LeafNode[Token`Newline | Token`LineContinuation, _, _]},
+  {___, LeafNode[Except[Whitespace], _, _], LeafNode[Whitespace, _, _]..., LeafNode[Token`Newline | Token`LineContinuation, _, _]},
     
     (*
     super slow:
-    cases = SequenceCases[line, {___, LeafNode[Except[Token`WhiteSpace], _, _], ws:LeafNode[Token`WhiteSpace, _, _]..., LeafNode[Token`Newline | Token`LineContinuation, _, _]} :> ws];
+    cases = SequenceCases[line, {___, LeafNode[Except[Whitespace], _, _], ws:LeafNode[Whitespace, _, _]..., LeafNode[Token`Newline | Token`LineContinuation, _, _]} :> ws];
     *)
-    cases = Reverse[TakeWhile[Reverse[line[[1 ;; -2]]], MatchQ[#, LeafNode[Token`WhiteSpace, _, _]]&]];
+    cases = Reverse[TakeWhile[Reverse[line[[1 ;; -2]]], MatchQ[#, LeafNode[Whitespace, _, _]]&]];
 
     Scan[Sow, cases]
   ,
@@ -610,13 +610,13 @@ Switch[line,
 
     if toplevel, then remove
   *)
-  {LeafNode[Token`WhiteSpace, _, _]...},
+  {LeafNode[Whitespace, _, _]...},
     
     (*
     super slow:
-    cases = SequenceCases[line, {ws:LeafNode[Token`WhiteSpace, _, _]...} :> ws];
+    cases = SequenceCases[line, {ws:LeafNode[Whitespace, _, _]...} :> ws];
     *)
-    cases = Reverse[TakeWhile[Reverse[line[[1 ;; -1]]], MatchQ[#, LeafNode[Token`WhiteSpace, _, _]]&]];
+    cases = Reverse[TakeWhile[Reverse[line[[1 ;; -1]]], MatchQ[#, LeafNode[Whitespace, _, _]]&]];
 
     cases = Select[cases, toplevelQ[#, cst]&];
 
@@ -627,13 +627,13 @@ Switch[line,
 
     remove whitespace after something
   *)
-  {___, LeafNode[Except[Token`WhiteSpace], _, _], LeafNode[Token`WhiteSpace, _, _]...},
+  {___, LeafNode[Except[Whitespace], _, _], LeafNode[Whitespace, _, _]...},
     
     (*
     super slow:
-    cases = SequenceCases[line, {___, LeafNode[Except[Token`WhiteSpace], _, _], ws:LeafNode[Token`WhiteSpace, _, _]...} :> ws];
+    cases = SequenceCases[line, {___, LeafNode[Except[Whitespace], _, _], ws:LeafNode[Whitespace, _, _]...} :> ws];
     *)
-    cases = Reverse[TakeWhile[Reverse[line[[1 ;; -1]]], MatchQ[#, LeafNode[Token`WhiteSpace, _, _]]&]];
+    cases = Reverse[TakeWhile[Reverse[line[[1 ;; -1]]], MatchQ[#, LeafNode[Whitespace, _, _]]&]];
 
     Scan[Sow, cases]
 ]]
@@ -665,7 +665,7 @@ Module[{trivia, actionSrc, cst},
   actionSrc = data[Source];
 
   trivia = Cases[cst,
-          LeafNode[Token`WhiteSpace | Token`Newline | Token`Comment | Token`LineContinuation, _,
+          LeafNode[Whitespace | Token`Newline | Token`Comment | Token`LineContinuation, _,
             KeyValuePattern[Source -> triviaSrc_ /; SourceMemberQ[actionSrc, triviaSrc]]], -1];
 
   CodeTextAction[label, DeleteText, <| Source -> #[[3, Key[Source] ]] |>]& /@ trivia

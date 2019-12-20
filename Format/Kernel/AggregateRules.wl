@@ -75,7 +75,7 @@ Module[{agg, node, data, children, issues, pairs, src},
       <|Source -> src,
         AirynessLevel -> 0.2,
         CodeActions -> {
-          CodeAction["Insert space", InsertNode, <|Source -> src, "InsertionNode" -> LeafNode[Token`WhiteSpace, " ", <||>]|>] }
+          CodeAction["Insert space", InsertNode, <|Source -> src, "InsertionNode" -> LeafNode[Whitespace, " ", <||>]|>] }
       |>]];
     ,
     {p, pairs}
@@ -114,7 +114,7 @@ Module[{agg, node, data, children, issues, pairs, src},
       <|Source -> src,
         AirynessLevel -> 0.6,
         CodeActions -> {
-          CodeAction["Insert space", InsertNode, <|Source -> src, "InsertionNode" -> LeafNode[Token`WhiteSpace, " ", <||>]|>] }
+          CodeAction["Insert space", InsertNode, <|Source -> src, "InsertionNode" -> LeafNode[Whitespace, " ", <||>]|>] }
       |>]];
     ,
     {p, pairs}
@@ -154,7 +154,7 @@ Module[{agg, node, data, children, issues, pairs, src},
       <|Source -> src,
         AirynessLevel -> 0.6,
         CodeActions -> {
-          CodeAction["Insert space", InsertNode, <|Source -> src, "InsertionNode" -> LeafNode[Token`WhiteSpace, " ", <||>]|>] }
+          CodeAction["Insert space", InsertNode, <|Source -> src, "InsertionNode" -> LeafNode[Whitespace, " ", <||>]|>] }
       |>]];
     ,
     {p, pairs}
@@ -206,7 +206,7 @@ Module[{agg, node, data, children, issues, pairs, src},
       <|Source -> src,
         AirynessLevel -> 0.6,
         CodeActions -> {
-          CodeAction["Insert space", InsertNode, <|Source -> src, "InsertionNode" -> LeafNode[Token`WhiteSpace, " ", <||>]|>] }
+          CodeAction["Insert space", InsertNode, <|Source -> src, "InsertionNode" -> LeafNode[Whitespace, " ", <||>]|>] }
       |>]];
     ,
     {p, pairs}
@@ -258,7 +258,7 @@ Module[{agg, node, data, children, issues, pairs, src},
       <|Source -> src,
         AirynessLevel -> 0.6,
         CodeActions -> {
-          CodeAction["Insert space", InsertNode, <|Source -> src, "InsertionNode" -> LeafNode[Token`WhiteSpace, " ", <||>]|>] }
+          CodeAction["Insert space", InsertNode, <|Source -> src, "InsertionNode" -> LeafNode[Whitespace, " ", <||>]|>] }
       |>]];
     ,
     {p, pairs}

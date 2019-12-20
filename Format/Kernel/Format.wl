@@ -10,17 +10,13 @@ FormatString
 FormatBytes
 
 
-
-
 (*
 Options
 *)
 AirynessLevel
 
 
-
 CodeTextAction
-
 
 
 
@@ -68,14 +64,14 @@ Options[FormatFile] = {
   "Tau" -> 2
 }
 
-FormatFile[file_String | File[file_String], opts:OptionsPattern[]] :=
-  formatFile[file, opts]
+FormatFile[f:File[_String], opts:OptionsPattern[]] :=
+  formatFile[f, opts]
 
 
 
 Options[formatFile] = Options[FormatFile]
 
-formatFile[file_String, opts:OptionsPattern[]] :=
+formatFile[File[file_String], opts:OptionsPattern[]] :=
 Catch[
 Module[{cst, cstAndIssues, issues, last, lastSrc, lastSrcLine, actions, str, bytes,
   actionfulIssues, actionlessIssues, badIssues, airynessTest, airyness,

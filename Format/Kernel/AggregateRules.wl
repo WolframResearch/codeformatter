@@ -104,6 +104,13 @@ Module[{agg, node, data, children, issues, pairs, src},
   ];
 
   Do[
+    If[MatchQ[p[[1]], ErrorNode[Token`Error`ExpectedOperand, _, _]],
+      Continue[]
+    ];
+    If[MatchQ[p[[2]], ErrorNode[Token`Error`ExpectedOperand, _, _]],
+      Continue[]
+    ];
+
     If[!contiguousQ[p[[1, 3, Key[Source] ]], p[[2, 3, Key[Source] ]] ],
       Continue[]
     ];
@@ -144,6 +151,13 @@ Module[{agg, node, data, children, issues, pairs, src},
   ];
 
   Do[
+    If[MatchQ[p[[1]], ErrorNode[Token`Error`ExpectedOperand, _, _]],
+      Continue[]
+    ];
+    If[MatchQ[p[[2]], ErrorNode[Token`Error`ExpectedOperand, _, _]],
+      Continue[]
+    ];
+
     If[!contiguousQ[p[[1, 3, Key[Source] ]], p[[2, 3, Key[Source] ]] ],
       Continue[]
     ];
@@ -246,6 +260,9 @@ Module[{agg, node, data, children, issues, pairs, src},
 
   Do[
     If[p[[1, 1]] =!= Token`Semi,
+      Continue[]
+    ];
+    If[MatchQ[p[[2]], LeafNode[Token`Fake`ImplicitNull, _, _]],
       Continue[]
     ];
     If[!contiguousQ[p[[1, 3, Key[Source] ]], p[[2, 3, Key[Source] ]] ],

@@ -19,13 +19,19 @@ Needs["PacletManager`"]
 
 
 
-Options[formatTest] = {"FileSizeLimit" -> {0, Infinity}};
+Options[formatTest] = {
+  "FileNamePrefixPattern" -> "",
+  "FileSizeLimit" -> {0, Infinity},
+  "DryRun" -> False
+}
 
 formatTest[fileIn_String, i_Integer, OptionsPattern[]] :=
- Module[{ast},
+ Module[{ast, dryRun, prefix},
   Catch[
    
+   prefix = OptionValue["FileNamePrefixPattern"];
    limit = OptionValue["FileSizeLimit"];
+   dryRun = OptionValue["DryRun"];
 
     file = fileIn;
     If[$Debug, Print["file1: ", file]];
@@ -45,8 +51,17 @@ formatTest[fileIn_String, i_Integer, OptionsPattern[]] :=
      ];
      ];
 
-  FormatFile[file, AirynessLevel -> 1.0]
-
+  Quiet[
+  Check[
+    FormatFile[File[file], AirynessLevel -> 1.0, "DryRun" -> dryRun]
+    ,
+    Print[
+       Style[Row[{"index: ", i, " ", 
+          StringReplace[fileIn, StartOfString ~~ prefix -> ""]}], 
+        Darker[Orange]]];
+      Print[
+       Style[$MessageList, Darker[Orange]]];
+  ]]
 ]]
 
 

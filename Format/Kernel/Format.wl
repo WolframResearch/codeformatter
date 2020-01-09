@@ -781,9 +781,9 @@ Module[{sorted, shadowing, actions},
 
   Fold[Switch[#2[[2]],
       InsertText,      StringInsert[     #1,   #2[[3, Key["InsertionText"] ]], #2[[3, Key[Source],   1, 2]] + 1 ],
-      InsertTextAfter, StringInsert[     #1,   #2[[3, Key["InsertionText"] ]], #2[[3, Key[Source],   2, 2]] + 1 ],
-      DeleteText,      StringReplacePart[#1,                               "", #2[[3, Key[Source], All, 2]] + 1 ],
-      ReplaceText,     StringReplacePart[#1, #2[[3, Key["ReplacementText"] ]], #2[[3, Key[Source], All, 2]] + 1 ]]&, line, sorted]
+      InsertTextAfter, StringInsert[     #1,   #2[[3, Key["InsertionText"] ]], #2[[3, Key[Source],   2, 2]] + 1 - 1 ],
+      DeleteText,      StringReplacePart[#1,                               "", { #2[[3, Key[Source], 1, 2]] + 1, #2[[3, Key[Source], 2, 2]] + 1 - 1 } ],
+      ReplaceText,     StringReplacePart[#1, #2[[3, Key["ReplacementText"] ]], { #2[[3, Key[Source], 1, 2]] + 1, #2[[3, Key[Source], 2, 2]] + 1 - 1 } ]]&, line, sorted]
 ]
 
 

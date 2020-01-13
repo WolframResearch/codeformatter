@@ -580,7 +580,7 @@ Switch[line,
     super slow:
     cases = SequenceCases[line, {ws:LeafNode[Whitespace, _, _]..., LeafNode[Token`Newline | Token`LineContinuation, _, _]} :> ws];
     *)
-    cases = Reverse[TakeWhile[Reverse[line[[1 ;; -2]]], MatchQ[#, LeafNode[Whitespace, _, _]]&]];
+    cases = Reverse[TakeWhile[Reverse[line[[1 ;; -2]] ], MatchQ[#, LeafNode[Whitespace, _, _]]&]];
 
     cases = Select[cases, toplevelQ[#, cst]&];
 
@@ -597,7 +597,7 @@ Switch[line,
     super slow:
     cases = SequenceCases[line, {___, LeafNode[Except[Whitespace], _, _], ws:LeafNode[Whitespace, _, _]..., LeafNode[Token`Newline | Token`LineContinuation, _, _]} :> ws];
     *)
-    cases = Reverse[TakeWhile[Reverse[line[[1 ;; -2]]], MatchQ[#, LeafNode[Whitespace, _, _]]&]];
+    cases = Reverse[TakeWhile[Reverse[line[[1 ;; -2]] ], MatchQ[#, LeafNode[Whitespace, _, _]]&]];
 
     Scan[Sow, cases]
   ,
@@ -612,7 +612,7 @@ Switch[line,
     super slow:
     cases = SequenceCases[line, {ws:LeafNode[Whitespace, _, _]...} :> ws];
     *)
-    cases = Reverse[TakeWhile[Reverse[line[[1 ;; -1]]], MatchQ[#, LeafNode[Whitespace, _, _]]&]];
+    cases = Reverse[TakeWhile[Reverse[line[[1 ;; -1]] ], MatchQ[#, LeafNode[Whitespace, _, _]]&]];
 
     cases = Select[cases, toplevelQ[#, cst]&];
 
@@ -629,7 +629,7 @@ Switch[line,
     super slow:
     cases = SequenceCases[line, {___, LeafNode[Except[Whitespace], _, _], ws:LeafNode[Whitespace, _, _]...} :> ws];
     *)
-    cases = Reverse[TakeWhile[Reverse[line[[1 ;; -1]]], MatchQ[#, LeafNode[Whitespace, _, _]]&]];
+    cases = Reverse[TakeWhile[Reverse[line[[1 ;; -1]] ], MatchQ[#, LeafNode[Whitespace, _, _]]&]];
 
     Scan[Sow, cases]
 ]]
@@ -738,7 +738,7 @@ Module[{},
     MapIndexed[Print["line ", #2[[1]], " ", #1 // InputForm]&, lines];
   ];
 
-  MapIndexed[(If[$Debug, xPrint["line ", #2[[1]]]]; apply[Lookup[groupedActions, #2[[1]], {}], #1, performanceGoal])&, lines]
+  MapIndexed[(If[$Debug, xPrint["line ", #2[[1]] ]]; apply[Lookup[groupedActions, #2[[1]], {}], #1, performanceGoal])&, lines]
 ]
 
 
@@ -777,7 +777,7 @@ Module[{sorted, shadowing, actions},
 
     actions = Complement[actions, shadowing];
 
-  sorted = SortBy[actions, -#[[3, Key[Source]]]&];
+  sorted = SortBy[actions, -#[[3, Key[Source] ]]&];
 
   Fold[Switch[#2[[2]],
       InsertText,      StringInsert[     #1,   #2[[3, Key["InsertionText"] ]], #2[[3, Key[Source],   1, 2]] + 1 ],

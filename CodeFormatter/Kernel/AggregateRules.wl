@@ -1,13 +1,13 @@
-BeginPackage["Format`AggregateRules`"]
+BeginPackage["CodeFormatter`AggregateRules`"]
 
 $DefaultAggregateRules
 
 
 Begin["`Private`"]
 
-Needs["Format`"]
-Needs["AST`Utils`"]
-Needs["AST`"]
+Needs["CodeFormatter`"]
+Needs["CodeParser`Utils`"]
+Needs["CodeParser`"]
 
 
 

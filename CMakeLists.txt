@@ -1,12 +1,13 @@
 
 cmake_minimum_required(VERSION 3.0)
 
-project(format)
+project(codeformatter)
 
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
+include(WolframKernel)
 
-set(PACLET "Format")
-set(WOLFRAMKERNEL /Applications/Mathematica.app/Contents/MacOS/WolframKernel CACHE FILEPATH "Path to WolframKernel")
+set(PACLET "CodeFormatter")
+set(WOLFRAMKERNEL ${WOLFRAMKERNEL_DEFAULT} CACHE FILEPATH "Path to WolframKernel")
 set(BUILD_DOCS OFF CACHE BOOL "Build documentation")
 set(LOCAL_BUILD OFF CACHE BOOL "Local build")
 
@@ -16,17 +17,17 @@ message(STATUS "BUILD_DOCS: ${BUILD_DOCS}")
 message(STATUS "LOCAL_BUILD: ${LOCAL_BUILD}")
 
 set(WL_PACLET_SOURCES
-	${CMAKE_SOURCE_DIR}/Format/Kernel/AggregateRules.wl
-	${CMAKE_SOURCE_DIR}/Format/Kernel/Format.wl
-	${CMAKE_SOURCE_DIR}/Format/Kernel/Utils.wl
+	${CMAKE_SOURCE_DIR}/CodeFormatter/Kernel/AggregateRules.wl
+	${CMAKE_SOURCE_DIR}/CodeFormatter/Kernel/CodeFormatter.wl
+	${CMAKE_SOURCE_DIR}/CodeFormatter/Kernel/Utils.wl
 )
 
 set(WL_GENERATE_PACKPACLET_SOURCES
-	${CMAKE_SOURCE_DIR}/Format/Generate/PackPaclet.wl
+	${CMAKE_SOURCE_DIR}/CodeFormatter/Generate/PackPaclet.wl
 )
 
 set(PACLETINFO_SOURCE
-	${CMAKE_SOURCE_DIR}/Format/PacletInfo.m
+	${CMAKE_SOURCE_DIR}/CodeFormatter/PacletInfo.m
 )
 
 set(DOCUMENTATION_NOTEBOOK_PATHS
@@ -48,7 +49,6 @@ endforeach()
 #
 # Set VERSION_NUMBER, SYSTEMID, and PACLET_VERSION
 #
-include(WolframKernel)
 CheckWolframKernel()
 
 

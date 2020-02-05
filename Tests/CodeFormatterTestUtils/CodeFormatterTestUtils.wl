@@ -1,4 +1,4 @@
-BeginPackage["FormatTestUtils`"]
+BeginPackage["CodeFormatterTestUtils`"]
 
 
 

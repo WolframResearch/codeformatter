@@ -1,4 +1,4 @@
-BeginPackage["Format`Utils`"]
+BeginPackage["CodeFormatter`Utils`"]
 
 SourceTake
 
@@ -8,9 +8,9 @@ shadows
 
 Begin["`Private`"]
 
-Needs["Format`"]
-Needs["AST`"]
-Needs["AST`Utils`"]
+Needs["CodeFormatter`"]
+Needs["CodeParser`"]
+Needs["CodeParser`Utils`"]
 
 
 (*

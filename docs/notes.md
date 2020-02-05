@@ -1,28 +1,99 @@
-# Formatter Notes
+# CodeFormatter Notes
+
+
+## Names
+
+Format
+PrettyPrint
+http://www.catb.org/~esr/jargon/html/P/prettyprint.html
+
+Beautify
+Reformat
+
+Grind
+http://www.catb.org/~esr/jargon/html/G/grind.html
+
+
+```
+
+Needs["Formatter`"]
+
+Needs["Printer`"]
+
+Needs["Prettier`"]
+
+```
 
 
 
-use the rewriter to implement a formatter
+
+## SW notes
+
+SW imagines 3 kind of toggles:
+compact:
+airy:
+very airy: adds \(\* Else \*\) comments
+
+perhaps another dimension:
+infixness
+
+perhaps another dimension:
+interactive-form vs. non-interactive-form
+
+perhaps another dimension:
+mathematical vs. software engineering
+mtrott is aware and sent comments
+
+perhaps another dimension:
+Write And[a, b] or a && b ?
+
+SW is imagining \~50 options
+not all user-visible
+
+How does this interact with spoken code?
+
+
+
+
+
+
+## stand-alone tooling
+
+wl-fmt script
+
+
+
+## Other formatters for WL
 
 https://github.com/lshifr/CodeFormatter
 
 
 
+## Possible names of functions
+
+FormatReplace
+
+TriviaReplace
+
+WhitespaceReplace
+
+AggregateReplace
+
+
+
+LanguageFormat
+
+CodeFormat
+
+WLFormat
 
 
 
 
 
-blogs:
-
-http://journal.stuffwithstuff.com/2015/09/08/the-hardest-program-ive-ever-written/
-
-https://ambrevar.xyz/indentation/
 
 
-
-
-## FrontEnd
+## FrontEnd ideas
 
 jasonb:
 Button in front end "Copy as Formatted Code"
@@ -35,16 +106,23 @@ Button in front end "Copy as Formatted Code"
 ## "Comma First Style"
 
 eslint comma style
-
 https://eslint.org/docs/rules/comma-style.html
 
 
+Why do lots of programmers move commas to the next line? [closed]
+https://stackoverflow.com/questions/10483635/why-do-lots-of-programmers-move-commas-to-the-next-line
+
+
+http://ajaxian.com/archives/is-there-something-to-the-crazy-comma-first-style
 
 
 
 
 
-## code indentation
+
+
+
+## Code indentation
 
 
 Detecting Code Indentation
@@ -69,9 +147,13 @@ https://marketplace.visualstudio.com/items?itemName=CoenraadS.bracket-pair-color
 
 
 
+## Syntax constructs
 
 
-## pseudo groups
+### Pseudo groups
+
+Switch
+others?
 
 
 Switch[a, b, c, d, e]
@@ -80,33 +162,25 @@ Switch[a, b, c, d, e]
 b, c   and   d, e   are grouped together conceptually
 
 
-
-AST should be something like
-
-
+AST should be something like:
 
 CallNode[Switch, { test, PseudoGroup[b, c], PseudoGroup[d, e] }, <||>]
 
 
+### Associations and lists of rules
+
+special mode for aligning a -> b of Associations
+
+
+<|  "a" -> 1,
+   "bb" -> 2 |>
 
 
 
 
 
 
-
-
-
-
-
-
-# related: automated docs generator
-
-
-
-
-
-
+## comments from others
 
 sasha:
 * explicit sequences of whitespace characters should be preferred over Tab,
@@ -115,9 +189,8 @@ sasha:
 
 
 
+## Hooks in stash
 
-
-#
 discussion about pre-receive hooks for stash
 
 https://mail-archive.wolfram.com/archive/t-stash/2018/Oct00/0053.html
@@ -127,100 +200,25 @@ https://mail-archive.wolfram.com/archive/t-stash/2018/Oct00/0053.html
 
 
 
+## TODO list
 
 things the formatter will do:
-
 
 move & to same line
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Format TODO
-
-
-
-
-
-
-Why do lots of programmers move commas to the next line? [closed]
-
-https://stackoverflow.com/questions/10483635/why-do-lots-of-programmers-move-commas-to-the-next-line
-
-
-
-
-
-
-
-http://ajaxian.com/archives/is-there-something-to-the-crazy-comma-first-style
-
-
-
-
-Haskell Style Guide
-
-https://kowainik.github.io/posts/2019-02-06-style-guide
-
-
-
-
-
-ESLint
-
-https://eslint.org/docs/rules/comma-style.html
-
-
-
-
-
-
-https://scalameta.org/scalafmt/docs/installation.html
-
-
-
-
-
-
-#
 suggest splitting:
 
 offset = 0;If[endptorder, a, b]
 
 
 
-
-#
 insert spaces between ]] and ]
 
 f[a[[x]]]  ->  f[ a[[x]] ]
 
 
 
-
-#
 warn about different line endings
 
 \n Unix
@@ -235,21 +233,7 @@ warn about different line endings
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# Design
+## Design
 
 Formatter:
 
@@ -277,6 +261,34 @@ example:
 b}
 
 does not remove the newline
+
+
+
+
+
+
+
+## Blogs on formatting code
+
+http://journal.stuffwithstuff.com/2015/09/08/the-hardest-program-ive-ever-written/
+
+https://ambrevar.xyz/indentation/
+
+
+## Links to other languages
+
+
+Haskell Style Guide
+https://kowainik.github.io/posts/2019-02-06-style-guide
+
+
+
+ESLint
+https://eslint.org/docs/rules/comma-style.html
+
+
+
+https://scalameta.org/scalafmt/docs/installation.html
 
 
 

@@ -1,8 +1,8 @@
 Resources[
     Version[1],
-    ExecutionBuildCommand["<<Format`"],
+    ExecutionBuildCommand["<<CodeFormatter`"],
     Paclet[
-        PacletFolder["Format"],
+        PacletFolder["CodeFormatter"],
         FunctionPaclet[False]
     ]
 ]

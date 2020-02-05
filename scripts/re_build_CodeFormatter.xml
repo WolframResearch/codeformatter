@@ -1,6 +1,6 @@
-<project name='Format' basedir='..'>
+<project name='CodeFormatter' basedir='..'>
 
-	<property name='component' value='Format' />
+	<property name='component' value='CodeFormatter' />
 	<property name='system_id' value='### Must be set by Jenkins ###' />
 
 	<property name='app.name' value='${component}' />
@@ -14,7 +14,7 @@
 		Component (platform-independent)
 	-->
 
-	<target name='Component.Format.execute' extensionOf='Component.execute'>
+	<target name='Component.CodeFormatter.execute' extensionOf='Component.execute'>
 
     <copy todir='${files_directory}/${component}'>
 			<fileset dir='${basedir}/${component}'>
@@ -29,7 +29,7 @@
 			Paclet generation
 	-->
 
-	<target name='Paclet.Format.init.custom' extensionOf='Paclet.init.custom'>
+	<target name='Paclet.CodeFormatter.init.custom' extensionOf='Paclet.init.custom'>
 
 		<!--
 			Prevent Paclet.clean from deleting files_directory,
@@ -41,7 +41,7 @@
 
 	</target>
 
-	<target name='Paclet.Format.execute' extensionOf='Paclet.execute'>
+	<target name='Paclet.CodeFormatter.execute' extensionOf='Paclet.execute'>
 		<mathematica exe="${mathExe}" fresh="true" quit="true"><![CDATA[
 
 			Print["$Version: ", $Version];
@@ -50,13 +50,13 @@
 			Unset[$MessagePrePrint];
 			Needs["PacletManager`"];
 
-			src = FileNameJoin[{AntProperty["files_directory"], "Format"}];
+			src = FileNameJoin[{AntProperty["files_directory"], "CodeFormatter"}];
 			dest = FileNameJoin[AntProperty["output_directory"]];
 			PackPaclet[src, dest];
 
 			SetDirectory[dest]
-			If [TrueQ[FileExistsQ[FileNames["Format*.paclet"][[1]]]],
-				Print[FileNames["Format*.paclet"][[1]] " ... OK"],
+			If [TrueQ[FileExistsQ[FileNames["CodeFormatter*.paclet"][[1]]]],
+				Print[FileNames["CodeFormatter*.paclet"][[1]] " ... OK"],
 				AntFail["Paclet not produced" ]];
 
 		]]></mathematica>

@@ -1,4 +1,4 @@
-BeginPackage["Format`Generate`PackPaclet`"]
+BeginPackage["CodeFormatter`Generate`PackPaclet`"]
 
 Begin["`Private`"]
 

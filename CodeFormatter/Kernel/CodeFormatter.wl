@@ -1,13 +1,9 @@
-BeginPackage["Format`"]
+BeginPackage["CodeFormatter`"]
 
 (*
 Functions
 *)
-FormatFile
-
-FormatString
-
-FormatBytes
+CodeFormat
 
 
 (*
@@ -22,12 +18,12 @@ CodeTextAction
 
 Begin["`Private`"]
 
-Needs["Format`AggregateRules`"]
-Needs["Format`Utils`"]
-Needs["AST`"]
-Needs["AST`Abstract`"]
-Needs["AST`CodeAction`"]
-Needs["AST`Utils`"]
+Needs["CodeFormatter`AggregateRules`"]
+Needs["CodeFormatter`Utils`"]
+Needs["CodeParser`"]
+Needs["CodeParser`Abstract`"]
+Needs["CodeParser`CodeAction`"]
+Needs["CodeParser`Utils`"]
 
 
 
@@ -51,25 +47,25 @@ $existsTest = Not @* KeyExistsQ[AirynessLevel]
 
 
 
-FormatFile::usage = "FormatFile[file] formats the WL input file."
+CodeFormat::usage = "CodeFormat[code] formats the WL code."
 
-FormatFile::long = "File `1` is long. Formatting will be truncated."
+CodeFormat::long = "File `1` is long. Formatting will be truncated."
 
-FormatFile::longlines = "File `1` has long lines. Formatting will be truncated."
+CodeFormat::longlines = "File `1` has long lines. Formatting will be truncated."
 
-Options[FormatFile] = {
+Options[CodeFormat] = {
   AirynessLevel :> $AirynessLevel,
   "DryRun" -> False,
   PerformanceGoal -> "Speed",
   "Tau" -> 2
 }
 
-FormatFile[f:File[_String], opts:OptionsPattern[]] :=
+CodeFormat[f:File[_String], opts:OptionsPattern[]] :=
   formatFile[f, opts]
 
 
 
-Options[formatFile] = Options[FormatFile]
+Options[formatFile] = Options[CodeFormat]
 
 formatFile[File[file_String], opts:OptionsPattern[]] :=
 Catch[
@@ -193,23 +189,11 @@ Module[{cst, cstAndIssues, issues, last, lastSrc, lastSrcLine, actions, str, byt
 
 
 
-FormatString::usage = "FormatString[string] formats the WL input string."
-
-FormatString::long = "String is long. Formatting will be truncated."
-
-FormatString::longlines = "String has long lines. Formatting will be truncated."
-
-Options[FormatString] = {
-  AirynessLevel :> $AirynessLevel,
-  PerformanceGoal -> "Speed",
-  "Tau" -> 2
-}
-
-FormatString[str_String, opts:OptionsPattern[]] :=
+CodeFormat[str_String, opts:OptionsPattern[]] :=
   formatString[str, opts]
 
 
-Options[formatString] = Options[FormatString]
+Options[formatString] = Options[CodeFormat]
 
 formatString[strIn_String, opts:OptionsPattern[]] :=
 Module[{cst, cstAndIssues, issues, actions, str,
@@ -304,23 +288,11 @@ Module[{cst, cstAndIssues, issues, actions, str,
 
 
 
-FormatBytes::usage = "FormatBytes[bytes] formats the WL input bytes."
-
-FormatBytes::long = "Bytes is long. Formatting will be truncated."
-
-FormatBytes::longlines = "Bytes has long lines. Formatting will be truncated."
-
-Options[FormatBytes] = {
-  AirynessLevel :> $AirynessLevel,
-  PerformanceGoal -> "Speed",
-  "Tau" -> 2
-}
-
-FormatBytes[bytes_List, opts:OptionsPattern[]] :=
+CodeFormat[bytes_List, opts:OptionsPattern[]] :=
   formatBytes[bytes, opts]
 
 
-Options[formatBytes] = Options[FormatBytes]
+Options[formatBytes] = Options[CodeFormat]
 
 formatBytes[bytesIn_List, opts:OptionsPattern[]] :=
 Catch[

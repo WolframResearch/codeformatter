@@ -9,9 +9,9 @@ ok
 
 Begin["`Private`"]
 
-Needs["Format`"]
-Needs["AST`"]
-Needs["AST`Utils`"]
+Needs["CodeFormatter`"]
+Needs["CodeParser`"]
+Needs["CodeParser`Utils`"]
 Needs["PacletManager`"]
 
 

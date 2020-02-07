@@ -80,7 +80,7 @@ Module[{cst, cstAndIssues, issues, last, lastSrc, lastSrcLine, actions, str, byt
 
   bytes = Import[file, "Byte"];
 
-  cstAndIssues = ConcreteParseBytes[bytes, {ContainerNode[File, #[[1]], <||>], Cases[#[[2]], FormatIssue[___]]}&];
+  cstAndIssues = CodeConcreteParse[bytes, {ContainerNode[File, #[[1]], <||>], Cases[#[[2]], FormatIssue[___]]}&];
 
   If[FailureQ[cstAndIssues],
     Throw[cstAndIssues]
@@ -113,7 +113,7 @@ Module[{cst, cstAndIssues, issues, last, lastSrc, lastSrcLine, actions, str, byt
 
   badIssues = Cases[issues, FormatIssue[_, _, _, _?$existsTest]];
   If[!empty[badIssues],
-   Message[FormatFile::airyness, badIssues]
+   Message[CodeFormat::airyness, badIssues]
   ];
 
     airynessTest = LessEqualThan[airyness];
@@ -126,7 +126,7 @@ Module[{cst, cstAndIssues, issues, last, lastSrc, lastSrcLine, actions, str, byt
   actionfulIssues = Select[issues, KeyExistsQ[#[[4]], CodeActions]&];
   actionlessIssues = Complement[issues, actionfulIssues];
 
-  Scan[(Message[FormatFile::noaction, #])&, actionlessIssues];
+  Scan[(Message[CodeFormat::noaction, #])&, actionlessIssues];
 
 
   (*
@@ -154,11 +154,11 @@ Module[{cst, cstAndIssues, issues, last, lastSrc, lastSrcLine, actions, str, byt
   If[performanceGoal == "Speed",
 
     If[Length[lines] > $lineLimit,
-      Message[FormatFile::long, file]
+      Message[CodeFormat::long, file]
     ];
 
     If[AnyTrue[lines, StringLength[#] > $lineLengthLimit&],
-      Message[FormatFile::longlines, file]
+      Message[CodeFormat::longlines, file]
     ];
   ];
 
@@ -206,7 +206,7 @@ Module[{cst, cstAndIssues, issues, actions, str,
   performanceGoal = OptionValue[PerformanceGoal];
   tau = OptionValue["Tau"];
 
-  cstAndIssues = ConcreteParseString[str, {ContainerNode[String, #[[1]], <||>], Cases[#[[2]], FormatIssue[___]]}&];
+  cstAndIssues = CodeConcreteParse[str, {ContainerNode[String, #[[1]], <||>], Cases[#[[2]], FormatIssue[___]]}&];
 
   If[FailureQ[cstAndIssues],
     Throw[cstAndIssues]
@@ -222,7 +222,7 @@ Module[{cst, cstAndIssues, issues, actions, str,
 
   badIssues = Cases[issues, FormatIssue[_, _, _, _?$existsTest]];
   If[!empty[badIssues],
-   Message[FormatFile::airyness, badIssues]
+   Message[CodeFormat::airyness, badIssues]
   ];
 
     airynessTest = LessEqualThan[airyness];
@@ -231,7 +231,7 @@ Module[{cst, cstAndIssues, issues, actions, str,
   actionfulIssues = Select[issues, KeyExistsQ[#[[4]], CodeActions]&];
   actionlessIssues = Complement[issues, actionfulIssues];
 
-  Scan[(Message[FormatString::noaction, #])&, actionlessIssues];
+  Scan[(Message[CodeFormat::noaction, #])&, actionlessIssues];
 
   If[$Debug,
     Print["actionfulIssues: ", actionfulIssues];
@@ -264,11 +264,11 @@ Module[{cst, cstAndIssues, issues, actions, str,
   If[performanceGoal == "Speed",
 
     If[Length[lines] > $lineLimit,
-      Message[FormatString::long]
+      Message[CodeFormat::long]
     ];
 
     If[AnyTrue[lines, StringLength[#] > $lineLengthLimit&],
-      Message[FormatString::longlines]
+      Message[CodeFormat::longlines]
     ];
   ];
 
@@ -309,7 +309,7 @@ Module[{cst, cstAndIssues, issues, actions, str,
   If[$Debug,
     Print["concrete parse"];
   ];
-  cstAndIssues = ConcreteParseBytes[bytes, {ContainerNode[File, #[[1]], <||>], Cases[#[[2]], FormatIssue[___]]}&];
+  cstAndIssues = CodeConcreteParse[bytes, {ContainerNode[File, #[[1]], <||>], Cases[#[[2]], FormatIssue[___]]}&];
 
     If[$Debug,
     Print["concrete parse done"];
@@ -333,7 +333,7 @@ Module[{cst, cstAndIssues, issues, actions, str,
 
   badIssues = Cases[issues, FormatIssue[_, _, _, _?$existsTest]];
   If[!empty[badIssues],
-   Message[FormatFile::airyness, badIssues]
+   Message[CodeFormat::airyness, badIssues]
   ];
 
     airynessTest = LessEqualThan[airyness];
@@ -342,7 +342,7 @@ Module[{cst, cstAndIssues, issues, actions, str,
   actionfulIssues = Select[issues, KeyExistsQ[#[[4]], CodeActions]&];
   actionlessIssues = Complement[issues, actionfulIssues];
 
-  Scan[(Message[FormatBytes::noaction, #])&, actionlessIssues];
+  Scan[(Message[CodeFormat::noaction, #])&, actionlessIssues];
 
 
   (*
@@ -372,11 +372,11 @@ Module[{cst, cstAndIssues, issues, actions, str,
   If[performanceGoal == "Speed",
 
     If[Length[lines] > $lineLimit,
-      Message[FormatBytes::long]
+      Message[CodeFormat::long]
     ];
 
     If[AnyTrue[lines, StringLength[#] > $lineLengthLimit&],
-      Message[FormatBytes::longlines]
+      Message[CodeFormat::longlines]
     ];
   ];
 

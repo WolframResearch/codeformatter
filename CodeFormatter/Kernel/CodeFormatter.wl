@@ -27,6 +27,12 @@ Needs["CodeParser`Utils`"]
 
 
 
+If[PacletFind["Format"] != {},
+  Message[General::obspkg, "Format`"]
+]
+
+
+
 $AirynessLevel = 1.0
 
 (*

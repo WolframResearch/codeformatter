@@ -1,6 +1,6 @@
 # CodeFormatter
 
-`CodeFormatter` is a package that provides functionality for formatting Wolfram Language code.
+CodeFormatter is a package that provides functionality for formatting Wolfram Language code.
 
 
 ## Setup

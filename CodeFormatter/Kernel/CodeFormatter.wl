@@ -104,7 +104,7 @@ Module[{cst, cstAndIssues, issues, last, lastSrc, lastSrcLine, actions, str, byt
 
     last = cst[[2, -1]];
 
-    If[!MatchQ[last, LeafNode[Token`Newline, _, _]],
+    If[!MatchQ[last, LeafNode[Token`ToplevelNewline | Token`InternalNewline, _, _]],
 
       lastSrc = last[[3, Key[Source] ]];
       lastSrcLine = lastSrc[[2, 1]];
@@ -112,7 +112,7 @@ Module[{cst, cstAndIssues, issues, last, lastSrc, lastSrcLine, actions, str, byt
       AppendTo[issues, FormatIssue["MissingTrailingNewline", "Missing trailing newline", "Formatting",
         <|  Source -> {{lastSrcLine + 1, 0}, {lastSrcLine + 1, 0}},
           CodeActions -> { CodeAction["Insert", InsertNodeAfter,
-            <|Source -> lastSrc, "InsertionNode" -> LeafNode[Token`Newline, "\n", <||>]|>] },
+            <|Source -> lastSrc, "InsertionNode" -> LeafNode[Token`ToplevelNewline, "\n", <||>]|>] },
           AirynessLevel -> 0.0|>] ];
     ];
   ];
@@ -525,7 +525,7 @@ Module[{cst, toks, lines},
   (* linearize *)
   toks = Cases[cst, _LeafNode, -1];
 
-  lines = Split[toks, #1[[1]] =!= Token`Newline && #1[[1]] =!= Token`LineContinuation&];
+  lines = Split[toks, #1[[1]] =!= Token`ToplevelNewline && #1[[1]] =!= Token`InternalNewline && #1[[1]] =!= Token`LineContinuation&];
 
   reaped = Reap[
   Scan[sowLine, lines]
@@ -552,11 +552,11 @@ Switch[line,
 
     if toplevel, then remove
   *)
-  {LeafNode[Whitespace, _, _]..., LeafNode[Token`Newline | Token`LineContinuation, _, _]},
+  {LeafNode[Whitespace, _, _]..., LeafNode[Token`ToplevelNewline | Token`InternalNewline | Token`LineContinuation, _, _]},
     
     (*
     super slow:
-    cases = SequenceCases[line, {ws:LeafNode[Whitespace, _, _]..., LeafNode[Token`Newline | Token`LineContinuation, _, _]} :> ws];
+    cases = SequenceCases[line, {ws:LeafNode[Whitespace, _, _]..., LeafNode[Token`ToplevelNewline | Token`InternalNewline | Token`LineContinuation, _, _]} :> ws];
     *)
     cases = Reverse[TakeWhile[Reverse[line[[1 ;; -2]] ], MatchQ[#, LeafNode[Whitespace, _, _]]&]];
 
@@ -569,11 +569,11 @@ Switch[line,
     
     remove whitespace after something
   *)
-  {___, LeafNode[Except[Whitespace], _, _], LeafNode[Whitespace, _, _]..., LeafNode[Token`Newline | Token`LineContinuation, _, _]},
+  {___, LeafNode[Except[Whitespace], _, _], LeafNode[Whitespace, _, _]..., LeafNode[Token`ToplevelNewline | Token`InternalNewline | Token`LineContinuation, _, _]},
     
     (*
     super slow:
-    cases = SequenceCases[line, {___, LeafNode[Except[Whitespace], _, _], ws:LeafNode[Whitespace, _, _]..., LeafNode[Token`Newline | Token`LineContinuation, _, _]} :> ws];
+    cases = SequenceCases[line, {___, LeafNode[Except[Whitespace], _, _], ws:LeafNode[Whitespace, _, _]..., LeafNode[Token`ToplevelNewline | Token`InternalNewline | Token`LineContinuation, _, _]} :> ws];
     *)
     cases = Reverse[TakeWhile[Reverse[line[[1 ;; -2]] ], MatchQ[#, LeafNode[Whitespace, _, _]]&]];
 
@@ -639,7 +639,7 @@ Module[{trivia, actionSrc, cst},
   actionSrc = data[Source];
 
   trivia = Cases[cst,
-          LeafNode[Whitespace | Token`Newline | Token`Comment | Token`LineContinuation, _,
+          LeafNode[Whitespace | Token`ToplevelNewline | Token`InternalNewline | Token`Comment | Token`LineContinuation, _,
             KeyValuePattern[Source -> triviaSrc_ /; SourceMemberQ[actionSrc, triviaSrc]]], -1];
 
   CodeTextAction[label, DeleteText, <| Source -> #[[3, Key[Source] ]] |>]& /@ trivia

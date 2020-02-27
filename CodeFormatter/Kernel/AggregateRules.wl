@@ -144,6 +144,13 @@ Module[{agg, node, data, children, issues, pairs, src},
 
   issues = {};
 
+  If[node[[1]] === Times && !FreeQ[children, LeafNode[Token`Fake`ImplicitTimes, _, _], 1],
+    (*
+    Times with implicits will be handled in a different scan
+    *)
+    Throw[issues]
+  ];
+
   pairs = Partition[children, 2, 1];
 
   If[$Debug,

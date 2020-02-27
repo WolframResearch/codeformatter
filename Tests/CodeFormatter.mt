@@ -10,7 +10,7 @@ Needs["CodeFormatter`"]
 Non-contiguous brackets
 *)
 Test[
-	FormatString["f[ [1]]"]
+	CodeFormat["f[ [1]]"]
 	,
 	"f[[1]]"
 	,
@@ -18,7 +18,7 @@ Test[
 ]
 
 Test[
-	FormatString["f[[1] ]"]
+	CodeFormat["f[[1] ]"]
 	,
 	"f[[1]]"
 	,
@@ -26,7 +26,7 @@ Test[
 ]
 
 Test[
-	FormatString["f[[1] ]"]
+	CodeFormat["f[[1] ]"]
 	,
 	"f[[1]]"
 	,
@@ -40,11 +40,11 @@ Test[
 Bad UTF-8 encoding
 *)
 Test[
-	FormatBytes[{206}]
+	CodeFormat[{206}]
 	,
 	ToCharacterCode["\[UnknownGlyph]", "UTF8"]
 	,
-	{FormatBytes::noaction}
+	{CodeFormat::noaction}
 	,
 	TestID -> "Format-20191111-W3S9H1"
 ]
@@ -55,11 +55,11 @@ Test[
 
 
 Test[
-	FormatString["{a\rb}"]
+	CodeFormat["{a\rb}"]
 	,
-	"{a\rb}"
+	"{a\nb}"
 	,
-	{FormatString::noaction}
+	{CodeFormat::noaction}
 	,
 	TestID -> "Format-20191111-N8K0J2"
 ]
@@ -72,7 +72,7 @@ Test[
 Top-level line continuations
 *)
 Test[
-	FormatString["{a \\\n+1}"]
+	CodeFormat["{a \\\n+1}"]
 	,
 	"{a\n+1}"
 	,
@@ -85,7 +85,7 @@ Test[
 
 
 Test[
-	FormatString["1.2`->3"]
+	CodeFormat["1.2`->3"]
 	,
 	"1.2` ->3"
 	,
@@ -93,7 +93,7 @@ Test[
 ]
 
 Test[
-	FormatString["a-->0"]
+	CodeFormat["a-->0"]
 	,
 	"a-- >0"
 	,
@@ -101,7 +101,7 @@ Test[
 ]
 
 Test[
-	FormatString["a--=0"]
+	CodeFormat["a--=0"]
 	,
 	"a-- =0"
 	,
@@ -109,7 +109,7 @@ Test[
 ]
 
 Test[
-	FormatString["<||>=0"]
+	CodeFormat["<||>=0"]
 	,
 	"<||> =0"
 	,
@@ -117,7 +117,7 @@ Test[
 ]
 
 Test[
-	FormatString["t/.3"]
+	CodeFormat["t/.3"]
 	,
 	"t/ .3"
 	,
@@ -125,7 +125,7 @@ Test[
 ]
 
 Test[
-	FormatString["a++=0"]
+	CodeFormat["a++=0"]
 	,
 	"a++ =0"
 	,
@@ -139,7 +139,7 @@ Test[
 
 
 Test[
-	FormatString["a = ."]
+	CodeFormat["a = ."]
 	,
 	"a =."
 	,
@@ -153,7 +153,7 @@ Test[
 
 
 Test[
-	FormatString["a "]
+	CodeFormat["a "]
 	,
 	"a"
 	,
@@ -170,7 +170,7 @@ Test[
 Comments are not modified
 *)
 Test[
-	FormatString["(*a\\\nb*)c"]
+	CodeFormat["(*a\\\nb*)c"]
 	,
 	"(*a\\\nb*)c"
 	,
@@ -183,7 +183,7 @@ Test[
 
 
 Test[
-	FormatString["{ f\n& }"]
+	CodeFormat["{ f\n& }"]
 	,
 	"{ f& }"
 	,
@@ -195,7 +195,7 @@ Test[
 
 
 Test[
-	FormatString["0.."]
+	CodeFormat["0.."]
 	,
 	"0 .."
 	,
@@ -207,7 +207,7 @@ Test[
 
 
 Test[
-	FormatString["_..."]
+	CodeFormat["_..."]
 	,
 	"_ ..."
 	,
@@ -224,7 +224,7 @@ Implicit Times
 *)
 
 Test[
-	FormatString["1.2`a"]
+	CodeFormat["1.2`a"]
 	,
 	"1.2` a"
 	,
@@ -232,7 +232,7 @@ Test[
 ]
 
 Test[
-	FormatString["1.2` a"]
+	CodeFormat["1.2` a"]
 	,
 	"1.2` a"
 	,
@@ -240,7 +240,7 @@ Test[
 ]
 
 Test[
-	FormatString["_.0"]
+	CodeFormat["_.0"]
 	,
 	"_. 0"
 	,
@@ -248,7 +248,7 @@ Test[
 ]
 
 Test[
-	FormatString["_. 0"]
+	CodeFormat["_. 0"]
 	,
 	"_. 0"
 	,
@@ -256,7 +256,7 @@ Test[
 ]
 
 Test[
-	FormatString["a_.b"]
+	CodeFormat["a_.b"]
 	,
 	"a_. b"
 	,
@@ -264,7 +264,7 @@ Test[
 ]
 
 Test[
-	FormatString["a_. b"]
+	CodeFormat["a_. b"]
 	,
 	"a_. b"
 	,
@@ -272,7 +272,7 @@ Test[
 ]
 
 Test[
-	FormatString["____"]
+	CodeFormat["____"]
 	,
 	"___ _"
 	,
@@ -280,7 +280,7 @@ Test[
 ]
 
 Test[
-	FormatString["___ _"]
+	CodeFormat["___ _"]
 	,
 	"___ _"
 	,
@@ -289,7 +289,7 @@ Test[
 
 
 Test[
-	FormatString["iMelToHz[args_,opts_]"]
+	CodeFormat["iMelToHz[args_,opts_]"]
 	,
 	"iMelToHz[args_, opts_]"
 	,
@@ -298,7 +298,7 @@ Test[
 
 
 Test[
-	FormatString["{a \n&}"]
+	CodeFormat["{a \n&}"]
 	,
 	"{a&}"
 	,

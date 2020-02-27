@@ -86,7 +86,7 @@ Module[{cst, cstAndIssues, issues, last, lastSrc, lastSrcLine, actions, str, byt
 
   bytes = Import[file, "Byte"];
 
-  cstAndIssues = CodeConcreteParse[bytes, {ContainerNode[File, #[[1]], <||>], Cases[#[[2]], FormatIssue[___]]}&];
+  cstAndIssues = CodeConcreteParse[bytes, {ContainerNode[File, #[[1]], <||>], Cases[#[[2]], (FormatIssue|EncodingIssue)[_, _, _, _]]}&];
 
   If[FailureQ[cstAndIssues],
     Throw[cstAndIssues]
@@ -117,13 +117,13 @@ Module[{cst, cstAndIssues, issues, last, lastSrc, lastSrcLine, actions, str, byt
     ];
   ];
 
-  badIssues = Cases[issues, FormatIssue[_, _, _, _?$existsTest]];
+  badIssues = Cases[issues, (FormatIssue|EncodingIssue)[_, _, _, _?$existsTest]];
   If[!empty[badIssues],
    Message[CodeFormat::airyness, badIssues]
   ];
 
     airynessTest = LessEqualThan[airyness];
-    issues = Cases[issues, FormatIssue[_, _, _, KeyValuePattern[AirynessLevel -> _?airynessTest]]];
+    issues = Cases[issues, (FormatIssue|EncodingIssue)[_, _, _, KeyValuePattern[AirynessLevel -> _?airynessTest]]];
 
     If[$Debug,
     Print["issues: ", issues];
@@ -212,7 +212,7 @@ Module[{cst, cstAndIssues, issues, actions, str,
   performanceGoal = OptionValue[PerformanceGoal];
   tau = OptionValue["Tau"];
 
-  cstAndIssues = CodeConcreteParse[str, {ContainerNode[String, #[[1]], <||>], Cases[#[[2]], FormatIssue[___]]}&];
+  cstAndIssues = CodeConcreteParse[str, {ContainerNode[String, #[[1]], <||>], Cases[#[[2]], (FormatIssue|EncodingIssue)[_, _, _, _]]}&];
 
   If[FailureQ[cstAndIssues],
     Throw[cstAndIssues]
@@ -226,13 +226,13 @@ Module[{cst, cstAndIssues, issues, actions, str,
     Print["issues: ", issues];
   ];
 
-  badIssues = Cases[issues, FormatIssue[_, _, _, _?$existsTest]];
+  badIssues = Cases[issues, (FormatIssue|EncodingIssue)[_, _, _, _?$existsTest]];
   If[!empty[badIssues],
    Message[CodeFormat::airyness, badIssues]
   ];
 
     airynessTest = LessEqualThan[airyness];
-    issues = Cases[issues, FormatIssue[_, _, _, KeyValuePattern[AirynessLevel -> _?airynessTest]]];
+    issues = Cases[issues, (FormatIssue|EncodingIssue)[_, _, _, KeyValuePattern[AirynessLevel -> _?airynessTest]]];
 
   actionfulIssues = Select[issues, KeyExistsQ[#[[4]], CodeActions]&];
   actionlessIssues = Complement[issues, actionfulIssues];
@@ -315,7 +315,7 @@ Module[{cst, cstAndIssues, issues, actions, str,
   If[$Debug,
     Print["concrete parse"];
   ];
-  cstAndIssues = CodeConcreteParse[bytes, {ContainerNode[File, #[[1]], <||>], Cases[#[[2]], FormatIssue[___]]}&];
+  cstAndIssues = CodeConcreteParse[bytes, {ContainerNode[File, #[[1]], <||>], Cases[#[[2]], (FormatIssue|EncodingIssue)[_, _, _, _]]}&];
 
     If[$Debug,
     Print["concrete parse done"];
@@ -337,13 +337,13 @@ Module[{cst, cstAndIssues, issues, actions, str,
     Print["formatCST done"];
   ];
 
-  badIssues = Cases[issues, FormatIssue[_, _, _, _?$existsTest]];
+  badIssues = Cases[issues, (FormatIssue|EncodingIssue)[_, _, _, _?$existsTest]];
   If[!empty[badIssues],
    Message[CodeFormat::airyness, badIssues]
   ];
 
     airynessTest = LessEqualThan[airyness];
-    issues = Cases[issues, FormatIssue[_, _, _, KeyValuePattern[AirynessLevel -> _?airynessTest]]];
+    issues = Cases[issues, (FormatIssue|EncodingIssue)[_, _, _, KeyValuePattern[AirynessLevel -> _?airynessTest]]];
 
   actionfulIssues = Select[issues, KeyExistsQ[#[[4]], CodeActions]&];
   actionlessIssues = Complement[issues, actionfulIssues];
@@ -448,7 +448,7 @@ Module[{cst, issues, agg, ast, trailing, trailingIssues, astIssues, rulesIssues,
   
   ast = Abstract[agg];
 
-  astIssues = Cases[ast, FormatIssue[___], Infinity];
+  astIssues = Cases[ast, (FormatIssue|EncodingIssue)[_, _, _, _], Infinity];
 
   If[$Debug,
     xPrint["astIssues: ", astIssues];

@@ -86,7 +86,7 @@ Module[{cst, cstAndIssues, issues, last, lastSrc, lastSrcLine, actions, str, byt
 
   bytes = Import[file, "Byte"];
 
-  cstAndIssues = CodeConcreteParse[bytes, {ContainerNode[File, #[[1]], <||>], Cases[#[[2]], (FormatIssue|EncodingIssue)[_, _, _, _]]}&];
+  cstAndIssues = CodeConcreteParse[bytes, ContainerNode -> ({ContainerNode[File, #[[1]], <||>], Cases[#[[2]], (FormatIssue|EncodingIssue)[_, _, _, _]]}&)];
 
   If[FailureQ[cstAndIssues],
     Throw[cstAndIssues]
@@ -212,7 +212,7 @@ Module[{cst, cstAndIssues, issues, actions, str,
   performanceGoal = OptionValue[PerformanceGoal];
   tau = OptionValue["Tau"];
 
-  cstAndIssues = CodeConcreteParse[str, {ContainerNode[String, #[[1]], <||>], Cases[#[[2]], (FormatIssue|EncodingIssue)[_, _, _, _]]}&];
+  cstAndIssues = CodeConcreteParse[str, ContainerNode -> ({ContainerNode[String, #[[1]], <||>], Cases[#[[2]], (FormatIssue|EncodingIssue)[_, _, _, _]]}&)];
 
   If[FailureQ[cstAndIssues],
     Throw[cstAndIssues]
@@ -315,7 +315,7 @@ Module[{cst, cstAndIssues, issues, actions, str,
   If[$Debug,
     Print["concrete parse"];
   ];
-  cstAndIssues = CodeConcreteParse[bytes, {ContainerNode[File, #[[1]], <||>], Cases[#[[2]], (FormatIssue|EncodingIssue)[_, _, _, _]]}&];
+  cstAndIssues = CodeConcreteParse[bytes, ContainerNode -> ({ContainerNode[File, #[[1]], <||>], Cases[#[[2]], (FormatIssue|EncodingIssue)[_, _, _, _]]}&)];
 
     If[$Debug,
     Print["concrete parse done"];

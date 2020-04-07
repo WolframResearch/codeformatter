@@ -19,6 +19,7 @@ CodeTextAction
 Begin["`Private`"]
 
 Needs["CodeFormatter`AggregateRules`"]
+Needs["CodeFormatter`ConcreteRules`"]
 Needs["CodeFormatter`Utils`"]
 Needs["CodeParser`"]
 Needs["CodeParser`Abstract`"]
@@ -59,6 +60,8 @@ CodeFormat::long = "File `1` is long. Formatting will be truncated."
 
 CodeFormat::longlines = "File `1` has long lines. Formatting will be truncated."
 
+CodeFormat::empty = "File `1` is empty."
+
 Options[CodeFormat] = {
   AirynessLevel :> $AirynessLevel,
   "DryRun" -> False,
@@ -91,6 +94,14 @@ Module[{cst, cstAndIssues, issues, last, lastSrc, lastSrcLine, actions, str, byt
   If[FailureQ[cstAndIssues],
     Throw[cstAndIssues]
    ];
+
+  If[empty[cstAndIssues],
+    (*
+    empty file
+    *)
+    Message[CodeFormat::empty, file];
+    Throw[cstAndIssues]
+  ];
 
    {cst, issues} = cstAndIssues;
 
@@ -142,7 +153,7 @@ Module[{cst, cstAndIssues, issues, last, lastSrc, lastSrcLine, actions, str, byt
 
   actions = Flatten[lowerToText[#, cst]& /@ actions];
 
-  groupedActions = GroupBy[actions, #[[3, Key[Source], 1, 1]]&];
+  groupedActions = GroupBy[actions, #[[3, Key[Source], All, 1]]&];
 
   If[$Debug,
     Print["actions Length: ", Length[actions]];
@@ -163,7 +174,7 @@ Module[{cst, cstAndIssues, issues, last, lastSrc, lastSrcLine, actions, str, byt
       Message[CodeFormat::long, file]
     ];
 
-    If[AnyTrue[lines, StringLength[#] > $lineLengthLimit&],
+    If[AnyTrue[lines, (StringLength[#] > $lineLengthLimit)&],
       Message[CodeFormat::longlines, file]
     ];
   ];
@@ -218,6 +229,14 @@ Module[{cst, cstAndIssues, issues, actions, str,
     Throw[cstAndIssues]
    ];
 
+  If[empty[cstAndIssues],
+    (*
+    empty file
+    *)
+    Message[CodeFormat::empty];
+    Throw[cstAndIssues]
+  ];
+
    {cst, issues} = cstAndIssues;
 
   issues = formatCST[cst, issues, "Tau" -> tau];
@@ -250,7 +269,7 @@ Module[{cst, cstAndIssues, issues, actions, str,
 
   actions = Flatten[lowerToText[#, cst]& /@ actions];
 
-    groupedActions = GroupBy[actions, #[[3, Key[Source], 1, 1]]&];
+    groupedActions = GroupBy[actions, #[[3, Key[Source], All, 1]]&];
 
     (*
   actions = SortBy[actions, -#[[3, Key[Source]]]&];
@@ -325,6 +344,14 @@ Module[{cst, cstAndIssues, issues, actions, str,
     Throw[cstAndIssues]
    ];
 
+  If[empty[cstAndIssues],
+    (*
+    empty file
+    *)
+    Message[CodeFormat::empty];
+    Throw[cstAndIssues]
+  ];
+
    {cst, issues} = cstAndIssues;
 
     If[$Debug,
@@ -365,7 +392,7 @@ Module[{cst, cstAndIssues, issues, actions, str,
     ];
   ];
 
-  groupedActions = GroupBy[actions, #[[3, Key[Source], 1, 1]]&];
+  groupedActions = GroupBy[actions, #[[3, Key[Source], All, 1]]&];
 
 
 
@@ -430,6 +457,9 @@ Module[{cst, issues, agg, ast, trailing, trailingIssues, astIssues, rulesIssues,
   tabReplacement = StringJoin[Table[" ", tau]];
 
   rulesIssues = {};
+
+  KeyValueMap[Function[{pat, func},
+    AppendTo[rulesIssues, Map[func[#, cst]&, Position[cst, pat]]];], $DefaultConcreteRules];
 
   agg = Aggregate[cst];
 
@@ -642,7 +672,7 @@ Module[{trivia, actionSrc, cst},
           LeafNode[Whitespace | Token`Newline | Token`Comment | Token`LineContinuation, _,
             KeyValuePattern[Source -> triviaSrc_ /; SourceMemberQ[actionSrc, triviaSrc]]], -1];
 
-  CodeTextAction[label, DeleteText, <| Source -> #[[3, Key[Source] ]] |>]& /@ trivia
+  CodeTextAction[label, DeleteText, <| Source -> #[[3, Key[Source]]]|>]& /@ trivia
 ]
 
 
@@ -708,26 +738,102 @@ Module[{actionSrc},
 
 
 
-ApplyCodeTextActions[groupedActions_, lines_, performanceGoal_] :=
-Module[{},
+ApplyCodeTextActions[groupedActions_, linesIn_, performanceGoal_] :=
+Module[{lines, singleLineActions, multiLineActions},
   
+  lines = linesIn;
+
   If[$Debug2,
     Print["lines: ", Length[lines]];
     MapIndexed[Print["line ", #2[[1]], " ", #1 // InputForm]&, lines];
   ];
 
-  MapIndexed[(If[$Debug, xPrint["line ", #2[[1]] ]]; apply[Lookup[groupedActions, #2[[1]], {}], #1, performanceGoal])&, lines]
+  singleLineActions = KeySelect[groupedActions, (#[[1]] == #[[2]]) &];
+
+  multiLineActions = Complement[groupedActions, singleLineActions];
+
+  If[$Debug2,
+    Print["singleLineActions: ", singleLineActions];
+    Print["multiLineActions: ", multiLineActions];
+  ];
+
+  lines = MapIndexed[
+    Function[{line, index}, If[$Debug, xPrint["line ", index[[1]]]];
+      applySingleLineActions[Lookup[singleLineActions, Key[{index[[1]], index[[1]]}], {}], line, performanceGoal]], lines];
+
+  multiLineActions = Flatten[Values[multiLineActions]];
+  lines = applyMultiLineActions[multiLineActions, lines, performanceGoal];
+
+  lines
 ]
 
 
-apply[actionsIn_, line_, performanceGoal_] :=
-Module[{sorted, shadowing, actions},
+applySingleLineActions[actionsIn_, lineIn_, performanceGoal_] :=
+Module[{sorted, shadowing, actions, line},
 
   If[$Debug2,
-    Print["apply: ", {actionsIn, line}];
+    Print["applySingleLineActions: ", {actionsIn, lineIn}];
   ];
 
   actions = actionsIn;
+  line = lineIn;
+
+  (*
+  Disregard label when deleting duplicates
+  *)
+  actions = DeleteDuplicatesBy[actions, {#[[2]], #[[3]]}&];
+
+  If[performanceGoal == "Speed",
+
+    actions = DeleteCases[actions,
+            CodeTextAction[_, _, KeyValuePattern[Source -> {{line1_ /; line1 > $lineLimit, _}, {_, _}}]]];
+
+    actions = DeleteCases[actions,
+            CodeTextAction[_, _, KeyValuePattern[Source -> {{_, _}, {_, col2_ /; col2 > $lineLengthLimit}}]]];
+  ];
+
+  If[$Debug2,
+      Print["actions: ", actions //InputForm];
+    ];
+
+  shadowing = Select[actions, Function[action, AnyTrue[actions, shadows[action, #]&]]];
+
+    If[$Debug2,
+      Print["shadowing: ", shadowing];
+    ];
+
+    actions = Complement[actions, shadowing];
+
+  sorted = SortBy[actions, -#[[3, Key[Source]]]&];
+
+  If[$Debug2,
+    Print["line before: ", line];
+  ];
+
+  line = Fold[Switch[#2[[2]],
+      InsertText,      StringInsert[     #1,   #2[[3, Key["InsertionText"]]], #2[[3, Key[Source],   1, 2]] + 1 ],
+      InsertTextAfter, StringInsert[     #1,   #2[[3, Key["InsertionText"]]], #2[[3, Key[Source],   2, 2]] + 1 - 1 ],
+      DeleteText,      StringReplacePart[#1,                               "", { #2[[3, Key[Source], 1, 2]] + 1, #2[[3, Key[Source], 2, 2]] + 1 - 1 } ],
+      ReplaceText,     StringReplacePart[#1, #2[[3, Key["ReplacementText"]]], { #2[[3, Key[Source], 1, 2]] + 1, #2[[3, Key[Source], 2, 2]] + 1 - 1 } ],
+      _, Throw[#2, "UnhandledSingleLineCodeAction"]]&, line, sorted];
+
+  If[$Debug2,
+    Print["line after: ", line];
+  ];
+
+  line
+]
+
+
+applyMultiLineActions[actionsIn_, linesIn_, performanceGoal_] :=
+Module[{sorted, shadowing, actions, lines},
+
+  If[$Debug2,
+    Print["applyMultiLineActions: ", {actionsIn, linesIn} //InputForm];
+  ];
+
+  actions = actionsIn;
+  lines = linesIn;
 
   (*
   Disregard label when deleting duplicates
@@ -755,16 +861,46 @@ Module[{sorted, shadowing, actions},
 
     actions = Complement[actions, shadowing];
 
-  sorted = SortBy[actions, -#[[3, Key[Source] ]]&];
+  sorted = SortBy[actions, -#[[3, Key[Source]]]&];
 
-  Fold[Switch[#2[[2]],
-      InsertText,      StringInsert[     #1,   #2[[3, Key["InsertionText"] ]], #2[[3, Key[Source],   1, 2]] + 1 ],
-      InsertTextAfter, StringInsert[     #1,   #2[[3, Key["InsertionText"] ]], #2[[3, Key[Source],   2, 2]] + 1 - 1 ],
-      DeleteText,      StringReplacePart[#1,                               "", { #2[[3, Key[Source], 1, 2]] + 1, #2[[3, Key[Source], 2, 2]] + 1 - 1 } ],
-      ReplaceText,     StringReplacePart[#1, #2[[3, Key["ReplacementText"] ]], { #2[[3, Key[Source], 1, 2]] + 1, #2[[3, Key[Source], 2, 2]] + 1 - 1 } ]]&, line, sorted]
+  If[$Debug2,
+      Print["sorted: ", sorted];
+    ];
+
+  Scan[
+    Function[{action},
+      Switch[action[[2]],
+        DeleteText,
+          Module[{lineNumber1, lineNumber2, line1, line2, colNumber1, colNumber2},
+            {lineNumber1, lineNumber2} = action[[3, Key[Source], All, 1]];
+            {colNumber1, colNumber2} = action[[3, Key[Source], All, 2]]; 
+            line1 = lines[[lineNumber1]];
+            line2 = lines[[lineNumber2]];
+            If[(lineNumber1 + 1 == lineNumber2) && ((*colNumber1 == StringLength[line1] &&*) colNumber2 == 1),
+              (*
+              This is a newline token
+              *)
+              lines[[lineNumber1]] = line1 <> StringDrop[line2, 1];
+              lines = Delete[lines, lineNumber2];
+
+              If[$Debug2,
+                Print["deleted newline: ", lines];
+              ];
+              ,
+              Throw[{action, {{lineNumber1, colNumber1},{lineNumber2, colNumber2}}}, "UnhandledMultiLineCodeAction"]
+            ]
+          ]
+        ,
+        _,
+          Throw[action, "UnhandledMultiLineCodeAction"]
+      ]
+    ]
+    ,
+    sorted
+  ];
+
+  lines
 ]
-
-
 
 End[]
 

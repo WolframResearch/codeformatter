@@ -26,7 +26,7 @@ Options[formatTest] = {
 }
 
 formatTest[fileIn_String, i_Integer, OptionsPattern[]] :=
- Module[{ast, dryRun, prefix},
+ Module[{ast, dryRun, prefix, res},
   Catch[
    
    prefix = OptionValue["FileNamePrefixPattern"];
@@ -53,7 +53,11 @@ formatTest[fileIn_String, i_Integer, OptionsPattern[]] :=
 
   Quiet[
   Check[
-    FormatFile[File[file], AirynessLevel -> 1.0, "DryRun" -> dryRun]
+    res = CodeFormat[File[file], AirynessLevel -> 1.0, "DryRun" -> dryRun];
+    If[res == {},
+      Print[Style[Row[{"index: ", i, " ", StringReplace[fileIn, StartOfString ~~ prefix -> ""]}], Darker[Orange]]];
+      Print[Style["empty file", Darker[Orange]]]
+    ]
     ,
     Print[
        Style[Row[{"index: ", i, " ", 

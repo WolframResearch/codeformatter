@@ -14,7 +14,7 @@ Test[
 	,
 	"f[[1]]"
 	,
-	TestID -> "Format-20191111-O8Y0I1"
+	TestID -> "CodeFormatter-20191111-O8Y0I1"
 ]
 
 Test[
@@ -22,7 +22,7 @@ Test[
 	,
 	"f[[1]]"
 	,
-	TestID -> "Format-20191111-X2P2T6"
+	TestID -> "CodeFormatter-20191111-X2P2T6"
 ]
 
 Test[
@@ -30,7 +30,7 @@ Test[
 	,
 	"f[[1]]"
 	,
-	TestID -> "Format-20191111-C0H0R2"
+	TestID -> "CodeFormatter-20191111-C0H0R2"
 ]
 
 
@@ -46,7 +46,7 @@ Test[
 	,
 	{CodeFormat::noaction}
 	,
-	TestID -> "Format-20191111-W3S9H1"
+	TestID -> "CodeFormatter-20191111-W3S9H1"
 ]
 
 
@@ -61,7 +61,7 @@ Test[
 	,
 	{CodeFormat::noaction}
 	,
-	TestID -> "Format-20191111-N8K0J2"
+	TestID -> "CodeFormatter-20191111-N8K0J2"
 ]
 
 
@@ -74,9 +74,9 @@ Top-level line continuations
 Test[
 	CodeFormat["{a \\\n+1}"]
 	,
-	"{a\n+1}"
+	"{a\n+ 1}"
 	,
-	TestID -> "Format-20191111-P7F7L2"
+	TestID -> "CodeFormatter-20191111-P7F7L2"
 ]
 
 
@@ -87,49 +87,49 @@ Test[
 Test[
 	CodeFormat["1.2`->3"]
 	,
-	"1.2` ->3"
+	"1.2` -> 3"
 	,
-	TestID -> "Format-20191111-H4M7F5"
+	TestID -> "CodeFormatter-20191111-H4M7F5"
 ]
 
 Test[
 	CodeFormat["a-->0"]
 	,
-	"a-- >0"
+	"a-- > 0"
 	,
-	TestID -> "Format-20191111-O9V1N1"
+	TestID -> "CodeFormatter-20191111-O9V1N1"
 ]
 
 Test[
 	CodeFormat["a--=0"]
 	,
-	"a-- =0"
+	"a-- = 0"
 	,
-	TestID -> "Format-20191111-H2F5P8"
+	TestID -> "CodeFormatter-20191111-H2F5P8"
 ]
 
 Test[
 	CodeFormat["<||>=0"]
 	,
-	"<||> =0"
+	"<||> = 0"
 	,
-	TestID -> "Format-20191111-F4G3N8"
+	TestID -> "CodeFormatter-20191111-F4G3N8"
 ]
 
 Test[
 	CodeFormat["t/.3"]
 	,
-	"t/ .3"
+	"t / .3"
 	,
-	TestID -> "Format-20191111-L7X1O9"
+	TestID -> "CodeFormatter-20191111-L7X1O9"
 ]
 
 Test[
 	CodeFormat["a++=0"]
 	,
-	"a++ =0"
+	"a++ = 0"
 	,
-	TestID -> "Format-20191111-F4G6G5"
+	TestID -> "CodeFormatter-20191111-F4G6G5"
 ]
 
 
@@ -141,9 +141,9 @@ Test[
 Test[
 	CodeFormat["a = ."]
 	,
-	"a =."
+	"a = ."
 	,
-	TestID -> "Format-20191111-M7F5A1"
+	TestID -> "CodeFormatter-20191111-M7F5A1"
 ]
 
 
@@ -157,7 +157,7 @@ Test[
 	,
 	"a"
 	,
-	TestID -> "Format-20191111-C8L0H3"
+	TestID -> "CodeFormatter-20191111-C8L0H3"
 ]
 
 
@@ -174,7 +174,7 @@ Test[
 	,
 	"(*a\\\nb*)c"
 	,
-	TestID -> "Format-20191112-S2I3Y2"
+	TestID -> "CodeFormatter-20191112-S2I3Y2"
 ]
 
 
@@ -187,7 +187,7 @@ Test[
 	,
 	"{ f& }"
 	,
-	TestID -> "Format-20191113-I8N9T2"
+	TestID -> "CodeFormatter-20191113-I8N9T2"
 ]
 
 
@@ -199,7 +199,7 @@ Test[
 	,
 	"0 .."
 	,
-	TestID -> "Format-20191113-P5R8O4"
+	TestID -> "CodeFormatter-20191113-P5R8O4"
 ]
 
 
@@ -211,7 +211,7 @@ Test[
 	,
 	"_ ..."
 	,
-	TestID -> "Format-20191113-T8E6X9"
+	TestID -> "CodeFormatter-20191113-T8E6X9"
 ]
 
 
@@ -228,7 +228,7 @@ Test[
 	,
 	"1.2` a"
 	,
-	TestID -> "Format-20191111-H8F1J5"
+	TestID -> "CodeFormatter-20191111-H8F1J5"
 ]
 
 Test[
@@ -236,7 +236,7 @@ Test[
 	,
 	"1.2` a"
 	,
-	TestID -> "Format-20191114-A1W5Y9"
+	TestID -> "CodeFormatter-20191114-A1W5Y9"
 ]
 
 Test[
@@ -244,7 +244,7 @@ Test[
 	,
 	"_. 0"
 	,
-	TestID -> "Format-20191113-C0N8Q4"
+	TestID -> "CodeFormatter-20191113-C0N8Q4"
 ]
 
 Test[
@@ -252,7 +252,7 @@ Test[
 	,
 	"_. 0"
 	,
-	TestID -> "Format-20191114-Y5X5K7"
+	TestID -> "CodeFormatter-20191114-Y5X5K7"
 ]
 
 Test[
@@ -260,7 +260,7 @@ Test[
 	,
 	"a_. b"
 	,
-	TestID -> "Format-20191113-K9N4C8"
+	TestID -> "CodeFormatter-20191113-K9N4C8"
 ]
 
 Test[
@@ -268,7 +268,7 @@ Test[
 	,
 	"a_. b"
 	,
-	TestID -> "Format-20191114-C8O3Z3"
+	TestID -> "CodeFormatter-20191114-C8O3Z3"
 ]
 
 Test[
@@ -276,7 +276,7 @@ Test[
 	,
 	"___ _"
 	,
-	TestID -> "Format-20191113-X8H4W7"
+	TestID -> "CodeFormatter-20191113-X8H4W7"
 ]
 
 Test[
@@ -284,7 +284,7 @@ Test[
 	,
 	"___ _"
 	,
-	TestID -> "Format-20191114-A8N3P3"
+	TestID -> "CodeFormatter-20191114-A8N3P3"
 ]
 
 
@@ -293,7 +293,7 @@ Test[
 	,
 	"iMelToHz[args_, opts_]"
 	,
-	TestID -> "Format-20191121-K3W7G3"
+	TestID -> "CodeFormatter-20191121-K3W7G3"
 ]
 
 
@@ -302,11 +302,24 @@ Test[
 	,
 	"{a&}"
 	,
-	TestID -> "Format-20191121-K9O8I8"
+	TestID -> "CodeFormatter-20191121-K9O8I8"
 ]
 
 
 
+
+
+Test[
+	CodeFormat[
+"
+foo[bar[[1, 2]
+]]
+"]
+ 	,
+ 	"\nfoo[bar[[1, 2]]]\n"
+	,
+	TestID->"CodeFormatter-20200406-V9L3L5"
+]
 
 
 

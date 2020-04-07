@@ -65,11 +65,11 @@ Module[{agg, node, data, children, issues, pairs, src},
       Continue[]
     ];
 
-    If[!contiguousQ[p[[1, 3, Key[Source] ]], p[[2, 3, Key[Source] ]] ],
+    If[!contiguousQ[p[[1, 3, Key[Source]]], p[[2, 3, Key[Source]]]],
       Continue[]
     ];
 
-    src = p[[2, 3, Key[Source] ]];
+    src = p[[2, 3, Key[Source]]];
 
     AppendTo[issues, FormatIssue["ContiguousImplicitTimes", "Contiguous implicit Times", "Formatting",
       <|Source -> src,
@@ -111,7 +111,7 @@ Module[{agg, node, data, children, issues, pairs, src},
       Continue[]
     ];
 
-    If[!contiguousQ[p[[1, 3, Key[Source] ]], p[[2, 3, Key[Source] ]] ],
+    If[!contiguousQ[p[[1, 3, Key[Source]]], p[[2, 3, Key[Source]]]],
       Continue[]
     ];
 
@@ -165,11 +165,11 @@ Module[{agg, node, data, children, issues, pairs, src},
       Continue[]
     ];
 
-    If[!contiguousQ[p[[1, 3, Key[Source] ]], p[[2, 3, Key[Source] ]] ],
+    If[!contiguousQ[p[[1, 3, Key[Source]]], p[[2, 3, Key[Source]]]],
       Continue[]
     ];
 
-    src = p[[2, 3, Key[Source] ]];
+    src = p[[2, 3, Key[Source]]];
 
     AppendTo[issues, FormatIssue["ContiguousInfix", "Contiguous infix", "Formatting",
       <|Source -> src,
@@ -214,14 +214,14 @@ Module[{agg, node, data, children, issues, pairs, src},
   ];
       Continue[]
     ];
-    If[!contiguousQ[p[[1, 3, Key[Source] ]], p[[2, 3, Key[Source] ]] ],
+    If[!contiguousQ[p[[1, 3, Key[Source]]], p[[2, 3, Key[Source]]]],
       If[$Debug,
     Print["continue2"];
   ];
       Continue[]
     ];
 
-    src = p[[2, 3, Key[Source] ]];
+    src = p[[2, 3, Key[Source]]];
 
     AppendTo[issues, FormatIssue["ContiguousComma", "Contiguous comma", "Formatting",
       <|Source -> src,
@@ -272,7 +272,7 @@ Module[{agg, node, data, children, issues, pairs, src},
     If[MatchQ[p[[2]], LeafNode[Token`Fake`ImplicitNull, _, _]],
       Continue[]
     ];
-    If[!contiguousQ[p[[1, 3, Key[Source] ]], p[[2, 3, Key[Source] ]] ],
+    If[!contiguousQ[p[[1, 3, Key[Source]]], p[[2, 3, Key[Source]]]],
       Continue[]
     ];
 

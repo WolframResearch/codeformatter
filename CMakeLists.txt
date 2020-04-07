@@ -20,6 +20,7 @@ message(STATUS "LOCAL_BUILD: ${LOCAL_BUILD}")
 set(WL_PACLET_SOURCES
 	${PROJECT_SOURCE_DIR}/CodeFormatter/Kernel/AggregateRules.wl
 	${PROJECT_SOURCE_DIR}/CodeFormatter/Kernel/CodeFormatter.wl
+	${PROJECT_SOURCE_DIR}/CodeFormatter/Kernel/ConcreteRules.wl
 	${PROJECT_SOURCE_DIR}/CodeFormatter/Kernel/Utils.wl
 )
 

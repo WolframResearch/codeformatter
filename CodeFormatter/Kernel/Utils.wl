@@ -38,16 +38,24 @@ Module[{lines},
 
 
 (*
-shadows[action1, action2] => True means action1 is less severe and is contained by action2; we will get rid of issue1
+shadows[action1, action2] => True means action1 is less severe and is contained by action2; we will get rid of action1
 *)
 shadows[action1:CodeTextAction[_, command1_, data1_], action2:CodeTextAction[_, command2_, data2_]] :=
 	Which[
 		action1 === action2,
 			False,
+		!SourceMemberQ[data2[Source], data1[Source]],
+			False
+		,
+		command2 === DeleteText && command1 === ReplaceText,
+			(*
+			The philosophy is that DeleteText trumps ReplaceText
+			*)
+			True
+		,
 		command1 =!= command2,
-			False,
-		SourceMemberQ[data2[ Source ], data1[ Source ] ],
-			True,
+			False
+		,
 		True,
 			False
 	]

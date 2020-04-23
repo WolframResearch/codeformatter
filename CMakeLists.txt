@@ -31,10 +31,7 @@ message(STATUS "BUG349779_PAUSE: ${BUG349779_PAUSE}")
 message(STATUS "BUG349779_TIMEOUT: ${BUG349779_TIMEOUT}")
 
 set(WL_PACLET_SOURCES
-	${PROJECT_SOURCE_DIR}/CodeFormatter/Kernel/AggregateRules.wl
 	${PROJECT_SOURCE_DIR}/CodeFormatter/Kernel/CodeFormatter.wl
-	${PROJECT_SOURCE_DIR}/CodeFormatter/Kernel/ConcreteRules.wl
-	${PROJECT_SOURCE_DIR}/CodeFormatter/Kernel/Utils.wl
 )
 
 set(WL_GENERATE_CREATEPACLETARCHIVE_SOURCES

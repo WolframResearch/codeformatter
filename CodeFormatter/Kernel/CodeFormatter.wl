@@ -6,26 +6,17 @@ Functions
 CodeFormat
 
 
+
 (*
 Options
 *)
 AirynessLevel
 
 
-CodeTextAction
-
-
 
 Begin["`Private`"]
 
-Needs["CodeFormatter`AggregateRules`"]
-Needs["CodeFormatter`ConcreteRules`"]
-Needs["CodeFormatter`Utils`"]
 Needs["CodeParser`"]
-Needs["CodeParser`Abstract`"]
-Needs["CodeParser`CodeAction`"]
-Needs["CodeParser`Utils`"]
-
 
 
 If[PacletFind["Format"] != {},
@@ -36,871 +27,420 @@ If[PacletFind["Format"] != {},
 
 $AirynessLevel = 1.0
 
-(*
-Number of characters per line to consider "long"
-*)
-$lineLengthLimit = 200
-
-(*
-Number of lines to consider "long"
-*)
-$lineLimit = 5000
 
 
-
-
-
-$existsTest = Not @* KeyExistsQ[AirynessLevel]
-
-
-
-CodeFormat::usage = "CodeFormat[code] formats the WL code."
-
-CodeFormat::long = "File `1` is long. Formatting will be truncated."
-
-CodeFormat::longlines = "File `1` has long lines. Formatting will be truncated."
-
-CodeFormat::empty = "File `1` is empty."
+CodeFormat::usage = "CodeFormat[code] returns a string of formatted WL code."
 
 Options[CodeFormat] = {
   AirynessLevel :> $AirynessLevel,
-  "DryRun" -> False,
-  PerformanceGoal -> "Speed",
-  "Tau" -> 2
+  "IndentationString" -> "  "
 }
+
 
 CodeFormat[f:File[_String], opts:OptionsPattern[]] :=
   formatFile[f, opts]
-
-
 
 Options[formatFile] = Options[CodeFormat]
 
 formatFile[File[file_String], opts:OptionsPattern[]] :=
 Catch[
-Module[{cst, cstAndIssues, issues, last, lastSrc, lastSrcLine, actions, str, bytes,
-  actionfulIssues, actionlessIssues, badIssues, airynessTest, airyness,
-  groupedActions, lines, newLines, dryRun, performanceGoal, tau},
-
-  airyness = OptionValue[AirynessLevel];
-  dryRun = OptionValue["DryRun"];
-  performanceGoal = OptionValue[PerformanceGoal];
-  tau = OptionValue["Tau"];
+Module[{cst, bytes},
 
   bytes = Import[file, "Byte"];
 
-  cstAndIssues = CodeConcreteParse[bytes, ContainerNode -> ({ContainerNode[File, #[[1]], <||>], Cases[#[[2]], (FormatIssue|EncodingIssue)[_, _, _, _]]}&)];
+  cst = CodeConcreteParse[bytes];
 
-  If[FailureQ[cstAndIssues],
-    Throw[cstAndIssues]
+  If[FailureQ[cst],
+    Throw[cst]
    ];
 
-  If[empty[cstAndIssues],
-    (*
-    empty file
-    *)
-    Message[CodeFormat::empty, file];
-    Throw[cstAndIssues]
-  ];
-
-   {cst, issues} = cstAndIssues;
-
-  issues = formatCST[cst, issues, "Tau" -> tau];
-
-  (*
-  File only
-  insert trailing \n if missing
-  *)
-  If[!empty[ cst[[2]] ],
-
-    last = cst[[2, -1]];
-
-    If[!MatchQ[last, LeafNode[Token`Newline, _, _]],
-
-      lastSrc = last[[3, Key[Source] ]];
-      lastSrcLine = lastSrc[[2, 1]];
-
-      AppendTo[issues, FormatIssue["MissingTrailingNewline", "Missing trailing newline", "Formatting",
-        <|  Source -> {{lastSrcLine + 1, 0}, {lastSrcLine + 1, 0}},
-          CodeActions -> { CodeAction["Insert", InsertNodeAfter,
-            <|Source -> lastSrc, "InsertionNode" -> LeafNode[Token`Newline, "\n", <||>]|>] },
-          AirynessLevel -> 0.0|>] ];
-    ];
-  ];
-
-  badIssues = Cases[issues, (FormatIssue|EncodingIssue)[_, _, _, _?$existsTest]];
-  If[!empty[badIssues],
-   Message[CodeFormat::airyness, badIssues]
-  ];
-
-    airynessTest = LessEqualThan[airyness];
-    issues = Cases[issues, (FormatIssue|EncodingIssue)[_, _, _, KeyValuePattern[AirynessLevel -> _?airynessTest]]];
-
-    If[$Debug,
-    Print["issues: ", issues];
-  ];
-
-  actionfulIssues = Select[issues, KeyExistsQ[#[[4]], CodeActions]&];
-  actionlessIssues = Complement[issues, actionfulIssues];
-
-  Scan[(Message[CodeFormat::noaction, #])&, actionlessIssues];
-
-
-  (*
-  Actions
-  *)
-  actions = #[[4, Key[CodeActions], 1 ]]& /@ actionfulIssues;
-
-  actions = Flatten[lowerToText[#, cst]& /@ actions];
-
-  groupedActions = GroupBy[actions, #[[3, Key[Source], All, 1]]&];
-
-  If[$Debug,
-    Print["actions Length: ", Length[actions]];
-    If[$Debug2,
-      Print["actions: ", actions];
-    ];
-  ];
-
-
-
-  str = FromCharacterCode[bytes, "UTF8"];
-
-  lines = ("\n" <> #)& /@ StringSplit[str, {"\r\n", "\n", "\r"}, All];
-
-  If[performanceGoal == "Speed",
-
-    If[Length[lines] > $lineLimit,
-      Message[CodeFormat::long, file]
-    ];
-
-    If[AnyTrue[lines, (StringLength[#] > $lineLengthLimit)&],
-      Message[CodeFormat::longlines, file]
-    ];
-  ];
-
-  If[$Debug,
-    xPrint["lines: ", lines // InputForm];
-  ];
-
-  newLines = ApplyCodeTextActions[groupedActions, lines, performanceGoal];
-
-  str = StringDrop[StringJoin[newLines], 1];
-
-  bytes = ToCharacterCode[str, "UTF8"];
-
-  If[!MatchQ[bytes, {_Integer...}],
-    Throw[Failure["CannotExportBytes", <|"Bytes" -> Shallow[bytes], "File" -> file|>]]
-  ];
-
-  If[dryRun,
-    Throw[Null]
-  ];
-
-  Export[file, bytes, "Byte"]
+  formatCST[cst, opts]
 ]]
-
-
-
-
-
 
 
 CodeFormat[str_String, opts:OptionsPattern[]] :=
   formatString[str, opts]
 
-
 Options[formatString] = Options[CodeFormat]
 
-formatString[strIn_String, opts:OptionsPattern[]] :=
-Module[{cst, cstAndIssues, issues, actions, str,
-  actionfulIssues, actionlessIssues, badIssues, airynessTest, airyness,
-  lines, newLines, groupedActions, newStr, performanceGoal, tau},
+formatString[str_String, opts:OptionsPattern[]] :=
+Module[{cst},
 
-  str = strIn;
+  cst = CodeConcreteParse[str];
 
-  airyness = OptionValue[AirynessLevel];
-  performanceGoal = OptionValue[PerformanceGoal];
-  tau = OptionValue["Tau"];
-
-  cstAndIssues = CodeConcreteParse[str, ContainerNode -> ({ContainerNode[String, #[[1]], <||>], Cases[#[[2]], (FormatIssue|EncodingIssue)[_, _, _, _]]}&)];
-
-  If[FailureQ[cstAndIssues],
-    Throw[cstAndIssues]
+  If[FailureQ[cst],
+    Throw[cst]
    ];
 
-  If[empty[cstAndIssues],
-    (*
-    empty file
-    *)
-    Message[CodeFormat::empty];
-    Throw[cstAndIssues]
-  ];
-
-   {cst, issues} = cstAndIssues;
-
-  issues = formatCST[cst, issues, "Tau" -> tau];
-
-  If[$Debug,
-    Print["issues: ", issues];
-  ];
-
-  badIssues = Cases[issues, (FormatIssue|EncodingIssue)[_, _, _, _?$existsTest]];
-  If[!empty[badIssues],
-   Message[CodeFormat::airyness, badIssues]
-  ];
-
-    airynessTest = LessEqualThan[airyness];
-    issues = Cases[issues, (FormatIssue|EncodingIssue)[_, _, _, KeyValuePattern[AirynessLevel -> _?airynessTest]]];
-
-  actionfulIssues = Select[issues, KeyExistsQ[#[[4]], CodeActions]&];
-  actionlessIssues = Complement[issues, actionfulIssues];
-
-  Scan[(Message[CodeFormat::noaction, #])&, actionlessIssues];
-
-  If[$Debug,
-    Print["actionfulIssues: ", actionfulIssues];
-  ];
-
-  (*
-  Actions
-  *)
-  actions = #[[4, Key[CodeActions], 1 ]]& /@ actionfulIssues;
-
-  actions = Flatten[lowerToText[#, cst]& /@ actions];
-
-    groupedActions = GroupBy[actions, #[[3, Key[Source], All, 1]]&];
-
-    (*
-  actions = SortBy[actions, -#[[3, Key[Source]]]&];
-  *)
-
-  If[$Debug,
-    Print["actions Length: ", Length[actions]];
-    If[$Debug2,
-      Print["actions: ", actions];
-    ];
-  ];
-
-
-
-  lines = ("\n" <> #)& /@ StringSplit[str, {"\r\n", "\n", "\r"}, All];
-
-  If[performanceGoal == "Speed",
-
-    If[Length[lines] > $lineLimit,
-      Message[CodeFormat::long]
-    ];
-
-    If[AnyTrue[lines, StringLength[#] > $lineLengthLimit&],
-      Message[CodeFormat::longlines]
-    ];
-  ];
-
-  If[$Debug,
-    xPrint["lines: ", lines // InputForm];
-  ];
-
-  newLines = ApplyCodeTextActions[groupedActions, lines, performanceGoal];
-
-  newStr = StringDrop[StringJoin[newLines], 1];
-
-  newStr
+   formatCST[cst, opts]
 ]
-
-
-
-
 
 
 CodeFormat[bytes_List, opts:OptionsPattern[]] :=
   formatBytes[bytes, opts]
 
-
 Options[formatBytes] = Options[CodeFormat]
 
-formatBytes[bytesIn_List, opts:OptionsPattern[]] :=
+formatBytes[bytes_List, opts:OptionsPattern[]] :=
 Catch[
-Module[{cst, cstAndIssues, issues, actions, str,
-  actionfulIssues, actionlessIssues, bytes, bytesOut, badIssues, airynessTest, airyness,
-  groupedActions, performanceGoal, tau},
+Module[{cst},
 
-  bytes = bytesIn;
+  cst = CodeConcreteParse[bytes];
 
-  airyness = OptionValue[AirynessLevel];
-  performanceGoal = OptionValue[PerformanceGoal];
-  tau = OptionValue["Tau"];
-
-  If[$Debug,
-    Print["concrete parse"];
-  ];
-  cstAndIssues = CodeConcreteParse[bytes, ContainerNode -> ({ContainerNode[File, #[[1]], <||>], Cases[#[[2]], (FormatIssue|EncodingIssue)[_, _, _, _]]}&)];
-
-    If[$Debug,
-    Print["concrete parse done"];
-  ];
-
-  If[FailureQ[cstAndIssues],
-    Throw[cstAndIssues]
+  If[FailureQ[cst],
+    Throw[cst]
    ];
 
-  If[empty[cstAndIssues],
-    (*
-    empty file
-    *)
-    Message[CodeFormat::empty];
-    Throw[cstAndIssues]
-  ];
-
-   {cst, issues} = cstAndIssues;
-
-    If[$Debug,
-    Print["formatCST"];
-  ];
-
-  issues = formatCST[cst, issues, "Tau" -> tau];
-
-    If[$Debug,
-    Print["formatCST done"];
-  ];
-
-  badIssues = Cases[issues, (FormatIssue|EncodingIssue)[_, _, _, _?$existsTest]];
-  If[!empty[badIssues],
-   Message[CodeFormat::airyness, badIssues]
-  ];
-
-    airynessTest = LessEqualThan[airyness];
-    issues = Cases[issues, (FormatIssue|EncodingIssue)[_, _, _, KeyValuePattern[AirynessLevel -> _?airynessTest]]];
-
-  actionfulIssues = Select[issues, KeyExistsQ[#[[4]], CodeActions]&];
-  actionlessIssues = Complement[issues, actionfulIssues];
-
-  Scan[(Message[CodeFormat::noaction, #])&, actionlessIssues];
-
-
-  (*
-  Actions
-  *)
-  actions = #[[4, Key[CodeActions], 1 ]]& /@ actionfulIssues;
-
-  actions = Flatten[lowerToText[#, cst]& /@ actions];
-
-  If[$Debug,
-    Print["actions Length: ", Length[actions]];
-    If[$Debug2,
-      Print["actions: ", actions];
-    ];
-  ];
-
-  groupedActions = GroupBy[actions, #[[3, Key[Source], All, 1]]&];
-
-
-
-
-  
-  str = ToSourceCharacterString[cst];
-
-  lines = ("\n" <> #)& /@ StringSplit[str, {"\r\n", "\n", "\r"}, All];
-
-  If[performanceGoal == "Speed",
-
-    If[Length[lines] > $lineLimit,
-      Message[CodeFormat::long]
-    ];
-
-    If[AnyTrue[lines, StringLength[#] > $lineLengthLimit&],
-      Message[CodeFormat::longlines]
-    ];
-  ];
-
-  If[$Debug,
-    xPrint["lines: ", lines // InputForm];
-  ];
-
-  newLines = ApplyCodeTextActions[groupedActions, lines, performanceGoal];
-
-  str = StringDrop[StringJoin[newLines], 1];
-
-  bytesOut = ToCharacterCode[str, "UTF8"];
-
-  bytesOut
+   formatCST[cst, opts]
 ]]
 
 
 
 
-Options[formatCST] = {
-  "Tau" -> 2
-}
+Options[formatCST] = Options[CodeFormat]
 
-(*
-  gather concrete issues
+formatCST[cst_, OptionsPattern[]] :=
+Module[{indentationString},
 
-  gather abstract issues
+  indentationString = OptionValue["IndentationString"];
 
-  
-  noncontroversial issues:
-  
-  remove trailing whitespace at end of lines
+  Block[{blockedIndentationString},
 
-  *)
-formatCST[cstIn_, issuesIn_, OptionsPattern[]] :=
-Catch[
-Module[{cst, issues, agg, ast, trailing, trailingIssues, astIssues, rulesIssues, tabIssues, tabs,
-  tau, tabReplacement},
+    blockedIndentationString[] = indentationString;
 
-  cst = cstIn;
-  issues = issuesIn;
-
-  tau = OptionValue["Tau"];
-
-  tabReplacement = StringJoin[Table[" ", tau]];
-
-  rulesIssues = {};
-
-  KeyValueMap[Function[{pat, func},
-    AppendTo[rulesIssues, Map[func[#, cst]&, Position[cst, pat]]];], $DefaultConcreteRules];
-
-  agg = Aggregate[cst];
-
-  If[FailureQ[agg],
-    Throw[agg]
-  ];
-
-  KeyValueMap[Function[{pat, func},
-      AppendTo[rulesIssues, Map[func[#, agg]&, Position[agg, pat]]];], $DefaultAggregateRules];
-
-  rulesIssues = Flatten[rulesIssues];
-
-  If[$Debug,
-    Print["rulesIssues: ", rulesIssues];
-  ];
-  
-  ast = Abstract[agg];
-
-  astIssues = Cases[ast, (FormatIssue|EncodingIssue)[_, _, _, _], Infinity];
-
-  If[$Debug,
-    xPrint["astIssues: ", astIssues];
-  ];
-
-  trailing = trailingWhitespace[cst];
-
-  If[$Debug2,
-    Print["trailing: ", trailing]
-  ];
-
-  trailingIssues = FormatIssue["TrailingWhitespace", "Trailing whitespace", "Formatting",
-              <|  Source -> #[[3, Key[Source] ]],
-                CodeActions -> { CodeAction["Remove", DeleteTriviaNode,
-                            <|Source -> #[[3, Key[Source] ]]|>] },
-                AirynessLevel -> 0.0|>]& /@ trailing;
-
-  If[$Debug2,
-    Print["trailingIssues: ", trailingIssues]
-  ];
-
-
-
-  tabs = Cases[cst, LeafNode[Whitespace, "\t", _], -1];
-
-  (*
-  if a tab is also trailing, then just let trailingIssues remove it
-  *)
-  tabs = Complement[tabs, trailing];
-
-  tabIssues = FormatIssue["TabsToSpaces", "Tabs to spaces", "Formatting",
-            <| Source -> #[[3, Key[Source] ]],
-              CodeActions -> { CodeAction["replace", ReplaceText,
-                          <| Source -> #[[3, Key[Source] ]],
-                            "ReplacementText" -> tabReplacement |>] },
-              AirynessLevel -> 0.1
-            |>]& /@ tabs;
-  If[$Debug2,
-    Print["tabIssues: ", tabIssues]
-  ];
-
-
-  issues = issues ~Join~
-          rulesIssues ~Join~
-          astIssues ~Join~
-          trailingIssues ~Join~
-          tabIssues;
-
-  If[$Debug,
-    Print["issues: ", issues];
-  ];
-
-  (*
-  str = ToSourceCharacterString[cst];
-
-  str*)
-
-  issues
-]]
-
-
-
-
-
-(*
-Return Whitespace nodes that are before Newline nodes
-*)
-trailingWhitespace[cstIn_] :=
-Catch[
-Module[{cst, toks, lines},
-
-  cst = cstIn;
-
-  (* linearize *)
-  toks = Cases[cst, _LeafNode, -1];
-
-  lines = Split[toks, #1[[1]] =!= Token`Newline && #1[[1]] =!= Token`LineContinuation&];
-
-  reaped = Reap[
-  Scan[sowLine, lines]
-  ][[2]];
-
-  If[$Debug,
-    xPrint["reaped: ", reaped];
-  ];
-
-  If[empty[reaped],
-    Throw[{}]
-  ];
-
-  reaped[[1]]
-]]
-
-
-sowLine[line_] :=
-Module[{cases},
-Switch[line,
-
-  (* only whitespace, then \n
-    also catches case of only \n
-
-    if toplevel, then remove
-  *)
-  {LeafNode[Whitespace, _, _]..., LeafNode[Token`Newline | Token`LineContinuation, _, _]},
-    
-    (*
-    super slow:
-    cases = SequenceCases[line, {ws:LeafNode[Whitespace, _, _]..., LeafNode[Token`ToplevelNewline | Token`InternalNewline | Token`LineContinuation, _, _]} :> ws];
-    *)
-    cases = Reverse[TakeWhile[Reverse[line[[1 ;; -2]] ], MatchQ[#, LeafNode[Whitespace, _, _]]&]];
-
-    cases = Select[cases, toplevelQ[#, cst]&];
-
-    Scan[Sow, cases]
-  ,
-
-  (* something, then whitespace, then \n
-    
-    remove whitespace after something
-  *)
-  {___, LeafNode[Except[Whitespace], _, _], LeafNode[Whitespace, _, _]..., LeafNode[Token`Newline | Token`LineContinuation, _, _]},
-    
-    (*
-    super slow:
-    cases = SequenceCases[line, {___, LeafNode[Except[Whitespace], _, _], ws:LeafNode[Whitespace, _, _]..., LeafNode[Token`ToplevelNewline | Token`InternalNewline | Token`LineContinuation, _, _]} :> ws];
-    *)
-    cases = Reverse[TakeWhile[Reverse[line[[1 ;; -2]] ], MatchQ[#, LeafNode[Whitespace, _, _]]&]];
-
-    Scan[Sow, cases]
-  ,
-
-  (* only whitespace, at EOF
-
-    if toplevel, then remove
-  *)
-  {LeafNode[Whitespace, _, _]...},
-    
-    (*
-    super slow:
-    cases = SequenceCases[line, {ws:LeafNode[Whitespace, _, _]...} :> ws];
-    *)
-    cases = Reverse[TakeWhile[Reverse[line[[1 ;; -1]] ], MatchQ[#, LeafNode[Whitespace, _, _]]&]];
-
-    cases = Select[cases, toplevelQ[#, cst]&];
-
-    Scan[Sow, cases]
-  ,
-
-  (* something, then whitespace, at EOF
-
-    remove whitespace after something
-  *)
-  {___, LeafNode[Except[Whitespace], _, _], LeafNode[Whitespace, _, _]...},
-    
-    (*
-    super slow:
-    cases = SequenceCases[line, {___, LeafNode[Except[Whitespace], _, _], ws:LeafNode[Whitespace, _, _]...} :> ws];
-    *)
-    cases = Reverse[TakeWhile[Reverse[line[[1 ;; -1]] ], MatchQ[#, LeafNode[Whitespace, _, _]]&]];
-
-    Scan[Sow, cases]
-]]
-
-
-toplevelQ[tok_, cst_] := MatchQ[FirstPosition[cst, tok], {2, _}]
-
-
-
-
-(*
-leave text-based actions alone
-*)
-lowerToText[CodeAction[label_, DeleteText, data_], _] := { CodeTextAction[label, DeleteText, data] }
-
-lowerToText[CodeAction[label_, InsertText, data_], _] := { CodeTextAction[label, InsertText, data] }
-
-lowerToText[CodeAction[label_, ReplaceText, data_], _] := { CodeTextAction[label, ReplaceText, data] }
-
-
-(*
-lower DeleteTrivia to { DeleteText }
-*)
-lowerToText[CodeAction[label_, DeleteTrivia, data_], cstIn_] :=
-Module[{trivia, actionSrc, cst},
-  
-  cst = cstIn;
-
-  actionSrc = data[Source];
-
-  trivia = Cases[cst,
-          LeafNode[Whitespace | Token`Newline | Token`Comment | Token`LineContinuation, _,
-            KeyValuePattern[Source -> triviaSrc_ /; SourceMemberQ[actionSrc, triviaSrc]]], -1];
-
-  CodeTextAction[label, DeleteText, <| Source -> #[[3, Key[Source]]]|>]& /@ trivia
+    fmt[cst, 0]
+  ]
 ]
 
 
+trivia = LeafNode[
+    Whitespace | Token`Comment | Token`Newline | Token`LineContinuation | 
+      Token`Boxes`MultiWhitespace, _, _]
 
-cacheToSourceCharacterString[insertionNode_] :=
-  cacheToSourceCharacterString[insertionNode] =
-  ToSourceCharacterString[insertionNode]
+ws = LeafNode[Whitespace | Token`Boxes`MultiWhitespace, _, _]
+
+nl = LeafNode[Token`Newline, _, _]
+
+comment = LeafNode[Token`Comment, _, _]
+
+cat[docs___] :=
+  StringJoin[docs]
+
+line[] = "\n"
+
+space[] = " "
+
+nest[i_][doc_String] :=
+  StringReplace[doc, "\n" -> "\n" <> StringJoin[Table[blockedIndentationString[], i]]]
+
+
+fmt[LeafNode[Token`Newline, s_, _], indent_] :=
+  nest[indent][line[]]
+
+fmt[LeafNode[Token`Comment, s_, data_], indent_] :=
+  nest[indent][s]
+
+fmt[LeafNode[_, s_, _], indent_] :=
+  s
+
+
+fmt[CompoundNode[_, {rand1_, rand2_}, _], indent_] :=
+  cat[fmt[rand1, indent], fmt[rand2, indent]]
+
+
+fmt[PrefixNode[_, {rator_, trivia..., rand_}, _], indent_] :=
+  cat[fmt[rator, indent], fmt[rand, indent]]
+
+fmt[PostfixNode[_, {rator_, trivia..., rand_}, _], indent_] :=
+  cat[fmt[rator, indent], fmt[rand, indent]]
+
+
+fmt[BinaryNode[SetDelayed, {
+      lhs_, 
+      trivia..., 
+      _, 
+      trivia..., 
+      rhs_
+    }, _], indent_] :=
+  cat[fmt[lhs, indent], space[], ":=", 
+    nest[indent + 1][cat[line[], fmt[rhs, indent]]]
+  ]
+
+fmt[BinaryNode[_, {
+      rand1_, 
+      trivia1 : trivia..., 
+      rator : Except[trivia], 
+      trivia2 : trivia..., 
+      rand2_
+    }, _], indent_] :=
+  Module[{graphs1, graphs2},
+    graphs1 = DeleteCases[{trivia1}, ws];
+    graphs2 = DeleteCases[{trivia2}, ws];
+    cat[
+      fmt[rand1, indent], 
+      fmt[#, indent + 1]& /@ graphs1, 
+      space[], fmt[rator, indent + 1], space[], 
+      fmt[#, indent + 1]& /@ graphs2, 
+      fmt[rand2, indent + 1]
+    ]
+  ]
 
 
 (*
-lower InsertNode to { InsertText }
+special casing CompoundExpression:
+do not insert space before or after semi
+
+  completely redo newlines
 *)
-lowerToText[CodeAction[label_, InsertNode, data_], _] :=
-Module[{actionSrc, insertionText, insertionNode},
-
-  actionSrc = data[Source];
-
-  insertionNode = data["InsertionNode"];
-
-  insertionText = cacheToSourceCharacterString[insertionNode];
-
-  { CodeTextAction[label, InsertText,
-    <| Source -> { actionSrc[[1]], actionSrc[[1]] + StringLength[insertionText] - 1 },
-      "InsertionText" -> insertionText |>] }
-]
-
+fmt[InfixNode[CompoundExpression, ts_, _], indent_] :=
+  Catch[
+    Module[{aggs, rands, rators, graphs, lastRator, lastRand, 
+      ratorsPat, randsPat},
+      aggs = DeleteCases[ts, trivia];
+      graphs = DeleteCases[ts, ws | nl];
+      rands = aggs[[1 ;; All ;; 2]];
+      rators = aggs[[2 ;; All ;; 2]];
+      lastRator = Last[rators];
+      lastRand = Last[rands];
+      ratorsPat = Alternatives @@ rators;
+      randsPat = Alternatives @@ rands;
+      cat[Replace[graphs, {
+            lastRator /; 
+              MatchQ[lastRand, LeafNode[Token`Fake`ImplicitNull, _, _]] :> 
+              fmt[lastRator, indent], 
+            rator : ratorsPat :> cat[fmt[rator, indent], nest[indent][line[]]], 
+            rand : randsPat :> fmt[rand, indent], 
+            comm_ :> cat[fmt[comm, indent], nest[indent][line[]]]
+          }, {1}]]
+    ]
+  ]
 
 (*
-lower InsertNode to { InsertText }
+special casing Comma:
+do not insert space before comma
 *)
+fmt[InfixNode[Comma, ts_, _], indent_] :=
+  Catch[
+    Module[{aggs, rators, graphs, ratorsPat},
+      aggs = DeleteCases[ts, trivia];
+      graphs = DeleteCases[ts, ws];
+      rators = aggs[[2 ;; All ;; 2]];
+      ratorsPat = Alternatives @@ rators;
+      cat[Replace[graphs, {
+            rator : ratorsPat :> cat[fmt[rator, indent], space[]], 
+            rand_ :> cat[fmt[rand, indent]]
+          }, {1}]]
+    ]
+  ]
 
-lowerToText[CodeAction[label_, InsertNodeAfter, data_], _] :=
-Module[{actionSrc, insertionText, insertionNode},
+fmt[InfixNode[MessageName, ts_, _], indent_] :=
+  Module[{rands, rators},
+    rands = ts[[1 ;; All ;; 2]];
+    rators = ts[[2 ;; All ;; 2]];
+    cat[Riffle[fmt[#, indent]& /@ rands, cat[fmt[#, indent]]& /@ rators]]
+  ]
 
-  actionSrc = data[Source];
-
-  insertionNode = data["InsertionNode"];
-
-  insertionText = cacheToSourceCharacterString[insertionNode];
-
-  { CodeTextAction[label, InsertTextAfter,
-    <| Source -> { { actionSrc[[2, 1]], actionSrc[[2, 2]] + 1 },
-              { actionSrc[[2, 1]], actionSrc[[2, 2]] + 1 + StringLength[insertionText] - 1 } },
-      "InsertionText" -> insertionText |>] }
-]
-
-
+fmt[InfixNode[Times, ts_, _], indent_] :=
+  Catch[
+    Module[{aggs, rands, rators, graphs, ratorsPat},
+      aggs = DeleteCases[ts, trivia];
+      graphs = DeleteCases[ts, ws];
+      rands = aggs[[1 ;; All ;; 2]];
+      rators = aggs[[2 ;; All ;; 2]];
+      ratorsPat = Alternatives @@ rators;
+      cat[Replace[graphs, {
+            rator : LeafNode[Token`Fake`ImplicitTimes, _, _] :> space[], 
+            rator : ratorsPat :> cat[space[], fmt[rator, indent + 1], space[]], 
+            other_ :> cat[fmt[other, indent + 1]]
+          }, {1}]]
+    ]
+  ]
 
 (*
-lower DeleteTriviaNode to { DeleteText }
+behavior of InfixNode:
+
 *)
-lowerToText[CodeAction[label_, DeleteTriviaNode, data_], _] :=
-Module[{actionSrc},
-
-  actionSrc = data[Source];
-
-  { CodeTextAction[label, DeleteText, <| Source -> actionSrc |>] }
-]
-
-
-
-
-
-
-
-ApplyCodeTextActions[groupedActions_, linesIn_, performanceGoal_] :=
-Module[{lines, singleLineActions, multiLineActions},
-  
-  lines = linesIn;
-
-  If[$Debug2,
-    Print["lines: ", Length[lines]];
-    MapIndexed[Print["line ", #2[[1]], " ", #1 // InputForm]&, lines];
-  ];
-
-  singleLineActions = KeySelect[groupedActions, (#[[1]] == #[[2]]) &];
-
-  multiLineActions = Complement[groupedActions, singleLineActions];
-
-  If[$Debug2,
-    Print["singleLineActions: ", singleLineActions];
-    Print["multiLineActions: ", multiLineActions];
-  ];
-
-  lines = MapIndexed[
-    Function[{line, index}, If[$Debug, xPrint["line ", index[[1]]]];
-      applySingleLineActions[Lookup[singleLineActions, Key[{index[[1]], index[[1]]}], {}], line, performanceGoal]], lines];
-
-  multiLineActions = Flatten[Values[multiLineActions]];
-  lines = applyMultiLineActions[multiLineActions, lines, performanceGoal];
-
-  lines
-]
+fmt[InfixNode[_, ts_, _], indent_] :=
+  Catch[
+    Module[{aggs, rands, rators, graphs},
+      aggs = DeleteCases[ts, trivia];
+      graphs = DeleteCases[ts, ws];
+      rands = aggs[[1 ;; All ;; 2]];
+      rators = aggs[[2 ;; All ;; 2]];
+      cat[Replace[graphs, {
+            rator : Alternatives @@ rators :> 
+              cat[space[], fmt[rator, indent + 1], space[]], 
+            other_ :> cat[fmt[other, indent + 1]]
+          }, {1}]]
+    ]
+  ]
 
 
-applySingleLineActions[actionsIn_, lineIn_, performanceGoal_] :=
-Module[{sorted, shadowing, actions, line},
-
-  If[$Debug2,
-    Print["applySingleLineActions: ", {actionsIn, lineIn}];
-  ];
-
-  actions = actionsIn;
-  line = lineIn;
-
-  (*
-  Disregard label when deleting duplicates
-  *)
-  actions = DeleteDuplicatesBy[actions, {#[[2]], #[[3]]}&];
-
-  If[performanceGoal == "Speed",
-
-    actions = DeleteCases[actions,
-            CodeTextAction[_, _, KeyValuePattern[Source -> {{line1_ /; line1 > $lineLimit, _}, {_, _}}]]];
-
-    actions = DeleteCases[actions,
-            CodeTextAction[_, _, KeyValuePattern[Source -> {{_, _}, {_, col2_ /; col2 > $lineLengthLimit}}]]];
-  ];
-
-  If[$Debug2,
-      Print["actions: ", actions //InputForm];
-    ];
-
-  shadowing = Select[actions, Function[action, AnyTrue[actions, shadows[action, #]&]]];
-
-    If[$Debug2,
-      Print["shadowing: ", shadowing];
-    ];
-
-    actions = Complement[actions, shadowing];
-
-  sorted = SortBy[actions, -#[[3, Key[Source]]]&];
-
-  If[$Debug2,
-    Print["line before: ", line];
-  ];
-
-  line = Fold[Switch[#2[[2]],
-      InsertText,      StringInsert[     #1,   #2[[3, Key["InsertionText"]]], #2[[3, Key[Source],   1, 2]] + 1 ],
-      InsertTextAfter, StringInsert[     #1,   #2[[3, Key["InsertionText"]]], #2[[3, Key[Source],   2, 2]] + 1 - 1 ],
-      DeleteText,      StringReplacePart[#1,                               "", { #2[[3, Key[Source], 1, 2]] + 1, #2[[3, Key[Source], 2, 2]] + 1 - 1 } ],
-      ReplaceText,     StringReplacePart[#1, #2[[3, Key["ReplacementText"]]], { #2[[3, Key[Source], 1, 2]] + 1, #2[[3, Key[Source], 2, 2]] + 1 - 1 } ],
-      _, Throw[#2, "UnhandledSingleLineCodeAction"]]&, line, sorted];
-
-  If[$Debug2,
-    Print["line after: ", line];
-  ];
-
-  line
-]
+fmt[TernaryNode[_, {
+      rand1_, 
+      trivia..., 
+      rator1_, 
+      trivia..., 
+      rand2_, 
+      trivia..., 
+      rator2_, 
+      trivia..., 
+      rand3_
+    }, _], indent_] :=
+  cat[
+    fmt[rand1, indent], 
+    space[], fmt[rator1, indent], space[], 
+    fmt[rand2, indent], 
+    space[], fmt[rator2, indent], space[], 
+    fmt[rand3, indent]
+  ]
 
 
-applyMultiLineActions[actionsIn_, linesIn_, performanceGoal_] :=
-Module[{sorted, shadowing, actions, lines},
-
-  If[$Debug2,
-    Print["applyMultiLineActions: ", {actionsIn, linesIn} //InputForm];
-  ];
-
-  actions = actionsIn;
-  lines = linesIn;
-
-  (*
-  Disregard label when deleting duplicates
-  *)
-  actions = DeleteDuplicatesBy[actions, {#[[2]], #[[3]]}&];
-
-  If[performanceGoal == "Speed",
-
-    actions = DeleteCases[actions,
-            CodeTextAction[_, _, KeyValuePattern[Source -> {{line1_ /; line1 > $lineLimit, _}, {_, _}}]]];
-
-    actions = DeleteCases[actions,
-            CodeTextAction[_, _, KeyValuePattern[Source -> {{_, _}, {_, col2_ /; col2 > $lineLengthLimit}}]]];
-  ];
-
-  If[$Debug2,
-      Print["actions: ", actions];
-    ];
-
-  shadowing = Select[actions, Function[action, AnyTrue[actions, shadows[action, #]&]]];
-
-    If[$Debug2,
-      Print["shadowing: ", shadowing];
-    ];
-
-    actions = Complement[actions, shadowing];
-
-  sorted = SortBy[actions, -#[[3, Key[Source]]]&];
-
-  If[$Debug2,
-      Print["sorted: ", sorted];
-    ];
-
-  Scan[
-    Function[{action},
-      Switch[action[[2]],
-        DeleteText,
-          Module[{lineNumber1, lineNumber2, line1, line2, colNumber1, colNumber2},
-            {lineNumber1, lineNumber2} = action[[3, Key[Source], All, 1]];
-            {colNumber1, colNumber2} = action[[3, Key[Source], All, 2]]; 
-            line1 = lines[[lineNumber1]];
-            line2 = lines[[lineNumber2]];
-            If[(lineNumber1 + 1 == lineNumber2) && ((*colNumber1 == StringLength[line1] &&*) colNumber2 == 1),
-              (*
-              This is a newline token
-              *)
-              lines[[lineNumber1]] = line1 <> StringDrop[line2, 1];
-              lines = Delete[lines, lineNumber2];
-
-              If[$Debug2,
-                Print["deleted newline: ", lines];
-              ];
-              ,
-              Throw[{action, {{lineNumber1, colNumber1},{lineNumber2, colNumber2}}}, "UnhandledMultiLineCodeAction"]
+fmt[GroupNode[_, {
+      opener_, 
+      trivia1 : trivia..., 
+      ts : Except[trivia]..., 
+      trivia2 : trivia..., closer_
+    }, _], indent_] :=
+  Catch[
+    Module[{aggs, trivia1Aggs, trivia2Aggs, trivia1HasNewline, 
+      trivia2HasNewline},
+      trivia1Aggs = DeleteCases[{trivia1}, ws];
+      aggs = DeleteCases[{ts}, ws];
+      trivia2Aggs = DeleteCases[{trivia2}, ws];
+      trivia1HasNewline = !FreeQ[trivia1Aggs, LeafNode[Token`Newline, _, _]];
+      trivia2HasNewline = !FreeQ[trivia2Aggs, LeafNode[Token`Newline, _, _]];
+      If[trivia1HasNewline,
+        If[!trivia2HasNewline,
+          Throw[
+            cat[
+              fmt[opener, indent], 
+              fmt[#, indent + 1]& /@ trivia1Aggs, 
+              fmt[#, indent + 1]& /@ aggs, 
+              fmt[#, indent]& /@ trivia2Aggs, nest[indent][line[]], 
+              fmt[closer, indent]
             ]
           ]
-        ,
-        _,
-          Throw[action, "UnhandledMultiLineCodeAction"]
+        ]
+      ];
+      cat[
+        fmt[opener, indent], 
+        fmt[#, indent + 1]& /@ trivia1Aggs, 
+        fmt[#, indent + 1]& /@ aggs, 
+        fmt[#, indent]& /@ trivia2Aggs, 
+        fmt[closer, indent]
       ]
     ]
-    ,
-    sorted
-  ];
+  ]
 
-  lines
-]
+
+fmt[CallNode[{head : LeafNode[Symbol, "Module" | "With" | "Block", _], trivia...}, {
+      GroupNode[GroupSquare, {
+          LeafNode[Token`OpenSquare, "[", _], 
+          trivia..., 
+          InfixNode[
+            Comma, {vars_, trivia..., LeafNode[Token`Comma, _, _], trivia..., 
+              body_}, _
+          ], 
+          trivia..., 
+          LeafNode[Token`CloseSquare, "]", _]
+        }, _]
+    }, _], indent_] :=
+  cat[fmt[head, indent], "[", fmt[vars, indent], ",", 
+    nest[indent + 1][line[]], 
+    fmt[body, indent + 1], 
+    nest[indent][cat[line[], "]"]]
+  ]
+
+fmt[CallNode[{LeafNode[Symbol, "Switch", _], trivia...}, {
+      GroupNode[GroupSquare, {
+          LeafNode[Token`OpenSquare, "[", _], 
+          trivia..., 
+          InfixNode[Comma, args_, _], 
+          trivia..., 
+          LeafNode[Token`CloseSquare, "]", _]
+        }, _]
+    }, _], indent_] :=
+  Module[{aggs, rands, rators, restRands, restRators},
+    aggs = DeleteCases[args, trivia];
+    rands = aggs[[1 ;; All ;; 2]];
+    rators = aggs[[2 ;; All ;; 2]];
+    restRands = Rest[rands];
+    restRators = Rest[rators];
+    cat["Switch", "[", fmt[First[rands], indent], fmt[First[rators], indent], 
+      nest[indent + 1][
+        cat[line[], 
+          Riffle[fmt[#, indent]& /@ restRands, 
+            cat[fmt[#, indent], line[]]& /@ restRators]]
+      ], 
+      nest[indent][cat[line[], "]"]]
+    ]
+  ]
+
+(*
+special casing If
+
+completely redo newlines
+*)
+fmt[CallNode[{tag : LeafNode[Symbol, "If", _], trivia1 : trivia...}, {
+      GroupNode[_, {
+          opener_, 
+          trivia2 : trivia..., 
+          InfixNode[
+            Comma, {
+              firstRand_, 
+              trivia3 : trivia..., 
+              firstRator_, 
+              rest___
+            }, _
+          ], 
+          trivia4 : trivia..., 
+          closer_
+        }, _]
+    }, _], indent_] :=
+  Module[{graphs, comments1, comments2, comments3, comments4, aggs, rators, 
+    rands, ratorsPat},
+    comments1 = Cases[{trivia1}, comment];
+    comments2 = Cases[{trivia2}, comment];
+    aggs = DeleteCases[{rest}, trivia];
+    graphs = DeleteCases[{rest}, ws | nl];
+    comments3 = Cases[{trivia3}, comment];
+    rands = aggs[[1 ;; All ;; 2]];
+    rators = aggs[[2 ;; All ;; 2]];
+    comments4 = Cases[{trivia4}, comment];
+    ratorsPat = Alternatives @@ rators;
+    cat[
+      fmt[tag, indent + 1], 
+      fmt[#, indent]& /@ comments1, 
+      fmt[opener, indent + 1], 
+      fmt[#, indent]& /@ comments2, 
+      fmt[firstRand, indent + 1], 
+      fmt[#, indent]& /@ comments3, 
+      fmt[firstRator, indent + 1], 
+      nest[indent + 2][line[]], 
+      Replace[graphs, {
+          rator : ratorsPat :> 
+            cat[nest[indent + 1][line[]], fmt[rator, indent + 1], 
+              nest[indent + 1][line[]]], 
+          other_ :> cat[fmt[other, indent + 1]]
+        }, {1}], 
+      fmt[#, indent]& /@ comments4, 
+      nest[indent][line[]], 
+      fmt[closer, indent]
+    ]
+  ]
+
+fmt[CallNode[{tag_, trivia..., ___}, ts_, _], indent_] :=
+  cat[fmt[tag, indent], fmt[#, indent]& /@ ts]
+
+
+fmt[ContainerNode[_, ts_, _], indent_] :=
+  Module[{graphs},
+    graphs = DeleteCases[ts, ws | nl];
+    cat[cat[fmt[#, indent], nest[indent][line[]], nest[indent][line[]]]& /@ 
+        graphs]
+  ]
+
 
 End[]
 

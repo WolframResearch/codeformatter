@@ -4,7 +4,7 @@ BeginPackage["CodeFormatterTestUtils`"]
 
 formatTest
 
-ok
+$HandledException
 
 
 Begin["`Private`"]
@@ -25,7 +25,7 @@ Options[formatTest] = {
   "DryRun" -> False
 }
 
-formatTest[fileIn_String, i_Integer, OptionsPattern[]] :=
+formatTest[file_String, i_Integer, OptionsPattern[]] :=
  Module[{ast, dryRun, prefix, res},
   Catch[
    
@@ -33,7 +33,6 @@ formatTest[fileIn_String, i_Integer, OptionsPattern[]] :=
    limit = OptionValue["FileSizeLimit"];
    dryRun = OptionValue["DryRun"];
 
-    file = fileIn;
     If[$Debug, Print["file1: ", file]];
     
     If[FileType[file] === File,
@@ -53,10 +52,28 @@ formatTest[fileIn_String, i_Integer, OptionsPattern[]] :=
 
   Quiet[
   Check[
-    res = CodeFormat[File[file], AirynessLevel -> 1.0, "DryRun" -> dryRun];
-    If[res == {},
-      Print[Style[Row[{"index: ", i, " ", StringReplace[fileIn, StartOfString ~~ prefix -> ""]}], Darker[Orange]]];
-      Print[Style["empty file", Darker[Orange]]]
+    res = CodeFormat[File[file]];
+
+    If[FailureQ[res],
+      Print[
+         Style[Row[{"index: ", i, " ", 
+            StringReplace[file, StartOfString ~~ prefix -> ""]}], 
+          Red]];
+        Print[Style[Row[{"index: ", i, " ", res}], Red]];
+      Throw[res, "Uncaught"]
+    ];
+
+    If[!StringQ[res],
+      Print[
+         Style[Row[{"index: ", i, " ", 
+            StringReplace[file, StartOfString ~~ prefix -> ""]}], 
+          Red]];
+        Print[Style[Row[{"index: ", i, " ", res}], Red]];
+      Throw[res, "Uncaught"]
+    ];
+
+    If[dryRun === False,
+      Export[file, res, "Text"]
     ]
     ,
     Print[

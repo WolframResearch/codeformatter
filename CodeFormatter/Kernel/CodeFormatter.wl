@@ -352,28 +352,57 @@ fmt[CallNode[{head : LeafNode[Symbol, "Module" | "With" | "Block", _], trivia...
     nest[indent][cat[line[], "]"]]
   ]
 
-fmt[CallNode[{LeafNode[Symbol, "Switch", _], trivia...}, {
+fmt[CallNode[{tag:LeafNode[Symbol, "Switch", _], trivia1:trivia...}, {
       GroupNode[GroupSquare, {
-          LeafNode[Token`OpenSquare, "[", _], 
-          trivia..., 
-          InfixNode[Comma, args_, _], 
-          trivia..., 
-          LeafNode[Token`CloseSquare, "]", _]
+          opener_,
+          trivia2:trivia..., 
+          InfixNode[
+            Comma, {
+              firstRand_, 
+              trivia3:trivia..., 
+              firstRator:Except[trivia], 
+              rest___
+            },
+            _
+          ], 
+          trivia4:trivia..., 
+          closer_
         }, _]
     }, _], indent_] :=
-  Module[{aggs, rands, rators, restRands, restRators},
-    aggs = DeleteCases[args, trivia];
-    rands = aggs[[1 ;; All ;; 2]];
-    rators = aggs[[2 ;; All ;; 2]];
+  Module[{aggs, rands, rators, restRands, restRators, tests, bodies, testsPat, bodiesPat,
+    comments1, comments2, comments3, comments4},
+    comments1 = Cases[{trivia1}, comment];
+    comments2 = Cases[{trivia2}, comment];
+    comments3 = Cases[{trivia3}, comment];
+    comments4 = Cases[{trivia4}, comment];
+    aggs = DeleteCases[{rest}, trivia];
+    graphs = DeleteCases[{rest}, ws | nl];
+    rands = aggs[[1 ;; -1 ;; 2]];
+    tests = rands[[1;;All;;2]];
+    bodies = rands[[2;;All;;2]];
+    rators = aggs[[2 ;; -2 ;; 2]];
     restRands = Rest[rands];
     restRators = Rest[rators];
-    cat["Switch", "[", fmt[First[rands], indent], fmt[First[rators], indent], 
-      nest[indent + 1][
-        cat[line[], 
-          Riffle[fmt[#, indent]& /@ restRands, 
-            cat[fmt[#, indent], line[]]& /@ restRators]]
-      ], 
-      nest[indent][cat[line[], "]"]]
+    ratorsPat = Alternatives @@ rators;
+    testsPat = Alternatives @@ tests;
+    bodiesPat = Alternatives @@ bodies;
+    cat[
+      fmt[tag, indent + 1],
+      fmt[#, indent + 1]& /@ comments1,
+      fmt[opener, indent + 1],
+      fmt[#, indent + 1]& /@ comments2, 
+      fmt[firstRand, indent + 1],
+      fmt[#, indent + 1]& /@ comments3,
+      fmt[firstRator, indent + 1],
+      Replace[graphs, {
+          rator : ratorsPat :> cat[nest[indent + 1][line[]], fmt[rator, indent + 1] ],
+          test:testsPat :> cat[nest[indent + 1][line[]], fmt[test, indent + 1]],
+          body:bodiesPat :> cat[nest[indent + 2][line[]], fmt[body, indent + 2]],
+          other_ :> fmt[other, indent + 1]
+        }, {1}],
+      fmt[#, indent + 1]& /@ comments4,
+      nest[indent][line[]],
+      fmt[closer, indent]
     ]
   ]
 
@@ -411,13 +440,13 @@ fmt[CallNode[{tag : LeafNode[Symbol, "If", _], trivia1 : trivia...}, {
     ratorsPat = Alternatives @@ rators;
     cat[
       fmt[tag, indent + 1], 
-      fmt[#, indent]& /@ comments1, 
+      fmt[#, indent + 1]& /@ comments1, 
       fmt[opener, indent + 1], 
-      fmt[#, indent]& /@ comments2, 
+      fmt[#, indent + 1]& /@ comments2, 
       fmt[firstRand, indent + 1], 
-      fmt[#, indent]& /@ comments3, 
+      fmt[#, indent + 1]& /@ comments3, 
       fmt[firstRator, indent + 1], 
-      nest[indent + 2][line[]], 
+      nest[indent + 1][line[]], 
       Replace[graphs, {
           rator : ratorsPat :> 
             cat[nest[indent + 1][line[]], fmt[rator, indent + 1], 

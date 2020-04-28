@@ -78,7 +78,7 @@ formatTest[file_String, i_Integer, OptionsPattern[]] :=
     ,
     Print[
        Style[Row[{"index: ", i, " ", 
-          StringReplace[fileIn, StartOfString ~~ prefix -> ""]}], 
+          StringReplace[file, StartOfString ~~ prefix -> ""]}], 
         Darker[Orange]]];
       Print[
        Style[$MessageList, Darker[Orange]]];

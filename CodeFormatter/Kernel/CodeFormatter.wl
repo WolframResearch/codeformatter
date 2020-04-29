@@ -210,7 +210,7 @@ replacementFunc[col_, tabWidth_] :=
 
 
 replaceTabs[str_String, startingColumn_Integer, newline_String, tabWidth_Integer] :=
-Module[{poss, lines},
+Module[{pos, lines},
   lines = StringSplit[str, newline, All];
   (*
   Pad the first line with the correct number of characters from its origin
@@ -218,16 +218,18 @@ Module[{poss, lines},
   lines[[1]] = StringJoin[Table["!", startingColumn - 1], lines[[1]]];
   lines = Map[
     Function[{line},
-      poss = StringPosition[line, "\t"];
       (*
       for each line, accumulate a string by replacing each tab with its equivalent spaces
       *)
-      Fold[
-        Function[{strAccum, pos}, StringReplacePart[strAccum, replacementFunc[pos, tabWidth], {pos, pos}]]
+      NestWhile[
+        Function[{lineAccum},
+          pos = StringPosition[lineAccum, "\t"][[1, 1]];
+          StringReplacePart[lineAccum, replacementFunc[pos, tabWidth], {pos, pos}]
+        ]
         ,
         line
         ,
-        poss[[All, 1]] // Reverse
+        StringContainsQ[#, "\t"]&
       ]
     ]
     ,

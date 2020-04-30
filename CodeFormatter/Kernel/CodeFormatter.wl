@@ -537,7 +537,8 @@ fmt[GroupNode[_, {
       opener_, 
       trivia1 : trivia..., 
       ts : Except[trivia]..., 
-      trivia2 : trivia..., closer_
+      trivia2 : trivia...,
+      closer_
     }, _], indent_] :=
   Module[{aggs, trivia1Aggs, trivia2Aggs, trivia1HasNewline, 
     trivia2HasNewline},
@@ -567,7 +568,16 @@ fmt[GroupNode[_, {
           fmt[closer, indent]
         ]
       ,
-      True,
+      !trivia1HasNewline && trivia2HasNewline,
+        cat[
+          fmt[opener, indent], 
+          fmt[#, indent + 1]& /@ trivia1Aggs, line[indent + 1],
+          fmt[#, indent + 1]& /@ aggs, 
+          fmt[#, indent]& /@ trivia2Aggs,
+          fmt[closer, indent]
+        ]
+      ,
+      !trivia1HasNewline && !trivia2HasNewline,
         cat[
           fmt[opener, indent], 
           fmt[#, indent]& /@ trivia1Aggs, 
@@ -577,6 +587,13 @@ fmt[GroupNode[_, {
         ]
     ]
   ]
+
+fmt[GroupMissingCloserNode[tag_, ts_, data_], indent_] :=
+  fmt[GroupNode[tag, ts ~Join~ { implicitCloser[] }, data], indent]
+
+fmt[implicitCloser[], indent_] :=
+  nil[]
+
 
 
 fmt[CallNode[{head : LeafNode[Symbol, "Module" | "With" | "Block", _], trivia...}, {

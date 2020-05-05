@@ -7,6 +7,14 @@ CodeFormat
 
 
 
+RemoveLineContinuations
+
+StandardizeNewlines
+
+StandardizeTabs
+
+
+
 (*
 Options
 *)
@@ -23,6 +31,8 @@ CodeFormatCST
 
 Begin["`Private`"]
 
+Needs["CodeFormatter`Utils`"]
+
 Needs["CodeParser`"]
 
 
@@ -32,55 +42,39 @@ If[PacletFind["Format"] != {},
 
 
 
-$AirynessLevel = 1.0
+$DefaultAirynessLevel = 1.0
 
-$TabWidth = 4
+$DefaultTabWidth = 4
 
 
 
 CodeFormat::usage = "CodeFormat[code] returns a string of formatted WL code."
 
 Options[CodeFormat] = {
-  AirynessLevel :> $AirynessLevel,
+  AirynessLevel :> $DefaultAirynessLevel,
   "IndentationString" -> "    ",
   "Newline" -> "\n",
-  "TabWidth" -> $TabWidth
+  "TabWidth" -> $DefaultTabWidth
 }
 
 
-CodeFormat[f:File[_String], opts:OptionsPattern[]] :=
-  formatFile[f, opts]
-
-Options[formatFile] = Options[CodeFormat]
-
-formatFile[File[file_String], opts:OptionsPattern[]] :=
+CodeFormat[file_File, opts:OptionsPattern[]] :=
 Catch[
-Module[{cst, bytes, tabWidth},
+Module[{cst, tabWidth},
 
   tabWidth = OptionValue["TabWidth"];
 
-  bytes = Import[file, "Byte"];
-
-  If[bytes == {},
-    Throw[""]
-  ];
-
-  cst = CodeConcreteParse[bytes, "TabWidth" -> tabWidth];
+  cst = CodeConcreteParse[file, "TabWidth" -> tabWidth];
 
   If[FailureQ[cst],
     Throw[cst]
    ];
 
-  formatCST[cst, opts]
+  CodeFormatCST[cst, opts]
 ]]
 
 
 CodeFormat[str_String, opts:OptionsPattern[]] :=
-  formatString[str, opts]
-
-Options[formatString] = Options[CodeFormat]
-
-formatString[str_String, opts:OptionsPattern[]] :=
 Module[{cst, tabWidth},
 
   tabWidth = OptionValue["TabWidth"];
@@ -91,16 +85,11 @@ Module[{cst, tabWidth},
     Throw[cst]
    ];
 
-   formatCST[cst, opts]
+   CodeFormatCST[cst, opts]
 ]
 
 
 CodeFormat[bytes_List, opts:OptionsPattern[]] :=
-  formatBytes[bytes, opts]
-
-Options[formatBytes] = Options[CodeFormat]
-
-formatBytes[bytes_List, opts:OptionsPattern[]] :=
 Catch[
 Module[{cst, tabWidth},
 
@@ -116,21 +105,14 @@ Module[{cst, tabWidth},
     Throw[cst]
    ];
 
-   formatCST[cst, opts]
+   CodeFormatCST[cst, opts]
 ]]
 
 
 
 Options[CodeFormatCST] = Options[CodeFormat]
 
-CodeFormatCST[cst_, opts:OptionsPattern[]] :=
-  formatCST[cst, opts]
-
-
-
-Options[formatCST] = Options[CodeFormat]
-
-formatCST[cstIn_, OptionsPattern[]] :=
+CodeFormatCST[cstIn_, opts:OptionsPattern[]] :=
 Module[{indentationString, cst, newline, tabWidth},
 
   indentationString = OptionValue["IndentationString"];
@@ -139,11 +121,11 @@ Module[{indentationString, cst, newline, tabWidth},
 
   cst = cstIn;
 
-  cst = removeLineContinuations[cst];
+  cst = RemoveLineContinuations[cst];
 
-  cst = standardizeNewlines[cst, newline];
+  cst = StandardizeNewlines[cst, newline];
 
-  cst = standardizeTabs[cst, newline, tabWidth];
+  cst = StandardizeTabs[cst, newline, tabWidth];
 
   Block[{blockedIndentationString, blockedNewline},
 
@@ -156,91 +138,125 @@ Module[{indentationString, cst, newline, tabWidth},
 ]
 
 
+
+
+RemoveLineContinuations::usage = "RemoveLineContinuations[cst] removes line continuations from cst."
+
 (*
 Level -5 is where LeafNodes[] are
 *)
-removeLineContinuations[cst_] :=
+RemoveLineContinuations[cst_] :=
   Replace[cst, {
     (*
-    quickly filter down to LeafNodes that may have line continuations
+    FIXME: 2D string/comments with extraneous line continuations NOT IMPLEMENTED YET
+
+    keep line continuations INSIDE OF strings and comments: may have been intentionally formatted
+    But make sure to remove line continuations outside of the actual token
+
+    Need to do:
+      after removing the extraneous line continuations, recalculate the correct Source
+      i.e., there may be whitespace after the line continuation that contributes to indentation
+      The spacing before the string/comment need to be preserved
     *)
-    LeafNode[tag_, s_ /; StringContainsQ[s, "\\"], data_] :>
-     LeafNode[tag, 
-      StringReplace[s, {"\\" ~~ ("\r\n" | "\n" | "\r") ~~ WhitespaceCharacter... -> ""}], data]}, {-5}]
+    (*
+    LeafNode[tag: String | Token`Comment, s_ /; hasExtraneousLineContinuationQ[s], data_] :>
+      Module[{replacedS, recalculatedStartCol},
+        replacedS = NestWhile[removeExtraneousLineContinuations, s, hasExtraneousLineContinuationQ];
+        recalculatedStartCol = StringCases[replacedS, StartOfString ~~ w:(WhitespaceCharacter ...) ~~ __ :> StringLength[w]][[1]];
+        recalculatedStartCol++;
+        If[$Debug,
+          Print["inside removeLineContinuations"];
+          Print["replacedS: ", replacedS];
+          Print["recalculatedStartCol: ", recalculatedStartCol];
+          Print[];
+        ];
+        LeafNode[tag,
+          replacedS
+          ,
+          <|Source -> {{Indeterminate, recalculatedStartCol}, {Indeterminate, Indeterminate}}|>
+        ]
+      ],
+    *)
+    LeafNode[tag: String | Token`Comment, s_, data_] :>
+      LeafNode[tag, s, data]
+    ,
+    (*
+    quickly filter down to LeafNodes that may have line continuations
+
+    remove from all other leafs:
+    Integers, Reals, etc.: line continuations are not "intentional"; purely for line breaking
+    white space, etc.: line continuations serve no purpose
+    *)
+    LeafNode[tag_, s_ /; hasLineContinuationQ[s], data_] :>
+      LeafNode[tag, 
+        NestWhile[removeLineContinuations, s, hasLineContinuationQ]
+        ,
+        data
+      ]
+  }, {-5}]
 
 
 (*
-Level -5 is where LeafNodes[] are
+extraneous line continuations are at the start or at the end
 *)
-standardizeNewlines[cst_, newline_] :=
+hasExtraneousLineContinuationQ[s_String] :=
+  StringMatchQ[s, 
+    (StartOfString ~~ "\\" ~~ ("\r\n" | "\n" | "\r") ~~ __) |
+    (__ ~~ "\\" ~~ ("\r\n" | "\n" | "\r") ~~ EndOfString)]
+
+(*
+do not remove trailing whitespace from extraneous line continuations
+the whitesace indicates intentional formatting in tokens where it matters: strings and comments
+*)
+removeExtraneousLineContinuations[s_String] :=
+  StringReplace[s, {
+    StartOfString ~~ "\\" ~~ ("\r\n" | "\n" | "\r") -> "",
+    "\\" ~~ ("\r\n" | "\n" | "\r") ~~ EndOfString -> ""}
+  ]
+
+
+hasLineContinuationQ[s_String] :=
+  StringContainsQ[s, "\\" ~~ ("\r\n" | "\n" | "\r") ~~ WhitespaceCharacter...]
+
+(*
+Remove both extraneous and internal line continuations
+*)
+removeLineContinuations[s_String] :=
+  StringReplace[s, {"\\" ~~ ("\r\n" | "\n" | "\r") ~~ WhitespaceCharacter... -> ""}]
+
+
+
+StandardizeNewlines::usage = "StandardizeNewlines[cst, newline] standardizes the newlines in cst."
+
+(*
+Level -5 is where LeafNodes[] are
+
+Do not need to recalculate Source data: replacing 1 Source character with 1 Source character
+*)
+StandardizeNewlines[cst_, newline_String] :=
   Replace[cst, {
     LeafNode[tag : String | Token`Comment, s_, data_] :>
      LeafNode[tag, 
       StringReplace[s, {"\r\n" -> newline, "\n" -> newline, "\r" -> newline}], data]}, {-5}]
 
 
+
+StandardizeTabs::usage = "StandardizeTabs[cst, newline, tabWidth] standardizes tabs in cst."
+
 (*
 Level -5 is where LeafNodes[] are
+
+Do not need to recalculate Source data: Source columns were already calculated accounting for tab stops
 *)
-standardizeTabs[cst_, newline_, tabWidth_] :=
+StandardizeTabs[cst_, newline_String, tabWidth_Integer] :=
   Replace[cst, {
     LeafNode[Whitespace, "\t", data_] :> 
-      LeafNode[Whitespace, replacementFunc[data[[Key[Source], 1, 2]], tabWidth], data],
+      LeafNode[Whitespace, tabReplacementFunc[data[[Key[Source], 1, 2]], tabWidth], data],
     LeafNode[tag : String | Token`Comment, s_ /; StringContainsQ[s, "\t"], data_] :> 
       LeafNode[tag, replaceTabs[s, data[[Key[Source], 1, 2]], newline, tabWidth], data]}, {-5}]
 
 
-(*
-Memoizing function that returns the number of spaces that a tab should be replaced with
 
-replacementFunc[1, 4] => "    "
-replacementFunc[2, 4] => "   "
-replacementFunc[3, 4] => "  "
-replacementFunc[4, 4] => " "
-replacementFunc[5, 4] => "    "
-replacementFunc[6, 4] => "   "
-replacementFunc[7, 4] => "  "
-replacementFunc[8, 4] => " "
-replacementFunc[9, 4] => "    "
-
-*)
-replacementFunc[col_, tabWidth_] :=
-  replacementFunc[col, tabWidth] =
-  StringJoin[Table[" ", Mod[1 - col, tabWidth, 1]]]
-
-
-replaceTabs[str_String, startingColumn_Integer, newline_String, tabWidth_Integer] :=
-Module[{pos, lines},
-  lines = StringSplit[str, newline, All];
-  (*
-  Pad the first line with the correct number of characters from its origin
-  *)
-  lines[[1]] = StringJoin[Table["!", startingColumn - 1], lines[[1]]];
-  lines = Map[
-    Function[{line},
-      (*
-      for each line, accumulate a string by replacing each tab with its equivalent spaces
-      *)
-      NestWhile[
-        Function[{lineAccum},
-          pos = StringPosition[lineAccum, "\t"][[1, 1]];
-          StringReplacePart[lineAccum, replacementFunc[pos, tabWidth], {pos, pos}]
-        ]
-        ,
-        line
-        ,
-        StringContainsQ[#, "\t"]&
-      ]
-    ]
-    ,
-    lines
-  ];
-  (*
-  Remove padding
-  *)
-  lines[[1]] = StringDrop[lines[[1]], startingColumn - 1];
-  StringJoin[Riffle[lines, newline]]
-]
 
 
 
@@ -262,7 +278,7 @@ line[indent_] := blockedNewline[] <> StringJoin[Table[blockedIndentationString[]
 
 space[] = " "
 
-nil = ""
+nil[] = ""
 
 nest[i_][doc_String] :=
   StringReplace[doc, blockedNewline[] -> blockedNewline[] <> StringJoin[Table[blockedIndentationString[], i]]]
@@ -271,25 +287,54 @@ nest[i_][doc_String] :=
 fmt[LeafNode[Token`Newline, s_, _], indent_] :=
   line[indent]
 
-fmt[LeafNode[Token`Comment, s_, data_], indent_] :=
-Module[{min, replaced},
+(*
+Special case 2D strings
+
+Must preserve the original number of columns preceding the string
+
+We do this by inserting a newline, then the original number of spaces.
+
+A line continuation is inserted to help with semantics of inserting a newline (this may not be needed)
+Also, the line continuation helps to communicate the "separateness" of the string
+*)
+fmt[LeafNode[String, s_ /; StringContainsQ[s, blockedNewline[]], data_], indent_] :=
+Module[{origSpaces},
+  origSpaces = data[[Key[Source], 1, 2]]-1;
+  cat["\\", blockedNewline[], Table[" ", origSpaces], s]
+]
+
+(*
+Special case 2D comments
+
+It is ok to change the internal indentation of comments
+*)
+fmt[LeafNode[Token`Comment, s_ /; StringContainsQ[s, blockedNewline[]], data_], indent_] :=
+Module[{min, replaced, origSpaces},
+  origSpaces = data[[Key[Source], 1, 2]]-1;
   (*
   Correctly indent comment, taking into account the original indentation
   *)
   (*
   min is the smallest number of irrelevant characters before any of the lines of the comment
-  This is the amount of whitespace that is safe to remove form each line.
+  This is the amount of whitespace that is safe to remove from each line.
 
   We do not count completely empty lines within the comment here,
   because that would always result in a min of 0,
   so we require that there must be *some* whitespace starting the line
-
   *)
-  min = Min[StringCases[s, (blockedNewline[] ~~ ws:" ".. ~~ Except[" "]) :> StringLength[ws]], data[[Key[Source], 1, 2]]-1];
+  min = Min[
+    StringCases[s, (blockedNewline[] ~~ ws:" "... ~~ Except[" " | blockedNewline[]]) :> StringLength[ws]]
+    ,
+    origSpaces
+  ];
   replaced = StringReplace[s, blockedNewline[] ~~ StringJoin[Table[" ", min]] :> blockedNewline[]];
   nest[indent][replaced]
 ]
 
+
+(*
+All other leafs: integers, reals, symbols, 1D strings, 1D comments, etc.
+*)
 fmt[LeafNode[_, s_, _], indent_] :=
   s
 
@@ -473,7 +518,7 @@ fmt[(BinaryNode|InfixNode|TernaryNode)[tag_, ts_, _], indent_] :=
       (*
       split graphs around existing newline tokens 
       *)
-      split = Split[graphs, ((!matchNewlineQ[#1] && !matchNewlineQ[#2]) || (matchNewlineQ[#1] && matchNewlineQ[#2]))&];
+      split = Split[graphs, (matchNewlineQ[#1] == matchNewlineQ[#2])&];
       (*
       Forget about the actual newline tokens
       *)
@@ -595,7 +640,9 @@ fmt[implicitCloser[], indent_] :=
   nil[]
 
 
-
+(*
+special casing Module | With | Block
+*)
 fmt[CallNode[{head : LeafNode[Symbol, "Module" | "With" | "Block", _], trivia...}, {
       GroupNode[GroupSquare, {
           LeafNode[Token`OpenSquare, "[", _], 
@@ -617,6 +664,10 @@ fmt[CallNode[{head : LeafNode[Symbol, "Module" | "With" | "Block", _], trivia...
     "]"
   ]
 
+
+(*
+special casing Switch
+*)
 fmt[CallNode[{tag:LeafNode[Symbol, "Switch", _], trivia1:trivia...}, {
       GroupNode[GroupSquare, {
           opener_,

@@ -148,7 +148,7 @@ Level -5 is where LeafNodes[] are
 RemoveLineContinuations[cst_] :=
   Replace[cst, {
     (*
-    FIXME: 2D string/comments with extraneous line continuations NOT IMPLEMENTED YET
+    FIXME: multiline string/comments with extraneous line continuations NOT IMPLEMENTED YET
 
     keep line continuations INSIDE OF strings and comments: may have been intentionally formatted
     But make sure to remove line continuations outside of the actual token
@@ -260,9 +260,9 @@ StandardizeTabs[cst_, newline_String, tabWidth_Integer] :=
 
 
 
-trivia = LeafNode[Whitespace | Token`Comment | Token`Newline, _, _]
+trivia = LeafNode[Whitespace | Token`Boxes`MultiWhitespace | Token`Comment | Token`Newline, _, _]
 
-ws = LeafNode[Whitespace, _, _]
+ws = LeafNode[Whitespace | Token`Boxes`MultiWhitespace, _, _]
 
 nl = LeafNode[Token`Newline, _, _]
 
@@ -288,7 +288,7 @@ fmt[LeafNode[Token`Newline, s_, _], indent_] :=
   line[indent]
 
 (*
-Special case 2D strings
+Special case multiline strings
 
 Must preserve the original number of columns preceding the string
 
@@ -304,7 +304,7 @@ Module[{origSpaces},
 ]
 
 (*
-Special case 2D comments
+Special case multiline comments
 
 It is ok to change the internal indentation of comments
 *)
@@ -434,11 +434,14 @@ a?b
 no spaces around MessageName:
 a::b
 
+no spaces around Power:
+a^b
+
 *)
-fmtRator[Pattern | Optional | PatternTest | MessageName][rator_, indent_] :=
+fmtRator[Pattern | Optional | PatternTest | MessageName | Power][rator_, indent_] :=
   fmt[rator, indent]
 
-fmtRatorNoTrailingSpace[Pattern | Optional | PatternTest | MessageName][rator_, indent_] :=
+fmtRatorNoTrailingSpace[Pattern | Optional | PatternTest | MessageName | Power][rator_, indent_] :=
   fmt[rator, indent]
 
 
@@ -477,8 +480,7 @@ indentIncrement[Comma, indent_] := indent
 indentIncrement[_, indent_] := indent + 1
 
 
-
-$AlwaysIndent = {
+$AlwaysLineBreak = {
 
   (*
   BinaryNode
@@ -501,23 +503,33 @@ The logic for all 3 is so similar, it should all be in a single function
 *)
 fmt[(BinaryNode|InfixNode|TernaryNode)[tag_, ts_, _], indent_] :=
   Catch[
-  Module[{aggs, rators, graphs, ratorsPat, split},
+  Module[{aggs, rators, graphs, ratorsPat, split, lastGraph},
 
     aggs = DeleteCases[ts, trivia];
-    graphs = DeleteCases[ts, ws];
     rators = aggs[[2 ;; All ;; 2]];
     ratorsPat = Alternatives @@ rators;
 
-    If[MemberQ[$AlwaysIndent, tag],
+    If[MemberQ[$AlwaysLineBreak, tag],
       (*
-      Always indent, so redo newlines
+      Always line break, so redo newlines
       *)
       graphs = DeleteCases[ts, ws | nl];
-      split = {Most[graphs], {Last[graphs]}};
+      lastGraph = Last[graphs];
+      If[MatchQ[lastGraph, GroupNode[_, _, _]],
+        (*
+        we want the opener of a group to be on same line as everything else
+        Newlines are inserted inside the group itself
+        *)
+        lastGraph = redoGroupNewlines[lastGraph];
+        split = {Most[graphs] ~Join~ {lastGraph}};
+        ,
+        split = {Most[graphs], {lastGraph}};
+      ];
       ,
       (*
       split graphs around existing newline tokens 
       *)
+      graphs = DeleteCases[ts, ws];
       split = Split[graphs, (matchNewlineQ[#1] == matchNewlineQ[#2])&];
       (*
       Forget about the actual newline tokens
@@ -532,9 +544,6 @@ fmt[(BinaryNode|InfixNode|TernaryNode)[tag_, ts_, _], indent_] :=
       Throw[
         cat[
           Map[
-            (*
-            grouped is a list of tokens with no newline tokens
-            *)
             Function[{grouped},
               cat[Replace[grouped, {
                 rator : ratorsPat :> fmtRator[tag][rator, indent], 
@@ -548,6 +557,7 @@ fmt[(BinaryNode|InfixNode|TernaryNode)[tag_, ts_, _], indent_] :=
       ]
     ];
 
+    With[{newIndent = indentIncrement[tag, indent]},
     cat[
     Riffle[
       Map[
@@ -557,14 +567,14 @@ fmt[(BinaryNode|InfixNode|TernaryNode)[tag_, ts_, _], indent_] :=
         Function[{grouped},
           cat[
             cat[Replace[Most[grouped], {
-              rator : ratorsPat :> fmtRator[tag][rator, indentIncrement[tag, indent]], 
-              randOrComment_ :> fmt[randOrComment, indentIncrement[tag, indent]]
+              rator : ratorsPat :> fmtRator[tag][rator, newIndent], 
+              randOrComment_ :> fmt[randOrComment, newIndent]
             }, {1}]]
             ,
             cat[Replace[{Last[grouped]}, {
               (* do not insert space after rator if immediately followed by newline *)
-              rator : ratorsPat :> fmtRatorNoTrailingSpace[tag][rator, indentIncrement[tag, indent]], 
-              randOrComment_ :> fmt[randOrComment, indentIncrement[tag, indent]]
+              rator : ratorsPat :> fmtRatorNoTrailingSpace[tag][rator, newIndent], 
+              randOrComment_ :> fmt[randOrComment, newIndent]
             }, {1}]]
           ]
         ]
@@ -572,64 +582,95 @@ fmt[(BinaryNode|InfixNode|TernaryNode)[tag_, ts_, _], indent_] :=
         split
       ]
       ,
-      line[indentIncrement[tag, indent]]
+      line[newIndent]
     ]]
+    ]
   ]]
 
 
+redoGroupNewlines[GroupNode[tag_, {
+  opener_,
+  trivia...,
+  ts:Except[trivia]...,
+  trivia...,
+  closer_
+  }, data_]] :=
+  GroupNode[tag, {
+    opener,
+    LeafNode[Token`Newline, blockedNewline[], <||>],
+    ts,
+    LeafNode[Token`Newline, blockedNewline[], <||>],
+    closer
+  }, data]
 
-fmt[GroupNode[_, {
+
+
+
+
+fmt[GroupNode[tag_, {
       opener_, 
       trivia1 : trivia..., 
-      ts : Except[trivia]..., 
+      ts:Except[trivia]..., 
       trivia2 : trivia...,
       closer_
     }, _], indent_] :=
-  Module[{aggs, trivia1Aggs, trivia2Aggs, trivia1HasNewline, 
-    trivia2HasNewline},
+  Module[{aggs, trivia1Aggs, trivia2Aggs, trivia1Graphs, trivia2Graphs, isMultiline},
+
     trivia1Aggs = DeleteCases[{trivia1}, ws];
     aggs = DeleteCases[{ts}, ws];
     trivia2Aggs = DeleteCases[{trivia2}, ws];
 
-    trivia1HasNewline = !FreeQ[trivia1Aggs, LeafNode[Token`Newline, _, _]];
-    trivia2HasNewline = !FreeQ[trivia2Aggs, LeafNode[Token`Newline, _, _]];
+    trivia1Graphs = DeleteCases[{trivia1}, ws | nl];
+    trivia2Graphs = DeleteCases[{trivia2}, ws | nl];
 
+    isMultiline  =
+      !FreeQ[trivia1Aggs, LeafNode[Token`Newline, _, _]] ||
+      !FreeQ[aggs, LeafNode[Token`Newline, _, _]] ||
+      !FreeQ[trivia2Aggs, LeafNode[Token`Newline, _, _]];
     Which[
-      trivia1HasNewline && !trivia2HasNewline,
-        cat[
-          fmt[opener, indent], 
-          fmt[#, indent + 1]& /@ trivia1Aggs, 
-          fmt[#, indent + 1]& /@ aggs, 
-          fmt[#, indent]& /@ trivia2Aggs, line[indent],
-          fmt[closer, indent]
-        ]
+      !FreeQ[trivia1Aggs, LeafNode[Token`Newline, _, _]] || !FreeQ[trivia2Aggs, LeafNode[Token`Newline, _, _]],
+        isMultiline = True
       ,
-      trivia1HasNewline && trivia2HasNewline,
-        cat[
-          fmt[opener, indent], 
-          fmt[#, indent + 1]& /@ trivia1Aggs, 
-          fmt[#, indent + 1]& /@ aggs, 
-          fmt[#, indent]& /@ trivia2Aggs, 
-          fmt[closer, indent]
-        ]
+      FreeQ[aggs, LeafNode[Token`Newline, _, _]],
+        isMultiline = False
       ,
-      !trivia1HasNewline && trivia2HasNewline,
-        cat[
-          fmt[opener, indent], 
-          fmt[#, indent + 1]& /@ trivia1Aggs, line[indent + 1],
-          fmt[#, indent + 1]& /@ aggs, 
-          fmt[#, indent]& /@ trivia2Aggs,
-          fmt[closer, indent]
-        ]
+      MatchQ[aggs, {GroupNode[_, _, _]}],
+        (*
+        if the child is another group, and there are no newlines on either side, then treat as single line
+        This keeps the [{ and }] together here:
+        f[{
+          1, 2, 3
+        }]
+        *)
+        isMultiline = False
       ,
-      !trivia1HasNewline && !trivia2HasNewline,
-        cat[
-          fmt[opener, indent], 
-          fmt[#, indent]& /@ trivia1Aggs, 
-          fmt[#, indent]& /@ aggs, 
-          fmt[#, indent]& /@ trivia2Aggs, 
-          fmt[closer, indent]
-        ]
+      True,
+        isMultiline = True
+    ];
+
+    If[isMultiline,
+      (*
+      if multiline, then keep as multiline, but redo newlines
+      *)
+      cat[
+        fmt[opener, indent], 
+        fmt[#, indent + 1]& /@ trivia1Graphs, line[indent + 1],
+        fmt[#, indent + 1]& /@ aggs, 
+        fmt[#, indent]& /@ trivia2Graphs, line[indent],
+        fmt[closer, indent]
+      ]
+      ,
+      (*
+      if will NOT make multiline, then keep everything on 1 line,
+      and do not indent
+      *)
+      cat[
+        fmt[opener, indent], 
+        fmt[#, indent]& /@ trivia1Graphs, 
+        fmt[#, indent]& /@ aggs, 
+        fmt[#, indent]& /@ trivia2Graphs, 
+        fmt[closer, indent]
+      ]
     ]
   ]
 
@@ -645,28 +686,42 @@ special casing Module | With | Block
 *)
 fmt[CallNode[{head : LeafNode[Symbol, "Module" | "With" | "Block", _], trivia...}, {
       GroupNode[GroupSquare, {
-          LeafNode[Token`OpenSquare, "[", _], 
+          opener_, 
           trivia..., 
           InfixNode[
-            Comma, {vars_, trivia..., LeafNode[Token`Comma, _, _], trivia..., 
+            Comma, {varsIn_, trivia..., comma1:LeafNode[Token`Comma, _, _], trivia..., 
               body_
             }, _
           ], 
           trivia..., 
-          LeafNode[Token`CloseSquare, "]", _]
+          closer_
         }, _]
     }, _], indent_] :=
-  cat[
-    fmt[head, indent], "[", fmt[vars, indent], ",", 
-    line[indent + 1], 
-    fmt[body, indent + 1], 
-    line[indent],
-    "]"
+  Module[{vars},
+
+    vars = varsIn;
+
+    (*
+    remove newlines from variable lists
+
+    Level -5 is where LeafNodes[] are
+    *)
+    vars = DeleteCases[vars, LeafNode[Token`Newline, _, _], {-5}];
+
+    cat[
+      fmt[head, indent], fmt[opener, indent], fmt[vars, indent], fmt[comma1, indent], 
+      line[indent + 1], 
+      fmt[body, indent + 1], 
+      line[indent],
+      fmt[closer, indent]
+    ]
   ]
 
 
 (*
 special casing Switch
+
+completely redo newlines
 *)
 fmt[CallNode[{tag:LeafNode[Symbol, "Switch", _], trivia1:trivia...}, {
       GroupNode[GroupSquare, {
@@ -723,6 +778,61 @@ fmt[CallNode[{tag:LeafNode[Symbol, "Switch", _], trivia1:trivia...}, {
     ]
   ]
 
+
+(*
+special casing Which
+
+completely redo newlines
+*)
+fmt[CallNode[{tag:LeafNode[Symbol, "Which", _], trivia1:trivia...}, {
+      GroupNode[GroupSquare, {
+          opener_,
+          trivia2:trivia..., 
+          InfixNode[
+            Comma, {
+              most___,
+              lastRand_
+            },
+            _
+          ], 
+          trivia3:trivia..., 
+          closer_
+        }, _]
+    }, _], indent_] :=
+  Module[{aggs, rands, rators, tests, bodies, testsPat, bodiesPat,
+    comments1, comments2, comments3, comments4},
+    comments1 = Cases[{trivia1}, comment];
+    comments2 = Cases[{trivia2}, comment];
+    comments3 = Cases[{trivia3}, comment];
+    aggs = DeleteCases[{most}, trivia];
+    graphs = DeleteCases[{most}, ws | nl];
+    rands = aggs[[1 ;; -1 ;; 2]];
+    tests = rands[[1;;All;;2]];
+    bodies = rands[[2;;All;;2]];
+    rators = aggs[[2 ;; -2 ;; 2]];
+    ratorsPat = Alternatives @@ rators;
+    testsPat = Alternatives @@ tests;
+    bodiesPat = Alternatives @@ bodies;
+    cat[
+      fmt[tag, indent + 1],
+      fmt[#, indent + 1]& /@ comments1,
+      fmt[opener, indent + 1],
+      fmt[#, indent + 1]& /@ comments2, 
+      Replace[graphs, {
+          rator : ratorsPat :> fmt[rator, indent + 1],
+          test:testsPat :> cat[line[indent + 1], fmt[test, indent + 1]],
+          body:bodiesPat :> cat[line[indent + 2], fmt[body, indent + 2], line[indent + 1]],
+          other_ :> fmt[other, indent + 1]
+        }, {1}],
+      line[indent + 2],
+      fmt[lastRand, indent + 2],
+      fmt[#, indent + 1]& /@ comments3,
+      line[indent],
+      fmt[closer, indent]
+    ]
+  ]
+
+
 (*
 special casing If
 
@@ -736,7 +846,7 @@ fmt[CallNode[{tag : LeafNode[Symbol, "If", _], trivia1 : trivia...}, {
             Comma, {
               firstRand_, 
               trivia3 : trivia..., 
-              firstRator_, 
+              firstRator:Except[trivia], 
               rest___
             }, _
           ], 
@@ -774,8 +884,12 @@ fmt[CallNode[{tag : LeafNode[Symbol, "If", _], trivia1 : trivia...}, {
     ]
   ]
 
-fmt[CallNode[{tag_, trivia..., ___}, ts_, _], indent_] :=
+fmt[CallNode[{tag_, trivia...}, ts_, _], indent_] :=
   cat[fmt[tag, indent], fmt[#, indent]& /@ ts]
+
+
+fmt[SyntaxErrorNode[_, ts_, _], indent_] :=
+  cat[fmt[#, indent]& /@ ts]
 
 
 fmt[ContainerNode[_, ts_, _], indent_] :=

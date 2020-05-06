@@ -726,27 +726,31 @@ completely redo newlines
 fmt[CallNode[{tag:LeafNode[Symbol, "Switch", _], trivia1:trivia...}, {
       GroupNode[GroupSquare, {
           opener_,
-          trivia2:trivia..., 
+          trivia2:trivia...,
           InfixNode[
             Comma, {
-              firstRand_, 
-              trivia3:trivia..., 
-              firstRator:Except[trivia], 
-              middle___,
+              firstRand_,
+              trivia3:trivia...,
+              firstRator:Except[trivia],
+              trivia4:trivia...,
+              middle:Repeated[_, {2, Infinity}],
+              trivia5:trivia...,
               lastRand_
             },
             _
           ], 
-          trivia4:trivia..., 
+          trivia6:trivia..., 
           closer_
         }, _]
     }, _], indent_] :=
   Module[{aggs, rands, rators, tests, bodies, testsPat, bodiesPat,
-    comments1, comments2, comments3, comments4},
+    comments1, comments2, comments3, comments4, comments5, comments6},
     comments1 = Cases[{trivia1}, comment];
     comments2 = Cases[{trivia2}, comment];
     comments3 = Cases[{trivia3}, comment];
     comments4 = Cases[{trivia4}, comment];
+    comments5 = Cases[{trivia5}, comment];
+    comments6 = Cases[{trivia6}, comment];
     aggs = DeleteCases[{middle}, trivia];
     graphs = DeleteCases[{middle}, ws | nl];
     rands = aggs[[1 ;; -1 ;; 2]];
@@ -764,6 +768,7 @@ fmt[CallNode[{tag:LeafNode[Symbol, "Switch", _], trivia1:trivia...}, {
       fmt[firstRand, indent + 1],
       fmt[#, indent + 1]& /@ comments3,
       fmt[firstRator, indent + 1],
+      fmt[#, indent + 1]& /@ comments4,
       Replace[graphs, {
           rator : ratorsPat :> fmt[rator, indent + 1],
           test:testsPat :> cat[line[indent + 1], fmt[test, indent + 1]],
@@ -771,8 +776,9 @@ fmt[CallNode[{tag:LeafNode[Symbol, "Switch", _], trivia1:trivia...}, {
           other_ :> fmt[other, indent + 1]
         }, {1}],
       line[indent + 2],
+      fmt[#, indent + 1]& /@ comments5,
       fmt[lastRand, indent + 2],
-      fmt[#, indent + 1]& /@ comments4,
+      fmt[#, indent + 1]& /@ comments6,
       line[indent],
       fmt[closer, indent]
     ]
@@ -800,7 +806,7 @@ fmt[CallNode[{tag:LeafNode[Symbol, "Which", _], trivia1:trivia...}, {
         }, _]
     }, _], indent_] :=
   Module[{aggs, rands, rators, tests, bodies, testsPat, bodiesPat,
-    comments1, comments2, comments3, comments4},
+    comments1, comments2, comments3},
     comments1 = Cases[{trivia1}, comment];
     comments2 = Cases[{trivia2}, comment];
     comments3 = Cases[{trivia3}, comment];

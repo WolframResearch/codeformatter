@@ -26,7 +26,7 @@ Options[formatTest] = {
 }
 
 formatTest[file_String, i_Integer, OptionsPattern[]] :=
- Module[{ast, dryRun, prefix, res},
+ Module[{ast, dryRun, prefix, res, lines},
   Catch[
    
    prefix = OptionValue["FileNamePrefixPattern"];
@@ -55,12 +55,24 @@ formatTest[file_String, i_Integer, OptionsPattern[]] :=
     res = CodeFormat[File[file]];
 
     If[FailureQ[res],
-      Print[
-         Style[Row[{"index: ", i, " ", 
-            StringReplace[file, StartOfString ~~ prefix -> ""]}], 
-          Red]];
-        Print[Style[Row[{"index: ", i, " ", res}], Red]];
-      Throw[res, "Uncaught"]
+
+      Switch[res,
+        Failure["TooLong", _],
+          Print[
+             Style[Row[{"index: ", i, " ", 
+                StringReplace[file, StartOfString ~~ prefix -> ""]}], 
+              Darker[Orange]]];
+            Print[Style[Row[{"index: ", i, " ", res}], Darker[Orange]]];
+          Throw[$HandledException]
+        ,
+        _,
+          Print[
+             Style[Row[{"index: ", i, " ", 
+                StringReplace[file, StartOfString ~~ prefix -> ""]}], 
+              Red]];
+            Print[Style[Row[{"index: ", i, " ", res}], Red]];
+          Throw[res, "Uncaught"]
+      ]
     ];
 
     If[!StringQ[res],
@@ -71,6 +83,17 @@ formatTest[file_String, i_Integer, OptionsPattern[]] :=
         Print[Style[Row[{"index: ", i, " ", res}], Red]];
       Throw[res, "Uncaught"]
     ];
+
+  lines = StringSplit[res, {"\r\n", "\n", "\r"}, All];
+
+  If[AnyTrue[lines, StringLength[#] > 120 &],
+    Print[
+       Style[Row[{"index: ", i, " ", 
+          StringReplace[file, StartOfString ~~ prefix -> ""]}], 
+        Darker[Orange]]];
+      Print[
+       Style[Row[{"Too Long"}], Darker[Orange]]];
+  ];
 
     If[dryRun === False,
       Export[file, res, "Text"]

@@ -44,7 +44,8 @@ set(PACLETINFO_SOURCE
 )
 
 set(DOCUMENTATION_NOTEBOOK_PATHS
-
+	English/Guides/CodeFormatter.nb
+	English/ReferencePages/Symbols/CodeFormat.nb
 )
 
 #

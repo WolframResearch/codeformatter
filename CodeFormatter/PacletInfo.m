@@ -6,6 +6,7 @@ Paclet[
   Description -> "Provide functionality for formatting Wolfram Language code.",
   Creator -> "Brenton Bostick <brenton@wolfram.com>",
   Extensions -> {
-    {"Kernel", Root -> "Kernel", Context -> "CodeFormatter`"}
+    {"Kernel", Root -> "Kernel", Context -> "CodeFormatter`"},
+    {"Documentation", Language -> "English", MainPage -> "Guides/CodeFormatter"}
   }
 ]

@@ -460,8 +460,6 @@ tab[] = "\t"
 
 nil[] = ""
 
-nest[i_][doc_String] :=
-  StringReplace[doc, blockedNewline[] -> blockedNewline[] <> StringJoin[Table[blockedIndentationString[], i]]]
 
 
 fmt[LeafNode[Token`Newline, s_, _], indent_] :=
@@ -508,7 +506,7 @@ Module[{min, replaced, origSpaces},
     origSpaces
   ];
   replaced = StringReplace[s, blockedNewline[] ~~ StringJoin[Table[" ", min]] :> blockedNewline[]];
-  nest[indent][replaced]
+  StringReplace[replaced, blockedNewline[] -> blockedNewline[] <> StringJoin[Table[blockedIndentationString[], indent]]]
 ]
 
 

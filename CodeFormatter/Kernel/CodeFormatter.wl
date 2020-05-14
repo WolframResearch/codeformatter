@@ -35,6 +35,7 @@ Needs["CodeFormatter`Utils`"]
 
 Needs["CodeParser`"]
 Needs["CodeParser`Utils`"]
+Needs["CodeInspector`Utils`"] (* for replaceTabs and tabReplacementFunc *)
 
 
 If[PacletFind["Format"] != {},

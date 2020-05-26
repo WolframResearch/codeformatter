@@ -362,7 +362,7 @@ IntroduceRowNodes[cst_] :=
         extracted = Extract[cst1, range];
         last = lastLeafNode[extracted[[1]]];
         pos = Position[cst1, last][[1]];
-        last[[2]] = last[[2]] <> StringJoin[ToSourceCharacterString /@ extracted[[2;;]]];
+        AssociateTo[last[[3]], "RowNode" -> last[[2]] <> StringJoin[ToSourceCharacterString /@ extracted[[2;;]]]];
         Insert[Delete[Delete[cst1, range[[2;;]]], pos], last, pos]
       ]
       ,
@@ -514,6 +514,9 @@ Module[{min, replaced, origSpaces},
 (*
 All other leafs: integers, reals, symbols, 1D strings, 1D comments, etc.
 *)
+indent[LeafNode[_, _, KeyValuePattern["RowNode" -> row_]], level_] :=
+  row
+
 indent[LeafNode[_, s_, _], level_] :=
   s
 

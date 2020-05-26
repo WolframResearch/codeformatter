@@ -876,10 +876,10 @@ indent[GroupNode[tag_, {
       FreeQ[aggs, LeafNode[Token`Newline, _, _]],
         condition = SingleLineEnum
       ,
-      MatchQ[aggs, {GroupNode[_, _, _]}],
+      MatchQ[aggs, {(GroupNode|CallNode)[_, _, _]}],
         condition = SingleLineEnum
       ,
-      MatchQ[aggs, {InfixNode[Comma, {GroupNode[_, _, _], ___}, _]}] && FreeQ[trivia2Aggs, LeafNode[Token`Newline, _, _]],
+      MatchQ[aggs, {InfixNode[Comma, {(GroupNode|CallNode)[_, _, _], ___}, _]}] && FreeQ[trivia2Aggs, LeafNode[Token`Newline, _, _]],
         condition = SingleLineEnum
       ,
       (*

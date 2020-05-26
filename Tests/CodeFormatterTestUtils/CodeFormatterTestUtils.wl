@@ -86,6 +86,7 @@ formatTest[file_String, i_Integer, OptionsPattern[]] :=
 
   lines = StringSplit[res, {"\r\n", "\n", "\r"}, All];
 
+  (*
   If[AnyTrue[lines, StringLength[#] > 120 &],
     Print[
        Style[Row[{"index: ", i, " ", 
@@ -94,7 +95,8 @@ formatTest[file_String, i_Integer, OptionsPattern[]] :=
       Print[
        Style[Row[{"Too Long"}], Darker[Orange]]];
   ];
-
+  *)
+  
     If[dryRun === False,
       Export[file, res, "Text"]
     ]

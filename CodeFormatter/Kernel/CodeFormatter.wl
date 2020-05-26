@@ -1217,6 +1217,72 @@ indent[CallNode[{tag : LeafNode[Symbol, "If", _], trivia1 : trivia...}, {
     ]
   ]
 
+(*
+special casing For
+
+completely redo newlines
+*)
+indent[CallNode[{tag : LeafNode[Symbol, "For", _], trivia1 : trivia...}, {
+      GroupNode[_, {
+          opener_, 
+          trivia2 : trivia..., 
+          InfixNode[
+            Comma, {
+              rand1_,
+              trivia3 : trivia...,
+              rator1:Except[trivia],
+              trivia4:trivia...,
+              rand2:Except[trivia],
+              trivia5:trivia...,
+              rator2:Except[trivia],
+              trivia6:trivia...,
+              rand3:Except[trivia],
+              trivia7:trivia...,
+              rator3:Except[trivia],
+              trivia8:trivia...,
+              rand4_
+            }, _
+          ], 
+          trivia9 : trivia..., 
+          closer_
+        }, _]
+    }, _], level_] :=
+  Module[{comments1, comments2, comments3, comments4, comments5, comments6, comments7, comments8, comments9},
+    comments1 = Cases[{trivia1}, comment];
+    comments2 = Cases[{trivia2}, comment];
+    comments3 = Cases[{trivia3}, comment];
+    comments4 = Cases[{trivia4}, comment];
+    comments5 = Cases[{trivia5}, comment];
+    comments6 = Cases[{trivia6}, comment];
+    comments7 = Cases[{trivia7}, comment];
+    comments8 = Cases[{trivia8}, comment];
+    comments9 = Cases[{trivia9}, comment];
+    cat[
+      indent[tag, level],
+      Riffle[indent[#, level]& /@ comments1, {space[]}],
+      indent[opener, level],
+      Riffle[indent[#, level]& /@ comments2, {space[]}],
+      indent[rand1, level],
+      Riffle[indent[#, level]& /@ comments3, {space[]}],
+      indent[rator1, level], space[],
+      Riffle[indent[#, level]& /@ comments4, {space[]}],
+      indent[rand2, level],
+      Riffle[indent[#, level]& /@ comments5, {space[]}],
+      indent[rator2, level], space[],
+      Riffle[indent[#, level]& /@ comments6, {space[]}],
+      indent[rand3, level],
+      Riffle[indent[#, level]& /@ comments7, {space[]}],
+      indent[rator3, level], space[],
+      Riffle[indent[#, level]& /@ comments8, {space[]}],
+      line[level + 1],
+      indent[rand4, level + 1],
+      If[!empty[comments9], line[level + 1], nil[]],
+      Riffle[indent[#, level + 1]& /@ comments9, {space[]}],
+      line[level], 
+      indent[closer, level]
+    ]
+  ]
+
 indent[CallNode[{tag_, trivia...}, ts_, _], level_] :=
   cat[indent[tag, level], indent[#, level]& /@ ts]
 

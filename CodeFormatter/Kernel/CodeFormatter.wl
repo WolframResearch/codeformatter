@@ -1298,12 +1298,24 @@ redo newlines
 *)
 indent[ContainerNode[_, ts_, _], level_] :=
   Module[{graphs},
-    graphs = DeleteCases[ts, ws | nl];
+    graphs = DeleteCases[ts, ws];
     cat[
-      cat[indent[#, level], line[level], line[level]]& /@ graphs
+      indent[#, level]& /@ graphs
     ]
   ]
 
+indent[ContainerNode[File, ts_, _], level_] :=
+  Module[{graphs},
+    graphs = DeleteCases[ts, ws];
+
+    If[!MatchQ[graphs[[-1]], nl],
+      AppendTo[graphs, LeafNode[Token`Newline, "", <||>]]
+    ];
+
+    cat[
+      indent[#, level]& /@ graphs
+    ]
+  ]
 
 End[]
 

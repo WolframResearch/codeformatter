@@ -1338,8 +1338,13 @@ indent[ContainerNode[_, ts_, _], level_] :=
   ]
 
 indent[ContainerNode[File, ts_, _], level_] :=
+  Catch[
   Module[{graphs},
     graphs = DeleteCases[ts, ws];
+
+    If[graphs == {},
+      Throw[nil[]]
+    ];
 
     If[!MatchQ[graphs[[-1]], nl],
       AppendTo[graphs, LeafNode[Token`Newline, "", <||>]]
@@ -1348,7 +1353,7 @@ indent[ContainerNode[File, ts_, _], level_] :=
     cat[
       indent[#, level]& /@ graphs
     ]
-  ]
+  ]]
 
 End[]
 

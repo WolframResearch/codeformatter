@@ -44,7 +44,7 @@ If[PacletFind["Format"] != {},
 
 
 
-$DefaultAirynessLevel = 1.0
+$DefaultAirynessLevel = 0
 
 $DefaultIndentationString := StringRepeat[" ", $DefaultTabWidth]
 
@@ -120,11 +120,12 @@ Options[CodeFormatCST] = Options[CodeFormat]
 
 CodeFormatCST[cstIn_, opts:OptionsPattern[]] :=
 Catch[
-Module[{indentationString, cst, newline, tabWidth, indented},
+Module[{indentationString, cst, newline, tabWidth, indented, airyness},
 
   indentationString = OptionValue["IndentationString"];
   newline = OptionValue["Newline"];
   tabWidth = OptionValue["TabWidth"];
+  airyness = OptionValue[AirynessLevel];
 
   cst = cstIn;
 
@@ -138,11 +139,13 @@ Module[{indentationString, cst, newline, tabWidth, indented},
 
   cst = AbstractFormatNodes[cst];
 
-  Block[{blockedIndentationString, blockedNewline},
+  Block[{blockedIndentationString, blockedNewline, blockedAiryness},
 
     blockedIndentationString[] = indentationString;
 
     blockedNewline[] = newline;
+
+    blockedAiryness[] = airyness;
 
     indented = indent[cst, 0];
   ];
@@ -582,6 +585,9 @@ Module[{aggs, rands, rators, graphs, lastRator, lastRand,
   randsPat = Alternatives @@ rands;
 
   Which[
+    blockedAiryness[] <= -0.25,
+      shouldStayOnSingleLine = True
+    ,
     data[[Key[Source], 1, 1]] != data[[Key[Source], 2, 1]],
       (*
       CompoundExpression is on multiple lines
@@ -596,6 +602,15 @@ Module[{aggs, rands, rators, graphs, lastRator, lastRand,
   ];
 
   Which[
+    blockedAiryness[] >= 0.25,
+      cat[Replace[graphs, {
+          lastRator /; MatchQ[lastRand, LeafNode[Token`Fake`ImplicitNull, _, _]] :> indent[lastRator, level], 
+          rator : ratorsPat :> cat[indent[rator, level], line[level], line[level]], 
+          rand : randsPat :> indent[rand, level], 
+          comm_ :> cat[indent[comm, level], line[level], line[level]]
+        }, {1}]
+      ]
+    ,
     shouldStayOnSingleLine,
       cat[Replace[graphs, {
           lastRator /; MatchQ[lastRand, LeafNode[Token`Fake`ImplicitNull, _, _]] :> indent[lastRator, level], 
@@ -646,6 +661,12 @@ indentInfixRator[Pattern | Optional | PatternTest | MessageName | Power][rator_,
 (*
 No spaces before Comma
 *)
+indentInfixRator[Comma][rator_, level_] /; blockedAiryness[] >= 0.85 :=
+  cat[line[level], indent[rator, level], line[level]]
+
+indentInfixRatorNoTrailingSpace[Comma][rator_, level_] /; blockedAiryness[] >= 0.85 :=
+  cat[line[level], indent[rator, level], line[level]]
+
 indentInfixRator[Comma][rator_, level_] :=
   cat[indent[rator, level], space[]]
 
@@ -739,8 +760,8 @@ indent[(BinaryNode|InfixNode|TernaryNode|QuaternaryNode)[tag_, ts_, _], level_] 
       *)
       split = Take[split, {1, -1, 2}];
     ];
-
-    If[Length[split] == 1,
+    
+    If[blockedAiryness[] <= -0.5 || (Length[split] == 1 && blockedAiryness[] <= 0.5),
       (*
       There were no newline tokens
       *)
@@ -821,6 +842,12 @@ indent[GroupNode[tag_, {
     triviaGraphs = DeleteCases[{trivia}, ws | nl];
 
     Which[
+      blockedAiryness[] >= 0.75,
+        condition = MultiLineEnum
+      ,
+      blockedAiryness[] <= -0.75,
+        condition = SingleLineEnum
+      ,
       !FreeQ[triviaAggs, LeafNode[Token`Newline, _, _]],
         condition = MultiLineEnum
       ,
@@ -870,6 +897,12 @@ indent[GroupNode[tag_, {
     trivia2Graphs = DeleteCases[{trivia2}, ws | nl];
 
     Which[
+      blockedAiryness[] >= 0.75,
+        condition = MultiLineEnum
+      ,
+      blockedAiryness[] <= -0.75,
+        condition = SingleLineEnum
+      ,
       !FreeQ[trivia1Aggs, LeafNode[Token`Newline, _, _]],
         condition = MultiLineEnum
       ,

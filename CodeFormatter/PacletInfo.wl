@@ -7,6 +7,7 @@ Paclet[
   Creator -> "Brenton Bostick <brenton@wolfram.com>",
   Extensions -> {
     {"Kernel", Root -> "Kernel", Context -> "CodeFormatter`"},
+    {"FrontEnd"},
     {"Documentation", Language -> "English", MainPage -> "Guides/CodeFormatter"}
   }
 ]

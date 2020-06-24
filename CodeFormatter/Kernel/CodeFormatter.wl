@@ -279,9 +279,9 @@ Do not need to recalculate Source data: Source columns were already calculated a
 *)
 StandardizeTabs[cst_, newline_String, tabWidth_Integer] :=
   Replace[cst, {
-    LeafNode[Whitespace, "\t", data_] :> 
+    LeafNode[Whitespace, "\t", data:KeyValuePattern[Source -> {{_, _}, {_, _}}]] :> 
       LeafNode[Whitespace, tabReplacementFunc[data[[Key[Source], 1, 2]], tabWidth], data],
-    LeafNode[tag : String | Token`Comment, s_ /; StringContainsQ[s, "\t"], data_] :> 
+    LeafNode[tag : String | Token`Comment, s_ /; StringContainsQ[s, "\t"], data:KeyValuePattern[Source -> {{_, _}, {_, _}}]] :> 
       LeafNode[tag, replaceTabs[s, data[[Key[Source], 1, 2]], newline, tabWidth], data]}, {-5}]
 
 
@@ -479,7 +479,7 @@ We do this by inserting a newline, then the original number of spaces.
 A line continuation is inserted to help with semantics of inserting a newline (this may not be needed)
 Also, the line continuation helps to communicate the "separateness" of the string
 *)
-indent[LeafNode[String, s_ /; StringContainsQ[s, blockedNewline[]], data_], level_] :=
+indent[LeafNode[String, s_ /; StringContainsQ[s, blockedNewline[]], data:KeyValuePattern[Source -> {{_, _}, {_, _}}]], level_] :=
 Module[{origSpaces},
   origSpaces = data[[Key[Source], 1, 2]]-1;
   cat["\\", blockedNewline[], Table[" ", origSpaces], s]
@@ -490,7 +490,7 @@ Special case multiline comments
 
 It is ok to change the internal indentation of comments
 *)
-indent[LeafNode[Token`Comment, s_ /; StringContainsQ[s, blockedNewline[]], data_], level_] :=
+indent[LeafNode[Token`Comment, s_ /; StringContainsQ[s, blockedNewline[]], data:KeyValuePattern[Source -> {{_, _}, {_, _}}]], level_] :=
 Module[{min, replaced, origSpaces},
   origSpaces = data[[Key[Source], 1, 2]]-1;
   (*
@@ -571,7 +571,7 @@ else:
   do not insert space before or after semi
   completely redo newlines
 *)
-indent[InfixNode[CompoundExpression, ts_, data_], level_] :=
+indent[InfixNode[CompoundExpression, ts_, data:KeyValuePattern[Source -> {{_, _}, {_, _}}]], level_] :=
 Catch[
 Module[{aggs, rands, rators, graphs, lastRator, lastRand, 
   ratorsPat, randsPat, shouldStayOnSingleLine},

@@ -308,10 +308,10 @@ IntroduceRowNodes[cst_] :=
   Module[{commentPoss, isCommentOrWhitespacePos, ranges, commentsOnNewlinesOrStartOfFile, subsumedRanges, extracted,
     last, pos},
     
-    commentPoss = Position[cst, LeafNode[Token`Comment, _, _]];
+    commentPoss = Position[cst, LeafNode[Token`Comment, _, _] | GroupNode[Comment, _, _]];
     
     isCommentOrWhitespacePos[pos1_] :=
-      ListQ[pos1] && MatchQ[Extract[cst, pos1], LeafNode[Token`Comment | Whitespace, _, _]];
+      ListQ[pos1] && MatchQ[Extract[cst, pos1], LeafNode[Token`Comment | Whitespace | Token`Boxes`MultiWhitespace, _, _] | GroupNode[Comment, _, _]];
 
     ranges = Function[{commentPos},
       Reverse[NestWhileList[decrementLast, commentPos, isCommentOrWhitespacePos]]
@@ -444,6 +444,8 @@ abstractFormatNodes[
 abstractFormatNodes[node_LeafNode] := node
 
 abstractFormatNodes[CallNode[head_, ts_, data_]] := CallNode[abstractFormatNodes /@ head, abstractFormatNodes /@ ts, data]
+
+abstractFormatNodes[BoxNode[RowBox, {ts_}, data_]] := BoxNode[RowBox, {abstractFormatNodes /@ ts}, data]
 
 abstractFormatNodes[head_[tag_, ts_, data_]] := head[tag, abstractFormatNodes /@ ts, data]
 
@@ -1354,6 +1356,14 @@ indent[ContainerNode[File, ts_, _], level_] :=
       indent[#, level]& /@ graphs
     ]
   ]]
+
+
+indent[BoxNode[RowBox, {ts_}, _], level_] :=
+  cat[
+    indent[#, level]& /@ ts
+  ]
+
+
 
 End[]
 

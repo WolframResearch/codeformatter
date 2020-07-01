@@ -81,6 +81,7 @@ Module[{cst, tabWidth},
 
 
 CodeFormat[str_String, opts:OptionsPattern[]] :=
+Catch[
 Module[{cst, tabWidth},
 
   tabWidth = OptionValue["TabWidth"];
@@ -92,7 +93,7 @@ Module[{cst, tabWidth},
    ];
 
    CodeFormatCST[cst, opts]
-]
+]]
 
 
 CodeFormat[bytes_List, opts:OptionsPattern[]] :=

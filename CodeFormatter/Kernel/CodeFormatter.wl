@@ -280,10 +280,30 @@ Do not need to recalculate Source data: Source columns were already calculated a
 *)
 StandardizeTabs[cst_, newline_String, tabWidth_Integer] :=
   Replace[cst, {
+    (*
+    LineColumn convention
+    *)
     LeafNode[Whitespace, "\t", data:KeyValuePattern[Source -> {{_, _}, {_, _}}]] :> 
       LeafNode[Whitespace, tabReplacementFunc[data[[Key[Source], 1, 2]], tabWidth], data],
+    (*
+    Any other convention
+
+    replace with " "; we don't know anything about columns
+    *)
+    LeafNode[Whitespace, "\t", data_] :> 
+      LeafNode[Whitespace, tabReplacementFunc[0, tabWidth], data],
+    (*
+    LineColumn convention
+    *)
     LeafNode[tag : String | Token`Comment, s_ /; StringContainsQ[s, "\t"], data:KeyValuePattern[Source -> {{_, _}, {_, _}}]] :> 
-      LeafNode[tag, replaceTabs[s, data[[Key[Source], 1, 2]], newline, tabWidth], data]}, {-5}]
+      LeafNode[tag, replaceTabs[s, data[[Key[Source], 1, 2]], newline, tabWidth], data],
+    (*
+    Any other convention
+
+    replace with " "; we don't know anything about columns
+    *)
+    LeafNode[tag : String | Token`Comment, s_ /; StringContainsQ[s, "\t"], data_] :> 
+      LeafNode[tag, replaceTabs[s, 0, newline, tabWidth], data]}, {-5}]
 
 
 
@@ -473,7 +493,7 @@ indent[LeafNode[Token`Newline, s_, _], level_] :=
   line[level]
 
 (*
-Special case multiline strings
+Special case multiline strings with LineColumn convention
 
 Must preserve the original number of columns preceding the string
 
@@ -489,7 +509,7 @@ Module[{origSpaces},
 ]
 
 (*
-Special case multiline comments
+Special case multiline comments with LineColumn convention
 
 It is ok to change the internal indentation of comments
 *)
@@ -518,7 +538,14 @@ Module[{min, replaced, origSpaces},
 
 
 (*
-All other leafs: integers, reals, symbols, 1D strings, 1D comments, etc.
+All other leafs:
+  integers,
+  reals,
+  symbols,
+  singleline strings,
+  singleline comments,
+  multiline string from FE,
+  multiline comments from FE, setc.
 *)
 indent[LeafNode[_, _, KeyValuePattern["RowNode" -> row_]], level_] :=
   row
@@ -574,7 +601,7 @@ else:
   do not insert space before or after semi
   completely redo newlines
 *)
-indent[InfixNode[CompoundExpression, ts_, data:KeyValuePattern[Source -> {{_, _}, {_, _}}]], level_] :=
+indent[InfixNode[CompoundExpression, ts_, data_], level_] :=
 Catch[
 Module[{aggs, rands, rators, graphs, lastRator, lastRand, 
   ratorsPat, randsPat, shouldStayOnSingleLine},
@@ -591,7 +618,7 @@ Module[{aggs, rands, rators, graphs, lastRator, lastRand,
     blockedAiryness[] <= -0.25,
       shouldStayOnSingleLine = True
     ,
-    data[[Key[Source], 1, 1]] != data[[Key[Source], 2, 1]],
+    !FreeQ[ts, LeafNode[Token`Newline, _, _]],
       (*
       CompoundExpression is on multiple lines
       *)

@@ -468,6 +468,8 @@ abstractFormatNodes[CallNode[head_, ts_, data_]] := CallNode[abstractFormatNodes
 
 abstractFormatNodes[BoxNode[RowBox, {ts_}, data_]] := BoxNode[RowBox, {abstractFormatNodes /@ ts}, data]
 
+abstractFormatNodes[node:CodeNode[_, _, _]] := node
+
 abstractFormatNodes[head_[tag_, ts_, data_]] := head[tag, abstractFormatNodes /@ ts, data]
 
 
@@ -476,8 +478,6 @@ abstractFormatNodes[head_[tag_, ts_, data_]] := head[tag, abstractFormatNodes /@
 
 
 
-cat[docs___] :=
-  StringJoin[docs]
 
 line[level_] := blockedNewline[] <> StringJoin[Table[blockedIndentationString[], level]]
 
@@ -1359,14 +1359,6 @@ special casing ContainerNode
 
 redo newlines
 *)
-indent[ContainerNode[_, ts_, _], level_] :=
-  Module[{graphs},
-    graphs = DeleteCases[ts, ws];
-    cat[
-      indent[#, level]& /@ graphs
-    ]
-  ]
-
 indent[ContainerNode[File, ts_, _], level_] :=
   Catch[
   Module[{graphs},
@@ -1380,16 +1372,60 @@ indent[ContainerNode[File, ts_, _], level_] :=
       AppendTo[graphs, LeafNode[Token`Newline, "", <||>]]
     ];
 
-    cat[
-      indent[#, level]& /@ graphs
+    Block[{cat},
+
+      cat = StringJoin;
+
+      cat[
+        indent[#, level]& /@ graphs
+      ]
     ]
   ]]
 
+indent[ContainerNode[Box, ts_, _], level_] :=
+  Module[{graphs},
+
+    graphs = DeleteCases[ts, ws];
+    
+    Block[{cat},
+
+      cat = StringJoin;
+      
+      cat[
+        indent[#, level]& /@ graphs
+      ]
+    ]
+  ]
+
+
+
+indent[ContainerNode[_, ts_, _], level_] :=
+  Module[{graphs},
+    graphs = DeleteCases[ts, ws];
+
+    Block[{cat},
+
+      cat = StringJoin;
+
+      cat[
+        indent[#, level]& /@ graphs
+      ]
+    ]
+  ]
+
+
 
 indent[BoxNode[RowBox, {ts_}, _], level_] :=
-  cat[
-    indent[#, level]& /@ ts
+  Module[{graphs},
+    graphs = DeleteCases[ts, ws];
+
+    cat[
+      indent[#, level]& /@ graphs
+    ]
   ]
+
+indent[node:BoxNode[_, _, _], level_] :=
+  node
 
 
 

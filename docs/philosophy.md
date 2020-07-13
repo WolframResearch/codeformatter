@@ -29,6 +29,9 @@ Inserting (*Else*) into If statements is not formatting, it is something else.
 
 Converting And[a, b] into a && b (or other way) now involves output and precedence and parentheses.
 
+Using CodeFormatter to insert \[LeftDoubleBracket] \[RightDoubleBracket] characters or \[Rule] character is not formatting, it is something else.
+
+Breaking up CompoundExpression[] at top-level is not formatting, it is something else, changes semantics.
 
 
 

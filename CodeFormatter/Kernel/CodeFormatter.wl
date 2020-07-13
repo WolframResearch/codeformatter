@@ -1251,7 +1251,8 @@ indent[CallNode[{tag : LeafNode[Symbol, "If", _], trivia1 : trivia...}, {
         }, _]
     }, _], level_] :=
   Module[{graphs, comments1, comments2, comments3, comments4, aggs, rators, 
-    rands, ratorsPat},
+    rands, ratorsPat, condition},
+
     comments1 = Cases[{trivia1}, comment];
     comments2 = Cases[{trivia2}, comment];
     aggs = DeleteCases[{rest}, trivia];
@@ -1261,22 +1262,54 @@ indent[CallNode[{tag : LeafNode[Symbol, "If", _], trivia1 : trivia...}, {
     rators = aggs[[2 ;; All ;; 2]];
     comments4 = Cases[{trivia4}, comment];
     ratorsPat = Alternatives @@ rators;
-    cat[
-      indent[tag, level + 1], 
-      indent[#, level + 1]& /@ comments1, 
-      indent[opener, level + 1], 
-      indent[#, level + 1]& /@ comments2, 
-      indent[firstRand, level + 1], 
-      indent[#, level + 1]& /@ comments3, 
-      indent[firstRator, level + 1], 
-      line[level + 1], 
-      Replace[graphs, {
-          rator : ratorsPat :> cat[line[level + 1], indent[rator, level + 1], line[level + 1]], 
-          other_ :> indent[other, level + 1]
-        }, {1}], 
-      indent[#, level]& /@ comments4, 
-      line[level], 
-      indent[closer, level]
+
+    Which[
+      (*
+      If[anything, symbol, symbol] => single line
+      *)
+      MatchQ[aggs, {PatternSequence[LeafNode[Symbol, _, _], LeafNode[Token`Comma, _, _]]..., LeafNode[Symbol, _, _]}],
+        condition = SingleLine
+      ,
+      True,
+        condition = RedoNewlines
+    ];
+
+    Switch[condition,
+      SingleLine,
+        cat[
+          indent[tag, level + 1], 
+          indent[#, level + 1]& /@ comments1, 
+          indent[opener, level + 1], 
+          indent[#, level + 1]& /@ comments2, 
+          indent[firstRand, level + 1], 
+          indent[#, level + 1]& /@ comments3, 
+          indent[firstRator, level + 1],
+          Replace[graphs, {
+              rator : ratorsPat :> cat[indent[rator, level + 1]], 
+              other_ :> indent[other, level + 1]
+            }, {1}], 
+          indent[#, level]& /@ comments4,
+          indent[closer, level]
+        ]
+      ,
+      RedoNewlines,
+        cat[
+          indent[tag, level + 1], 
+          indent[#, level + 1]& /@ comments1, 
+          indent[opener, level + 1], 
+          indent[#, level + 1]& /@ comments2, 
+          indent[firstRand, level + 1], 
+          indent[#, level + 1]& /@ comments3, 
+          indent[firstRator, level + 1], 
+          line[level + 1], 
+          Replace[graphs, {
+              rator : ratorsPat :> cat[line[level + 1], indent[rator, level + 1], line[level + 1]], 
+              other_ :> indent[other, level + 1]
+            }, {1}], 
+          indent[#, level]& /@ comments4, 
+          line[level], 
+          indent[closer, level]
+        ]
     ]
   ]
 

@@ -42,14 +42,28 @@ Module[{nb},
   
   UsingFrontEnd[
 
-    nb = CreatePalette[{
-      Button["Format current cell",
-        Needs["CodeFormatter`Notebooks`"];
-        CodeFormatter`Notebooks`formatCurrentCell[]]}, WindowTitle->"CodeFormatter"];
+    nb = CreatePalette[
+      {
+        Button["Format current cell", Needs["CodeFormatter`Notebooks`"];CodeFormatter`Notebooks`formatCurrentCell[], Method -> "Queued"],
+        Button["Format current notebook", Needs["CodeFormatter`Notebooks`"];CodeFormatter`Notebooks`formatCurrentNotebook[], Method -> "Queued"],
+        Spacer[{0, 20}],
+        Button["(Selection: Strip newlines)", Null, Method -> "Queued"],
+        Button["(Selection: Shift left)", Null, Method -> "Queued"],
+        Spacer[{0, 20}],
+        OpenerView[{
+          "Settings",
+          Column[{
+            Labeled[Checkbox[], "(Reparse boxes before formatting)"],
+            Labeled[Slider[Dynamic[CodeFormatter`$DefaultAirynessLevel, Initialization :> (Needs["CodeFormatter`"])], {-1, 1}], "Airyness"]
+          }]
+        }]
+      }, WindowTitle->"CodeFormatter"];
 
     NotebookSave[nb, FileNameJoin[{generatedWLDir, "CodeFormatter.nb"}]]
   ]
 ]
+
+Print["UsingFrontEnd... \[WatchIcon]"]
 
 generatePalette[]
 

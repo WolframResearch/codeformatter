@@ -29,6 +29,12 @@ CodeFormatCST
 
 
 
+
+$DefaultAirynessLevel
+
+
+
+
 Begin["`Private`"]
 
 Needs["CodeFormatter`Utils`"]

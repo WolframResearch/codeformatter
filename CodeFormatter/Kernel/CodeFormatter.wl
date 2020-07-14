@@ -641,13 +641,43 @@ indent[PostfixNode[tag_, {rand_, trivia..., rator_}, _], level_] :=
 
 
 (*
+Special case CompoundExpression at top-level
+
+Completely preserve newlines for CompoundExpression at top-level
+
+Breaking up lines or gluing lines together may change the actual CompoundExpressions and
+how expressions are parsed
+*)
+indent[InfixNode[CompoundExpression, ts_, data_], level:0] :=
+Catch[
+Module[{aggs, rands, rators, graphs, lastRator, lastRand, 
+  ratorsPat, randsPat},
+  aggs = DeleteCases[ts, trivia];
+  graphs = DeleteCases[ts, ws];
+  rands = aggs[[1 ;; All ;; 2]];
+  rators = aggs[[2 ;; All ;; 2]];
+  lastRator = Last[rators];
+  lastRand = Last[rands];
+  ratorsPat = Alternatives @@ rators;
+  randsPat = Alternatives @@ rands;
+
+  cat[Replace[graphs, {
+      lastRator /; MatchQ[lastRand, LeafNode[Token`Fake`ImplicitNull, _, _]] :> indent[lastRator, level], 
+      rator : ratorsPat :> cat[indent[rator, level], space[]],
+      rand : randsPat :> indent[rand, level], 
+      other_ :> indent[other, level]
+    }, {1}]
+  ]
+]]
+
+(*
 special casing CompoundExpression:
 
 shouldStayOnSingleLine =
 matches these cases:
   singleLineExpr;
   singleLineExpr; singleLineExpr
-does NOT match these cases:
+and does NOT match these cases:
   <newline> anywhere
 
 if shouldStayOnSingleLine:

@@ -72,7 +72,7 @@ Options[CodeFormat] = {
 
 CodeFormat[file_File, opts:OptionsPattern[]] :=
 Catch[
-Module[{cst, tabWidth},
+Module[{cst, tabWidth, formattedStr, agg, cst2, agg2, aggToCompare, agg2ToCompare},
 
   tabWidth = OptionValue["TabWidth"];
 
@@ -80,15 +80,36 @@ Module[{cst, tabWidth},
 
   If[FailureQ[cst],
     Throw[cst]
-   ];
+  ];
 
-  CodeFormatCST[cst, opts]
+  formattedStr = CodeFormatCST[cst, opts];
+
+  If[$DisableSanityChecking,
+    Throw[formattedStr]
+  ];
+
+  agg = CodeParser`Abstract`Aggregate[cst];
+
+  cst2 = CodeConcreteParse[formattedStr];
+
+  agg2 = CodeParser`Abstract`Aggregate[cst2];
+
+  agg2[[1]] = File;
+
+  aggToCompare = agg /. _Association -> <||>;
+  agg2ToCompare = agg2 /. _Association -> <||>;
+
+  If[aggToCompare =!= agg2ToCompare,
+    Throw[Failure["SanityCheckFailed", <||>]]
+  ];
+
+  formattedStr
 ]]
 
 
 CodeFormat[str_String, opts:OptionsPattern[]] :=
 Catch[
-Module[{cst, tabWidth},
+Module[{cst, tabWidth, formattedStr, agg, cst2, agg2, aggToCompare, agg2ToCompare},
 
   tabWidth = OptionValue["TabWidth"];
 
@@ -96,15 +117,33 @@ Module[{cst, tabWidth},
 
   If[FailureQ[cst],
     Throw[cst]
-   ];
+  ];
 
-   CodeFormatCST[cst, opts]
+  formattedStr = CodeFormatCST[cst, opts];
+
+  If[$DisableSanityChecking,
+    Throw[formattedStr]
+  ];
+
+  agg = CodeParser`Abstract`Aggregate[cst];
+
+  cst2 = CodeConcreteParse[formattedStr];
+  agg2 = CodeParser`Abstract`Aggregate[cst2];
+
+  aggToCompare = agg /. _Association -> <||>;
+  agg2ToCompare = agg2 /. _Association -> <||>;
+
+  If[aggToCompare =!= agg2ToCompare,
+    Throw[Failure["SanityCheckFailed", <||>]]
+  ];
+
+  formattedStr
 ]]
 
 
 CodeFormat[bytes_List, opts:OptionsPattern[]] :=
 Catch[
-Module[{cst, tabWidth},
+Module[{cst, tabWidth, formattedStr, agg, cst2, agg2, aggToCompare, agg2ToCompare},
 
   tabWidth = OptionValue["TabWidth"];
 
@@ -116,9 +155,29 @@ Module[{cst, tabWidth},
 
   If[FailureQ[cst],
     Throw[cst]
-   ];
+  ];
 
-   CodeFormatCST[cst, opts]
+  formattedStr = CodeFormatCST[cst, opts];
+
+  If[$DisableSanityChecking,
+    Throw[formattedStr]
+  ];
+
+  agg = CodeParser`Abstract`Aggregate[cst];
+
+  cst2 = CodeConcreteParse[formattedStr];
+  agg2 = CodeParser`Abstract`Aggregate[cst2];
+
+  agg2[[1]] = Byte;
+
+  aggToCompare = agg /. _Association -> <||>;
+  agg2ToCompare = agg2 /. _Association -> <||>;
+
+  If[aggToCompare =!= agg2ToCompare,
+    Throw[Failure["SanityCheckFailed", <||>]]
+  ];
+
+  formattedStr
 ]]
 
 

@@ -7,14 +7,6 @@ CodeFormat
 
 
 
-RemoveLineContinuations
-
-StandardizeNewlines
-
-StandardizeTabs
-
-
-
 (*
 Options
 *)
@@ -292,12 +284,10 @@ RemoveLineContinuations[cst_] :=
 
 
 (*
-extraneous line continuations are at the start or at the end
+extraneous line continuations are at the start
 *)
 hasExtraneousLineContinuationQ[s_String] :=
-  StringMatchQ[s, 
-    (StartOfString ~~ "\\" ~~ ("\r\n" | "\n" | "\r") ~~ __) |
-    (__ ~~ "\\" ~~ ("\r\n" | "\n" | "\r") ~~ EndOfString)]
+  StringMatchQ[s, StartOfString ~~ "\\" ~~ ("\r\n" | "\n" | "\r") ~~ __ ]
 
 (*
 do not remove trailing whitespace from extraneous line continuations

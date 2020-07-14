@@ -33,18 +33,18 @@ formatTest[file_String, i_Integer, OptionsPattern[]] :=
    limit = OptionValue["FileSizeLimit"];
    dryRun = OptionValue["DryRun"];
 
-    If[$Debug, Print["file1: ", file]];
+    If[$Debug, Print["file1: ", File[file]]];
     
     If[FileType[file] === File,
      If[FileByteCount[file] > limit[[2]],
       ast =
-      Failure["FileTooLarge", <|"FileName" -> file,
+      Failure["FileTooLarge", <|"File" -> File[file],
         "FileSize" -> FileSize[file]|>];
      Throw[ast]
      ];
      If[FileByteCount[file] < limit[[1]],
       ast =
-      Failure["FileTooSmall", <|"FileName" -> file,
+      Failure["FileTooSmall", <|"File" -> File[file],
         "FileSize" -> FileSize[file]|>];
      Throw[ast]
      ];
@@ -59,16 +59,14 @@ formatTest[file_String, i_Integer, OptionsPattern[]] :=
       Switch[res,
         Failure["TooLong", _],
           Print[
-             Style[Row[{"index: ", i, " ", 
-                StringReplace[file, StartOfString ~~ prefix -> ""]}], 
+             Style[Row[{"index: ", i, " ", File[file]}], 
               Darker[Orange]]];
             Print[Style[Row[{"index: ", i, " ", res}], Darker[Orange]]];
           Throw[$HandledException]
         ,
         _,
           Print[
-             Style[Row[{"index: ", i, " ", 
-                StringReplace[file, StartOfString ~~ prefix -> ""]}], 
+             Style[Row[{"index: ", i, " ", File[file]}], 
               Red]];
             Print[Style[Row[{"index: ", i, " ", res}], Red]];
           Throw[res, "Uncaught"]
@@ -77,8 +75,7 @@ formatTest[file_String, i_Integer, OptionsPattern[]] :=
 
     If[!StringQ[res],
       Print[
-         Style[Row[{"index: ", i, " ", 
-            StringReplace[file, StartOfString ~~ prefix -> ""]}], 
+         Style[Row[{"index: ", i, " ", File[file]}], 
           Red]];
         Print[Style[Row[{"index: ", i, " ", res}], Red]];
       Throw[res, "Uncaught"]
@@ -102,8 +99,7 @@ formatTest[file_String, i_Integer, OptionsPattern[]] :=
     ]
     ,
     Print[
-       Style[Row[{"index: ", i, " ", 
-          StringReplace[file, StartOfString ~~ prefix -> ""]}], 
+       Style[Row[{"index: ", i, " ", File[file]}], 
         Darker[Orange]]];
       Print[
        Style[$MessageList, Darker[Orange]]];

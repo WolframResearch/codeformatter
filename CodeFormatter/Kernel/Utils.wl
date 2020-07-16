@@ -17,6 +17,8 @@ isOpener
 isCloser
 
 
+insertNecessarySpaces
+
 
 Begin["`Private`"]
 
@@ -165,7 +167,106 @@ isCloser[_] = False
 
 
 
+(*
+Used by CodeMinifier also
+*)
 
+insertNecessarySpaces[tokensIn_] :=
+  Module[{poss, tokens, toInsert},
+
+    If[$Debug,
+      Print["insertNecessarySpaces: ", tokensIn];
+    ];
+
+    tokens = tokensIn;
+    toInsert = {};
+
+    (*
+    Insert space for  1.2` +3
+    *)
+    poss = Position[tokens, LeafNode[Real, str_ /; StringEndsQ[str, "`"], _]];
+    poss = Select[poss, (#[[1]] < Length[tokens] && MatchQ[tokens[[#[[1]]+1]], LeafNode[Token`Plus | Token`Minus, _, _]])&];
+    Scan[(AppendTo[toInsert, #+1])&, poss];
+
+    (*
+    Insert space for  a. 5
+    *)
+    poss = Position[tokens, LeafNode[Token`Dot | Token`DotDot | Token`DotDotDot, _, _]];
+    poss = Select[poss, (#[[1]] < Length[tokens] && MatchQ[tokens[[#[[1]]+1]], LeafNode[Integer | Real | Rational, _, _]])&];
+    Scan[(AppendTo[toInsert, #+1])&, poss];
+
+    (*
+    Insert space for  2 .a
+    *)
+    poss = Position[tokens, LeafNode[Integer | Real | Rational, _, _]];
+    poss = Select[poss, (#[[1]] < Length[tokens] && MatchQ[tokens[[#[[1]]+1]], LeafNode[Token`Dot | Token`DotDot | Token`DotDotDot, _, _]])&];
+    Scan[(AppendTo[toInsert, #+1])&, poss];
+
+    (*
+    Insert space for  a_ .b
+    *)
+    poss = Position[tokens, LeafNode[Token`Under, _, _]];
+    poss = Select[poss, (#[[1]] < Length[tokens] && MatchQ[tokens[[#[[1]]+1]], LeafNode[Token`Dot | Token`DotDot | Token`DotDotDot, _, _]])&];
+    Scan[(AppendTo[toInsert, #+1])&, poss];
+
+    (*
+    Insert space for  a_. ..
+    *)
+    poss = Position[tokens, LeafNode[Token`UnderDot, _, _]];
+    poss = Select[poss, (#[[1]] < Length[tokens] && MatchQ[tokens[[#[[1]]+1]], LeafNode[Token`Dot | Token`DotDot | Token`DotDotDot, _, _]])&];
+    Scan[(AppendTo[toInsert, #+1])&, poss];
+
+    (*
+    Insert space for  a - -b
+    *)
+    poss = Position[tokens, LeafNode[Token`Minus, _, _]];
+    poss = Select[poss, (#[[1]] < Length[tokens] && MatchQ[tokens[[#[[1]]+1]], LeafNode[Token`Minus | Token`MinusMinus, _, _]])&];
+    Scan[(AppendTo[toInsert, #+1])&, poss];
+
+    (*
+    Insert space for  a - -1
+    *)
+    poss = Position[tokens, LeafNode[Token`Minus, _, _]];
+    poss = Select[poss, (#[[1]] < Length[tokens] && MatchQ[tokens[[#[[1]]+1]], LeafNode[Integer | Real | Rational, str_ /; StringStartsQ[str, "-"], _]])&];
+    Scan[(AppendTo[toInsert, #+1])&, poss];
+
+    (*
+    Insert space for  a! !
+    *)
+    poss = Position[tokens, LeafNode[Token`Bang, _, _]];
+    poss = Select[poss, (#[[1]] < Length[tokens] && MatchQ[tokens[[#[[1]]+1]], LeafNode[Token`Bang | Token`BangBang, _, _]])&];
+    Scan[(AppendTo[toInsert, #+1])&, poss];
+
+    (*
+    Insert space for  a + +b
+    *)
+    poss = Position[tokens, LeafNode[Token`Plus, _, _]];
+    poss = Select[poss, (#[[1]] < Length[tokens] && MatchQ[tokens[[#[[1]]+1]], LeafNode[Token`Plus | Token`PlusPlus, _, _]])&];
+    Scan[(AppendTo[toInsert, #+1])&, poss];
+
+    (*
+    Insert space for  a & & + b
+    *)
+    poss = Position[tokens, LeafNode[Token`Amp, _, _]];
+    poss = Select[poss, (#[[1]] < Length[tokens] && MatchQ[tokens[[#[[1]]+1]], LeafNode[Token`Amp, _, _]])&];
+    Scan[(AppendTo[toInsert, #+1])&, poss];
+
+    (*
+    Insert space for  a >> b !
+
+    tutorial/OperatorInputForms
+    File Names
+    *)
+    poss = Position[tokens, LeafNode[String, str_ /; !StringStartsQ[str, "\""], _]];
+    poss = Select[poss, (#[[1]] < Length[tokens] && MatchQ[tokens[[#[[1]]+1]], LeafNode[Token`Bang, _, _]])&];
+    Scan[(AppendTo[toInsert, #+1])&, poss];
+
+    toInsert = ReverseSort[toInsert];
+
+    tokens = Fold[Function[{toks, pos}, Insert[toks, LeafNode[Token`Whitespace, " ", <||>], pos]], tokens, toInsert];
+
+    tokens
+  ]
 
 
 

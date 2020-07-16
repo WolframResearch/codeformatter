@@ -33,7 +33,6 @@ Needs["CodeFormatter`Utils`"]
 
 Needs["CodeParser`"]
 Needs["CodeParser`Utils`"]
-Needs["CodeInspector`Utils`"] (* for replaceTabs and tabReplacementFunc *)
 
 
 If[PacletFind["Format"] != {},
@@ -64,9 +63,10 @@ Options[CodeFormat] = {
 
 CodeFormat[file_File, opts:OptionsPattern[]] :=
 Catch[
-Module[{cst, tabWidth, formattedStr, agg, cst2, agg2, aggToCompare, agg2ToCompare},
+Module[{cst, tabWidth, formattedStr, agg, cst2, agg2, aggToCompare, agg2ToCompare, newline},
 
   tabWidth = OptionValue["TabWidth"];
+  newline = OptionValue["Newline"];
 
   cst = CodeConcreteParse[file, "TabWidth" -> tabWidth];
 
@@ -81,6 +81,7 @@ Module[{cst, tabWidth, formattedStr, agg, cst2, agg2, aggToCompare, agg2ToCompar
   ];
 
   agg = CodeParser`Abstract`Aggregate[cst];
+  agg = normalizeTokens[agg, "FormatOnly" -> True, "Newline" -> newline, "TabWidth" -> tabWidth];
 
   cst2 = CodeConcreteParse[formattedStr];
 
@@ -101,9 +102,10 @@ Module[{cst, tabWidth, formattedStr, agg, cst2, agg2, aggToCompare, agg2ToCompar
 
 CodeFormat[str_String, opts:OptionsPattern[]] :=
 Catch[
-Module[{cst, tabWidth, formattedStr, agg, cst2, agg2, aggToCompare, agg2ToCompare},
+Module[{cst, tabWidth, formattedStr, agg, cst2, agg2, aggToCompare, agg2ToCompare, newline},
 
   tabWidth = OptionValue["TabWidth"];
+  newline = OptionValue["Newline"];
 
   cst = CodeConcreteParse[str, "TabWidth" -> tabWidth];
 
@@ -118,6 +120,7 @@ Module[{cst, tabWidth, formattedStr, agg, cst2, agg2, aggToCompare, agg2ToCompar
   ];
 
   agg = CodeParser`Abstract`Aggregate[cst];
+  agg = normalizeTokens[agg, "FormatOnly" -> True, "Newline" -> newline, "TabWidth" -> tabWidth];
 
   cst2 = CodeConcreteParse[formattedStr];
   agg2 = CodeParser`Abstract`Aggregate[cst2];
@@ -126,6 +129,10 @@ Module[{cst, tabWidth, formattedStr, agg, cst2, agg2, aggToCompare, agg2ToCompar
   agg2ToCompare = agg2 /. _Association -> <||>;
 
   If[aggToCompare =!= agg2ToCompare,
+    If[$Debug,
+      Print["aggToCompare: ", aggToCompare];
+      Print["agg2ToCompare: ", agg2ToCompare];
+    ];
     Throw[Failure["SanityCheckFailed", <||>]]
   ];
 
@@ -135,9 +142,10 @@ Module[{cst, tabWidth, formattedStr, agg, cst2, agg2, aggToCompare, agg2ToCompar
 
 CodeFormat[bytes_List, opts:OptionsPattern[]] :=
 Catch[
-Module[{cst, tabWidth, formattedStr, agg, cst2, agg2, aggToCompare, agg2ToCompare},
+Module[{cst, tabWidth, formattedStr, agg, cst2, agg2, aggToCompare, agg2ToCompare, newline},
 
   tabWidth = OptionValue["TabWidth"];
+  newline = OptionValue["Newline"];
 
   If[bytes == {},
     Throw[""]
@@ -156,6 +164,7 @@ Module[{cst, tabWidth, formattedStr, agg, cst2, agg2, aggToCompare, agg2ToCompar
   ];
 
   agg = CodeParser`Abstract`Aggregate[cst];
+  agg = normalizeTokens[agg, "FormatOnly" -> True, "Newline" -> newline, "TabWidth" -> tabWidth];
 
   cst2 = CodeConcreteParse[formattedStr];
   agg2 = CodeParser`Abstract`Aggregate[cst2];
@@ -178,7 +187,8 @@ Options[CodeFormatCST] = Options[CodeFormat]
 
 CodeFormatCST[cstIn_, opts:OptionsPattern[]] :=
 Catch[
-Module[{indentationString, cst, newline, tabWidth, indented, airyness},
+Module[{indentationString, cst, newline, tabWidth, indented, airyness, formattedStr, merged,
+  linearized, strs, spaced},
 
   indentationString = OptionValue["IndentationString"];
   newline = OptionValue["Newline"];
@@ -187,15 +197,52 @@ Module[{indentationString, cst, newline, tabWidth, indented, airyness},
 
   cst = cstIn;
 
-  cst = RemoveLineContinuations[cst];
+  If[$Debug,
+    Print["CodeFormatCST: ", cst];
+  ];
 
-  cst = StandardizeNewlines[cst, newline];
+  (*
+  Must be before StandardizeEmbeddedNewlines
+  depends on "EmbeddedNewlines" data
+  *)
+  cst = RemoveSimpleLineContinuations[cst];
 
-  cst = StandardizeTabs[cst, newline, tabWidth];
+  If[$Debug,
+    Print["after RemoveSimpleLineContinuations: ", cst];
+  ];
+
+  cst = RemoveRemainingSimpleLineContinuations[cst];
+
+  If[$Debug,
+    Print["after RemoveRemainingSimpleLineContinuations: ", cst];
+  ];
+
+  (*
+  Post condition: "EmbeddedNewlines" data is removed
+  *)
+  cst = StandardizeEmbeddedNewlines[cst, newline];
+
+  If[$Debug,
+    Print["after StandardizeEmbeddedNewlines: ", cst];
+  ];
+
+  cst = StandardizeEmbeddedTabs[cst, newline, tabWidth];
+
+  If[$Debug,
+    Print["after StandardizeEmbeddedTabs: ", cst];
+  ];
 
   cst = IntroduceRowNodes[cst];
 
+  If[$Debug,
+    Print["after IntroduceRowNodes: ", cst];
+  ];
+
   cst = AbstractFormatNodes[cst];
+
+  If[$Debug,
+    Print["after AbstractFormatNodes: ", cst];
+  ];
 
   Block[{blockedIndentationString, blockedNewline, blockedAiryness},
 
@@ -206,9 +253,35 @@ Module[{indentationString, cst, newline, tabWidth, indented, airyness},
     blockedAiryness[] = airyness;
 
     indented = indent[cst, 0];
+
+    If[$Debug,
+      Print["after indent: ", indented];
+    ];
+
+    linearized = linearize[indented];
+
+    If[$Debug,
+      Print["after linearize: ", linearized];
+    ];
+
+    merged = mergeLineContinuations[linearized];
+
+    If[$Debug,
+      Print["after mergeLineContinuations: ", merged];
+    ];
   ];
 
-  indented
+  spaced = insertNecessarySpaces[merged];
+
+  If[$Debug,
+    Print["after insertNecessarySpaces: ", merged];
+  ];
+
+  strs = spaced[[All, 2]];
+
+  formattedStr = StringJoin[strs];
+
+  formattedStr
 ]]
 
 
@@ -227,138 +300,296 @@ matchNewlineQ = MatchQ[nl]
 
 
 
-RemoveLineContinuations::usage = "RemoveLineContinuations[cst] removes line continuations from cst."
+RemoveSimpleLineContinuations::usage = "RemoveSimpleLineContinuations[cst] removes simple line continuations from cst."
 
-(*
-Level -5 is where LeafNodes[] are
-*)
-RemoveLineContinuations[cst_] :=
-  Replace[cst, {
-    (*
-    FIXME: multiline string/comments with extraneous line continuations NOT IMPLEMENTED YET
+RemoveSimpleLineContinuations[cstIn_] :=
+  Module[{data, cst, tokStartLocs, simpleLineContinuations, grouped, poss, tuples, mapSpecs,
+    embeddedNewlineStartLocs, extracted, complexLineContinuations},
 
-    keep line continuations INSIDE OF strings and comments: may have been intentionally formatted
-    But make sure to remove line continuations outside of the actual token
+    cst = cstIn;
 
-    Need to do:
-      after removing the extraneous line continuations, recalculate the correct Source
-      i.e., there may be whitespace after the line continuation that contributes to indentation
-      The spacing before the string/comment need to be preserved
-    *)
-    (*
-    LeafNode[tag: String | Token`Comment, s_ /; hasExtraneousLineContinuationQ[s], data_] :>
-      Module[{replacedS, recalculatedStartCol},
-        replacedS = NestWhile[removeExtraneousLineContinuations, s, hasExtraneousLineContinuationQ];
-        recalculatedStartCol = StringCases[replacedS, StartOfString ~~ w:(WhitespaceCharacter ...) ~~ __ :> StringLength[w]][[1]];
-        recalculatedStartCol++;
-        If[$Debug,
-          Print["inside removeLineContinuations"];
-          Print["replacedS: ", replacedS];
-          Print["recalculatedStartCol: ", recalculatedStartCol];
-          Print[];
-        ];
-        LeafNode[tag,
-          replacedS
-          ,
-          <|Source -> {{Indeterminate, recalculatedStartCol}, {Indeterminate, Indeterminate}}|>
+    data = cst[[3]];
+
+    If[KeyExistsQ[data, "SimpleLineContinuations"],
+
+      (*
+      -5 is where LeafNodes[] are
+
+      Line continuations in multiline strings and multiline comments will be handled later
+      *)
+      poss = Position[cst, LeafNode[_, _, _], {-5}];
+
+      extracted = Extract[cst, poss];
+
+      tokStartLocs = #[[3, Key[Source], 1]]& /@ extracted;
+
+      (*
+      Group by starting SourceLocation
+      *)
+      grouped = GroupBy[Transpose[{tokStartLocs, poss}, {2, 1}], #[[1]]&];
+
+
+
+      (*
+      Filter out multiline strings and multiline comments: they are not simple
+      *)
+      If[KeyExistsQ[data, "EmbeddedNewlines"],
+
+        embeddedNewlineStartLocs = data["EmbeddedNewlines"];
+
+        KeyDropFrom[grouped, embeddedNewlineStartLocs]
+      ];
+
+      If[KeyExistsQ[data, "ComplexLineContinuations"],
+
+        complexLineContinuations = data["ComplexLineContinuations"];
+
+        KeyDropFrom[grouped, complexLineContinuations]
+      ];
+
+
+
+      simpleLineContinuations = data["SimpleLineContinuations"];
+
+      mapSpecs = Map[
+        Function[{contLoc},
+
+          tuples = grouped[contLoc];
+
+          (*
+          The token associated with this location may have been processed away and now missing
+          *)
+          If[!MissingQ[tuples],
+            tuples
+            ,
+            Nothing
+          ]
         ]
-      ],
-    *)
-    LeafNode[tag: String | Token`Comment, s_, data_] :>
-      LeafNode[tag, s, data]
-    ,
-    (*
-    quickly filter down to LeafNodes that may have line continuations
-
-    remove from all other leafs:
-    Integers, Reals, etc.: line continuations are not "intentional"; purely for line breaking
-    white space, etc.: line continuations serve no purpose
-    *)
-    LeafNode[tag_, s_ /; hasLineContinuationQ[s], data_] :>
-      LeafNode[tag, 
-        NestWhile[removeLineContinuations, s, hasLineContinuationQ]
         ,
-        data
-      ]
-  }, {-5}]
+        simpleLineContinuations
+      ];
 
+      mapSpecs = Flatten[mapSpecs, 1];
 
-(*
-extraneous line continuations are at the start
-*)
-hasExtraneousLineContinuationQ[s_String] :=
-  StringMatchQ[s, StartOfString ~~ "\\" ~~ ("\r\n" | "\n" | "\r") ~~ __ ]
+      (*
+      There may be more than 1 simple line continuation, so use FixedPoint
+      *)
+      cst = MapAt[FixedPoint[removeSimpleLineContinuation, #]&, cst, mapSpecs[[All, 2]]];
 
-(*
-do not remove trailing whitespace from extraneous line continuations
-the whitesace indicates intentional formatting in tokens where it matters: strings and comments
-*)
-removeExtraneousLineContinuations[s_String] :=
-  StringReplace[s, {
-    StartOfString ~~ "\\" ~~ ("\r\n" | "\n" | "\r") -> "",
-    "\\" ~~ ("\r\n" | "\n" | "\r") ~~ EndOfString -> ""}
+      If[empty[simpleLineContinuations],
+        KeyDropFrom[data, "SimpleLineContinuations"]
+        ,
+        data["SimpleLineContinuations"] = simpleLineContinuations
+      ];
+
+      cst[[3]] = data;
+    ];
+
+    cst
   ]
 
 
-hasLineContinuationQ[s_String] :=
-  StringContainsQ[s, "\\" ~~ ("\r\n" | "\n" | "\r") ~~ WhitespaceCharacter...]
-
 (*
-Remove both extraneous and internal line continuations
+There may be "simple line continuations" that were left behind because they belonged to a multiline string or comment
+
+Ex:
+
+x + \
+ "abc
+ def"
+
+We remove the simple line continuation here, but we DO NOT remove the preceding whitespace
+
+Note: we only care about the LAST preceding whitespace
+
+Ex:
+
+x + \
+ \
+   "abc
+   def"
+
+the last preceding whitespace is 3 spaces, so keep that
+
+Also recompute the Source of the multiline token to reflect the new whitespace start
+
+Need to recompute Source because it is used later
 *)
-removeLineContinuations[s_String] :=
-  StringReplace[s, {"\\" ~~ ("\r\n" | "\n" | "\r") ~~ WhitespaceCharacter... -> ""}]
+RemoveRemainingSimpleLineContinuations::usage =
+  "RemoveRemainingSimpleLineContinuations[cst] removes simple line continuations from cst."
+
+RemoveRemainingSimpleLineContinuations[cstIn_] :=
+  Module[{data, cst, tokStartLocs, simpleLineContinuations, grouped, poss, tuples, mapSpecs, extracted},
+
+    cst = cstIn;
+
+    data = cst[[3]];
+
+    If[KeyExistsQ[data, "SimpleLineContinuations"],
+
+      (*
+      -5 is where LeafNodes[] are
+
+      Line continuations in multiline strings and multiline comments will be handled later
+      *)
+      poss = Position[cst, LeafNode[_, _, _], {-5}];
+
+      extracted = Extract[cst, poss];
+
+      tokStartLocs = #[[3, Key[Source], 1]]& /@ extracted;
+
+      (*
+      Group by starting SourceLocation
+      *)
+      grouped = GroupBy[Transpose[{tokStartLocs, poss}, {2, 1}], #[[1]]&];
+
+      simpleLineContinuations = data["SimpleLineContinuations"];
+
+      mapSpecs = Map[
+        Function[{contLoc},
+
+          tuples = grouped[contLoc];
+
+          (*
+          The token associated with this location may have been processed away and now missing
+          *)
+          If[!MissingQ[tuples],
+            tuples
+            ,
+            Nothing
+          ]
+        ]
+        ,
+        simpleLineContinuations
+      ];
+
+      mapSpecs = Flatten[mapSpecs, 1];
+
+      (*
+      There may be more than 1 simple line continuation, so use FixedPoint
+      *)
+      cst = MapAt[FixedPoint[removeRemainingSimpleLineContinuation, #]&, cst, mapSpecs[[All, 2]]];
+
+      KeyDropFrom[data, "SimpleLineContinuations"];
+
+      cst[[3]] = data;
+    ];
+
+    cst
+  ]
+
+
+StandardizeEmbeddedNewlines::usage = "StandardizeEmbeddedNewlines[cst, newline] standardizes the newlines in cst."
+
+StandardizeEmbeddedNewlines[cstIn_, newline_String] :=
+  Module[{cst, data, embeddedNewlines, mapSpecs, tuples, poss, tokStartLocs, grouped},
+
+    cst = cstIn;
+
+    data = cst[[3]];
+
+    If[KeyExistsQ[data, "EmbeddedNewlines"],
+
+      (*
+      -5 is where LeafNodes[] are
+      *)
+      poss = Position[cst, LeafNode[_, _, _], {-5}];
+
+      tokStartLocs = #[[3, Key[Source], 1]]& /@ Extract[cst, poss];
+
+      (*
+      Group by starting SourceLocation
+      *)
+      grouped = GroupBy[Transpose[{tokStartLocs, poss}, {2, 1}], #[[1]]&];
+
+      embeddedNewlines = data["EmbeddedNewlines"];
+
+      mapSpecs = Map[
+        Function[{newlineLoc},
+
+          tuples = grouped[newlineLoc];
+
+          (*
+          The token associated with this location may have been abstracted away and now missing
+          *)
+          If[!MissingQ[tuples],
+            tuples
+            ,
+            Nothing
+          ]
+        ]
+        ,
+        embeddedNewlines
+      ];
+
+      mapSpecs = Flatten[mapSpecs, 1];
+
+      cst = MapAt[convertEmbeddedNewlines[#, "FormatOnly" -> True, "Newline" -> newline]&, cst, mapSpecs[[All, 2]]];
+
+      KeyDropFrom[data, "EmbeddedNewlines"];
+
+      cst[[3]] = data;
+    ];
+
+    cst
+  ]
 
 
 
-StandardizeNewlines::usage = "StandardizeNewlines[cst, newline] standardizes the newlines in cst."
+StandardizeEmbeddedTabs::usage = "StandardizeEmbeddedTabs[cst, newline, tabWidth] standardizes tabs in cst."
 
-(*
-Level -5 is where LeafNodes[] are
+StandardizeEmbeddedTabs[cstIn_, newline_String, tabWidth_Integer] :=
+  Module[{cst, data, embeddedTabs, mapSpecs, tuples, poss, tokStartLocs, grouped},
 
-Do not need to recalculate Source data: replacing 1 Source character with 1 Source character
-*)
-StandardizeNewlines[cst_, newline_String] :=
-  Replace[cst, {
-    LeafNode[tag : String | Token`Comment, s_, data_] :>
-     LeafNode[tag, 
-      StringReplace[s, {"\r\n" -> newline, "\n" -> newline, "\r" -> newline}], data]}, {-5}]
+    cst = cstIn;
 
+    data = cst[[3]];
 
+    If[KeyExistsQ[data, "EmbeddedTabs"],
 
-StandardizeTabs::usage = "StandardizeTabs[cst, newline, tabWidth] standardizes tabs in cst."
+      (*
+      -5 is where LeafNodes[] are
+      *)
+      poss = Position[cst, LeafNode[_, _, _], {-5}];
 
-(*
-Level -5 is where LeafNodes[] are
+      tokStartLocs = #[[3, Key[Source], 1]]& /@ Extract[cst, poss];
 
-Do not need to recalculate Source data: Source columns were already calculated accounting for tab stops
-*)
-StandardizeTabs[cst_, newline_String, tabWidth_Integer] :=
-  Replace[cst, {
-    (*
-    LineColumn convention
-    *)
-    LeafNode[Whitespace, "\t", data:KeyValuePattern[Source -> {{_, _}, {_, _}}]] :> 
-      LeafNode[Whitespace, tabReplacementFunc[data[[Key[Source], 1, 2]], tabWidth], data],
-    (*
-    Any other convention
+      (*
+      Group by starting SourceLocation
+      *)
+      grouped = GroupBy[Transpose[{tokStartLocs, poss}, {2, 1}], #[[1]]&];
 
-    replace with " "; we don't know anything about columns
-    *)
-    LeafNode[Whitespace, "\t", data_] :> 
-      LeafNode[Whitespace, tabReplacementFunc[0, tabWidth], data],
-    (*
-    LineColumn convention
-    *)
-    LeafNode[tag : String | Token`Comment, s_ /; StringContainsQ[s, "\t"], data:KeyValuePattern[Source -> {{_, _}, {_, _}}]] :> 
-      LeafNode[tag, replaceTabs[s, data[[Key[Source], 1, 2]], newline, tabWidth], data],
-    (*
-    Any other convention
+      embeddedTabs = data["EmbeddedTabs"];
 
-    replace with " "; we don't know anything about columns
-    *)
-    LeafNode[tag : String | Token`Comment, s_ /; StringContainsQ[s, "\t"], data_] :> 
-      LeafNode[tag, replaceTabs[s, 0, newline, tabWidth], data]}, {-5}]
+      mapSpecs = Map[
+        Function[{newlineLoc},
+
+          tuples = grouped[newlineLoc];
+
+          (*
+          The token associated with this location may have been abstracted away and now missing
+          *)
+          If[!MissingQ[tuples],
+            tuples
+            ,
+            Nothing
+          ]
+        ]
+        ,
+        embeddedTabs
+      ];
+
+      mapSpecs = Flatten[mapSpecs, 1];
+
+      cst = MapAt[convertEmbeddedTabs[#, "Newline" -> newline, "TabWidth" -> tabWidth]&, cst, mapSpecs[[All, 2]]];
+
+      KeyDropFrom[data, "EmbeddedTabs"];
+
+      cst[[3]] = data;
+    ];
+
+    cst
+  ]
 
 
 
@@ -441,7 +672,7 @@ IntroduceRowNodes[cst_] :=
         extracted = Extract[cst1, range];
         last = lastLeafNode[extracted[[1]]];
         pos = Position[cst1, last][[1]];
-        AssociateTo[last[[3]], "RowNode" -> last[[2]] <> StringJoin[ToSourceCharacterString /@ extracted[[2;;]]]];
+        AssociateTo[last[[3]], "RowNode" -> {last[[2]], ToSourceCharacterString /@ extracted[[2;;]]}];
         Insert[Delete[Delete[cst1, range[[2;;]]], pos], last, pos]
       ]
       ,
@@ -529,22 +760,19 @@ abstractFormatNodes[head_[tag_, ts_, data_]] := head[tag, abstractFormatNodes /@
 
 
 
+line[level_] :=
+  {LeafNode[Token`Newline, blockedNewline[], <||>]} ~Join~
+    Table[LeafNode[Token`Whitespace, #, <||>]& /@ Characters[blockedIndentationString[]], level]
+
+space[] = LeafNode[Token`WhiteSpace, " ", <||>]
+
+tab[] = LeafNode[Token`WhiteSpace, "\t", <||>]
+
+nil[] = {}
 
 
 
-
-
-line[level_] := blockedNewline[] <> StringJoin[Table[blockedIndentationString[], level]]
-
-space[] = " "
-
-tab[] = "\t"
-
-nil[] = ""
-
-
-
-indent[LeafNode[Token`Newline, s_, _], level_] :=
+indent[LeafNode[Token`Newline, _, _], level_] :=
   line[level]
 
 (*
@@ -560,7 +788,7 @@ Also, the line continuation helps to communicate the "separateness" of the strin
 indent[LeafNode[String, s_ /; StringContainsQ[s, blockedNewline[]], data:KeyValuePattern[Source -> {{_, _}, {_, _}}]], level_] :=
 Module[{origSpaces},
   origSpaces = data[[Key[Source], 1, 2]]-1;
-  cat["\\", blockedNewline[], Table[" ", origSpaces], s]
+  LeafNode[String, {"\\" <> blockedNewline[], Table[" ", origSpaces], s}, data]
 ]
 
 (*
@@ -588,7 +816,7 @@ Module[{min, replaced, origSpaces},
     origSpaces
   ];
   replaced = StringReplace[s, blockedNewline[] ~~ StringJoin[Table[" ", min]] :> blockedNewline[]];
-  StringReplace[replaced, blockedNewline[] -> blockedNewline[] <> StringJoin[Table[blockedIndentationString[], level]]]
+  LeafNode[Token`Comment, StringReplace[replaced, blockedNewline[] -> blockedNewline[] <> StringJoin[Table[blockedIndentationString[], level]]], data]
 ]
 
 
@@ -602,42 +830,35 @@ All other leafs:
   multiline string from FE,
   multiline comments from FE, setc.
 *)
-indent[LeafNode[_, _, KeyValuePattern["RowNode" -> row_]], level_] :=
-  row
+indent[LeafNode[tag_, _, data:KeyValuePattern["RowNode" -> row_]], level_] :=
+  LeafNode[tag, row, data]
 
-indent[LeafNode[_, s_, _], level_] :=
-  s
+indent[n:LeafNode[_, _, _], level_] :=
+  n
 
-
-indent[ErrorNode[_, s_, _], level_] :=
-  s
-
-
-indent[CompoundNode[_, {rand1_, rand2_}, _], level_] :=
-  cat[indent[rand1, level], indent[rand2, level]]
+indent[n:ErrorNode[_, _, _], level_] :=
+  n
 
 
-
-
+indent[CompoundNode[tag_, {rand1_, rand2_}, data_], level_] :=
+  CompoundNode[tag, {indent[rand1, level], indent[rand2, level]}, data]
 
 
 (*
 "FrontEnd"-style:
 indentPostfixRator[Function][rator_, level_] :=
-  cat[space[], indent[rator, level]]
+  {space[], indent[rator, level]}
 *)
 
 indentPostfixRator[_][rator_, level_] :=
   indent[rator, level]
 
 
+indent[PrefixNode[tag_, {rator_, trivia..., rand_}, data_], level_] :=
+  PrefixNode[tag, {indent[rator, level], indent[rand, level]}, data]
 
-indent[PrefixNode[_, {rator_, trivia..., rand_}, _], level_] :=
-  cat[indent[rator, level], indent[rand, level]]
-
-indent[PostfixNode[tag_, {rand_, trivia..., rator_}, _], level_] :=
-  cat[indent[rand, level], indentPostfixRator[tag][rator, level]]
-
+indent[PostfixNode[tag_, {rand_, trivia..., rator_}, data_], level_] :=
+  PostfixNode[tag, {indent[rand, level], indentPostfixRator[tag][rator, level]}, data]
 
 
 (*
@@ -661,12 +882,15 @@ Module[{aggs, rands, rators, graphs, lastRator, lastRand,
   ratorsPat = Alternatives @@ rators;
   randsPat = Alternatives @@ rands;
 
-  cat[Replace[graphs, {
+  InfixNode[CompoundExpression,
+    Replace[graphs, {
       lastRator /; MatchQ[lastRand, LeafNode[Token`Fake`ImplicitNull, _, _]] :> indent[lastRator, level], 
-      rator : ratorsPat :> cat[indent[rator, level], space[]],
+      rator : ratorsPat :> {indent[rator, level], space[]},
       rand : randsPat :> indent[rand, level], 
       other_ :> indent[other, level]
     }, {1}]
+    ,
+    data
   ]
 ]]
 
@@ -716,36 +940,39 @@ Module[{aggs, rands, rators, graphs, lastRator, lastRand,
       shouldStayOnSingleLine = False
   ];
 
-  Which[
-    blockedAiryness[] >= 0.25,
-      cat[Replace[graphs, {
-          lastRator /; MatchQ[lastRand, LeafNode[Token`Fake`ImplicitNull, _, _]] :> indent[lastRator, level], 
-          rator : ratorsPat :> cat[indent[rator, level], line[level], line[level]], 
-          rand : randsPat :> indent[rand, level], 
-          comm_ :> cat[indent[comm, level], line[level], line[level]]
-        }, {1}]
-      ]
+  InfixNode[CompoundExpression,
+    Which[
+      blockedAiryness[] >= 0.25,
+        Replace[graphs, {
+            lastRator /; MatchQ[lastRand, LeafNode[Token`Fake`ImplicitNull, _, _]] :> indent[lastRator, level], 
+            rator : ratorsPat :> {indent[rator, level], line[level], line[level]}, 
+            rand : randsPat :> indent[rand, level], 
+            comm_ :> {indent[comm, level], line[level], line[level]}
+          }, {1}
+        ]
+      ,
+      shouldStayOnSingleLine,
+        Replace[graphs, {
+            lastRator /; MatchQ[lastRand, LeafNode[Token`Fake`ImplicitNull, _, _]] :> indent[lastRator, level], 
+            rator : ratorsPat :> {indent[rator, level], space[]},
+            rand : randsPat :> indent[rand, level], 
+            comm_ :> indent[comm, level]
+          }, {1}
+        ]
+      ,
+      True,
+        Replace[graphs, {
+            lastRator /; MatchQ[lastRand, LeafNode[Token`Fake`ImplicitNull, _, _]] :> indent[lastRator, level], 
+            rator : ratorsPat :> {indent[rator, level], line[level]}, 
+            rand : randsPat :> indent[rand, level], 
+            comm_ :> {indent[comm, level], line[level]}
+          }, {1}
+        ]
+    ]
     ,
-    shouldStayOnSingleLine,
-      cat[Replace[graphs, {
-          lastRator /; MatchQ[lastRand, LeafNode[Token`Fake`ImplicitNull, _, _]] :> indent[lastRator, level], 
-          rator : ratorsPat :> cat[indent[rator, level], space[]],
-          rand : randsPat :> indent[rand, level], 
-          comm_ :> indent[comm, level]
-        }, {1}]
-      ]
-    ,
-    True,
-      cat[Replace[graphs, {
-          lastRator /; MatchQ[lastRand, LeafNode[Token`Fake`ImplicitNull, _, _]] :> indent[lastRator, level], 
-          rator : ratorsPat :> cat[indent[rator, level], line[level]], 
-          rand : randsPat :> indent[rand, level], 
-          comm_ :> cat[indent[comm, level], line[level]]
-        }, {1}]
-      ]
+    data
   ]
 ]]
-
 
 
 (*
@@ -777,13 +1004,13 @@ indentInfixRator[Pattern | Optional | PatternTest | MessageName | Power][rator_,
 No spaces before Comma
 *)
 indentInfixRator[Comma][rator_, level_] /; blockedAiryness[] >= 0.85 :=
-  cat[line[level], indent[rator, level], line[level]]
+  {line[level], indent[rator, level], line[level]}
 
 indentInfixRatorNoTrailingSpace[Comma][rator_, level_] /; blockedAiryness[] >= 0.85 :=
-  cat[line[level], indent[rator, level], line[level]]
+  {line[level], indent[rator, level], line[level]}
 
 indentInfixRator[Comma][rator_, level_] :=
-  cat[indent[rator, level], space[]]
+  {indent[rator, level], space[]}
 
 indentInfixRatorNoTrailingSpace[Comma][rator_, level_] :=
   indent[rator, level]
@@ -799,11 +1026,10 @@ indentInfixRatorNoTrailingSpace[Times][LeafNode[Token`Fake`ImplicitTimes, _, _],
 
 
 indentInfixRator[_][rator_, level_] :=
-  cat[space[], indent[rator, level], space[]]
+  {space[], indent[rator, level], space[]}
 
 indentInfixRatorNoTrailingSpace[_][rator_, level_] :=
-  cat[space[], indent[rator, level]]
-
+  {space[], indent[rator, level]}
 
 
 (*
@@ -840,7 +1066,7 @@ This is the big function for all BinaryNodes, InfixNodes, and TernaryNodes
 The logic for all 3 is so similar, it should all be in a single function
 
 *)
-indent[(BinaryNode|InfixNode|TernaryNode|QuaternaryNode)[tag_, ts_, _], level_] :=
+indent[(head:(BinaryNode|InfixNode|TernaryNode|QuaternaryNode))[tag_, ts_, data_], level_] :=
   Catch[
   Module[{aggs, rators, graphs, ratorsPat, split, lastGraph},
 
@@ -881,48 +1107,53 @@ indent[(BinaryNode|InfixNode|TernaryNode|QuaternaryNode)[tag_, ts_, _], level_] 
       There were no newline tokens
       *)
       Throw[
-        cat[
+        head[tag,
           Map[
             Function[{grouped},
-              cat[Replace[grouped, {
+              Replace[grouped, {
                 rator : ratorsPat :> indentInfixRator[tag][rator, level], 
                 randOrComment_ :> indent[randOrComment, level]
-              }, {1}]]
+              }, {1}]
             ]
             ,
             split
           ]
+          ,
+          data
         ]
       ]
     ];
 
-    With[{newLevel = indentIncrement[tag, level]},
-    cat[
-    Riffle[
-      Map[
-        (*
-        grouped is a list of tokens with no newline tokens
-        *)
-        Function[{grouped},
-          cat[
-            cat[Replace[Most[grouped], {
-              rator : ratorsPat :> indentInfixRator[tag][rator, newLevel], 
-              randOrComment_ :> indent[randOrComment, newLevel]
-            }, {1}]]
+    head[tag,
+      With[{newLevel = indentIncrement[tag, level]},
+        Riffle[
+          Map[
+            (*
+            grouped is a list of tokens with no newline tokens
+            *)
+            Function[{grouped},
+              {
+                Replace[Most[grouped], {
+                  rator : ratorsPat :> indentInfixRator[tag][rator, newLevel], 
+                  randOrComment_ :> indent[randOrComment, newLevel]
+                }, {1}]
+                ,
+                Replace[{Last[grouped]}, {
+                  (* do not insert space after rator if immediately followed by newline *)
+                  rator : ratorsPat :> indentInfixRatorNoTrailingSpace[tag][rator, newLevel], 
+                  randOrComment_ :> indent[randOrComment, newLevel]
+                }, {1}]
+              }
+            ]
             ,
-            cat[Replace[{Last[grouped]}, {
-              (* do not insert space after rator if immediately followed by newline *)
-              rator : ratorsPat :> indentInfixRatorNoTrailingSpace[tag][rator, newLevel], 
-              randOrComment_ :> indent[randOrComment, newLevel]
-            }, {1}]]
+            split
           ]
+          ,
+          {line[newLevel]}
         ]
-        ,
-        split
       ]
       ,
-      line[newLevel]
-    ]]
+      data
     ]
   ]]
 
@@ -943,13 +1174,11 @@ redoGroupNewlines[GroupNode[tag_, {
   }, data]
 
 
-
-
 indent[GroupNode[tag_, {
       opener_, 
       trivia : trivia...,
       closer_
-    }, _], level_] :=
+    }, data_], level_] :=
   Module[{triviaAggs, triviaGraphs, condition},
 
     triviaAggs = DeleteCases[{trivia}, ws];
@@ -970,28 +1199,32 @@ indent[GroupNode[tag_, {
         condition = SingleLineEnum
     ];
 
-    Which[
-      condition === MultiLineEnum,
-      (*
-      if multiline, then keep as multiline, but redo newlines
-      *)
-      cat[
-        indent[opener, level], 
-        indent[#, level + 1]& /@ triviaGraphs,
-        line[level],
-        indent[closer, level]
+    GroupNode[tag,
+      Which[
+        condition === MultiLineEnum,
+        (*
+        if multiline, then keep as multiline, but redo newlines
+        *)
+        {
+          indent[opener, level], 
+          indent[#, level + 1]& /@ triviaGraphs,
+          line[level],
+          indent[closer, level]
+        }
+        ,
+        condition === SingleLineEnum,
+        (*
+        if will NOT make multiline, then keep everything on 1 line,
+        and do not indent
+        *)
+        {
+          indent[opener, level], 
+          indent[#, level]& /@ triviaGraphs, 
+          indent[closer, level]
+        }
       ]
       ,
-      condition === SingleLineEnum,
-      (*
-      if will NOT make multiline, then keep everything on 1 line,
-      and do not indent
-      *)
-      cat[
-        indent[opener, level], 
-        indent[#, level]& /@ triviaGraphs, 
-        indent[closer, level]
-      ]
+      data
     ]
   ]
 
@@ -1001,7 +1234,7 @@ indent[GroupNode[tag_, {
       ts:PatternSequence[Except[trivia], ___, Except[trivia]] | Except[trivia],
       trivia2 : trivia...,
       closer_
-    }, _], level_] :=
+    }, data_], level_] :=
   Module[{aggs, trivia1Aggs, trivia2Aggs, trivia1Graphs, trivia2Graphs, condition, x},
 
     trivia1Aggs = DeleteCases[{trivia1}, ws];
@@ -1039,55 +1272,59 @@ indent[GroupNode[tag_, {
         condition = WeirdMiddleEnum
     ];
 
-    Which[
-      condition === WeirdMiddleEnum,
+    GroupNode[tag,
+      Which[
+        condition === WeirdMiddleEnum,
 
-      (*
-      Comma does not indent, so must indent manually here
-      *)
-      If[MatchQ[aggs, {InfixNode[Comma | CompoundExpression, _, _]}],
-        x = 1
+        (*
+        Comma does not indent, so must indent manually here
+        *)
+        If[MatchQ[aggs, {InfixNode[Comma | CompoundExpression, _, _]}],
+          x = 1
+          ,
+          x = 0
+        ];
+        (*
+        format as single line, except there are newlines inside, so also line break before the closer
+        *)
+        {
+          indent[opener, level], 
+          indent[#, level]& /@ trivia1Graphs, 
+          indent[#, level + x]& /@ aggs, 
+          indent[#, level]& /@ trivia2Graphs,
+          line[level],
+          indent[closer, level]
+        }
         ,
-        x = 0
-      ];
-      (*
-      format as single line, except there are newlines inside, so also line break before the closer
-      *)
-      cat[
-        indent[opener, level], 
-        indent[#, level]& /@ trivia1Graphs, 
-        indent[#, level + x]& /@ aggs, 
-        indent[#, level]& /@ trivia2Graphs,
-        line[level],
-        indent[closer, level]
+        condition === MultiLineEnum,
+        (*
+        if multiline, then keep as multiline, but redo newlines
+        *)
+        {
+          indent[opener, level], 
+          indent[#, level + 1]& /@ trivia1Graphs,
+          line[level + 1],
+          indent[#, level + 1]& /@ aggs, 
+          indent[#, level]& /@ trivia2Graphs,
+          line[level],
+          indent[closer, level]
+        }
+        ,
+        condition === SingleLineEnum,
+        (*
+        if will NOT make multiline, then keep everything on 1 line,
+        and do not indent
+        *)
+        {
+          indent[opener, level], 
+          indent[#, level]& /@ trivia1Graphs, 
+          indent[#, level]& /@ aggs, 
+          indent[#, level]& /@ trivia2Graphs, 
+          indent[closer, level]
+        }
       ]
       ,
-      condition === MultiLineEnum,
-      (*
-      if multiline, then keep as multiline, but redo newlines
-      *)
-      cat[
-        indent[opener, level], 
-        indent[#, level + 1]& /@ trivia1Graphs,
-        line[level + 1],
-        indent[#, level + 1]& /@ aggs, 
-        indent[#, level]& /@ trivia2Graphs,
-        line[level],
-        indent[closer, level]
-      ]
-      ,
-      condition === SingleLineEnum,
-      (*
-      if will NOT make multiline, then keep everything on 1 line,
-      and do not indent
-      *)
-      cat[
-        indent[opener, level], 
-        indent[#, level]& /@ trivia1Graphs, 
-        indent[#, level]& /@ aggs, 
-        indent[#, level]& /@ trivia2Graphs, 
-        indent[closer, level]
-      ]
+      data
     ]
   ]
 
@@ -1113,7 +1350,7 @@ indent[CallNode[{head : LeafNode[Symbol, "Module" | "With" | "Block", _], trivia
           trivia5:trivia..., 
           closer_
         }, _]
-    }, _], level_] :=
+    }, data_], level_] :=
   Module[{vars, comments1, comments2, comments3, comments4, comments5},
 
     vars = varsIn;
@@ -1133,21 +1370,26 @@ indent[CallNode[{head : LeafNode[Symbol, "Module" | "With" | "Block", _], trivia
     *)
     vars = DeleteCases[vars, LeafNode[Token`Newline, _, _], {-5}];
 
-    cat[
-      indent[head, level],
-      indent[#, level + 1]& /@ comments1,
-      indent[opener, level + 1],
-      indent[#, level + 1]& /@ comments2,
-      indent[vars, level + 1],
-      indent[#, level + 1]& /@ comments3,
-      indent[comma1, level + 1], 
-      line[level + 1], 
-      indent[#, level + 1]& /@ comments4,
-      indent[body, level + 1],
-      If[!empty[comments5], line[level + 1], nil[]],
-      Riffle[indent[#, level + 1]& /@ comments5, {space[]}],
-      line[level],
-      indent[closer, level]
+    CallNode[{
+        indent[head, level],
+        indent[#, level + 1]& /@ comments1
+      },
+      {
+        indent[opener, level + 1],
+        indent[#, level + 1]& /@ comments2,
+        indent[vars, level + 1],
+        indent[#, level + 1]& /@ comments3,
+        indent[comma1, level + 1], 
+        line[level + 1], 
+        indent[#, level + 1]& /@ comments4,
+        indent[body, level + 1],
+        If[!empty[comments5], line[level + 1], nil[]],
+        Riffle[indent[#, level + 1]& /@ comments5, {space[]}],
+        line[level],
+        indent[closer, level]
+      }
+      ,
+      data
     ]
   ]
 
@@ -1182,14 +1424,18 @@ indent[CallNode[{head:LeafNode[Symbol, "Function", _], trivia1:trivia...}, {
     *)
     vars = DeleteCases[{varsIn}, LeafNode[Token`Newline, _, _], {-5}];
 
-    cat[
-      indent[head, level],
-      indent[#, level]& /@ comments1,
-      indent[GroupNode[GroupSquare,
-          {opener} ~Join~
-          comments2 ~Join~
-          {InfixNode[Comma, vars ~Join~ {rest}, data2]} ~Join~
-          {trivia4, closer}, data1], level]
+    CallNode[{
+        indent[head, level],
+        indent[#, level]& /@ comments1},
+      {
+        indent[GroupNode[GroupSquare,
+            {opener} ~Join~
+            comments2 ~Join~
+            {InfixNode[Comma, vars ~Join~ {rest}, data2]} ~Join~
+            {trivia4, closer}, data1], level]
+      }
+      ,
+      data
     ]
   ]
 
@@ -1218,7 +1464,7 @@ indent[CallNode[{tag:LeafNode[Symbol, "Switch", _], trivia1:trivia...}, {
           trivia6:trivia..., 
           closer_
         }, _]
-    }, _], level_] :=
+    }, data_], level_] :=
   Module[{aggs, rands, rators, tests, bodies, testsPat, bodiesPat, comments1, comments2, comments3, comments4, comments5, comments6},
     comments1 = Cases[{trivia1}, comment];
     comments2 = Cases[{trivia2}, comment];
@@ -1235,27 +1481,33 @@ indent[CallNode[{tag:LeafNode[Symbol, "Switch", _], trivia1:trivia...}, {
     ratorsPat = Alternatives @@ rators;
     testsPat = Alternatives @@ tests;
     bodiesPat = Alternatives @@ bodies;
-    cat[
-      indent[tag, level + 1],
-      indent[#, level + 1]& /@ comments1,
-      indent[opener, level + 1],
-      indent[#, level + 1]& /@ comments2, 
-      indent[firstRand, level + 1],
-      indent[#, level + 1]& /@ comments3,
-      indent[firstRator, level + 1],
-      indent[#, level + 1]& /@ comments4,
-      Replace[graphs, {
-          rator : ratorsPat :> indent[rator, level + 1],
-          test:testsPat :> cat[line[level + 1], indent[test, level + 1]],
-          body:bodiesPat :> cat[line[level + 2], indent[body, level + 2], line[level + 1]],
-          other_ :> indent[other, level + 1]
-        }, {1}],
-      line[level + 2],
-      indent[#, level + 1]& /@ comments5,
-      indent[lastRand, level + 2],
-      indent[#, level + 1]& /@ comments6,
-      line[level],
-      indent[closer, level]
+
+    CallNode[{
+        indent[tag, level + 1],
+        indent[#, level + 1]& /@ comments1
+      },
+      {
+        indent[opener, level + 1],
+        indent[#, level + 1]& /@ comments2, 
+        indent[firstRand, level + 1],
+        indent[#, level + 1]& /@ comments3,
+        indent[firstRator, level + 1],
+        indent[#, level + 1]& /@ comments4,
+        Replace[graphs, {
+            rator : ratorsPat :> indent[rator, level + 1],
+            test:testsPat :> {line[level + 1], indent[test, level + 1]},
+            body:bodiesPat :> {line[level + 2], indent[body, level + 2], line[level + 1]},
+            other_ :> indent[other, level + 1]
+          }, {1}],
+        line[level + 2],
+        indent[#, level + 1]& /@ comments5,
+        indent[lastRand, level + 2],
+        indent[#, level + 1]& /@ comments6,
+        line[level],
+        indent[closer, level]
+      }
+      ,
+      data
     ]
   ]
 
@@ -1279,7 +1531,7 @@ indent[CallNode[{tag:LeafNode[Symbol, "Which", _], trivia1:trivia...}, {
           trivia3:trivia..., 
           closer_
         }, _]
-    }, _], level_] :=
+    }, data_], level_] :=
   Module[{aggs, rands, rators, tests, bodies, testsPat, bodiesPat,
     comments1, comments2, comments3},
     comments1 = Cases[{trivia1}, comment];
@@ -1294,22 +1546,27 @@ indent[CallNode[{tag:LeafNode[Symbol, "Which", _], trivia1:trivia...}, {
     ratorsPat = Alternatives @@ rators;
     testsPat = Alternatives @@ tests;
     bodiesPat = Alternatives @@ bodies;
-    cat[
-      indent[tag, level + 1],
-      indent[#, level + 1]& /@ comments1,
-      indent[opener, level + 1],
-      indent[#, level + 1]& /@ comments2, 
-      Replace[graphs, {
-          rator : ratorsPat :> indent[rator, level + 1],
-          test:testsPat :> cat[line[level + 1], indent[test, level + 1]],
-          body:bodiesPat :> cat[line[level + 2], indent[body, level + 2], line[level + 1]],
-          other_ :> indent[other, level + 1]
-        }, {1}],
-      line[level + 2],
-      indent[lastRand, level + 2],
-      indent[#, level + 1]& /@ comments3,
-      line[level],
-      indent[closer, level]
+
+    CallNode[{
+        indent[tag, level + 1],
+        indent[#, level + 1]& /@ comments1},
+      {
+        indent[opener, level + 1],
+        indent[#, level + 1]& /@ comments2, 
+        Replace[graphs, {
+            rator : ratorsPat :> indent[rator, level + 1],
+            test:testsPat :> {line[level + 1], indent[test, level + 1]},
+            body:bodiesPat :> {line[level + 2], indent[body, level + 2], line[level + 1]},
+            other_ :> indent[other, level + 1]
+          }, {1}],
+        line[level + 2],
+        indent[lastRand, level + 2],
+        indent[#, level + 1]& /@ comments3,
+        line[level],
+        indent[closer, level]
+      }
+      ,
+      data
     ]
   ]
 
@@ -1334,7 +1591,7 @@ indent[CallNode[{tag : LeafNode[Symbol, "If", _], trivia1 : trivia...}, {
           trivia4 : trivia..., 
           closer_
         }, _]
-    }, _], level_] :=
+    }, data_], level_] :=
   Module[{graphs, comments1, comments2, comments3, comments4, aggs, rators, 
     rands, ratorsPat, condition},
 
@@ -1359,42 +1616,44 @@ indent[CallNode[{tag : LeafNode[Symbol, "If", _], trivia1 : trivia...}, {
         condition = RedoNewlines
     ];
 
-    Switch[condition,
-      SingleLine,
-        cat[
-          indent[tag, level + 1], 
-          indent[#, level + 1]& /@ comments1, 
-          indent[opener, level + 1], 
-          indent[#, level + 1]& /@ comments2, 
-          indent[firstRand, level + 1], 
-          indent[#, level + 1]& /@ comments3, 
-          indent[firstRator, level + 1],
-          Replace[graphs, {
-              rator : ratorsPat :> cat[indent[rator, level + 1]], 
-              other_ :> indent[other, level + 1]
-            }, {1}], 
-          indent[#, level]& /@ comments4,
-          indent[closer, level]
-        ]
+    CallNode[{
+        indent[tag, level + 1], 
+        indent[#, level + 1]& /@ comments1},
+      Switch[condition,
+        SingleLine,
+          {
+            indent[opener, level + 1], 
+            indent[#, level + 1]& /@ comments2, 
+            indent[firstRand, level + 1], 
+            indent[#, level + 1]& /@ comments3, 
+            indent[firstRator, level + 1],
+            Replace[graphs, {
+                rator : ratorsPat :> indent[rator, level + 1], 
+                other_ :> indent[other, level + 1]
+              }, {1}], 
+            indent[#, level]& /@ comments4,
+            indent[closer, level]
+          }
+        ,
+        RedoNewlines,
+          {
+            indent[opener, level + 1], 
+            indent[#, level + 1]& /@ comments2, 
+            indent[firstRand, level + 1], 
+            indent[#, level + 1]& /@ comments3, 
+            indent[firstRator, level + 1], 
+            line[level + 1], 
+            Replace[graphs, {
+                rator : ratorsPat :> {line[level + 1], indent[rator, level + 1], line[level + 1]}, 
+                other_ :> indent[other, level + 1]
+              }, {1}], 
+            indent[#, level]& /@ comments4, 
+            line[level], 
+            indent[closer, level]
+          }
+      ]
       ,
-      RedoNewlines,
-        cat[
-          indent[tag, level + 1], 
-          indent[#, level + 1]& /@ comments1, 
-          indent[opener, level + 1], 
-          indent[#, level + 1]& /@ comments2, 
-          indent[firstRand, level + 1], 
-          indent[#, level + 1]& /@ comments3, 
-          indent[firstRator, level + 1], 
-          line[level + 1], 
-          Replace[graphs, {
-              rator : ratorsPat :> cat[line[level + 1], indent[rator, level + 1], line[level + 1]], 
-              other_ :> indent[other, level + 1]
-            }, {1}], 
-          indent[#, level]& /@ comments4, 
-          line[level], 
-          indent[closer, level]
-        ]
+      data
     ]
   ]
 
@@ -1427,7 +1686,7 @@ indent[CallNode[{tag : LeafNode[Symbol, "For", _], trivia1 : trivia...}, {
           trivia9 : trivia..., 
           closer_
         }, _]
-    }, _], level_] :=
+    }, data_], level_] :=
   Module[{comments1, comments2, comments3, comments4, comments5, comments6, comments7, comments8, comments9},
     comments1 = Cases[{trivia1}, comment];
     comments2 = Cases[{trivia2}, comment];
@@ -1438,38 +1697,49 @@ indent[CallNode[{tag : LeafNode[Symbol, "For", _], trivia1 : trivia...}, {
     comments7 = Cases[{trivia7}, comment];
     comments8 = Cases[{trivia8}, comment];
     comments9 = Cases[{trivia9}, comment];
-    cat[
-      indent[tag, level],
-      Riffle[indent[#, level]& /@ comments1, {space[]}],
-      indent[opener, level],
-      Riffle[indent[#, level]& /@ comments2, {space[]}],
-      indent[rand1, level],
-      Riffle[indent[#, level]& /@ comments3, {space[]}],
-      indent[rator1, level], space[],
-      Riffle[indent[#, level]& /@ comments4, {space[]}],
-      indent[rand2, level],
-      Riffle[indent[#, level]& /@ comments5, {space[]}],
-      indent[rator2, level], space[],
-      Riffle[indent[#, level]& /@ comments6, {space[]}],
-      indent[rand3, level],
-      Riffle[indent[#, level]& /@ comments7, {space[]}],
-      indent[rator3, level], space[],
-      Riffle[indent[#, level]& /@ comments8, {space[]}],
-      line[level + 1],
-      indent[rand4, level + 1],
-      If[!empty[comments9], line[level + 1], nil[]],
-      Riffle[indent[#, level + 1]& /@ comments9, {space[]}],
-      line[level], 
-      indent[closer, level]
+
+    CallNode[{
+        indent[tag, level],
+        Riffle[indent[#, level]& /@ comments1, {space[]}]
+      },
+      {
+        indent[opener, level],
+        Riffle[indent[#, level]& /@ comments2, {space[]}],
+        indent[rand1, level],
+        Riffle[indent[#, level]& /@ comments3, {space[]}],
+        indent[rator1, level], space[],
+        Riffle[indent[#, level]& /@ comments4, {space[]}],
+        indent[rand2, level],
+        Riffle[indent[#, level]& /@ comments5, {space[]}],
+        indent[rator2, level], space[],
+        Riffle[indent[#, level]& /@ comments6, {space[]}],
+        indent[rand3, level],
+        Riffle[indent[#, level]& /@ comments7, {space[]}],
+        indent[rator3, level], space[],
+        Riffle[indent[#, level]& /@ comments8, {space[]}],
+        line[level + 1],
+        indent[rand4, level + 1],
+        If[!empty[comments9], line[level + 1], nil[]],
+        Riffle[indent[#, level + 1]& /@ comments9, {space[]}],
+        line[level], 
+        indent[closer, level]
+      }
+      ,
+      data
     ]
   ]
 
-indent[CallNode[{tag_, trivia...}, ts_, _], level_] :=
-  cat[indent[tag, level], indent[#, level]& /@ ts]
+indent[CallNode[{tag_, trivia...}, ts_, data_], level_] :=
+  CallNode[{indent[tag, level]}
+    ,
+    indent[#, level]& /@ ts
+    ,
+    data
+  ]
 
 
-indent[SyntaxErrorNode[_, ts_, _], level_] :=
-  cat[indent[#, level]& /@ ts]
+indent[SyntaxErrorNode[tag_, ts_, data_], level_] :=
+  SyntaxErrorNode[tag, indent[#, level]& /@ ts, data]
 
 
 (*
@@ -1477,73 +1747,208 @@ special casing ContainerNode
 
 redo newlines
 *)
-indent[ContainerNode[File, ts_, _], level_] :=
-  Catch[
+indent[ContainerNode[File, ts_, data_], level_] :=
   Module[{graphs},
+
     graphs = DeleteCases[ts, ws];
 
-    If[graphs == {},
-      Throw[nil[]]
-    ];
-
-    If[!MatchQ[graphs[[-1]], nl],
+    If[Length[graphs] >= 1 && !MatchQ[graphs[[-1]], nl],
       AppendTo[graphs, LeafNode[Token`Newline, "", <||>]]
     ];
 
-    Block[{cat},
-
-      cat = StringJoin;
-
-      cat[
-        indent[#, level]& /@ graphs
-      ]
+    ContainerNode[File,
+      indent[#, level]& /@ graphs
+      ,
+      data
     ]
-  ]]
+  ]
 
-indent[ContainerNode[Box, ts_, _], level_] :=
+indent[ContainerNode[Box, ts_, data_], level_] :=
   Module[{graphs},
 
     graphs = DeleteCases[ts, ws];
     
-    Block[{cat},
-
-      cat = StringJoin;
-      
-      cat[
-        indent[#, level]& /@ graphs
-      ]
-    ]
-  ]
-
-
-
-indent[ContainerNode[_, ts_, _], level_] :=
-  Module[{graphs},
-    graphs = DeleteCases[ts, ws];
-
-    Block[{cat},
-
-      cat = StringJoin;
-
-      cat[
-        indent[#, level]& /@ graphs
-      ]
-    ]
-  ]
-
-
-
-indent[BoxNode[RowBox, {ts_}, _], level_] :=
-  Module[{graphs},
-    graphs = DeleteCases[ts, ws];
-
-    cat[
+    ContainerNode[Box,
       indent[#, level]& /@ graphs
+      ,
+      data
+    ]
+  ]
+
+indent[ContainerNode[tag_, ts_, data_], level_] :=
+  Module[{graphs},
+
+    graphs = DeleteCases[ts, ws];
+    
+    ContainerNode[tag,
+      indent[#, level]& /@ graphs
+      ,
+      data
+    ]
+  ]
+
+
+
+indent[BoxNode[RowBox, {ts_}, data_], level_] :=
+  Module[{graphs},
+
+    graphs = DeleteCases[ts, ws];
+
+    BoxNode[RowBox,
+      indent[#, level]& /@ graphs
+      ,
+      data
     ]
   ]
 
 indent[node:BoxNode[_, _, _], level_] :=
   node
+
+
+
+
+
+linearize[node_] := Flatten[linearize0[node]]
+
+linearize0[(ContainerNode|GroupNode|
+  BinaryNode|InfixNode|TernaryNode|QuaternaryNode|
+  PrefixNode|PostfixNode|
+  CompoundNode|
+  BoxNode)[_, fs_List, _]] :=
+  linearize0 /@ fs
+
+linearize0[(CallNode)[head_List, fs_List, _]] :=
+  {linearize0 /@ head, linearize0 /@ fs}
+
+linearize0[n:LeafNode[_, _String, _]] :=
+  n
+
+linearize0[n:ErrorNode[_, _String, _]] :=
+  n
+
+linearize0[LeafNode[tag_, fs_List, _]] :=
+  FragmentNode[tag, #, <||>]& /@ Flatten[linearize0[#]& /@ fs]
+
+linearize0[ErrorNode[tag_, fs_List, _]] :=
+  FragmentNode[tag, #, <||>]& /@ Flatten[linearize0[#]& /@ fs]
+
+linearize0[fs_List] :=
+  linearize0 /@ fs
+
+linearize0[f_String] :=
+  f
+
+
+
+
+mergeLineContinuations[fs_] :=
+  Module[{poss, lc, onePast, numberOfOriginalSpaces, numberOfBeforeChars, originalSpacesSpec, dropSpecs, takeSpec,
+    newFs},
+
+    lc = FragmentNode[String, "\\" <> blockedNewline[], <||>];
+
+    poss = Position[fs, lc];
+
+    dropSpecs = Function[{pos},
+
+      (*
+      Count how many spaces after the line continuation
+      *)
+      onePast = NestWhile[# + 1 &, pos[[1]] + 1, # <= Length[fs] && MatchQ[fs[[#]], (LeafNode|FragmentNode)[_, " ", _]] &];
+
+      originalSpacesSpec = {pos[[1]] + 1, onePast};
+
+      numberOfOriginalSpaces = (onePast) - (pos[[1]] + 1);
+
+      (*
+      Count how many characters before the line continuation (but after any previous newline)
+      *)
+      onePast = NestWhile[# - 1 &, pos[[1]] - 1, # >= 1 && !MatchQ[fs[[#]], (LeafNode|FragmentNode)[_, blockedNewline[], _]] &];
+
+      takeSpec = {onePast, pos[[1]] - 1};
+
+      numberOfBeforeChars = (pos[[1]] - 1) - (onePast);
+
+      Which[
+        numberOfBeforeChars == 0 && numberOfOriginalSpaces == 0,
+          (*
+          not mergeable; the line continuation will be dropped later 
+          *)
+          Nothing
+        ,
+        (*
+        either there are more original spaces (so fine to merge back)
+
+        a::usage = \
+                   "text
+        text"
+
+        turns into =>
+
+        a::usage = "text
+        text"
+
+        *)
+        numberOfBeforeChars <= numberOfOriginalSpaces,
+          (*
+          make sure to include the line continuation itself to be removed
+          *)
+          {pos[[1]], originalSpacesSpec[[2]] - (numberOfOriginalSpaces - numberOfBeforeChars) - 1}
+        ,
+        (*
+        or whatever is overlapping is spaces, so also fine to merge back
+
+        a::usage =
+              \
+        "text
+        text"
+
+        turns into =>
+
+        a::usage =
+        "text
+        text"
+
+        *)
+        (*
+        AllTrue[Take[fs, {takeSpec[[2]] - (numberOfBeforeChars - numberOfOriginalSpaces) + 1, takeSpec[[2]]}], MatchQ[#, (LeafNode|FragmentNode)[_, " ", _]]&] &&
+          True,
+          If[$Debug,
+            Print["mergeable 2"];
+            Print["tested this spec: ", {takeSpec[[2]] - (numberOfBeforeChars - numberOfOriginalSpaces) + 1, takeSpec[[2]]}]
+          ];
+          (*
+          make sure to include the line continuation itself
+          *)
+          {takeSpec[[2]] - (numberOfBeforeChars - numberOfOriginalSpaces) + 1, originalSpacesSpec[[2]] - 1}
+        ,
+        *)
+        True,
+          (*
+          not mergeable; the line continuation will be dropped later 
+          *)
+          Nothing
+      ]
+
+    ] /@ poss;
+
+    newFs = Fold[Drop, fs, dropSpecs // Reverse];
+
+    (*
+    cleanup any remaining line continuations
+    *)
+    newFs = newFs /. {
+      lc :> Sequence @@ line[0],
+      (*
+      space fragments are now orphaned, so need to convert back to LeafNodes
+      *)
+      FragmentNode[String, " ", data_] :> LeafNode[Token`WhiteSpace, " ", data],
+      FragmentNode[String, str_, data_] :> LeafNode[String, str, data]
+    };
+
+    newFs
+  ]
+
 
 
 

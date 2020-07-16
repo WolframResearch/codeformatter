@@ -74,7 +74,7 @@ Top-level line continuations
 Test[
 	CodeFormat["{a \\\n+1}"]
 	,
-	"{a\n+ 1}"
+	"{a + 1}"
 	,
 	TestID -> "CodeFormatter-20191111-P7F7L2"
 ]
@@ -322,7 +322,13 @@ foo[bar[[1, 2]
 ]
 
 
-
+Test[
+	CodeFormat["{0. ...}"]
+	,
+	"{0. ...}"
+	,
+	TestID->"CodeFormatter-20200715-K5E0Q1"
+]
 
 
 

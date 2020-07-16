@@ -172,7 +172,7 @@ Used by CodeMinifier also
 *)
 
 insertNecessarySpaces[tokensIn_] :=
-  Module[{poss, tokens, toInsert},
+  Module[{poss, tokens, toInsert, poss1},
 
     If[$Debug,
       Print["insertNecessarySpaces: ", tokensIn];
@@ -220,22 +220,25 @@ insertNecessarySpaces[tokensIn_] :=
     Insert space for  a - -b
     *)
     poss = Position[tokens, LeafNode[Token`Minus, _, _]];
-    poss = Select[poss, (#[[1]] < Length[tokens] && MatchQ[tokens[[#[[1]]+1]], LeafNode[Token`Minus | Token`MinusMinus, _, _]])&];
-    Scan[(AppendTo[toInsert, #+1])&, poss];
-
+    poss1 = Select[poss, (#[[1]] < Length[tokens] && MatchQ[tokens[[#[[1]]+1]], LeafNode[Token`Minus | Token`MinusMinus, _, _]])&];
+    Scan[(AppendTo[toInsert, #+1])&, poss1];
     (*
     Insert space for  a - -1
     *)
-    poss = Position[tokens, LeafNode[Token`Minus, _, _]];
-    poss = Select[poss, (#[[1]] < Length[tokens] && MatchQ[tokens[[#[[1]]+1]], LeafNode[Integer | Real | Rational, str_ /; StringStartsQ[str, "-"], _]])&];
-    Scan[(AppendTo[toInsert, #+1])&, poss];
+    poss1 = Select[poss, (#[[1]] < Length[tokens] && MatchQ[tokens[[#[[1]]+1]], LeafNode[Integer | Real | Rational, str_ /; StringStartsQ[str, "-"], _]])&];
+    Scan[(AppendTo[toInsert, #+1])&, poss1];
 
     (*
     Insert space for  a! !
     *)
     poss = Position[tokens, LeafNode[Token`Bang, _, _]];
-    poss = Select[poss, (#[[1]] < Length[tokens] && MatchQ[tokens[[#[[1]]+1]], LeafNode[Token`Bang | Token`BangBang, _, _]])&];
-    Scan[(AppendTo[toInsert, #+1])&, poss];
+    poss1 = Select[poss, (#[[1]] < Length[tokens] && MatchQ[tokens[[#[[1]]+1]], LeafNode[Token`Bang | Token`BangBang, _, _]])&];
+    Scan[(AppendTo[toInsert, #+1])&, poss1];
+    (*
+    Insert space for  a! =b
+    *)
+    poss1 = Select[poss, (#[[1]] < Length[tokens] && MatchQ[tokens[[#[[1]]+1]], LeafNode[Token`Equal, _, _]])&];
+    Scan[(AppendTo[toInsert, #+1])&, poss1];
 
     (*
     Insert space for  a + +b
@@ -249,6 +252,13 @@ insertNecessarySpaces[tokensIn_] :=
     *)
     poss = Position[tokens, LeafNode[Token`Amp, _, _]];
     poss = Select[poss, (#[[1]] < Length[tokens] && MatchQ[tokens[[#[[1]]+1]], LeafNode[Token`Amp, _, _]])&];
+    Scan[(AppendTo[toInsert, #+1])&, poss];
+
+    (*
+    Insert space for  a < << b
+    *)
+    poss = Position[tokens, LeafNode[Token`Less, _, _]];
+    poss = Select[poss, (#[[1]] < Length[tokens] && MatchQ[tokens[[#[[1]]+1]], LeafNode[Token`LessLess, _, _]])&];
     Scan[(AppendTo[toInsert, #+1])&, poss];
 
     (*

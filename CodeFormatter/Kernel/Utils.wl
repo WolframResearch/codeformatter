@@ -205,14 +205,7 @@ insertNecessarySpaces[tokensIn_] :=
     (*
     Insert space for  a_ .b
     *)
-    poss = Position[tokens, LeafNode[Token`Under, _, _]];
-    poss = Select[poss, (#[[1]] < Length[tokens] && MatchQ[tokens[[#[[1]]+1]], LeafNode[Token`Dot | Token`DotDot | Token`DotDotDot, _, _]])&];
-    Scan[(AppendTo[toInsert, #+1])&, poss];
-
-    (*
-    Insert space for  a_. ..
-    *)
-    poss = Position[tokens, LeafNode[Token`UnderDot, _, _]];
+    poss = Position[tokens, LeafNode[Token`Under | Token`UnderDot, _, _]];
     poss = Select[poss, (#[[1]] < Length[tokens] && MatchQ[tokens[[#[[1]]+1]], LeafNode[Token`Dot | Token`DotDot | Token`DotDotDot, _, _]])&];
     Scan[(AppendTo[toInsert, #+1])&, poss];
 
@@ -232,12 +225,7 @@ insertNecessarySpaces[tokensIn_] :=
     Insert space for  a! !
     *)
     poss = Position[tokens, LeafNode[Token`Bang, _, _]];
-    poss1 = Select[poss, (#[[1]] < Length[tokens] && MatchQ[tokens[[#[[1]]+1]], LeafNode[Token`Bang | Token`BangBang, _, _]])&];
-    Scan[(AppendTo[toInsert, #+1])&, poss1];
-    (*
-    Insert space for  a! =b
-    *)
-    poss1 = Select[poss, (#[[1]] < Length[tokens] && MatchQ[tokens[[#[[1]]+1]], LeafNode[Token`Equal, _, _]])&];
+    poss1 = Select[poss, (#[[1]] < Length[tokens] && MatchQ[tokens[[#[[1]]+1]], LeafNode[Token`Bang | Token`BangBang | Token`Equal | Token`BangEqual | Token`EqualEqual | Token`EqualEqualEqual, _, _]])&];
     Scan[(AppendTo[toInsert, #+1])&, poss1];
 
     (*
@@ -274,6 +262,19 @@ insertNecessarySpaces[tokensIn_] :=
     toInsert = ReverseSort[toInsert];
 
     tokens = Fold[Function[{toks, pos}, Insert[toks, LeafNode[Token`Whitespace, " ", <||>], pos]], tokens, toInsert];
+
+
+    (*
+    Now replace implicit Times with a space
+
+    If the implicit Times is at the end of a line, then insert actual * character
+    *)
+    poss = Position[tokens, LeafNode[Token`Fake`ImplicitTimes, _, _]];
+    poss1 = Select[poss, (#[[1]] < Length[tokens] && MatchQ[tokens[[#[[1]]+1]], LeafNode[Token`Newline, _, _]])&];
+    poss2 = Complement[poss, poss1];
+
+    tokens = ReplacePart[tokens, poss1 -> LeafNode[Token`Star, "*", <||>]];
+    tokens = ReplacePart[tokens, poss2 -> LeafNode[Token`Whitespace, " ", <||>]];
 
     tokens
   ]

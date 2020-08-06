@@ -42,29 +42,10 @@ Bad UTF-8 encoding
 Test[
 	CodeFormat[{206}]
 	,
-	ToCharacterCode["\[UnknownGlyph]", "UTF8"]
-	,
-	{CodeFormat::noaction}
+	"\[UnknownGlyph]"
 	,
 	TestID -> "CodeFormatter-20191111-W3S9H1"
 ]
-
-
-
-
-
-
-Test[
-	CodeFormat["{a\rb}"]
-	,
-	"{a\nb}"
-	,
-	{CodeFormat::noaction}
-	,
-	TestID -> "CodeFormatter-20191111-N8K0J2"
-]
-
-
 
 
 
@@ -179,21 +160,6 @@ Test[
 
 
 
-
-
-
-Test[
-	CodeFormat["{ f\n& }"]
-	,
-	"{ f& }"
-	,
-	TestID -> "CodeFormatter-20191113-I8N9T2"
-]
-
-
-
-
-
 Test[
 	CodeFormat["0.."]
 	,
@@ -297,17 +263,6 @@ Test[
 ]
 
 
-Test[
-	CodeFormat["{a \n&}"]
-	,
-	"{a&}"
-	,
-	TestID -> "CodeFormatter-20191121-K9O8I8"
-]
-
-
-
-
 
 Test[
 	CodeFormat[
@@ -316,7 +271,7 @@ foo[bar[[1, 2]
 ]]
 "]
  	,
- 	"\nfoo[bar[[1, 2]]]\n"
+ 	"foo[bar[[1, 2]]]"
 	,
 	TestID->"CodeFormatter-20200406-V9L3L5"
 ]
@@ -329,6 +284,40 @@ Test[
 	,
 	TestID->"CodeFormatter-20200715-K5E0Q1"
 ]
+
+
+
+Test[
+	CodeFormat["a\"\t\""]
+	,
+	"a \"  \""
+	,
+	TestID->"CodeFormatter-20200803-Y4E5E2"
+]
+
+
+
+Test[
+	CodeFormat["a(*\t*)&"]
+	,
+	"a(* *)&"
+	,
+	TestID->"CodeFormatter-20200803-U6J1P6"
+]
+
+
+Test[
+	CodeFormat["If[a, b, c]"]
+	,
+	"If[a, b, c]"
+	,
+	TestID->"CodeFormatter-20200805-Q8H6M7"
+]
+
+
+
+
+
 
 
 

@@ -1,5 +1,6 @@
 (* Wolfram Language Test file *)
 
 TestSuite[{
-	"CodeFormatter.mt"
+	"CodeFormatter.mt",
+	"LineBreaking.mt"
 }]

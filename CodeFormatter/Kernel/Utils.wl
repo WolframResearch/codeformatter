@@ -274,7 +274,7 @@ insertNecessarySpaces[tokensIn_] :=
     poss2 = Complement[poss, poss1];
 
     tokens = ReplacePart[tokens, poss1 -> LeafNode[Token`Star, "*", <||>]];
-    tokens = ReplacePart[tokens, poss2 -> LeafNode[Token`Whitespace, " ", <||>]];
+    tokens = ReplacePart[tokens, poss2 -> LeafNode[Token`Fake`ImplicitTimes, " ", <||>]];
 
     tokens
   ]

@@ -104,7 +104,10 @@ formatCurrentNotebook[] :=
 formatProgramCellContents[contents_String] :=
     Catch[
     Module[{formatted},
-        formatted = CodeFormat[contents];
+        (*
+        FIXME: "LineWidth" -> Infinity will be revisited when line continuations in boxes are properly supported
+        *)
+        formatted = CodeFormat[contents, "LineWidth" -> Infinity];
         If[FailureQ[formatted],
             Throw[formatted]
         ];
@@ -122,7 +125,10 @@ formatInputContents[contentsBox_] :=
         If[FailureQ[cst],
             Throw[cst]
         ];
-        formatted = CodeFormatCST[cst];
+        (*
+        FIXME: "LineWidth" -> Infinity will be revisited when line continuations in boxes are properly supported
+        *)
+        formatted = CodeFormatCST[cst, "LineWidth" -> Infinity];
         If[FailureQ[formatted],
             Throw[formatted]
         ];

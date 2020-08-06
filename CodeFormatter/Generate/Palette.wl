@@ -62,7 +62,7 @@ Module[{nb},
             Labeled[Checkbox[Enabled -> False], "Reparse boxes before formatting"],
             Spacer[{0, 20}],
             Labeled[Slider[Dynamic[CodeFormatter`$DefaultAirynessLevel, Initialization :> (Needs["CodeFormatter`"])], {-1, 1}], "Airyness"],
-            Labeled[Slider[Enabled -> False], "Line width"],
+            (*Labeled[Slider[Dynamic[CodeFormatter`$DefaultLineWidth, Initialization :> (Needs["CodeFormatter`"])], {40, 200, 1}], "Line width"],*)
             Spacer[{0, 20}]
           }]
         }]

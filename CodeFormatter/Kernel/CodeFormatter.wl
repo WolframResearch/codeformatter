@@ -50,6 +50,8 @@ $DefaultNewline = "\n"
 
 $DefaultTabWidth = 4
 
+$DefaultLineWidth = 120
+
 
 
 CodeFormat::usage = "CodeFormat[code] returns a string of formatted WL code."
@@ -58,7 +60,8 @@ Options[CodeFormat] = {
   AirynessLevel :> $DefaultAirynessLevel,
   "IndentationString" :> $DefaultIndentationString,
   "Newline" :> $DefaultNewline,
-  "TabWidth" :> $DefaultTabWidth
+  "TabWidth" :> $DefaultTabWidth,
+  "LineWidth" :> $DefaultLineWidth
 }
 
 
@@ -82,11 +85,11 @@ Module[{cst, tabWidth, formattedStr, agg, cst2, agg2, aggToCompare, agg2ToCompar
   ];
 
   agg = CodeParser`Abstract`Aggregate[cst];
-  agg = normalizeTokens[agg, "FormatOnly" -> False, "Newline" -> newline, "TabWidth" -> tabWidth];
+  agg = normalizeTokens[agg, "FormatOnly" -> True, "Newline" -> newline, "TabWidth" -> tabWidth];
 
   cst2 = CodeConcreteParse[formattedStr];
   agg2 = CodeParser`Abstract`Aggregate[cst2];
-  agg2 = normalizeTokens[agg2, "FormatOnly" -> False, "Newline" -> newline, "TabWidth" -> tabWidth];
+  agg2 = normalizeTokens[agg2, "FormatOnly" -> True, "Newline" -> newline, "TabWidth" -> tabWidth];
 
   agg2[[1]] = File;
 
@@ -103,7 +106,7 @@ Module[{cst, tabWidth, formattedStr, agg, cst2, agg2, aggToCompare, agg2ToCompar
 
 CodeFormat[str_String, opts:OptionsPattern[]] :=
 Catch[
-Module[{cst, tabWidth, formattedStr, agg, cst2, agg2, aggToCompare, agg2ToCompare, newline},
+Module[{cst, tabWidth, formattedStr, agg, cst2, agg2, aggToCompare, agg2ToCompare},
 
   tabWidth = OptionValue["TabWidth"];
   newline = OptionValue["Newline"];
@@ -116,16 +119,18 @@ Module[{cst, tabWidth, formattedStr, agg, cst2, agg2, aggToCompare, agg2ToCompar
 
   formattedStr = CodeFormatCST[cst, opts];
 
+  formattedStr = StringTrim[formattedStr];
+
   If[$DisableSanityChecking,
     Throw[formattedStr]
   ];
 
   agg = CodeParser`Abstract`Aggregate[cst];
-  agg = normalizeTokens[agg, "FormatOnly" -> False, "Newline" -> newline, "TabWidth" -> tabWidth];
+  agg = normalizeTokens[agg, "FormatOnly" -> True, "Newline" -> newline, "TabWidth" -> tabWidth];
 
   cst2 = CodeConcreteParse[formattedStr];
   agg2 = CodeParser`Abstract`Aggregate[cst2];
-  agg2 = normalizeTokens[agg2, "FormatOnly" -> False, "Newline" -> newline, "TabWidth" -> tabWidth];
+  agg2 = normalizeTokens[agg2, "FormatOnly" -> True, "Newline" -> newline, "TabWidth" -> tabWidth];
 
   aggToCompare = agg /. _Association -> <||>;
   agg2ToCompare = agg2 /. _Association -> <||>;
@@ -161,16 +166,18 @@ Module[{cst, tabWidth, formattedStr, agg, cst2, agg2, aggToCompare, agg2ToCompar
 
   formattedStr = CodeFormatCST[cst, opts];
 
+  formattedStr = StringTrim[formattedStr];
+
   If[$DisableSanityChecking,
     Throw[formattedStr]
   ];
 
   agg = CodeParser`Abstract`Aggregate[cst];
-  agg = normalizeTokens[agg, "FormatOnly" -> False, "Newline" -> newline, "TabWidth" -> tabWidth];
+  agg = normalizeTokens[agg, "FormatOnly" -> True, "Newline" -> newline, "TabWidth" -> tabWidth];
 
   cst2 = CodeConcreteParse[formattedStr];
   agg2 = CodeParser`Abstract`Aggregate[cst2];
-  agg2 = normalizeTokens[agg2, "FormatOnly" -> False, "Newline" -> newline, "TabWidth" -> tabWidth];
+  agg2 = normalizeTokens[agg2, "FormatOnly" -> True, "Newline" -> newline, "TabWidth" -> tabWidth];
 
   agg2[[1]] = Byte;
 
@@ -191,12 +198,13 @@ Options[CodeFormatCST] = Options[CodeFormat]
 CodeFormatCST[cstIn_, opts:OptionsPattern[]] :=
 Catch[
 Module[{indentationString, cst, newline, tabWidth, indented, airyness, formattedStr, merged,
-  linearized, strs, spaced, breaked},
+  linearized, strs, spaced, breaked, lineWidth},
 
   indentationString = OptionValue["IndentationString"];
   newline = OptionValue["Newline"];
   tabWidth = OptionValue["TabWidth"];
   airyness = OptionValue[AirynessLevel];
+  lineWidth = OptionValue["LineWidth"];
 
   cst = cstIn;
 
@@ -220,6 +228,12 @@ Module[{indentationString, cst, newline, tabWidth, indented, airyness, formatted
 
     If[$Debug,
       Print["after RemoveSimpleLineContinuations: ", cst];
+    ];
+
+    cst = RemoveComplexLineContinuations[cst];
+
+    If[$Debug,
+      Print["after RemoveComplexLineContinuations: ", cst];
     ];
 
     cst = RemoveRemainingSimpleLineContinuations[cst];
@@ -285,7 +299,7 @@ Module[{indentationString, cst, newline, tabWidth, indented, airyness, formatted
       Print["after insertNecessarySpaces: ", spaced];
     ];
 
-    breaked = breakLines[spaced];
+    breaked = breakLines[spaced, lineWidth];
 
     If[$Debug,
       Print["after breaked: ", breaked];
@@ -408,6 +422,70 @@ RemoveSimpleLineContinuations[cstIn_] :=
     cst
   ]
 
+RemoveComplexLineContinuations::usage = "RemoveComplexLineContinuations[cst] removes complex line continuations from cst."
+
+RemoveComplexLineContinuations[cstIn_] :=
+  Module[{data, cst, tokStartLocs, grouped, poss, tuples, mapSpecs,
+    extracted, complexLineContinuations},
+
+    cst = cstIn;
+
+    data = cst[[3]];
+
+    If[KeyExistsQ[data, "ComplexLineContinuations"],
+
+      (*
+      -5 is where LeafNode[xxx, xxx, <|Source->{{1,1},{1,1}}|>] is
+
+      -3 is where LeafNode[xxx, xxx, <||>] is
+
+      There may be LeafNodes in metadata such as SyntaxIssues or AbstractSyntaxIssues, so remove those
+
+      Line continuations in multiline strings and multiline comments will be handled later
+      *)
+      poss = Position[cst, LeafNode[_, _, _], {-5, -3}];
+      poss = Cases[poss, {___Integer}];
+
+      extracted = Extract[cst, poss];
+
+      tokStartLocs = #[[3, Key[Source], 1]]& /@ extracted;
+
+      (*
+      Group by starting SourceLocation
+      *)
+      grouped = GroupBy[Transpose[{tokStartLocs, poss}, {2, 1}], #[[1]]&];
+
+      complexLineContinuations = data["ComplexLineContinuations"];
+
+      mapSpecs = Map[
+        Function[{contLoc},
+
+          tuples = grouped[contLoc];
+
+          (*
+          The token associated with this location may have been processed away and now missing
+          *)
+          If[!MissingQ[tuples],
+            tuples
+            ,
+            Nothing
+          ]
+        ]
+        ,
+        complexLineContinuations
+      ];
+
+      mapSpecs = Flatten[mapSpecs, 1];
+
+      cst = MapAt[removeComplexLineContinuations, cst, mapSpecs[[All, 2]]];
+
+      KeyDropFrom[data, "ComplexLineContinuations"];
+
+      cst[[3]] = data;
+    ];
+
+    cst
+  ]
 
 (*
 There may be "simple line continuations" that were left behind because they belonged to a multiline string or comment
@@ -655,8 +733,10 @@ multiline comments have temporary line continuations introduced
 others?
 
 *)
-Fragmentize[cst_] :=
-  Module[{poss},
+Fragmentize[cstIn_] :=
+  Module[{poss, cst},
+
+    cst = cstIn;
 
     (*
     Special case multiline strings and multiline comments with LineColumn convention
@@ -670,19 +750,51 @@ Fragmentize[cst_] :=
     *)
     poss = Position[cst, LeafNode[String | Token`Comment, s_ /; StringContainsQ[s, $CurrentNewline], KeyValuePattern[Source -> {{_, _}, {_, _}}]]];
 
-    MapAt[fragmentizeMultilineLeafNode, cst, poss]
+    cst = MapAt[fragmentizeMultilineLeafNode, cst, poss];
+
+    (*
+    Now also fragmentize the remaining comments
+    *)
+    poss = Position[cst, LeafNode[Token`Comment, _String, _]];
+
+    cst = MapAt[fragmentizeComment, cst, poss];
+
+    cst
   ]
 
-fragmentizeMultilineLeafNode[LeafNode[tag_, s_, data_]] :=
+fragmentizeMultilineLeafNode[LeafNode[String, s_, data_]] :=
 Module[{origSpaces},
   origSpaces = data[[Key[Source], 1, 2]]-1;
-  LeafNode[tag,
+  LeafNode[String,
     Flatten[{
-      FragmentNode[tag, "\\" <> $CurrentNewline, <||>],
-      Table[FragmentNode[tag, " ", <||>], origSpaces],
-      Riffle[FragmentNode[tag, #, <||>]& /@ StringSplit[s, $CurrentNewline, All], FragmentNode[tag, $CurrentNewline, <||>]]
+      FragmentNode[String, "\\" <> $CurrentNewline, <||>],
+      Table[FragmentNode[String, " ", <||>], origSpaces],
+      Riffle[FragmentNode[String, #, <||>]& /@ StringSplit[s, $CurrentNewline, All], FragmentNode[String, $CurrentNewline, <||>]]
     }], <|data, "InsertedFragmentNodes" -> 1 + origSpaces|>]
 ]
+
+(*
+Make sure to fragmentize ( * and * ) here
+*)
+fragmentizeMultilineLeafNode[LeafNode[Token`Comment, s_, data_]] :=
+Module[{origSpaces},
+  origSpaces = data[[Key[Source], 1, 2]]-1;
+  LeafNode[Token`Comment,
+    Flatten[{
+      FragmentNode[Token`Comment, "\\" <> $CurrentNewline, <||>],
+      Table[FragmentNode[Token`Comment, " ", <||>], origSpaces],
+      FragmentNode[Token`Comment, "(*", <||>],
+      Riffle[FragmentNode[Token`Comment, #, <||>]& /@ StringSplit[StringTake[s, {3, -3}], $CurrentNewline], FragmentNode[Token`Comment, $CurrentNewline, <||>]],
+      FragmentNode[Token`Comment, "*)", <||>]
+    }], <|data, "InsertedFragmentNodes" -> 1 + origSpaces|>]
+]
+
+fragmentizeComment[LeafNode[Token`Comment, s_, data_]] :=
+  LeafNode[Token`Comment,
+    FragmentNode[Token`Comment, #, <||>]& /@ ({"(*"} ~Join~ {StringTake[s, {3, -3}]} ~Join~ {"*)"})
+    ,
+    data
+  ]
 
 
 
@@ -797,10 +909,10 @@ IntroduceRowNodes[cst_] :=
           May have already been fragmentized
           *)
           last[[2]] = last[[2]] ~Join~
-            Flatten[extractFragmentNodes[last[[1]], #]& /@ extracted[[2;;]]];
+            Flatten[extractFragmentNodes /@ extracted[[2;;]]];
           ,
           last[[2]] = {FragmentNode[last[[1]], last[[2]], <||>]} ~Join~
-            Flatten[extractFragmentNodes[last[[1]], #]& /@ extracted[[2;;]]];
+            Flatten[extractFragmentNodes /@ extracted[[2;;]]];
         ];
 
         Insert[Delete[Delete[cst1, range[[2;;]]], pos], last, pos]
@@ -815,9 +927,9 @@ IntroduceRowNodes[cst_] :=
     ]
   ]
 
-extractFragmentNodes[_, LeafNode[_, fs_List, _]] := fs
+extractFragmentNodes[LeafNode[_, fs_List, _]] := fs
 
-extractFragmentNodes[tag_, LeafNode[_, s_String, _]] := {FragmentNode[tag, s, <||>]}
+extractFragmentNodes[LeafNode[tag_, s_String, data_]] := {FragmentNode[tag, s, data]}
 
 
 (*
@@ -895,9 +1007,9 @@ line[level_] :=
   {LeafNode[Token`Newline, $CurrentNewline, <||>]} ~Join~
     Table[LeafNode[Token`Whitespace, #, <||>]& /@ Characters[$CurrentIndentationString], level]
 
-space[] = LeafNode[Token`WhiteSpace, " ", <||>]
+space[] = LeafNode[Token`Whitespace, " ", <||>]
 
-tab[] = LeafNode[Token`WhiteSpace, "\t", <||>]
+tab[] = LeafNode[Token`Whitespace, "\t", <||>]
 
 nil[] = {}
 
@@ -1809,8 +1921,9 @@ indent[CallNode[{tag : LeafNode[Symbol, "If", _], trivia1 : trivia...}, {
             indent[firstRand, level + 1], 
             indent[#, level + 1]& /@ comments3, 
             indent[firstRator, level + 1],
+            space[],
             Replace[graphs, {
-                rator : ratorsPat :> indent[rator, level + 1], 
+                rator : ratorsPat :> {indent[rator, level + 1], space[]},
                 other_ :> indent[other, level + 1]
               }, {1}], 
             indent[#, level]& /@ comments4,
@@ -1926,72 +2039,15 @@ indent[SyntaxErrorNode[tag_, ts_, data_], level_] :=
   SyntaxErrorNode[tag, indent[#, level]& /@ ts, data]
 
 
-(*
-special casing ContainerNode
-
-redo newlines
-*)
-indent[ContainerNode[File, ts_, data_], level_] :=
-  Module[{graphs},
-
-    graphs = DeleteCases[ts, ws];
-
-    If[Length[graphs] >= 1 && !MatchQ[graphs[[-1]], nl],
-      AppendTo[graphs, LeafNode[Token`Newline, "", <||>]]
-    ];
-
-    ContainerNode[
-      File
-      ,
-      Flatten[
-        indent[#, level]& /@ graphs
-      ]
-      ,
-      data
-    ]
-  ]
-
-indent[ContainerNode[Box, ts_, data_], level_] :=
-  Module[{graphs},
-
-    graphs = DeleteCases[ts, ws];
-    
-    ContainerNode[
-      Box
-      ,
-      Flatten[
-        indent[#, level]& /@ graphs
-      ]
-      ,
-      data
-    ]
-  ]
-
-indent[ContainerNode[String, ts_, data_], level_] :=
-  Module[{graphs},
-
-    graphs = DeleteCases[ts, ws];
-
-    If[Length[graphs] >= 1 && !MatchQ[graphs[[-1]], nl],
-      AppendTo[graphs, LeafNode[Token`Newline, "", <||>]]
-    ];
-
-    ContainerNode[
-      String
-      ,
-      Flatten[
-        indent[#, level]& /@ graphs
-      ]
-      ,
-      data
-    ]
-  ]
-
 indent[ContainerNode[tag_, ts_, data_], level_] :=
   Module[{graphs},
 
     graphs = DeleteCases[ts, ws];
-    
+
+    If[Length[graphs] >= 1 && !MatchQ[graphs[[-1]], nl],
+      AppendTo[graphs, LeafNode[Token`Newline, "", <||>]]
+    ];
+
     ContainerNode[
       tag
       ,
@@ -2244,7 +2300,7 @@ mergeLineContinuations[fs_] :=
       (*
       space fragments are now orphaned, so need to convert back to LeafNodes
       *)
-      FragmentNode[_, " ", data_] :> LeafNode[Token`WhiteSpace, " ", data],
+      FragmentNode[_, " ", data_] :> LeafNode[Token`Whitespace, " ", data],
       FragmentNode[tag_, str_, data_] :> LeafNode[tag, str, data]
     };
     *)
@@ -2254,7 +2310,7 @@ mergeLineContinuations[fs_] :=
 
 
 
-breakLines[tokensIn_] :=
+breakLines[tokensIn_, lineWidth_] :=
   Module[{tokens, lines},
 
     tokens = tokensIn;
@@ -2265,7 +2321,7 @@ breakLines[tokensIn_] :=
       Print["lines: ", lines];
     ];
 
-    lines = breakLine /@ lines;
+    lines = breakLine[#, lineWidth]& /@ lines;
 
     If[$Debug,
       Print["lines: ", lines];
@@ -2276,60 +2332,118 @@ breakLines[tokensIn_] :=
     tokens
   ]
 
-breakLine[tokensIn_] :=
-  Module[{tokens, width, tok, toSplit, takeSpecs},
+breakLine[tokensIn_, lineWidth_] :=
+  Module[{tokens, width, tok, toSplit, takeSpecs, kTmp},
 
     tokens = tokensIn;
 
     width = 0;
     toSplit = <||>;
     Do[
-    	If[$Debug,
-			Print["starting loop ", i];
-			Print["width is: ", width];
-		];
-    	tok = tokens[[i]];
+      If[$Debug,
+        Print["starting loop ", i];
+        Print["width is: ", width];
+      ];
+      tok = tokens[[i]];
 
-    	width += StringLength[tok[[2]]];
-		If[$Debug,
-			Print["width is (tentatively) now 1: ", width];
-		];
+      width += StringLength[tok[[2]]];
+      If[$Debug,
+        Print["width is (tentatively) now 1: ", width];
+      ];
 
-		If[width > 40,
+      While[True,
 
-			If[KeyExistsQ[toSplit, i],
-				toSplit[i] = Join[toSplit[i], { StringLength[tok[[2]]] - (width - 40)  }]
-			,
-				toSplit[i] = { StringLength[tok[[2]]] - (width - 40) }
-			];
+        If[width <= lineWidth,
+          Break[]
+        ];
 
-			width = StringLength[tok[[2]]] - (StringLength[tok[[2]]] - (width - 40));
-			If[$Debug,
-				Print["toSplit: ", toSplit];
-				Print["width is (tentatively) now 2: ", width];
-			];
+        If[KeyExistsQ[toSplit, i],
+          toSplit[i] = Join[toSplit[i], { StringLength[tok[[2]]] - (width - lineWidth)  }]
+          ,
+          toSplit[i] = { StringLength[tok[[2]]] - (width - lineWidth) }
+        ];
 
-			If[width > 40,
-
-				If[KeyExistsQ[toSplit, i],
-					toSplit[i] = Join[toSplit[i], { StringLength[tok[[2]]] - (width - 40) }]
-				,
-					toSplit[i] = { StringLength[tok[[2]]] - (width - 40) }
-				];
-
-				width = StringLength[tok[[2]]] - (StringLength[tok[[2]]] - (width - 40));
-				If[$Debug,
-					Print["toSplit: ", toSplit];
-					Print["width is (tentatively) now 2: ", width];
-				];
-			];
-		];
+        width = StringLength[tok[[2]]] - (StringLength[tok[[2]]] - (width - lineWidth));
+        If[$Debug,
+          Print["toSplit: ", toSplit];
+          Print["width is (tentatively) now 2: ", width];
+        ]
+      ]
       ,
       {i, 1, Length[tokens]}
     ];
 
     If[$Debug,
-      Print["toSplit: ", toSplit];
+      Print["toSplit 1: ", toSplit];
+    ];
+
+    (*
+    Adjust toSplit as needed to not split \[Alpha] or \"
+    *)
+    toSplit = Association[KeyValueMap[
+      Function[{key, val},
+        tok = tokens[[key]];
+
+        Which[
+          StringContainsQ[tok[[2]], "\\"],
+            (*
+            splitting at k means to return substrings with indices {1, k} and {k+1, 20}
+            *)
+            key -> (Function[k,
+              kTmp = k;
+              Catch[
+              (*
+              need to loop because there may be mutiple escapes to handle in a row
+              *)
+              While[True,
+                If[$Debug,
+                  Print["kTmp: ", kTmp];
+                  Print["examing: ", StringTake[tok[[2]], kTmp]];
+                ];
+                Which[
+                  (*
+                  reached beginning of token
+                  *)
+                  kTmp == -1,
+                    Throw[0]
+                  ,
+                  (*
+                  ends with unfinished longname
+                  *)
+                  StringEndsQ[StringTake[tok[[2]], kTmp], RegularExpression["\\\\\\[([a-zA-Z0-9]*)"]],
+                    If[$Debug,
+                      Print["unfinished longname"];
+                    ];
+                    kTmp = kTmp - StringLength[StringCases[StringTake[tok[[2]], kTmp], RegularExpression["\\\\\\[([a-zA-Z0-9]*)$"]][[1]]] - 1
+                  ,
+                  (*
+                  ends with unfinished single escaped character
+                  *)
+                  StringEndsQ[StringTake[tok[[2]], kTmp], RegularExpression["\\\\"]],
+                    If[$Debug,
+                      Print["unfinished single character"];
+                    ];
+                    kTmp = kTmp - StringLength[StringCases[StringTake[tok[[2]], kTmp], RegularExpression["\\\\$"]][[1]]] - 1
+                  ,
+                  True,
+                    If[$Debug,
+                      Print["nothing unfinished"];
+                    ];
+                    Throw[kTmp]
+                ]
+              ]]
+            ] /@ val)
+          ,
+          True,
+            key -> val
+        ]
+      ]
+      ,
+      toSplit
+    ]];
+
+    If[$Debug,
+      Print["toSplit 2: ", toSplit];
     ];
 
     (*
@@ -2339,35 +2453,44 @@ breakLine[tokensIn_] :=
       Function[{key, val},
         tok = tokens[[key]];
         (*
-        Which[
-        	val == {1} && val == {StringLength[tok[[2]]]},
-        		takeSpecs = Partition[{1} ~Join~ val ~Join~ {StringLength[tok[[2]]]}, 2, 1];
-        	,
-        	val == {1},
-        		takeSpecs = Partition[{1} ~Join~ val ~Join~ {StringLength[tok[[2]]]}, 2, 1];
-        	,
-        	val == {StringLength[tok[[2]]]},
-        		takeSpecs = Partition[{1} ~Join~ val ~Join~ {StringLength[tok[[2]]]}, 2, 1];
-        	,
-        	True,
-        		takeSpecs = Partition[{1} ~Join~ val ~Join~ {StringLength[tok[[2]]]}, 2, 1];
-        ];
+        scan for fragments such as * ) that should NOT be broken
+
+        but line break BEFORE this fragment
         *)
-        takeSpecs = Partition[{0} ~Join~ val ~Join~ {StringLength[tok[[2]]]}, 2, 1];
-        If[$Debug,
-        	Print["takeSpecs: ", takeSpecs];
+        Which[
+          (*
+          comments have been fragmentized
+
+          there may be more fragments to check in the future
+          *)
+          MatchQ[tok, FragmentNode[Token`Comment, "*)", _]],
+            tokens[[key]] = {Fragment[Token`Comment, "\\" <> $CurrentNewline, tok[[3]]], tok}
+          ,
+          MatchQ[tok, LeafNode[Token`Fake`ImplicitTimes, _, _]],
+            Message[CodeFormat::implicittimesaftercontinuation];
+            tokens[[key]] = {Fragment[Token`Fake`ImplicitTimes, "\\" <> $CurrentNewline, tok[[3]]], FragmentNode[Token`Star, "*", <||>]}
+          ,
+          (*
+          No special cases, can use the original split value
+          *)
+          True,
+            takeSpecs = Partition[{0} ~Join~ val ~Join~ {StringLength[tok[[2]]]}, 2, 1];
+            If[$Debug,
+              Print["takeSpecs 1: ", takeSpecs];
+            ];
+            takeSpecs = Replace[takeSpecs, {
+                {0, 0} -> {},
+                {start_, end_} :> {start+1, end}
+              }
+              ,
+              {1}
+            ];
+            If[$Debug,
+              Print["takeSpecs 2: ", takeSpecs];
+            ];
+
+            tokens[[key]] = FragmentNode[tok[[1]], #, tok[[3]]]& /@ Riffle[StringTake[tok[[2]], takeSpecs], "\\" <> $CurrentNewline]
         ];
-        takeSpecs = Replace[takeSpecs, {
-        		{0, 0} -> {},
-        		{start_, end_} :> {start+1, end}
-        	}
-        	,
-        	{1}
-        ];
-        If[$Debug,
-        	Print["takeSpecs: ", takeSpecs];
-        ];
-        tokens[[key]] = FragmentNode[tok[[1]], #, tok[[3]]]& /@ Riffle[StringTake[tok[[2]], takeSpecs], "\\" <> $CurrentNewline]
       ]
       ,
       toSplit

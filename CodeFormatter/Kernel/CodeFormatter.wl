@@ -326,6 +326,8 @@ comment = LeafNode[Token`Comment, _, _]
 
 matchNewlineQ = MatchQ[nl]
 
+matchCommentFragmentNewlineQ := MatchQ[FragmentNode[Token`Comment, $CurrentNewline, _]]
+
 
 
 
@@ -784,7 +786,7 @@ Module[{origSpaces},
       FragmentNode[Token`Comment, "\\" <> $CurrentNewline, <||>],
       Table[FragmentNode[Token`Comment, " ", <||>], origSpaces],
       FragmentNode[Token`Comment, "(*", <||>],
-      Riffle[FragmentNode[Token`Comment, #, <||>]& /@ StringSplit[StringTake[s, {3, -3}], $CurrentNewline], FragmentNode[Token`Comment, $CurrentNewline, <||>]],
+      Riffle[FragmentNode[Token`Comment, #, <||>]& /@ StringSplit[StringTake[s, {3, -3}], $CurrentNewline, All], FragmentNode[Token`Comment, $CurrentNewline, <||>]],
       FragmentNode[Token`Comment, "*)", <||>]
     }], <|data, "InsertedFragmentNodes" -> 1 + origSpaces|>]
 ]
@@ -833,7 +835,7 @@ IntroduceRowNodes[cst_] :=
       Print["ranges: ", ranges];
     ];
 
-    ranges = DeleteCases[#, {_, 0}]& /@ ranges;
+    ranges = DeleteCases[ranges, {{_, 0}, ___}];
 
     If[$Debug2,
       Print["ranges: ", ranges];
@@ -1021,10 +1023,15 @@ indent[LeafNode[Token`Newline, _, _], level_] :=
 (*
 Special case multiline comments
 
-It is ok to change the internal indentation of comments
+It is ok to change the internal indentation of comments, as long as everything is still aligned
 *)
-indent[LeafNode[Token`Comment, fs:{FragmentNode[Token`Comment, s_ /; s == "\\" <> $CurrentNewline, _], ___}, data_], level_] :=
-Module[{min, replaced, origSpaces, strs, minStr, indentStr, frags, inserted},
+indent[LeafNode[Token`Comment, fs:{
+  FragmentNode[Token`Comment, s_ /; s == "\\" <> $CurrentNewline, _],
+  ___,
+  FragmentNode[Token`Comment, "(*", _],
+  ___,
+  FragmentNode[Token`Comment, "*)", _]}, data_], level_] :=
+Module[{min, replaced, origSpaces, strs, minStr, indentStr, frags, inserted, split, fragGroups, nlGroups, firstStrs, replacedStrs, replacedFirstStrs},
   
   origSpaces = data[[Key[Source], 1, 2]]-1;
 
@@ -1046,20 +1053,46 @@ Module[{min, replaced, origSpaces, strs, minStr, indentStr, frags, inserted},
   so we require that there must be *some* whitespace starting the line
   *)
 
-  frags = DeleteCases[fs, FragmentNode[Token`Comment, $CurrentNewline, _]];
-  strs = frags[[All, 2]];
+  (*
+  inserted + 1 is the opener ( *
+  *)
+  split = Split[fs[[inserted + 1;;]], (matchCommentFragmentNewlineQ[#1] == matchCommentFragmentNewlineQ[#2])&];
+  fragGroups = split[[1;;-1;;2]];
+  nlGroups = split[[2;;-2;;2]];
+
+  strs = fragGroups[[All, All, 2]];
+
+  firstStrs = strs[[All, 1]];
+
+  If[$Debug,
+    Print["fragGroups: ", fragGroups];
+    Print["nlGroups: ", nlGroups];
+    Print["strs: ", strs];
+    Print["firstStrs: ", firstStrs];
+  ];
+
 
   min = Min[
     inserted - 1,
-    StringCases[strs[[inserted + 1 ;;]],
-      StartOfString ~~ ws:(" " ~~ " "...) ~~ Except[" "] :> StringLength[ws]]
+    (*
+    do not count the first group that starts with ( *, this is already being counted by inserted
+    *)
+    StringCases[firstStrs[[2;;]],
+      StartOfString ~~ ws:(" "...) ~~ Except[" "] :> StringLength[ws]]
     ,
     origSpaces
   ];
 
+  If[$Debug,
+    Print["min: ", min];
+  ];
+
   minStr = StringJoin[Table[" ", min]];
   indentStr = StringJoin[Table[$CurrentIndentationString, level]];
-  replaced = StringReplace[strs, StartOfString ~~ minStr :> indentStr];
+  
+  replacedFirstStrs = StringReplace[firstStrs[[2;;]], StartOfString ~~ minStr :> indentStr];
+
+  replacedStrs = MapThread[{#1}~Join~Rest[#2] &, {replacedFirstStrs, strs[[2;;]]}];
 
   replacedOrigSpaces =
     Join[
@@ -1072,13 +1105,15 @@ Module[{min, replaced, origSpaces, strs, minStr, indentStr, frags, inserted},
     Print["minStr: ", minStr //InputForm];
     Print["indentStr: ", indentStr //InputForm];
     Print["replacedOrigSpaces: ", replacedOrigSpaces //InputForm];
-    Print["replaced: ", replaced //InputForm];
+    Print["replacedStrs: ", replacedStrs //InputForm];
   ];
 
   LeafNode[Token`Comment,
-    {fs[[1]]} ~Join~
-    replacedOrigSpaces ~Join~
-      Riffle[FragmentNode[Token`Comment, #, <||>]& /@ replaced[[inserted+1;;]], FragmentNode[Token`Comment, $CurrentNewline, <||>]]
+    Flatten[
+      {fs[[1]]} ~Join~
+      replacedOrigSpaces ~Join~
+      Riffle[{fragGroups[[1]]} ~Join~ ((FragmentNode[Token`Comment, #, <||>]& /@ #)& /@ replacedStrs), nlGroups]
+    ]
     ,
     data
   ]
@@ -2465,6 +2500,13 @@ breakLine[tokensIn_, lineWidth_] :=
           *)
           MatchQ[tok, FragmentNode[Token`Comment, "*)", _]],
             tokens[[key]] = {Fragment[Token`Comment, "\\" <> $CurrentNewline, tok[[3]]], tok}
+          ,
+          MatchQ[tok, LeafNode[String, s_ /; !StringStartsQ[s, "\""], _]],
+            (*
+            just ignore the line break for now
+            FIXME: yes this is wrong
+            *)
+            tokens[[key]] = tok
           ,
           MatchQ[tok, LeafNode[Token`Fake`ImplicitTimes, _, _]],
             Message[CodeFormat::implicittimesaftercontinuation];

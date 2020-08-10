@@ -148,5 +148,20 @@ TestMatch[
 
 
 
+(*
+Test nested comments
+*)
+TestMatch[
+	CodeFormat["(*(**)*)", "LineWidth" -> 5]
+	,
+	_String
+	,
+	TestID->"LineBreaking-20200808-F9R3L9"
+]
+
+
+
+
+
 
 

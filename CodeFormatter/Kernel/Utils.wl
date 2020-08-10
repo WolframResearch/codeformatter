@@ -20,6 +20,9 @@ isCloser
 insertNecessarySpaces
 
 
+betterRiffle
+
+
 Begin["`Private`"]
 
 Needs["CodeParser`"]
@@ -261,7 +264,7 @@ insertNecessarySpaces[tokensIn_] :=
 
     toInsert = ReverseSort[toInsert];
 
-    tokens = Fold[Function[{toks, pos}, Insert[toks, LeafNode[Token`Whitespace, " ", <||>], pos]], tokens, toInsert];
+    tokens = Fold[Function[{toks, pos}, Insert[toks, LeafNode[Whitespace, " ", <||>], pos]], tokens, toInsert];
 
 
     (*
@@ -279,6 +282,16 @@ insertNecessarySpaces[tokensIn_] :=
     tokens
   ]
 
+
+
+(*
+It is convenient to have a function that does:
+
+Riffle[{1}, {2}] => {1}
+*)
+betterRiffle[{a_}, _] := {a}
+
+betterRiffle[a_, b_] := Riffle[a, b]
 
 
 End[]

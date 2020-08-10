@@ -20,16 +20,20 @@ Needs["PacletManager`"]
 Options[formatTest] = {
   "FileNamePrefixPattern" -> "",
   "FileSizeLimit" -> {0, Infinity},
-  "DryRun" -> False
+  "DryRun" -> False,
+  "LineWidth" -> 120,
+  AirynessLevel -> 0
 }
 
 formatTest[file_String, i_Integer, OptionsPattern[]] :=
   Catch[
- Module[{dryRun, prefix, res},
+ Module[{dryRun, prefix, res, lineWidth, airyness},
    
    prefix = OptionValue["FileNamePrefixPattern"];
    limit = OptionValue["FileSizeLimit"];
    dryRun = OptionValue["DryRun"];
+   lineWidth = OptionValue["LineWidth"];
+   airyness = OptionValue[AirynessLevel];
 
     If[$Debug, Print["file1: ", File[file]]];
     
@@ -69,7 +73,14 @@ formatTest[file_String, i_Integer, OptionsPattern[]] :=
   ];
 
   Check[
-    res = CodeFormat[File[file]];
+    Check[
+    implicitTimesInserted = False;
+    res = CodeFormat[File[file], "LineWidth" -> lineWidth, AirynessLevel -> airyness];
+    ,
+    implicitTimesInserted = True;
+    ,
+    {CodeFormat::implicittimesaftercontinuation}
+    ];
 
     If[FailureQ[res],
 
@@ -81,32 +92,9 @@ formatTest[file_String, i_Integer, OptionsPattern[]] :=
             Print[Style[Row[{"index: ", i, " ", res}], Darker[Orange]]];
           Throw[res]
         ,
-        _,
-          (*
-          implicit Times after a line continuation
-
-          must make an explicit *, so this is now not the same aggregate syntax as the input and the sanity check fails
-          *)
-          If[MemberQ[{
-            prefix <> "StartUp/Biology/MoleculePlot.m",
-            prefix <> "StartUp/DataPaclets/TideData.m",
-            prefix <> "StartUp/DataPaclets/UniverseModelData.m",
-            prefix <> "StartUp/DSolve/DSolveNonlinear2ndOrderODE.m",
-            prefix <> "StartUp/DSolve/DSolveSecondOrderODE.m",
-            prefix <> "StartUp/ImageProcessing/Interactive/DynamicImage.m",
-            prefix <> "StartUp/Network/GraphElementLibrary.m",
-            prefix <> "StartUp/NKSSpecialFunctions/RulePlot.m",
-            prefix <> "StartUp/PlaneGeometry/TriangleData.m",
-            prefix <> "StartUp/RandomProcesses/Library.m",
-            prefix <> "StartUp/RandomProcesses/TimeSeriesAnalysis/TimeSeriesConvert.m",
-            prefix <> "StartUp/Regions/RegionFunctions/Measure.m",
-            prefix <> "StartUp/Regions/RegionFunctions/Perimeter.m",
-            prefix <> "StartUp/SpecialSimplifiers/PolyGamma.m",
-            prefix <> "StartUp/SpecialSimplifiers/Recurrence.m",
-            prefix <> "StartUp/Statistics/RandomMatrices/TracyWidomDistribution.m",
-            Nothing
-            }, file],
-            Throw[Failure["ImplcitTimesAfterLineContinuation", <|"File" -> File[file]|>]]
+        Failure["SanityCheckFailed", _],
+          If[implicitTimesInserted,
+            Throw[Failure["ImplicitTimesAfterLineContinuation", <|"File" -> File[file]|>]]
           ];
           Print[
              Style[Row[{"index: ", i, " ", File[file]}], 
@@ -127,11 +115,16 @@ formatTest[file_String, i_Integer, OptionsPattern[]] :=
       Export[file, res, "Text"]
     ]
     ,
-    Print[
-       Style[Row[{"index: ", i, " ", File[file]}], 
-        Darker[Orange]]];
+    If[!implicitTimesInserted,
+      (*
+      only fire if not handled by other check
+      *)
       Print[
-       Style[$MessageList, Darker[Orange]]];
+         Style[Row[{"index: ", i, " ", File[file]}], 
+          Darker[Orange]]];
+        Print[
+         Style[$MessageList, Darker[Orange]]];
+    ]
   ]
 ]]
 

@@ -19,7 +19,7 @@
     <copy todir='${files_directory}/${component}'>
 			<fileset dir='${basedir}/${component}'>
 				<include name='Kernel/**' />
-				<include name='*.m' />
+				<include name='*.wl' />
 			</fileset>
 		</copy>
 

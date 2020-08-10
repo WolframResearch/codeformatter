@@ -52,9 +52,11 @@ $DefaultTabWidth = 4
 
 $DefaultLineWidth = 120
 
+$DefaultSafetyMargin = 10
 
 
-CodeFormat::implicittimesaftercontinuation = "CodeFormat inserted * where an implicit Times was previously."
+
+CodeFormat::implicittimesaftercontinuation = "Replaced implicit Times with explicit * to remove ambiguity."
 
 
 
@@ -66,7 +68,7 @@ Options[CodeFormat] = {
   "Newline" :> $DefaultNewline,
   "TabWidth" :> $DefaultTabWidth,
   "LineWidth" :> $DefaultLineWidth,
-  "SafetyMargin" :> 10
+  "SafetyMargin" :> $DefaultSafetyMargin
 }
 
 
@@ -295,6 +297,10 @@ Module[{indentationString, cst, newline, tabWidth, indented, airyness, formatted
 
     If[$Debug,
       Print["after linearize: ", linearized];
+    ];
+
+    If[FailureQ[linearized],
+      Throw[linearized]
     ];
 
     merged = mergeLineContinuations[linearized];
@@ -850,7 +856,7 @@ IntroduceRowNodes[cst_] :=
       Print["ranges: ", ranges];
     ];
 
-    ranges = DeleteCases[ranges, {{_, 0}, ___}];
+    ranges = DeleteCases[ranges, {{___, 0}, ___}];
 
     If[$Debug2,
       Print["ranges: ", ranges];
@@ -2855,6 +2861,9 @@ isAcceptableOperator[tok_] :=
       False
     ,
     LeafNode[Token`Fake`ImplicitTimes, _, _],
+      False
+    ,
+    FragmentNode[Token`Fake`ImplicitTimes, _, _],
       False
     ,
     LeafNode[Token`ColonColon | Token`LessLess | Token`GreaterGreater | Token`GreaterGreaterGreater, _, _],

@@ -125,6 +125,23 @@ TestMatch[
 	TestID->"LineBreaking-20200805-W8K3O3"
 ]
 
+(*
+Test breaking on \:
+*)
+str = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa + \\:03b1"
+
+TestMatch[
+	CodeFormat[str, "LineWidth" -> 120]
+	,
+	_String
+	,
+	TestID->"LineBreaking-20200810-T5K2E1"
+]
+
+
+
+
+
 
 
 (*

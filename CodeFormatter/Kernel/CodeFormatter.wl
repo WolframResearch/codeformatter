@@ -2541,11 +2541,11 @@ breakLine[tokensIn_, lineWidth1_, lineWidth2_] :=
         Print["width is (tentatively) now 1: ", width];
       ];
 
-      While[True,
+      If[width <= lineWidth1,
+        Continue[]
+      ];
 
-        If[width <= lineWidth1,
-          Break[]
-        ];
+      While[True,
 
         (*
         Algorithm 1
@@ -2563,127 +2563,10 @@ breakLine[tokensIn_, lineWidth1_, lineWidth2_] :=
 
         *)
         If[width <= lineWidth2,
-          Switch[tok,
-            LeafNode[Integer | Real | Symbol | String |
-              Token`Under | Token`UnderUnder | Token`UnderUnderUnder | Token`UnderDot |
-              Token`Hash | Token`HashHash |
-              Token`Fake`ImplicitNull | Token`Fake`ImplicitOne | Token`Fake`ImplicitAll, _, _],
-              Null
-            ,
-            FragmentNode[Integer | Real | Symbol | String |
-              Token`Under | Token`UnderUnder | Token`UnderUnderUnder | Token`UnderDot |
-              Token`Hash | Token`HashHash |
-              Token`Fake`ImplicitNull | Token`Fake`ImplicitOne | Token`Fake`ImplicitAll, _, _],
-              Null
-            ,
-            LeafNode[Whitespace, _, _],
-              Null
-            ,
-            FragmentNode[Whitespace, _, _],
-              Null
-            ,
-            FragmentNode[Token`Comment, _, _],
-              Null
-            ,
-            (*
-            Closers
-            *)
-            LeafNode[Token`CloseCurly | Token`CloseParen | Token`CloseSquare | Token`BarGreater | Token`LongName`RightDoubleBracket, _, _],
-              Null
-            ,
-            FragmentNode[Token`CloseCurly | Token`CloseParen | Token`CloseSquare | Token`BarGreater | Token`LongName`RightDoubleBracket, _, _],
-              Null
-            ,
-            (*
-            Postfix
-            *)
-            LeafNode[Token`Amp | Token`SingleQuote | Token`DotDot | Token`DotDotDot, _ , _],
-              Null
-            ,
-            (*
-            Possibly Postfix, so do not break after
-            *)
-            LeafNode[Token`Bang | Token`MinusMinus | Token`PlusPlus | Token`BangBang, _ , _],
-              Null
-            ,
-            (*
-            a semi can end an expression
-            do not insert newline after ;
-            may change semantics
-            *)
-            LeafNode[Token`Semi, _, _],
-              Null
-            ,
-            FragmentNode[Token`Semi, _, _],
-              Null
-            ,
-            (*
-            semisemi may have optional arguments that line breaking would change
-            *)
-            LeafNode[Token`SemiSemi, _, _],
-              Null
-            ,
-            LeafNode[Token`Fake`ImplicitTimes, _, _],
-              Null
-            ,
-            LeafNode[Token`ColonColon | Token`LessLess | Token`GreaterGreater | Token`GreaterGreaterGreater, _, _],
-              Null
-            ,
-            FragmentNode[Token`ColonColon | Token`LessLess | Token`GreaterGreater | Token`GreaterGreaterGreater, _, _],
-              Null
-            ,
-            (*
-            Unambiguous:
-            openers
-            Prefix
-            Binary
-            Infix
-            Ternary
-            *)
-            LeafNode[
-              (* Unambiguous openers *)
-              Token`OpenCurly | Token`OpenParen | Token`OpenSquare | Token`LessBar | Token`LongName`LeftDoubleBracket |
-              (* Unambiguous prefix *)
-              Token`LongName`Not |
-              (* Unambiguous binary / infix 1 character *)
-              Token`Plus | Token`Comma | Token`Less | Token`Minus | Token`Caret | Token`Slash | Token`Greater | Token`Equal | Token`Star | Token`Bar | Token`Question |
-                Token`Colon | Token`At | Token`Dot |
-              (* Unambiguous binary / infix 2 character *)
-              Token`BarBar | Token`SlashDot | Token`MinusGreater | Token`SlashAt | Token`EqualEqual | Token`AmpAmp | Token`ColonEqual | Token`AtAt | Token`BangEqual |
-                Token`LessEqual | Token`SlashSemi | Token`LessGreater | Token`ColonGreater | Token`SlashSlash | Token`GreaterEqual | Token`AtStar | Token`TildeTilde |
-                Token`StarEqual | Token`PlusEqual | Token`SlashStar | Token`SlashEqual | Token`StarStar | Token`MinusEqual | Token`CaretEqual |
-              (* Unambiguous binary / infix 3 character *)
-              Token`EqualEqualEqual | Token`EqualBangEqual | Token`AtAtAt | Token`SlashSlashDot | Token`CaretColonEqual | Token`SlashSlashAt |
-              (* Unambiguous binary / infix longname *)
-              Token`LongName`And | Token`LongName`Element | Token`LongName`DirectedEdge | Token`LongName`RuleDelayed |
-              (* Unambiguous ternary *)
-              Token`Tilde | Token`SlashColon, _, _],
-              AppendTo[toInsertAfter, i];
-              width = 0;
-            ,
-            FragmentNode[
-              (* Unambiguous openers *)
-              Token`OpenCurly | Token`OpenParen | Token`OpenSquare | Token`LessBar | Token`LongName`LeftDoubleBracket |
-              (* Unambiguous prefix *)
-              Token`LongName`Not |
-              (* Unambiguous binary / infix 1 character *)
-              Token`Plus | Token`Comma | Token`Less | Token`Minus | Token`Caret | Token`Slash | Token`Greater | Token`Equal | Token`Star | Token`Bar | Token`Question |
-                Token`Colon | Token`At | Token`Dot |
-              (* Unambiguous binary / infix 2 character *)
-              Token`BarBar | Token`SlashDot | Token`MinusGreater | Token`SlashAt | Token`EqualEqual | Token`AmpAmp | Token`ColonEqual | Token`AtAt | Token`BangEqual |
-                Token`LessEqual | Token`SlashSemi | Token`LessGreater | Token`ColonGreater | Token`SlashSlash | Token`GreaterEqual | Token`AtStar | Token`TildeTilde |
-                Token`StarEqual | Token`PlusEqual | Token`SlashStar | Token`SlashEqual | Token`StarStar | Token`MinusEqual | Token`CaretEqual |
-              (* Unambiguous binary / infix 3 character *)
-              Token`EqualEqualEqual | Token`EqualBangEqual | Token`AtAtAt | Token`SlashSlashDot | Token`CaretColonEqual | Token`SlashSlashAt |
-              (* Unambiguous binary / infix longname *)
-              Token`LongName`And | Token`LongName`Element | Token`LongName`DirectedEdge | Token`LongName`RuleDelayed |
-              (* Unambiguous ternary *)
-              Token`Tilde | Token`SlashColon, _, _],
-              AppendTo[toInsertAfter, i];
-              width = 0;
-            ,
-            _,
-              Print[tok]
+          
+          If[isAcceptableOperator[tok],
+            AppendTo[toInsertAfter, i];
+            width = 0;
           ];
 
           Break[]
@@ -2747,6 +2630,42 @@ breakLine[tokensIn_, lineWidth1_, lineWidth2_] :=
                       Print["unfinished longname"];
                     ];
                     kTmp = kTmp - StringLength[StringCases[StringTake[tok[[2]], kTmp], RegularExpression["\\\\\\[([a-zA-Z0-9]*)$"]][[1]]] - 1
+                  ,
+                  (*
+                  ends with unfinished 2hex
+                  *)
+                  StringEndsQ[StringTake[tok[[2]], kTmp], RegularExpression["\\\\\\.[a-fA-F0-9]"]],
+                    If[$Debug,
+                      Print["unfinished 2hex"];
+                    ];
+                    kTmp = kTmp - StringLength[StringCases[StringTake[tok[[2]], kTmp], RegularExpression["\\\\\\.[a-fA-F0-9]$"]][[1]]] - 1
+                  ,
+                  (*
+                  ends with unfinished 4hex
+                  *)
+                  StringEndsQ[StringTake[tok[[2]], kTmp], RegularExpression["\\\\:[a-fA-F0-9]{1,3}"]],
+                    If[$Debug,
+                      Print["unfinished 4hex"];
+                    ];
+                    kTmp = kTmp - StringLength[StringCases[StringTake[tok[[2]], kTmp], RegularExpression["\\\\:[a-fA-F0-9]{1,3}$"]][[1]]] - 1
+                  ,
+                  (*
+                  ends with unfinished 6hex
+                  *)
+                  StringEndsQ[StringTake[tok[[2]], kTmp], RegularExpression["\\\\\\|[a-fA-F0-9]{1,5}"]],
+                    If[$Debug,
+                      Print["unfinished 6hex"];
+                    ];
+                    kTmp = kTmp - StringLength[StringCases[StringTake[tok[[2]], kTmp], RegularExpression["\\\\\\|[a-fA-F0-9]{1,5}$"]][[1]]] - 1
+                  ,
+                  (*
+                  ends with unfinished octal
+                  *)
+                  StringEndsQ[StringTake[tok[[2]], kTmp], RegularExpression["\\\\[0-7]{1,2}"]],
+                    If[$Debug,
+                      Print["unfinished octal"];
+                    ];
+                    kTmp = kTmp - StringLength[StringCases[StringTake[tok[[2]], kTmp], RegularExpression["\\\\[0-7]{1,2}$"]][[1]]] - 1
                   ,
                   (*
                   ends with unfinished single escaped character
@@ -2872,6 +2791,130 @@ breakLine[tokensIn_, lineWidth1_, lineWidth2_] :=
 
     Flatten[tokens]
   ]
+
+
+isAcceptableOperator[tok_] :=
+  Switch[tok,
+    LeafNode[Integer | Real | Symbol | String |
+      Token`Under | Token`UnderUnder | Token`UnderUnderUnder | Token`UnderDot |
+      Token`Hash | Token`HashHash |
+      Token`Fake`ImplicitNull | Token`Fake`ImplicitOne | Token`Fake`ImplicitAll, _, _],
+      False
+    ,
+    FragmentNode[Integer | Real | Symbol | String |
+      Token`Under | Token`UnderUnder | Token`UnderUnderUnder | Token`UnderDot |
+      Token`Hash | Token`HashHash |
+      Token`Fake`ImplicitNull | Token`Fake`ImplicitOne | Token`Fake`ImplicitAll, _, _],
+      False
+    ,
+    LeafNode[Whitespace, _, _],
+      False
+    ,
+    FragmentNode[Whitespace, _, _],
+      False
+    ,
+    FragmentNode[Token`Comment, _, _],
+      False
+    ,
+    (*
+    Closers
+    *)
+    LeafNode[Token`CloseCurly | Token`CloseParen | Token`CloseSquare | Token`BarGreater | Token`LongName`RightDoubleBracket, _, _],
+      False
+    ,
+    FragmentNode[Token`CloseCurly | Token`CloseParen | Token`CloseSquare | Token`BarGreater | Token`LongName`RightDoubleBracket, _, _],
+      False
+    ,
+    (*
+    Postfix
+    *)
+    LeafNode[Token`Amp | Token`SingleQuote | Token`DotDot | Token`DotDotDot, _ , _],
+      False
+    ,
+    (*
+    Possibly Postfix, so do not break after
+    *)
+    LeafNode[Token`Bang | Token`MinusMinus | Token`PlusPlus | Token`BangBang, _ , _],
+      False
+    ,
+    (*
+    a semi can end an expression
+    do not insert newline after ;
+    may change semantics
+    *)
+    LeafNode[Token`Semi, _, _],
+      False
+    ,
+    FragmentNode[Token`Semi, _, _],
+      False
+    ,
+    (*
+    semisemi may have optional arguments that line breaking would change
+    *)
+    LeafNode[Token`SemiSemi, _, _],
+      False
+    ,
+    LeafNode[Token`Fake`ImplicitTimes, _, _],
+      False
+    ,
+    LeafNode[Token`ColonColon | Token`LessLess | Token`GreaterGreater | Token`GreaterGreaterGreater, _, _],
+      False
+    ,
+    FragmentNode[Token`ColonColon | Token`LessLess | Token`GreaterGreater | Token`GreaterGreaterGreater, _, _],
+      False
+    ,
+    (*
+    Unambiguous:
+    openers
+    Prefix
+    Binary
+    Infix
+    Ternary
+    *)
+    LeafNode[
+      (* Unambiguous openers *)
+      Token`OpenCurly | Token`OpenParen | Token`OpenSquare | Token`LessBar | Token`LongName`LeftDoubleBracket |
+      (* Unambiguous prefix *)
+      Token`LongName`Not |
+      (* Unambiguous binary / infix 1 character *)
+      Token`Plus | Token`Comma | Token`Less | Token`Minus | Token`Caret | Token`Slash | Token`Greater | Token`Equal | Token`Star | Token`Bar | Token`Question |
+        Token`Colon | Token`At | Token`Dot |
+      (* Unambiguous binary / infix 2 character *)
+      Token`BarBar | Token`SlashDot | Token`MinusGreater | Token`SlashAt | Token`EqualEqual | Token`AmpAmp | Token`ColonEqual | Token`AtAt | Token`BangEqual |
+        Token`LessEqual | Token`SlashSemi | Token`LessGreater | Token`ColonGreater | Token`SlashSlash | Token`GreaterEqual | Token`AtStar | Token`TildeTilde |
+        Token`StarEqual | Token`PlusEqual | Token`SlashStar | Token`SlashEqual | Token`StarStar | Token`MinusEqual | Token`CaretEqual |
+      (* Unambiguous binary / infix 3 character *)
+      Token`EqualEqualEqual | Token`EqualBangEqual | Token`AtAtAt | Token`SlashSlashDot | Token`CaretColonEqual | Token`SlashSlashAt |
+      (* Unambiguous binary / infix longname *)
+      Token`LongName`And | Token`LongName`Element | Token`LongName`DirectedEdge | Token`LongName`RuleDelayed |
+      (* Unambiguous ternary *)
+      Token`Tilde | Token`SlashColon, _, _],
+      True
+    ,
+    FragmentNode[
+      (* Unambiguous openers *)
+      Token`OpenCurly | Token`OpenParen | Token`OpenSquare | Token`LessBar | Token`LongName`LeftDoubleBracket |
+      (* Unambiguous prefix *)
+      Token`LongName`Not |
+      (* Unambiguous binary / infix 1 character *)
+      Token`Plus | Token`Comma | Token`Less | Token`Minus | Token`Caret | Token`Slash | Token`Greater | Token`Equal | Token`Star | Token`Bar | Token`Question |
+        Token`Colon | Token`At | Token`Dot |
+      (* Unambiguous binary / infix 2 character *)
+      Token`BarBar | Token`SlashDot | Token`MinusGreater | Token`SlashAt | Token`EqualEqual | Token`AmpAmp | Token`ColonEqual | Token`AtAt | Token`BangEqual |
+        Token`LessEqual | Token`SlashSemi | Token`LessGreater | Token`ColonGreater | Token`SlashSlash | Token`GreaterEqual | Token`AtStar | Token`TildeTilde |
+        Token`StarEqual | Token`PlusEqual | Token`SlashStar | Token`SlashEqual | Token`StarStar | Token`MinusEqual | Token`CaretEqual |
+      (* Unambiguous binary / infix 3 character *)
+      Token`EqualEqualEqual | Token`EqualBangEqual | Token`AtAtAt | Token`SlashSlashDot | Token`CaretColonEqual | Token`SlashSlashAt |
+      (* Unambiguous binary / infix longname *)
+      Token`LongName`And | Token`LongName`Element | Token`LongName`DirectedEdge | Token`LongName`RuleDelayed |
+      (* Unambiguous ternary *)
+      Token`Tilde | Token`SlashColon, _, _],
+      True
+    ,
+    _,
+      Print["unhandled: ", tok];
+      False
+  ];
 
 
 End[]

@@ -2716,10 +2716,10 @@ breakLine[tokensIn_, lineWidth1_, lineWidth2_] :=
         *)
         Which[
           MatchQ[tok, FragmentNode[Token`Comment, "(*", _]],
-            tokens[[key]] = {Fragment[Token`Comment, "\\" <> $CurrentNewline, tok[[3]]], tok}
+            tokens[[key]] = {FragmentNode[Token`Comment, "\\" <> $CurrentNewline, tok[[3]]], tok}
           ,
           MatchQ[tok, FragmentNode[Token`Comment, "*)", _]],
-            tokens[[key]] = {Fragment[Token`Comment, $CurrentNewline, tok[[3]]], tok}
+            tokens[[key]] = {FragmentNode[Token`Comment, $CurrentNewline, tok[[3]]], tok}
           ,
           MatchQ[tok, LeafNode[String, s_ /; !StringStartsQ[s, "\""], _]],
             (*
@@ -2733,7 +2733,7 @@ breakLine[tokensIn_, lineWidth1_, lineWidth2_] :=
             insert a star to work-around design issues of line continuations and implicit Times interfering with each other
             *)
             Message[CodeFormat::implicittimesaftercontinuation];
-            tokens[[key]] = {Fragment[Token`Fake`ImplicitTimes, "\\" <> $CurrentNewline, tok[[3]]], FragmentNode[Token`Star, "*", <||>]}
+            tokens[[key]] = {FragmentNode[Token`Fake`ImplicitTimes, "\\" <> $CurrentNewline, tok[[3]]], FragmentNode[Token`Star, "*", <||>]}
           ,
           (*
           inside comment, so do not need to insert continuations marks

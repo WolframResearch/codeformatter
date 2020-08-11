@@ -321,13 +321,28 @@ Module[{indentationString, cst, newline, tabWidth, indented, airyness, formatted
       Print["after breaked: ", breaked];
     ];
 
-    strs = breaked[[All, 2]];
+    If[!ListQ[breaked],
+      Throw[breaked]
+    ];
+
+    strs = collectStr /@ breaked;
 
     formattedStr = StringJoin[strs];
 
     formattedStr
   ]
 ]]
+
+
+
+collectStr[LeafNode[_, s_String, _]] := s
+
+collectStr[FragmentNode[_, s_String, _]] := s
+
+(*
+linear syntax does not participate in formatting
+*)
+collectStr[GroupNode[GroupLinearSyntaxParen, ts_, _]] := collectStr /@ ts
 
 
 
@@ -2548,6 +2563,13 @@ breakLine[tokensIn_, lineWidth1_, lineWidth2_] :=
         Print["width is: ", width];
       ];
       tok = tokens[[i]];
+
+      (*
+      linear syntax does not participate in line breaking
+      *)
+      If[MatchQ[tok, GroupNode[GroupLinearSyntaxParen, _, _]],
+        Continue[]
+      ];
 
       width += StringLength[tok[[2]]];
       If[$Debug,

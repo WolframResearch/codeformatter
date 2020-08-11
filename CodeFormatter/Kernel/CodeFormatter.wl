@@ -954,6 +954,13 @@ extractFragmentNodes[LeafNode[_, fs_List, _]] := fs
 
 extractFragmentNodes[LeafNode[tag_, s_String, data_]] := {FragmentNode[tag, s, data]}
 
+extractFragmentNodes[GroupNode[Comment, fs_List, _]] := extractFragmentNodesFromCommentGroupNode /@ fs
+
+extractFragmentNodesFromCommentGroupNode[LeafNode[_, s_String, _]] := FragmentNode[Token`Comment, s, <||>]
+
+extractFragmentNodesFromCommentGroupNode[BoxNode[RowBox, {fs_List}, _]] := extractFragmentNodesFromCommentGroupNode /@ fs
+
+
 
 (*
 Some nodes can be "abstracted" for formatting

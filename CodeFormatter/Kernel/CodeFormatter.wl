@@ -95,6 +95,11 @@ Module[{cst, tabWidth, formattedStr, agg, cst2, agg2, aggToCompare, agg2ToCompar
   agg = normalizeTokens[agg, "FormatOnly" -> True, "Newline" -> newline, "TabWidth" -> tabWidth];
 
   cst2 = CodeConcreteParse[formattedStr];
+
+  If[KeyExistsQ[cst2[[3]], SyntaxIssues],
+    Message[CodeFormat::syntaxissues];
+  ];
+
   agg2 = CodeParser`Abstract`Aggregate[cst2];
   agg2 = normalizeTokens[agg2, "FormatOnly" -> True, "Newline" -> newline, "TabWidth" -> tabWidth];
 
@@ -126,6 +131,10 @@ Module[{cst, tabWidth, formattedStr, agg, cst2, agg2, aggToCompare, agg2ToCompar
 
   formattedStr = CodeFormatCST[cst, opts];
 
+  If[!StringQ[formattedStr],
+    Throw[formattedStr]
+  ];
+
   formattedStr = StringTrim[formattedStr];
 
   If[$DisableSanityChecking,
@@ -136,6 +145,11 @@ Module[{cst, tabWidth, formattedStr, agg, cst2, agg2, aggToCompare, agg2ToCompar
   agg = normalizeTokens[agg, "FormatOnly" -> True, "Newline" -> newline, "TabWidth" -> tabWidth];
 
   cst2 = CodeConcreteParse[formattedStr];
+
+  If[KeyExistsQ[cst2[[3]], SyntaxIssues],
+    Message[CodeFormat::syntaxissues];
+  ];
+
   agg2 = CodeParser`Abstract`Aggregate[cst2];
   agg2 = normalizeTokens[agg2, "FormatOnly" -> True, "Newline" -> newline, "TabWidth" -> tabWidth];
 
@@ -173,6 +187,10 @@ Module[{cst, tabWidth, formattedStr, agg, cst2, agg2, aggToCompare, agg2ToCompar
 
   formattedStr = CodeFormatCST[cst, opts];
 
+  If[!StringQ[formattedStr],
+    Throw[formattedStr]
+  ];
+
   formattedStr = StringTrim[formattedStr];
 
   If[$DisableSanityChecking,
@@ -183,6 +201,11 @@ Module[{cst, tabWidth, formattedStr, agg, cst2, agg2, aggToCompare, agg2ToCompar
   agg = normalizeTokens[agg, "FormatOnly" -> True, "Newline" -> newline, "TabWidth" -> tabWidth];
 
   cst2 = CodeConcreteParse[formattedStr];
+
+  If[KeyExistsQ[cst2[[3]], SyntaxIssues],
+    Message[CodeFormat::syntaxissues];
+  ];
+  
   agg2 = CodeParser`Abstract`Aggregate[cst2];
   agg2 = normalizeTokens[agg2, "FormatOnly" -> True, "Newline" -> newline, "TabWidth" -> tabWidth];
 
@@ -2527,7 +2550,7 @@ mergeLineContinuations[fs_] :=
 
 
 
-breakLines[tokensIn_, lineWidth1_, lineWidth2_] :=
+breakLines[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
   Module[{tokens, lines},
 
     tokens = tokensIn;
@@ -2549,7 +2572,7 @@ breakLines[tokensIn_, lineWidth1_, lineWidth2_] :=
     tokens
   ]
 
-breakLine[tokensIn_, lineWidth1_, lineWidth2_] :=
+breakLine[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
   Module[{tokens, width, tok, toSplit, takeSpecs, kTmp, toInsertAfter},
 
     tokens = tokensIn;
@@ -2660,11 +2683,11 @@ breakLine[tokensIn_, lineWidth1_, lineWidth2_] :=
                   (*
                   ends with unfinished longname
                   *)
-                  StringEndsQ[StringTake[tok[[2]], kTmp], RegularExpression["\\\\\\[([a-zA-Z0-9]*)"]],
+                  StringEndsQ[StringTake[tok[[2]], kTmp], RegularExpression["\\\\\\[[a-zA-Z0-9]+"]],
                     If[$Debug,
                       Print["unfinished longname"];
                     ];
-                    kTmp = kTmp - StringLength[StringCases[StringTake[tok[[2]], kTmp], RegularExpression["\\\\\\[([a-zA-Z0-9]*)$"]][[1]]] - 1
+                    kTmp = kTmp - StringLength[StringCases[StringTake[tok[[2]], kTmp], RegularExpression["\\\\\\[[a-zA-Z0-9]+$"]][[1]]]
                   ,
                   (*
                   ends with unfinished 2hex
@@ -2673,7 +2696,7 @@ breakLine[tokensIn_, lineWidth1_, lineWidth2_] :=
                     If[$Debug,
                       Print["unfinished 2hex"];
                     ];
-                    kTmp = kTmp - StringLength[StringCases[StringTake[tok[[2]], kTmp], RegularExpression["\\\\\\.[a-fA-F0-9]$"]][[1]]] - 1
+                    kTmp = kTmp - StringLength[StringCases[StringTake[tok[[2]], kTmp], RegularExpression["\\\\\\.[a-fA-F0-9]$"]][[1]]]
                   ,
                   (*
                   ends with unfinished 4hex
@@ -2682,7 +2705,7 @@ breakLine[tokensIn_, lineWidth1_, lineWidth2_] :=
                     If[$Debug,
                       Print["unfinished 4hex"];
                     ];
-                    kTmp = kTmp - StringLength[StringCases[StringTake[tok[[2]], kTmp], RegularExpression["\\\\:[a-fA-F0-9]{1,3}$"]][[1]]] - 1
+                    kTmp = kTmp - StringLength[StringCases[StringTake[tok[[2]], kTmp], RegularExpression["\\\\:[a-fA-F0-9]{1,3}$"]][[1]]]
                   ,
                   (*
                   ends with unfinished 6hex
@@ -2691,25 +2714,34 @@ breakLine[tokensIn_, lineWidth1_, lineWidth2_] :=
                     If[$Debug,
                       Print["unfinished 6hex"];
                     ];
-                    kTmp = kTmp - StringLength[StringCases[StringTake[tok[[2]], kTmp], RegularExpression["\\\\\\|[a-fA-F0-9]{1,5}$"]][[1]]] - 1
+                    kTmp = kTmp - StringLength[StringCases[StringTake[tok[[2]], kTmp], RegularExpression["\\\\\\|[a-fA-F0-9]{1,5}$"]][[1]]]
                   ,
                   (*
                   ends with unfinished octal
                   *)
-                  StringEndsQ[StringTake[tok[[2]], kTmp], RegularExpression["\\\\[0-7]{1,2}"]],
+                  StringEndsQ[StringTake[tok[[2]], kTmp], RegularExpression["\\\\[0-7]{2}"]],
                     If[$Debug,
                       Print["unfinished octal"];
                     ];
-                    kTmp = kTmp - StringLength[StringCases[StringTake[tok[[2]], kTmp], RegularExpression["\\\\[0-7]{1,2}$"]][[1]]] - 1
+                    kTmp = kTmp - StringLength[StringCases[StringTake[tok[[2]], kTmp], RegularExpression["\\\\[0-7]{2}$"]][[1]]]
                   ,
                   (*
                   ends with unfinished single escaped character
                   *)
-                  StringEndsQ[StringTake[tok[[2]], kTmp], RegularExpression["\\\\"]],
+                  StringEndsQ[StringTake[tok[[2]], kTmp], RegularExpression["\\\\."]],
                     If[$Debug,
                       Print["unfinished single character"];
                     ];
-                    kTmp = kTmp - StringLength[StringCases[StringTake[tok[[2]], kTmp], RegularExpression["\\\\$"]][[1]]] - 1
+                    kTmp = kTmp - StringLength[StringCases[StringTake[tok[[2]], kTmp], RegularExpression["\\\\.$"]][[1]]]
+                  ,
+                  (*
+                  ends with backslash
+                  *)
+                  StringEndsQ[StringTake[tok[[2]], kTmp], RegularExpression["\\\\"]],
+                    If[$Debug,
+                      Print["unfinished backslash"];
+                    ];
+                    kTmp = kTmp - StringLength[StringCases[StringTake[tok[[2]], kTmp], RegularExpression["\\\\$"]][[1]]]
                   ,
                   True,
                     If[$Debug,
@@ -2830,13 +2862,13 @@ breakLine[tokensIn_, lineWidth1_, lineWidth2_] :=
 
 isAcceptableOperator[tok_] :=
   Switch[tok,
-    LeafNode[Integer | Real | Symbol | String |
+    LeafNode[Integer | Real | Rational | Symbol | String |
       Token`Under | Token`UnderUnder | Token`UnderUnderUnder | Token`UnderDot |
       Token`Hash | Token`HashHash |
       Token`Fake`ImplicitNull | Token`Fake`ImplicitOne | Token`Fake`ImplicitAll, _, _],
       False
     ,
-    FragmentNode[Integer | Real | Symbol | String |
+    FragmentNode[Integer | Real | Rational | Symbol | String |
       Token`Under | Token`UnderUnder | Token`UnderUnderUnder | Token`UnderDot |
       Token`Hash | Token`HashHash |
       Token`Fake`ImplicitNull | Token`Fake`ImplicitOne | Token`Fake`ImplicitAll, _, _],
@@ -2864,6 +2896,9 @@ isAcceptableOperator[tok_] :=
     Postfix
     *)
     LeafNode[Token`Amp | Token`SingleQuote | Token`DotDot | Token`DotDotDot, _ , _],
+      False
+    ,
+    FragmentNode[Token`Amp | Token`SingleQuote | Token`DotDot | Token`DotDotDot, _ , _],
       False
     ,
     (*
@@ -2913,7 +2948,7 @@ isAcceptableOperator[tok_] :=
       (* Unambiguous openers *)
       Token`OpenCurly | Token`OpenParen | Token`OpenSquare | Token`LessBar | Token`LongName`LeftDoubleBracket |
       (* Unambiguous prefix *)
-      Token`LongName`Not |
+      Token`LongName`Not | Token`LongName`DifferentialD | Token`LongName`Product |
       (* Unambiguous binary / infix 1 character *)
       Token`Plus | Token`Comma | Token`Less | Token`Minus | Token`Caret | Token`Slash | Token`Greater | Token`Equal | Token`Star | Token`Bar | Token`Question |
         Token`Colon | Token`At | Token`Dot |
@@ -2922,9 +2957,11 @@ isAcceptableOperator[tok_] :=
         Token`LessEqual | Token`SlashSemi | Token`LessGreater | Token`ColonGreater | Token`SlashSlash | Token`GreaterEqual | Token`AtStar | Token`TildeTilde |
         Token`StarEqual | Token`PlusEqual | Token`SlashStar | Token`SlashEqual | Token`StarStar | Token`MinusEqual | Token`CaretEqual |
       (* Unambiguous binary / infix 3 character *)
-      Token`EqualEqualEqual | Token`EqualBangEqual | Token`AtAtAt | Token`SlashSlashDot | Token`CaretColonEqual | Token`SlashSlashAt |
+      Token`EqualEqualEqual | Token`EqualBangEqual | Token`AtAtAt | Token`SlashSlashDot | Token`CaretColonEqual | Token`SlashSlashAt | Token`LessMinusGreater |
       (* Unambiguous binary / infix longname *)
-      Token`LongName`And | Token`LongName`Element | Token`LongName`DirectedEdge | Token`LongName`RuleDelayed |
+      Token`LongName`And | Token`LongName`Element | Token`LongName`DirectedEdge | Token`LongName`RuleDelayed | Token`LongName`Rule | Token`LongName`UndirectedEdge |
+        Token`LongName`Xor | Token`LongName`Function | Token`LongName`Intersection | Token`LongName`Union | Token`LongName`Or | Token`LongName`Subset |
+        Token`LongName`Distributed | Token`LongName`Conditioned |
       (* Unambiguous ternary *)
       Token`Tilde | Token`SlashColon, _, _],
       True
@@ -2933,7 +2970,7 @@ isAcceptableOperator[tok_] :=
       (* Unambiguous openers *)
       Token`OpenCurly | Token`OpenParen | Token`OpenSquare | Token`LessBar | Token`LongName`LeftDoubleBracket |
       (* Unambiguous prefix *)
-      Token`LongName`Not |
+      Token`LongName`Not | Token`LongName`DifferentialD | Token`LongName`Product |
       (* Unambiguous binary / infix 1 character *)
       Token`Plus | Token`Comma | Token`Less | Token`Minus | Token`Caret | Token`Slash | Token`Greater | Token`Equal | Token`Star | Token`Bar | Token`Question |
         Token`Colon | Token`At | Token`Dot |
@@ -2942,9 +2979,11 @@ isAcceptableOperator[tok_] :=
         Token`LessEqual | Token`SlashSemi | Token`LessGreater | Token`ColonGreater | Token`SlashSlash | Token`GreaterEqual | Token`AtStar | Token`TildeTilde |
         Token`StarEqual | Token`PlusEqual | Token`SlashStar | Token`SlashEqual | Token`StarStar | Token`MinusEqual | Token`CaretEqual |
       (* Unambiguous binary / infix 3 character *)
-      Token`EqualEqualEqual | Token`EqualBangEqual | Token`AtAtAt | Token`SlashSlashDot | Token`CaretColonEqual | Token`SlashSlashAt |
+      Token`EqualEqualEqual | Token`EqualBangEqual | Token`AtAtAt | Token`SlashSlashDot | Token`CaretColonEqual | Token`SlashSlashAt | Token`LessMinusGreater |
       (* Unambiguous binary / infix longname *)
-      Token`LongName`And | Token`LongName`Element | Token`LongName`DirectedEdge | Token`LongName`RuleDelayed |
+      Token`LongName`And | Token`LongName`Element | Token`LongName`DirectedEdge | Token`LongName`RuleDelayed | Token`LongName`Rule | Token`LongName`UndirectedEdge |
+        Token`LongName`Xor | Token`LongName`Function | Token`LongName`Intersection | Token`LongName`Union | Token`LongName`Or | Token`LongName`Subset |
+        Token`LongName`Distributed | Token`LongName`Conditioned |
       (* Unambiguous ternary *)
       Token`Tilde | Token`SlashColon, _, _],
       True

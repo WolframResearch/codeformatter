@@ -255,6 +255,12 @@ Module[{indentationString, cst, newline, tabWidth, indented, airyness, formatted
 
     $CurrentAiryness = airyness;
 
+    cst = StandardizeCommentGroups[cst];
+
+    If[$Debug,
+      Print["after StandardizeCommentGroups: ", cst];
+    ];
+
     (*
     Must be before StandardizeEmbeddedNewlines
     depends on "EmbeddedNewlines" data
@@ -369,7 +375,6 @@ collectStr[GroupNode[GroupLinearSyntaxParen, ts_, _]] := collectStr /@ ts
 
 
 
-
 trivia = LeafNode[Whitespace | Token`Boxes`MultiWhitespace | Token`Comment | Token`Newline, _, _]
 
 ws = LeafNode[Whitespace | Token`Boxes`MultiWhitespace, _, _]
@@ -382,6 +387,46 @@ matchNewlineQ = MatchQ[nl]
 
 matchCommentFragmentNewlineQ := MatchQ[FragmentNode[Token`Comment, $CurrentNewline, _]]
 
+
+
+StandardizeCommentGroups::usage = "StandardizeCommentGroups[cst] standardizes comment groups."
+
+StandardizeCommentGroups[cstIn_] :=
+  Module[{cst, reaped, picking, embeddedNewlines, embeddedNewlinesFromCommentGroups},
+
+    cst = cstIn;
+
+    poss = Position[cst, GroupNode[Comment, _, _]];
+
+    reaped = Reap[
+      cst = MapAt[convertCommentGroups, cst, poss];
+      ,
+      "containsEmbeddedNewline"
+    ];
+
+    If[!empty[reaped[[2]]],
+      picking = reaped[[2]][[1]];
+      embeddedNewlinesFromCommentGroups = Pick[poss, picking];
+      If[!empty[embeddedNewlinesFromCommentGroups],
+        embeddedNewlines = Lookup[cst[[3]], "EmbeddedNewlines", {}];
+        embeddedNewlines = Union[embeddedNewlines, embeddedNewlinesFromCommentGroups];
+        cst[[3, Key["EmbeddedNewlines"]]] = embeddedNewlines;
+      ];
+    ];
+
+    cst
+  ]
+
+convertCommentGroups[GroupNode[Comment, boxs_, data_]] :=
+  Module[{strs},
+    strs = Cases[boxs, _String, Infinity];
+    If[MemberQ[strs, "\[IndentingNewLine]"],
+      Sow[True, "containsEmbeddedNewline"]
+      ,
+      Sow[False, "containsEmbeddedNewline"]
+    ];
+    LeafNode[Token`Comment, StringJoin[strs], data]
+  ]
 
 
 
@@ -765,6 +810,7 @@ StandardizeEmbeddedTabs[cstIn_, newline_String, tabWidth_Integer] :=
   ]
 
 
+
 (*
 Fragmentize leaf nodes
 
@@ -881,10 +927,10 @@ IntroduceRowNodes[cst_] :=
   Module[{commentPoss, isCommentOrWhitespacePos, ranges, commentsOnNewlinesOrStartOfFile, subsumedRanges, extracted,
     last, pos},
     
-    commentPoss = Position[cst, LeafNode[Token`Comment, _, _] | GroupNode[Comment, _, _]];
+    commentPoss = Position[cst, LeafNode[Token`Comment, _, _]];
     
     isCommentOrWhitespacePos[pos1_] :=
-      ListQ[pos1] && MatchQ[Extract[cst, pos1], LeafNode[Token`Comment | Whitespace | Token`Boxes`MultiWhitespace, _, _] | GroupNode[Comment, _, _]];
+      ListQ[pos1] && MatchQ[Extract[cst, pos1], LeafNode[Token`Comment | Whitespace | Token`Boxes`MultiWhitespace, _, _]];
 
     ranges = Function[{commentPos},
       Reverse[NestWhileList[ Join[Most[#], {Last[#] - 1}]&, commentPos, (Last[#] >= 1 && isCommentOrWhitespacePos[#])&]]
@@ -991,12 +1037,6 @@ IntroduceRowNodes[cst_] :=
 extractFragmentNodes[LeafNode[_, fs_List, _]] := fs
 
 extractFragmentNodes[LeafNode[tag_, s_String, data_]] := {FragmentNode[tag, s, data]}
-
-extractFragmentNodes[GroupNode[Comment, fs_List, _]] := extractFragmentNodesFromCommentGroupNode /@ fs
-
-extractFragmentNodesFromCommentGroupNode[LeafNode[_, s_String, _]] := FragmentNode[Token`Comment, s, <||>]
-
-extractFragmentNodesFromCommentGroupNode[BoxNode[RowBox, {fs_List}, _]] := extractFragmentNodesFromCommentGroupNode /@ fs
 
 
 

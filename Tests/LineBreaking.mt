@@ -89,7 +89,7 @@ str = "\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 Test[
 	CodeFormat[str, "LineWidth" -> 120]
 	,
-	"\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\\\na\\[DiscretionaryParagraphSeparator]\""
+	"\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\\\n\\[DiscretionaryParagraphSeparator]\""
 	,
 	TestID->"LineBreaking-20200805-A0T7P8"
 ]
@@ -178,7 +178,23 @@ TestMatch[
 
 
 
+(*
+Test sequences of longnames
+*)
 
+str =
+"
+lowcaseQ :=
+    StringMatchQ[s, RegularExpression[\"[\\[Alpha]\\[Beta]\\[Gamma]\\[Delta]\\[Epsilon]\\[CurlyKappa]\\[Lambda]\\[Mu]\\[Nu]\\[Xi]\\[Omicron]\\[Pi]\\[CurlyPi]\\[Rho]\\[Chi]\\[Psi]]\"]]
+"
+
+TestMatch[
+	CodeFormat[str, "LineWidth" -> 40, "SafetyMargin" -> 10, AirynessLevel -> 0]
+	,
+	_String
+	,
+	TestID->"LineBreaking-20200811-V0V3B3"
+]
 
 
 

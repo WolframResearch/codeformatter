@@ -460,7 +460,7 @@ ternary, with different possibilities for second operator
 Token`SlashColon -> Parselet`SlashColonParselet[],
 
 (*
-Has to handle  a ->.  and  a -> Parselet`.
+Has to handle  a =.  and  a = .
 *)
 Token`Equal -> Parselet`EqualParselet[],
 Token`ColonEqual -> Parselet`ColonEqualParselet[],

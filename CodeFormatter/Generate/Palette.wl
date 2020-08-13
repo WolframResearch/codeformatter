@@ -2,40 +2,9 @@ BeginPackage["CodeFormatter`Generate`Palette`"]
 
 Begin["`Private`"]
 
+Needs["CodeFormatter`Generate`GenerateSources`"]
+
 Print["Generating Palette..."]
-
-
-buildDirFlagPosition = FirstPosition[$CommandLine, "-buildDir"]
-
-If[MissingQ[buildDirFlagPosition],
-  Print["Cannot proceed; Unsupported build directory"];
-  Quit[1]
-]
-
-buildDir = $CommandLine[[buildDirFlagPosition[[1]] + 1]]
-
-If[!DirectoryQ[buildDir],
-  Print["Cannot proceed; Unsupported build directory"];
-  Quit[1]
-]
-
-
-
-generatedWLDir = FileNameJoin[{buildDir, "generated", "wl"}]
-
-Print["Clean..."]
-
-Quiet[DeleteDirectory[generatedWLDir, DeleteContents -> True], DeleteDirectory::nodir]
-
-Quiet[CreateDirectory[generatedWLDir], CreateDirectory::filex]
-
-Print["Done Clean"]
-
-
-
-
-
-
 
 generatePalette[] :=
 Module[{nb},
@@ -62,7 +31,6 @@ Module[{nb},
             Labeled[Checkbox[Enabled -> False], "Reparse boxes before formatting"],
             Spacer[{0, 20}],
             Labeled[Slider[Dynamic[CodeFormatter`$DefaultAirynessLevel, Initialization :> (Needs["CodeFormatter`"])], {-1, 1}], "Airyness"],
-            (*Labeled[Slider[Dynamic[CodeFormatter`$DefaultLineWidth, Initialization :> (Needs["CodeFormatter`"])], {40, 200, 1}], "Line width"],*)
             Spacer[{0, 20}]
           }]
         }]

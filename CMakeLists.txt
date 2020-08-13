@@ -30,14 +30,19 @@ message(STATUS "CMAKE_SIZEOF_VOID_P: ${CMAKE_SIZEOF_VOID_P}")
 message(STATUS "BUG349779_PAUSE: ${BUG349779_PAUSE}")
 message(STATUS "BUG349779_TIMEOUT: ${BUG349779_TIMEOUT}")
 
-set(WL_PACLET_SOURCES
+set(STATIC_WL_PACLET_SOURCES
 	${PROJECT_SOURCE_DIR}/CodeFormatter/Kernel/CodeFormatter.wl
 	${PROJECT_SOURCE_DIR}/CodeFormatter/Kernel/Notebooks.wl
 	${PROJECT_SOURCE_DIR}/CodeFormatter/Kernel/Utils.wl
 )
 
-set(GENERATED_WL_PACLET_SOURCES
-	${PROJECT_BINARY_DIR}/generated/wl/CodeFormatter.nb
+#
+# Used during the build process
+#
+set(WL_GENERATE_SOURCES_SOURCES
+	${PROJECT_SOURCE_DIR}/CodeFormatter/Generate/AcceptableOperators.wl
+	${PROJECT_SOURCE_DIR}/CodeFormatter/Generate/GenerateSources.wl
+	${PROJECT_SOURCE_DIR}/CodeFormatter/Generate/Palette.wl
 )
 
 set(WL_GENERATE_CREATEPACLETARCHIVE_SOURCES
@@ -46,6 +51,24 @@ set(WL_GENERATE_CREATEPACLETARCHIVE_SOURCES
 
 set(PACLETINFO_SOURCE
 	${PROJECT_SOURCE_DIR}/${PACLET}/PacletInfo.wl
+)
+
+set(WL_DATA_SOURCES
+	${PROJECT_SOURCE_DIR}/CodeFormatter/Data/InfixParselets.wl
+	${PROJECT_SOURCE_DIR}/CodeFormatter/Data/PrefixParselets.wl
+)
+
+set(GENERATED_WL_PACLET_PALETTE_SOURCES
+	${PROJECT_BINARY_DIR}/generated/wl/CodeFormatter.nb
+)
+
+set(GENERATED_WL_PACLET_KERNEL_SOURCES
+	${PROJECT_BINARY_DIR}/generated/wl/AcceptableOperators.wl
+)
+
+set(GENERATED_SOURCES
+	${GENERATED_WL_PACLET_PALETTE_SOURCES}
+	${GENERATED_WL_PACLET_KERNEL_SOURCES}
 )
 
 set(DOCUMENTATION_NOTEBOOK_PATHS
@@ -96,47 +119,32 @@ add_custom_command(
 )
 list(APPEND COPIED_WL_PACLET_SOURCES ${COPIED_PACLETINFO})
 
-foreach(SRC ${WL_PACLET_SOURCES})
+foreach(SRC ${STATIC_WL_PACLET_SOURCES})
 	get_filename_component(BARE_SRC ${SRC} NAME)
 	add_custom_command(
-    OUTPUT ${PROJECT_BINARY_DIR}/paclet/${PACLET}/Kernel/${BARE_SRC}
-    COMMAND ${CMAKE_COMMAND} -E copy ${SRC} ${PROJECT_BINARY_DIR}/paclet/${PACLET}/Kernel/${BARE_SRC}
-    DEPENDS ${SRC})
+		OUTPUT
+			${PROJECT_BINARY_DIR}/paclet/${PACLET}/Kernel/${BARE_SRC}
+		COMMAND
+			${CMAKE_COMMAND} -E copy ${SRC} ${PROJECT_BINARY_DIR}/paclet/${PACLET}/Kernel/${BARE_SRC}
+		DEPENDS
+			${SRC})
 	list(APPEND COPIED_WL_PACLET_SOURCES ${PROJECT_BINARY_DIR}/paclet/${PACLET}/Kernel/${BARE_SRC})
 endforeach()
 
+foreach(SRC ${GENERATED_WL_PACLET_KERNEL_SOURCES})
+	get_filename_component(BARE_SRC ${SRC} NAME)
+	add_custom_command(
+		OUTPUT
+			${PROJECT_BINARY_DIR}/paclet/${PACLET}/Kernel/${BARE_SRC}
+		COMMAND
+			${CMAKE_COMMAND} -E copy ${SRC} ${PROJECT_BINARY_DIR}/paclet/${PACLET}/Kernel/${BARE_SRC}
+		DEPENDS
+			${SRC}
+	)
+	list(APPEND COPIED_WL_PACLET_SOURCES ${PROJECT_BINARY_DIR}/paclet/${PACLET}/Kernel/${BARE_SRC})
+endforeach()
 
-
-
-
-
-#
-# generate palette
-#
-
-#set(GENERATED_PALETTE_OUTPUT ${PROJECT_BINARY_DIR}/paclet/${PACLET}/FrontEnd/Palettes/${PACLET}.nb)
-
-#add_custom_target(generated-palette
-#	DEPENDS
-#		${GENERATED_PALETTE_OUTPUT}
-#)
-
-add_custom_command(
-	OUTPUT
-		${GENERATED_WL_PACLET_SOURCES}
-	DEPENDS
-		${PROJECT_SOURCE_DIR}/${PACLET}/Generate/Palette.wl
-		${PROJECT_SOURCE_DIR}/cmake/WolframScript.cmake
-	COMMAND
-		${CMAKE_COMMAND} -E echo "GENERATED_WL_PACLET_SOURCES: ${GENERATED_WL_PACLET_SOURCES}"
-	COMMAND
-		${CMAKE_COMMAND} -DSCRIPT=${PROJECT_SOURCE_DIR}/${PACLET}/Generate/Palette.wl -DSRCDIR=${PROJECT_SOURCE_DIR} -DBUILDDIR=${PROJECT_BINARY_DIR} -DWOLFRAMKERNEL=${WOLFRAMKERNEL} -DBUG349779_TIMEOUT=${BUG349779_TIMEOUT} -P ${PROJECT_SOURCE_DIR}/cmake/WolframScript.cmake
-	VERBATIM
-	WORKING_DIRECTORY
-		${PROJECT_SOURCE_DIR}
-)
-
-foreach(SRC ${GENERATED_WL_PACLET_SOURCES})
+foreach(SRC ${GENERATED_WL_PACLET_PALETTE_SOURCES})
 	get_filename_component(BARE_SRC ${SRC} NAME)
 	add_custom_command(
 		OUTPUT
@@ -148,6 +156,37 @@ foreach(SRC ${GENERATED_WL_PACLET_SOURCES})
 	)
 	list(APPEND COPIED_WL_PACLET_SOURCES ${PROJECT_BINARY_DIR}/paclet/${PACLET}/FrontEnd/Palettes/${BARE_SRC})
 endforeach()
+
+
+
+#
+# generated-srcs target
+#
+add_custom_target(generated-srcs
+	DEPENDS
+		${GENERATED_SOURCES}
+)
+
+#
+# Generate source files
+#
+# Run the GenerateSources.wl script to generate additional required source files
+#
+add_custom_command(
+	OUTPUT
+		${GENERATED_SOURCES}
+	DEPENDS
+		${WL_DATA_SOURCES}
+		${WL_GENERATE_SOURCES_SOURCES}
+		${PROJECT_SOURCE_DIR}/cmake/WolframScript.cmake
+	COMMAND
+		${CMAKE_COMMAND} -E echo "GENERATED_WL_PACLET_SOURCES: ${GENERATED_WL_PACLET_SOURCES}"
+	COMMAND
+		${CMAKE_COMMAND} -DSCRIPT=${PROJECT_SOURCE_DIR}/${PACLET}/Generate/GenerateSources.wl -DSRCDIR=${PROJECT_SOURCE_DIR} -DBUILDDIR=${PROJECT_BINARY_DIR} -DWOLFRAMKERNEL=${WOLFRAMKERNEL} -DBUG349779_TIMEOUT=${BUG349779_TIMEOUT} -P ${PROJECT_SOURCE_DIR}/cmake/WolframScript.cmake
+	VERBATIM
+	WORKING_DIRECTORY
+		${PROJECT_SOURCE_DIR}
+)
 
 
 

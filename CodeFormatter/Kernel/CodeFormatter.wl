@@ -738,7 +738,12 @@ StandardizeEmbeddedNewlines[cstIn_, newline_String] :=
 
       cst = MapAt[convertEmbeddedNewlines[#, "FormatOnly" -> True, "Newline" -> newline]&, cst, mapSpecs[[All, 2]]];
 
+      (*
+
+      To be used later
+
       KeyDropFrom[data, "EmbeddedNewlines"];
+      *)
 
       cst[[3]] = data;
     ];
@@ -802,7 +807,12 @@ StandardizeEmbeddedTabs[cstIn_, newline_String, tabWidth_Integer] :=
 
       cst = MapAt[convertEmbeddedTabs[#, "FormatOnly" -> True, "Newline" -> newline, "TabWidth" -> tabWidth]&, cst, mapSpecs[[All, 2]]];
 
+      (*
+      
+      To be used later
+
       KeyDropFrom[data, "EmbeddedTabs"];
+      *)
 
       cst[[3]] = data;
     ];
@@ -837,9 +847,10 @@ others?
 
 *)
 Fragmentize[cstIn_] :=
-  Module[{poss, cst},
+  Module[{poss, cst, tokStartLocs, grouped, data, embeddedNewlines, mapSpecs, tuples, allOtherPoss},
 
     cst = cstIn;
+    data = cst[[3]];
 
     (*
     Special case multiline strings and multiline comments with LineColumn convention
@@ -851,21 +862,62 @@ Fragmentize[cstIn_] :=
     A line continuation is inserted to help with semantics of inserting a newline (this may not ultimately be needed)
     Also, the line continuation helps to communicate the "separateness" of the string or comment
     *)
-    poss = Position[cst, LeafNode[String | Token`Comment, s_ /; StringContainsQ[s, $CurrentNewline], KeyValuePattern[Source -> {{_, _}, {_, _}}]]];
+    poss = Position[cst, LeafNode[_, _, _], {-5, -3}];
+    poss = Cases[poss, {___Integer}];
+    
+    tokStartLocs = #[[3, Key[Source], 1]]& /@ Extract[cst, poss];
 
-    cst = MapAt[fragmentizeMultilineLeafNode, cst, poss];
+    (*
+    Group by starting SourceLocation
+    *)
+    grouped = GroupBy[Transpose[{tokStartLocs, poss}, {2, 1}], #[[1]]&];
 
+    (*
+    "EmbeddedNewlines" may not exist
+    *)
+    embeddedNewlines = Lookup[data, "EmbeddedNewlines", {}];
+
+    mapSpecs = Map[
+      Function[{newlineLoc},
+
+        tuples = grouped[newlineLoc];
+
+        (*
+        The token associated with this location may have been abstracted away and now missing
+        *)
+        If[!MissingQ[tuples],
+          tuples
+          ,
+          Nothing
+        ]
+      ]
+      ,
+      embeddedNewlines
+    ];
+
+    mapSpecs = Flatten[mapSpecs, 1];
+    embeddedNewlinePoss =  mapSpecs[[All, 2]];
+
+    cst = MapAt[fragmentizeMultilineLeafNode, cst, embeddedNewlinePoss];
+
+    If[$Debug,
+      Print["after fragmentizeMultilineLeafNode: ", cst];
+    ];
+
+    allOtherPoss = Complement[poss, embeddedNewlinePoss];
     (*
     Now also fragmentize the remaining comments
     *)
-    poss = Position[cst, LeafNode[Token`Comment, _String, _]];
+    cst = MapAt[fragmentizeAllOtherLeafs, cst, allOtherPoss];
 
-    cst = MapAt[fragmentizeComment, cst, poss];
+    If[$Debug,
+      Print["after fragmentizeAllOtherLeafs: ", cst];
+    ];
 
     cst
   ]
 
-fragmentizeMultilineLeafNode[LeafNode[String, s_, data_]] :=
+fragmentizeMultilineLeafNode[LeafNode[String, s_, data:KeyValuePattern[Source -> {{_, _}, {_, _}}]]] :=
 Module[{origSpaces},
   origSpaces = data[[Key[Source], 1, 2]]-1;
   LeafNode[String,
@@ -881,7 +933,7 @@ Make sure to fragmentize ( * and * ) here
 
 And fragmentize nested comments also
 *)
-fragmentizeMultilineLeafNode[LeafNode[Token`Comment, s_, data_]] :=
+fragmentizeMultilineLeafNode[LeafNode[Token`Comment, s_, data:KeyValuePattern[Source -> {{_, _}, {_, _}}]]] :=
 Module[{origSpaces},
   origSpaces = data[[Key[Source], 1, 2]]-1;
   LeafNode[Token`Comment,
@@ -892,17 +944,24 @@ Module[{origSpaces},
     }], <|data, "InsertedFragmentNodes" -> 1 + origSpaces|>]
 ]
 
+fragmentizeMultilineLeafNode[args___] := Failure["InternalUnhandled", <|"Function"->fragmentizeMultilineLeafNode, "Arguments"->{args}|>]
+
+
 (*
 Make sure to fragmentize ( * and * ) here
 
 And fragmentize nested comments also
 *)
-fragmentizeComment[LeafNode[Token`Comment, s_, data_]] :=
+fragmentizeAllOtherLeafs[LeafNode[Token`Comment, s_, data_]] :=
   LeafNode[Token`Comment,
     FragmentNode[Token`Comment, #, <||>]& /@ DeleteCases[StringSplit[s, x:"(*"|"*)" :> x], ""]
     ,
     data
   ]
+
+fragmentizeAllOtherLeafs[l:LeafNode[_, _, _]] :=
+  l
+
 
 
 

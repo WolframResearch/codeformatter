@@ -51,7 +51,7 @@ $DefaultNewline = "\n"
 
 $DefaultTabWidth = 4
 
-$DefaultLineWidth = 120
+$DefaultLineWidth = 180
 
 $DefaultSafetyMargin = 10
 

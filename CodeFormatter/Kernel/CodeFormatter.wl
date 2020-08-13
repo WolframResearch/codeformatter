@@ -97,8 +97,8 @@ Module[{cst, tabWidth, formattedStr, agg, cst2, agg2, aggToCompare, agg2ToCompar
 
   cst2 = CodeConcreteParse[formattedStr];
 
-  If[KeyExistsQ[cst2[[3]], SyntaxIssues],
-    Message[CodeFormat::syntaxissues];
+  If[MatchQ[cst2[[3]], KeyValuePattern[SyntaxIssues -> {___, SyntaxIssue["UnrecognizedCharacter", _, _, _], ___}]],
+    Message[CodeFormat::syntaxissues, Lookup[cst2[[3]], SyntaxIssues]];
   ];
 
   agg2 = CodeParser`Abstract`Aggregate[cst2];
@@ -147,8 +147,8 @@ Module[{cst, tabWidth, formattedStr, agg, cst2, agg2, aggToCompare, agg2ToCompar
 
   cst2 = CodeConcreteParse[formattedStr];
 
-  If[KeyExistsQ[cst2[[3]], SyntaxIssues],
-    Message[CodeFormat::syntaxissues];
+  If[MatchQ[cst2[[3]], KeyValuePattern[SyntaxIssues -> {___, SyntaxIssue["UnrecognizedCharacter", _, _, _], ___}]],
+    Message[CodeFormat::syntaxissues, Lookup[cst2[[3]], SyntaxIssues]];
   ];
 
   agg2 = CodeParser`Abstract`Aggregate[cst2];
@@ -203,8 +203,8 @@ Module[{cst, tabWidth, formattedStr, agg, cst2, agg2, aggToCompare, agg2ToCompar
 
   cst2 = CodeConcreteParse[formattedStr];
 
-  If[KeyExistsQ[cst2[[3]], SyntaxIssues],
-    Message[CodeFormat::syntaxissues];
+  If[MatchQ[cst2[[3]], KeyValuePattern[SyntaxIssues -> {___, SyntaxIssue["UnrecognizedCharacter", _, _, _], ___}]],
+    Message[CodeFormat::syntaxissues, Lookup[cst2[[3]], SyntaxIssues]];
   ];
   
   agg2 = CodeParser`Abstract`Aggregate[cst2];

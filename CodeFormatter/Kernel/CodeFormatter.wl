@@ -29,7 +29,7 @@ $DefaultAirynessLevel
 
 Begin["`Private`"]
 
-Needs["CodeFormatter`AcceptableOperator`"]
+Needs["CodeFormatter`AcceptableOperators`"]
 Needs["CodeFormatter`Utils`"]
 
 Needs["CodeParser`"]
@@ -40,7 +40,6 @@ Needs["CodeParser`Utils`"]
 If[PacletFind["Format"] != {},
   Message[General::obspkg, "Format`"]
 ]
-
 
 
 $DefaultAirynessLevel = 0

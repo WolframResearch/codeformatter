@@ -37,9 +37,11 @@ Needs["CodeParser`Folds`"] (* for linearize *)
 Needs["CodeParser`Utils`"]
 
 
+
 If[PacletFind["Format"] != {},
   Message[General::obspkg, "Format`"]
 ]
+
 
 
 $DefaultAirynessLevel = 0
@@ -368,10 +370,7 @@ collectStr[LeafNode[_, s_String, _]] := s
 
 collectStr[FragmentNode[_, s_String, _]] := s
 
-(*
-linear syntax does not participate in formatting
-*)
-collectStr[GroupNode[GroupLinearSyntaxParen, ts_, _]] := collectStr /@ ts
+collectStr[FragmentNode[_, s_String, _]] := s
 
 
 
@@ -1657,11 +1656,6 @@ redoGroupNewlines[GroupNode[tag_, {
   }, data]
 
 
-(*
-Do not format linear syntax right now
-*)
-indent[n:GroupNode[GroupLinearSyntaxParen, _, _], _] :=
-  n
 
 indent[GroupNode[tag_, {
       opener_, 
@@ -2686,13 +2680,6 @@ breakLine[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
       ];
       tok = tokens[[i]];
 
-      (*
-      linear syntax does not participate in line breaking
-      *)
-      If[MatchQ[tok, GroupNode[GroupLinearSyntaxParen, _, _]],
-        Continue[]
-      ];
-
       width += StringLength[tok[[2]]];
       If[$Debug,
         Print["width is (tentatively) now 1: ", width];
@@ -2747,6 +2734,7 @@ breakLine[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
 
     If[$Debug,
       Print["toSplit 1: ", toSplit];
+      Print["toInsertAfter: ", toInsertAfter];
     ];
 
     (*
@@ -2870,9 +2858,11 @@ breakLine[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
       Function[{key, val},
         tok = tokens[[key]];
         (*
-        scan for fragments such as * ) that should NOT be broken
+        scan for fragments such as ( * and * ) that COULD be broken but that SHOULD NOT be broken
 
-        but line break BEFORE this fragment
+        For aesthetics or whatever reasons
+
+        but at least line break BEFORE this fragment
         *)
         Which[
           MatchQ[tok, FragmentNode[Token`Comment, "(*", _]],
@@ -2895,7 +2885,12 @@ breakLine[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
             Message[CodeFormat::implicittimesaftercontinuation];
             tokens[[key]] = {FragmentNode[Token`Fake`ImplicitTimes, "\\" <> $CurrentNewline, tok[[3]]], FragmentNode[Token`Star, "*", <||>]}
           ,
+          MatchQ[tok, LeafNode[Token`LinearSyntaxBlob, _, _]],
+            tokens[[key]] = {FragmentNode[Token`LinearSyntaxBlob, "\\" <> $CurrentNewline, tok[[3]]], tok}
+          ,
           (*
+          OK to split
+
           inside comment, so do not need to insert continuations marks
           *)
           MatchQ[tok, FragmentNode[Token`Comment, _, _]],
@@ -2917,6 +2912,8 @@ breakLine[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
             tokens[[key]] = FragmentNode[tok[[1]], #, tok[[3]]]& /@ betterRiffle[StringTake[tok[[2]], takeSpecs], $CurrentNewline]
           ,
           (*
+          OK to split
+          
           No special cases, can use the original split value
           *)
           True,

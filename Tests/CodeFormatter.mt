@@ -315,7 +315,13 @@ Test[
 ]
 
 
-
+TestMatch[
+	CodeFormat["\\((*\\ \\(Test\\ comment\\)\\ *)\\)"]
+	,
+	_String
+	,
+	TestID->"CodeFormatter-20200813-B6S4H2"
+]
 
 
 

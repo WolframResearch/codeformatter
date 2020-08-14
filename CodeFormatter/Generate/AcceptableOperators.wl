@@ -28,8 +28,10 @@ acceptableOperators =
 		Cases[normalInfixParselets, Verbatim[Rule][tok_, Parselet`InfixOperatorParselet[_, _, _]] :> tok],
 		(*
 		Manually remove Token`Fake`ImplicitTimes
+
+		Manually remove Token`Dot, because we do not want to break after  a =.
 		*)
-		{Token`Fake`ImplicitTimes}
+		{Token`Fake`ImplicitTimes, Token`Dot}
 	] ~Join~
 	Cases[normalInfixParselets, Verbatim[Rule][tok_, Parselet`TildeParselet[]] :> tok] ~Join~
 	Cases[normalInfixParselets, Verbatim[Rule][tok_, Parselet`SlashColonParselet[]] :> tok] ~Join~

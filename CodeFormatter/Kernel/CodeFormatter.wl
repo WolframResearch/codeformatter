@@ -52,7 +52,10 @@ $DefaultNewline = "\n"
 
 $DefaultTabWidth = 4
 
-$DefaultLineWidth = 180
+(*
+decreed by SW
+*)
+$DefaultLineWidth = 80
 
 $DefaultSafetyMargin = 10
 
@@ -368,7 +371,7 @@ Module[{indentationString, cst, newline, tabWidth, indented, airyness, formatted
 
 collectStr[LeafNode[_, s_String, _]] := s
 
-collectStr[FragmentNode[_, s_String, _]] := s
+collectStr[ErrorNode[_, s_String, _]] := s
 
 collectStr[FragmentNode[_, s_String, _]] := s
 
@@ -941,6 +944,12 @@ Module[{origSpaces},
       FragmentNode[Token`Comment, #, <||>]& /@ DeleteCases[StringSplit[s, x:"(*"|"*)"|$CurrentNewline :> x], ""]
     }], <|data, "InsertedFragmentNodes" -> 1 + origSpaces|>]
 ]
+
+(*
+Could be processed because it has the same Source as a multiline leaf node
+*)
+fragmentizeMultilineLeafNode[n:LeafNode[Token`Fake`ImplicitNull, _, _]] :=
+	n
 
 fragmentizeMultilineLeafNode[args___] := Failure["InternalUnhandled", <|"Function"->fragmentizeMultilineLeafNode, "Arguments"->{args}|>]
 

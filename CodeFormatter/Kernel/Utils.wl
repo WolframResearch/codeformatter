@@ -207,8 +207,12 @@ insertNecessarySpaces[tokensIn_] :=
 
     (*
     Insert space for  a_ .b
+
+    This used to also check for UnderDot, as in:  a_. .b
+
+    But this behavior was fixed in 12.2 and a_. .b may now be minified to a_..b
     *)
-    poss = Position[tokens, LeafNode[Token`Under | Token`UnderDot, _, _]];
+    poss = Position[tokens, LeafNode[Token`Under, _, _]];
     poss = Select[poss, (#[[1]] < Length[tokens] && MatchQ[tokens[[#[[1]]+1]], LeafNode[Token`Dot | Token`DotDot | Token`DotDotDot, _, _]])&];
     Scan[(AppendTo[toInsert, #+1])&, poss];
 

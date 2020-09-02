@@ -2674,6 +2674,9 @@ breakLines[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
     tokens
   ]
 
+breakLines[tokensIn_, Infinity, Infinity] :=
+  tokensIn
+
 breakLine[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
   Module[{tokens, width, tok, toSplit, takeSpecs, kTmp, toInsertAfter},
 

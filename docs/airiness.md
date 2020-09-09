@@ -1,9 +1,9 @@
 
-# Airyness
+# Airiness
 
 
 
-airyness == -1
+airiness == -1
 
 newlines are removed from comments
 
@@ -12,7 +12,7 @@ newlines are removed from comments
 
 
 
-airyness < -0.85
+airiness < -0.85
 
 all stay on single line:
 Module
@@ -23,49 +23,49 @@ For
 
 
 
-airyness < -0.75
+airiness < -0.75
 
 groups stay on single line
 
 
 
-airyness < -0.5
+airiness < -0.5
 
 binary / infix / ternary stay on single line
 
 
 
-airyness < -0.25
+airiness < -0.25
 
 CompoundExpressions stay on single line
 
 
 
-airyness = 0
+airiness = 0
 
 normal
 
 
 
-0.25 < airyness
+0.25 < airiness
 
 newlines between elements of CompoundExpression
 
 
 
-0.5 < airyness
+0.5 < airiness
 
 newlines between binary / infix / ternary stay
 
 
 
-0.75 < airyness
+0.75 < airiness
 
 newlines between groups
 
 
 
-0.85 < airyness
+0.85 < airiness
 
 newlines between Commas
 

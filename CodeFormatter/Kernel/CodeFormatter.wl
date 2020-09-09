@@ -10,7 +10,7 @@ CodeFormat
 (*
 Options
 *)
-AirynessLevel
+Airiness
 
 
 
@@ -22,9 +22,11 @@ CodeFormatCST
 
 
 
-$DefaultAirynessLevel
+$DefaultAiriness
 
+$DefaultIndentationString
 
+$DefaultTabWidth
 
 
 Begin["`Private`"]
@@ -44,7 +46,7 @@ If[PacletFind["Format"] != {},
 
 
 
-$DefaultAirynessLevel = 0
+$DefaultAiriness = 0
 
 $DefaultIndentationString := StringRepeat[" ", $DefaultTabWidth]
 
@@ -55,7 +57,7 @@ $DefaultTabWidth = 4
 (*
 decreed by SW
 *)
-$DefaultLineWidth = 80
+$DefaultLineWidth = 70
 
 $DefaultSafetyMargin = 10
 
@@ -68,7 +70,7 @@ CodeFormat::implicittimesaftercontinuation = "Replaced implicit Times with expli
 CodeFormat::usage = "CodeFormat[code] returns a string of formatted WL code."
 
 Options[CodeFormat] = {
-  AirynessLevel :> $DefaultAirynessLevel,
+  Airiness :> $DefaultAiriness,
   "IndentationString" :> $DefaultIndentationString,
   "Newline" :> $DefaultNewline,
   "TabWidth" :> $DefaultTabWidth,
@@ -232,13 +234,13 @@ Options[CodeFormatCST] = Options[CodeFormat]
 
 CodeFormatCST[cstIn_, opts:OptionsPattern[]] :=
 Catch[
-Module[{indentationString, cst, newline, tabWidth, indented, airyness, formattedStr, merged,
+Module[{indentationString, cst, newline, tabWidth, indented, airiness, formattedStr, merged,
   linearized, strs, spaced, breaked, lineWidth1, lineWidth2, lineWidth, safetyMargin},
 
   indentationString = OptionValue["IndentationString"];
   newline = OptionValue["Newline"];
   tabWidth = OptionValue["TabWidth"];
-  airyness = OptionValue[AirynessLevel];
+  airiness = OptionValue[Airiness];
 
   safetyMargin = OptionValue["SafetyMargin"];
   lineWidth = OptionValue["LineWidth"];
@@ -252,13 +254,13 @@ Module[{indentationString, cst, newline, tabWidth, indented, airyness, formatted
     Print["CodeFormatCST: ", cst];
   ];
 
-  Block[{$CurrentIndentationString, $CurrentNewline, $CurrentAiryness},
+  Block[{$CurrentIndentationString, $CurrentNewline, $CurrentAiriness},
 
     $CurrentIndentationString = indentationString;
 
     $CurrentNewline = newline;
 
-    $CurrentAiryness = airyness;
+    $CurrentAiriness = airiness;
 
     cst = StandardizeCommentGroups[cst];
 
@@ -435,12 +437,17 @@ convertCommentGroups[GroupNode[Comment, boxs_, data_]] :=
 RemoveSimpleLineContinuations::usage = "RemoveSimpleLineContinuations[cst] removes simple line continuations from cst."
 
 RemoveSimpleLineContinuations[cstIn_] :=
+  Catch[
   Module[{data, cst, tokStartLocs, simpleLineContinuations, grouped, poss, tuples, mapSpecs,
     embeddedNewlineStartLocs, extracted, complexLineContinuations},
 
     cst = cstIn;
 
     data = cst[[3]];
+
+    If[!MatchQ[data, KeyValuePattern[Source -> {{_, _}, {_, _}}]],
+      Throw[cst]
+    ];
 
     If[KeyExistsQ[data, "SimpleLineContinuations"],
 
@@ -523,17 +530,22 @@ RemoveSimpleLineContinuations[cstIn_] :=
     ];
 
     cst
-  ]
+  ]]
 
 RemoveComplexLineContinuations::usage = "RemoveComplexLineContinuations[cst] removes complex line continuations from cst."
 
 RemoveComplexLineContinuations[cstIn_] :=
+  Catch[
   Module[{data, cst, tokStartLocs, grouped, poss, tuples, mapSpecs,
     extracted, complexLineContinuations},
 
     cst = cstIn;
 
     data = cst[[3]];
+
+    If[!MatchQ[data, KeyValuePattern[Source -> {{_, _}, {_, _}}]],
+      Throw[cst]
+    ];
 
     If[KeyExistsQ[data, "ComplexLineContinuations"],
 
@@ -588,7 +600,7 @@ RemoveComplexLineContinuations[cstIn_] :=
     ];
 
     cst
-  ]
+  ]]
 
 (*
 There may be "simple line continuations" that were left behind because they belonged to a multiline string or comment
@@ -620,11 +632,16 @@ RemoveRemainingSimpleLineContinuations::usage =
   "RemoveRemainingSimpleLineContinuations[cst] removes simple line continuations from cst."
 
 RemoveRemainingSimpleLineContinuations[cstIn_] :=
+  Catch[
   Module[{data, cst, tokStartLocs, simpleLineContinuations, grouped, poss, tuples, mapSpecs, extracted},
 
     cst = cstIn;
 
     data = cst[[3]];
+
+    If[!MatchQ[data, KeyValuePattern[Source -> {{_, _}, {_, _}}]],
+      Throw[cst]
+    ];
 
     If[KeyExistsQ[data, "SimpleLineContinuations"],
 
@@ -682,17 +699,22 @@ RemoveRemainingSimpleLineContinuations[cstIn_] :=
     ];
 
     cst
-  ]
+  ]]
 
 
 StandardizeEmbeddedNewlines::usage = "StandardizeEmbeddedNewlines[cst, newline] standardizes the newlines in cst."
 
 StandardizeEmbeddedNewlines[cstIn_, newline_String] :=
+  Catch[
   Module[{cst, data, embeddedNewlines, mapSpecs, tuples, poss, tokStartLocs, grouped},
 
     cst = cstIn;
 
     data = cst[[3]];
+
+    If[!MatchQ[data, KeyValuePattern[Source -> {{_, _}, {_, _}}]],
+      Throw[cst]
+    ];
 
     If[KeyExistsQ[data, "EmbeddedNewlines"],
 
@@ -750,18 +772,23 @@ StandardizeEmbeddedNewlines[cstIn_, newline_String] :=
     ];
 
     cst
-  ]
+  ]]
 
 
 
 StandardizeEmbeddedTabs::usage = "StandardizeEmbeddedTabs[cst, newline, tabWidth] standardizes tabs in cst."
 
 StandardizeEmbeddedTabs[cstIn_, newline_String, tabWidth_Integer] :=
+  Catch[
   Module[{cst, data, embeddedTabs, mapSpecs, tuples, poss, tokStartLocs, grouped},
 
     cst = cstIn;
 
     data = cst[[3]];
+
+    If[!MatchQ[data, KeyValuePattern[Source -> {{_, _}, {_, _}}]],
+      Throw[cst]
+    ];
 
     If[KeyExistsQ[data, "EmbeddedTabs"],
 
@@ -819,7 +846,7 @@ StandardizeEmbeddedTabs[cstIn_, newline_String, tabWidth_Integer] :=
     ];
 
     cst
-  ]
+  ]]
 
 
 
@@ -848,10 +875,15 @@ others?
 
 *)
 Fragmentize[cstIn_] :=
+  Catch[
   Module[{poss, cst, tokStartLocs, grouped, data, embeddedNewlines, mapSpecs, tuples, allOtherPoss},
 
     cst = cstIn;
     data = cst[[3]];
+
+    If[!MatchQ[data, KeyValuePattern[Source -> {{_, _}, {_, _}}]],
+      Throw[cst]
+    ];
 
     (*
     Special case multiline strings and multiline comments with LineColumn convention
@@ -916,7 +948,7 @@ Fragmentize[cstIn_] :=
     ];
 
     cst
-  ]
+  ]]
 
 fragmentizeMultilineLeafNode[LeafNode[String, s_, data:KeyValuePattern[Source -> {{_, _}, {_, _}}]]] :=
 Module[{origSpaces},
@@ -1203,9 +1235,9 @@ indent[LeafNode[Token`Comment, fs:{
   ___,
   FragmentNode[Token`Comment, "(*", _],
   ___,
-  FragmentNode[Token`Comment, "*)", _]}, data_], level_] :=
+  FragmentNode[Token`Comment, "*)", _]}, data:KeyValuePattern[Source -> {{_, _}, {_, _}}]], level_] :=
 Module[{min, replaced, origSpaces, strs, minStr, indentStr, frags, inserted, split, fragGroups, nlGroups, firstStrs, replacedStrs, replacedFirstStrs},
-  
+
   origSpaces = data[[Key[Source], 1, 2]]-1;
 
   If[$Debug,
@@ -1281,7 +1313,7 @@ Module[{min, replaced, origSpaces, strs, minStr, indentStr, frags, inserted, spl
     Print["replacedStrs: ", replacedStrs //InputForm];
   ];
 
-  If[$CurrentAiryness == -1,
+  If[$CurrentAiriness == -1,
     LeafNode[Token`Comment,
       Flatten[
         replacedOrigSpaces ~Join~
@@ -1407,7 +1439,7 @@ Module[{aggs, rands, rators, graphs, lastRator, lastRand,
   randsPat = Alternatives @@ rands;
 
   Which[
-    $CurrentAiryness <= -0.25,
+    $CurrentAiriness <= -0.25,
       shouldStayOnSingleLine = True
     ,
     !FreeQ[ts, LeafNode[Token`Newline, _, _]],
@@ -1427,7 +1459,7 @@ Module[{aggs, rands, rators, graphs, lastRator, lastRand,
     ,
     Flatten[
     Which[
-      $CurrentAiryness >= 0.25,
+      $CurrentAiriness >= 0.25,
         Replace[graphs, {
             lastRator /; MatchQ[lastRand, LeafNode[Token`Fake`ImplicitNull, _, _]] :> indent[lastRator, level], 
             rator : ratorsPat :> {indent[rator, level], line[level], line[level]}, 
@@ -1488,10 +1520,10 @@ indentInfixRator[Pattern | Optional | PatternTest | MessageName | Power][rator_,
 (*
 No spaces before Comma
 *)
-indentInfixRator[Comma][rator_, level_] /; $CurrentAiryness >= 0.85 :=
+indentInfixRator[Comma][rator_, level_] /; $CurrentAiriness >= 0.85 :=
   {line[level], indent[rator, level], line[level]}
 
-indentInfixRatorNoTrailingSpace[Comma][rator_, level_] /; $CurrentAiryness >= 0.85 :=
+indentInfixRatorNoTrailingSpace[Comma][rator_, level_] /; $CurrentAiriness >= 0.85 :=
   {line[level], indent[rator, level], line[level]}
 
 indentInfixRator[Comma][rator_, level_] :=
@@ -1591,7 +1623,7 @@ indent[(head:(BinaryNode|InfixNode|TernaryNode|QuaternaryNode))[tag_, ts_, data_
       Print["split: ", split];
     ];
 
-    If[$CurrentAiryness <= -0.5 || (Length[split] == 1 && $CurrentAiryness <= 0.5),
+    If[$CurrentAiriness <= -0.5 || (Length[split] == 1 && $CurrentAiriness <= 0.5),
       (*
       There were no newline tokens
       *)
@@ -1678,10 +1710,10 @@ indent[GroupNode[tag_, {
     triviaGraphs = DeleteCases[{trivia}, ws | nl];
 
     Which[
-      $CurrentAiryness >= 0.75,
+      $CurrentAiriness >= 0.75,
         condition = MultiLineEnum
       ,
-      $CurrentAiryness <= -0.75,
+      $CurrentAiriness <= -0.75,
         condition = SingleLineEnum
       ,
       !FreeQ[triviaAggs, LeafNode[Token`Newline, _, _]],
@@ -1738,10 +1770,10 @@ indent[GroupNode[tag_, {
     trivia2Graphs = DeleteCases[{trivia2}, ws | nl];
 
     Which[
-      $CurrentAiryness >= 0.75,
+      $CurrentAiriness >= 0.75,
         condition = MultiLineEnum
       ,
-      $CurrentAiryness <= -0.75,
+      $CurrentAiriness <= -0.75,
         condition = SingleLineEnum
       ,
       !FreeQ[trivia1Aggs, LeafNode[Token`Newline, _, _]],
@@ -1867,7 +1899,7 @@ indent[CallNode[{head : LeafNode[Symbol, "Module" | "With" | "Block", _], trivia
     *)
     vars = DeleteCases[vars, LeafNode[Token`Newline, _, _], {-5, -3}];
 
-    If[$CurrentAiryness <= -0.85,
+    If[$CurrentAiriness <= -0.85,
       (*
       no newlines
       *)
@@ -2011,7 +2043,7 @@ indent[CallNode[{tag:LeafNode[Symbol, "Switch", _], trivia1:trivia...}, {
     testsPat = Alternatives @@ tests;
     bodiesPat = Alternatives @@ bodies;
 
-    If[$CurrentAiryness <= -0.85,
+    If[$CurrentAiriness <= -0.85,
       (*
       no newlines
       *)
@@ -2111,7 +2143,7 @@ indent[CallNode[{tag:LeafNode[Symbol, "Which", _], trivia1:trivia...}, {
     testsPat = Alternatives @@ tests;
     bodiesPat = Alternatives @@ bodies;
 
-    If[$CurrentAiryness <= -0.85,
+    If[$CurrentAiriness <= -0.85,
       (*
       no newlines
       *)
@@ -2201,7 +2233,7 @@ indent[CallNode[{tag : LeafNode[Symbol, "If", _], trivia1 : trivia...}, {
     ratorsPat = Alternatives @@ rators;
 
     Which[
-      $CurrentAiryness <= -0.85,
+      $CurrentAiriness <= -0.85,
         condition = SingleLine
       ,
       (*
@@ -2301,7 +2333,7 @@ indent[CallNode[{tag : LeafNode[Symbol, "For", _], trivia1 : trivia...}, {
     comments8 = Cases[{trivia8}, comment];
     comments9 = Cases[{trivia9}, comment];
 
-    If[$CurrentAiryness <= -0.85,
+    If[$CurrentAiriness <= -0.85,
       (*
       no newlines
       *)

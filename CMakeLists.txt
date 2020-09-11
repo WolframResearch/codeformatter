@@ -108,7 +108,7 @@ file(MAKE_DIRECTORY
 # Copy WL source files
 #
 
-set(COPIED_PACLETINFO ${PROJECT_BINARY_DIR}/paclet/${PACLET}/PacletInfo.m)
+set(COPIED_PACLETINFO ${PROJECT_BINARY_DIR}/paclet/${PACLET}/PacletInfo.wl)
 
 add_custom_command(
 	OUTPUT

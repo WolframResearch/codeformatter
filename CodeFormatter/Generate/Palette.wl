@@ -17,40 +17,68 @@ Module[{nb},
       {
         Button["Format selected cell", Needs["CodeFormatter`Notebooks`"];CodeFormatter`Notebooks`formatSelectedCell[], Method -> "Queued"],
         Spacer[{0, 20}],
-        Labeled[Slider[Dynamic[CodeFormatter`$InteractiveAiriness, (
-          CodeFormatter`$InteractiveAiriness = #;
-          If[$VersionNumber >= 12.2,
-            CurrentValue[$FrontEnd, {CodeAssistOptions, "CodeToolsOptions", "CodeFormatterInteractiveAiriness"}] = #;
-          ];
-          CodeFormatter`Notebooks`formatSelectedCell[];
-          )&], {-1, 1}, ContinuousAction -> False], "Airiness"],
+        (*
+        I would like to use Labeled[content, label, {{Top, Left}}]
+
+        But there is a bug that causes content to stay center-aligned when the label is longer than the content
+
+        email thread sep 14 2020 [l-frontend] Aligning label and content in Labeled
+
+        so just using Column[] for now
+
+        In the future, make sure to do {{Top, Left}}, not {Top, Left}
+        https://mathematica.stackexchange.com/a/126834/63281
+        *)
+        Column[{
+          Style["Airiness", "Item"],
+          Slider[Dynamic[CodeFormatter`$InteractiveAiriness, (
+            CodeFormatter`$InteractiveAiriness = #;
+            If[$VersionNumber >= 12.2,
+              CurrentValue[$FrontEnd, {CodeAssistOptions, "CodeToolsOptions", "CodeFormatterInteractiveAiriness"}] = #;
+            ];
+            CodeFormatter`Notebooks`formatSelectedCell[];
+            )&], {-1, 1}, ContinuousAction -> False
+          ]
+        }],
         Spacer[{0, 20}],
         OpenerView[{
           "Settings",
           Panel[Column[{
-            Labeled[RadioButtonBar[Dynamic[CodeFormatter`$InteractiveIndentationCharacter, (
-              CodeFormatter`$InteractiveIndentationCharacter = #;
-              If[$VersionNumber >= 12.2,
-                CurrentValue[$FrontEnd, {CodeAssistOptions, "CodeToolsOptions", "CodeFormatterInteractiveIndentationCharacter"}] = #;
-              ];
-              (* CodeFormatter`Notebooks`formatSelectedCell[]; *)
-              )&], {"tab", "space"}], "Indentation character"],
-            Spacer[{0, 20}],
-            Labeled[RadioButtonBar[Dynamic[CodeFormatter`$InteractiveTabWidth, (
-              CodeFormatter`$InteractiveTabWidth = #;
-              If[$VersionNumber >= 12.2,
-                CurrentValue[$FrontEnd, {CodeAssistOptions, "CodeToolsOptions", "CodeFormatterInteractiveTabWidth"}] = #;
-              ];
-              (* CodeFormatter`Notebooks`formatSelectedCell[]; *)
-              )&], {"2", "4", "6", "8"}], "Tab width"],
-            Spacer[{0, 20}],
-            Labeled[Checkbox[Dynamic[CodeFormatter`$InteractiveReparse, (
-              CodeFormatter`$InteractiveReparse = #;
-              If[$VersionNumber >= 12.2,
-                CurrentValue[$FrontEnd, {CodeAssistOptions, "CodeToolsOptions", "CodeFormatterInteractiveReparse"}] = #;
+            Column[{
+              Style["Indentation character", "Item"],
+              RadioButtonBar[Dynamic[CodeFormatter`$InteractiveIndentationCharacter, (
+                CodeFormatter`$InteractiveIndentationCharacter = #;
+                If[$VersionNumber >= 12.2,
+                  CurrentValue[$FrontEnd, {CodeAssistOptions, "CodeToolsOptions", "CodeFormatterInteractiveIndentationCharacter"}] = #;
+                ];
+                (* CodeFormatter`Notebooks`formatSelectedCell[]; *)
+                )&], {"tab", "space"}
               ]
-              (* CodeFormatter`Notebooks`formatSelectedCell[]; *)
-              )&]], "Reparse boxes before formatting"]
+            }],
+            Spacer[{0, 20}],
+            Column[{
+              Style["Tab width", "Item"],
+              RadioButtonBar[Dynamic[CodeFormatter`$InteractiveTabWidth, (
+                CodeFormatter`$InteractiveTabWidth = #;
+                If[$VersionNumber >= 12.2,
+                  CurrentValue[$FrontEnd, {CodeAssistOptions, "CodeToolsOptions", "CodeFormatterInteractiveTabWidth"}] = #;
+                ];
+                (* CodeFormatter`Notebooks`formatSelectedCell[]; *)
+                )&], {"2", "4", "6", "8"}
+              ]
+            }],
+            Spacer[{0, 20}],
+            Column[{
+              Style["Reparse boxes before formatting", "Item"],
+              Checkbox[Dynamic[CodeFormatter`$InteractiveReparse, (
+                CodeFormatter`$InteractiveReparse = #;
+                If[$VersionNumber >= 12.2,
+                  CurrentValue[$FrontEnd, {CodeAssistOptions, "CodeToolsOptions", "CodeFormatterInteractiveReparse"}] = #;
+                ]
+                (* CodeFormatter`Notebooks`formatSelectedCell[]; *)
+                )&]
+              ]
+            }]
           }]]
         }]
       }]], Initialization :> (

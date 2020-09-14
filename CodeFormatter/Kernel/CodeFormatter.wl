@@ -439,13 +439,22 @@ RemoveSimpleLineContinuations::usage = "RemoveSimpleLineContinuations[cst] remov
 RemoveSimpleLineContinuations[cstIn_] :=
   Catch[
   Module[{data, cst, tokStartLocs, simpleLineContinuations, grouped, poss, tuples, mapSpecs,
-    embeddedNewlineStartLocs, extracted, complexLineContinuations},
+    embeddedNewlineStartLocs, extracted, complexLineContinuations, childData},
 
     cst = cstIn;
 
     data = cst[[3]];
 
-    If[!MatchQ[data, KeyValuePattern[Source -> {{_, _}, {_, _}}]],
+    If[empty[cst[[2]]],
+      Throw[cst]
+    ];
+
+    childData = cst[[2, 1, 3]];
+
+    (*
+    Only proceed if LineColumn convention
+    *)
+    If[!MatchQ[childData, KeyValuePattern[Source -> {{_, _}, {_, _}}]],
       Throw[cst]
     ];
 
@@ -537,13 +546,22 @@ RemoveComplexLineContinuations::usage = "RemoveComplexLineContinuations[cst] rem
 RemoveComplexLineContinuations[cstIn_] :=
   Catch[
   Module[{data, cst, tokStartLocs, grouped, poss, tuples, mapSpecs,
-    extracted, complexLineContinuations},
+    extracted, complexLineContinuations, childData},
 
     cst = cstIn;
 
     data = cst[[3]];
 
-    If[!MatchQ[data, KeyValuePattern[Source -> {{_, _}, {_, _}}]],
+    If[empty[cst[[2]]],
+      Throw[cst]
+    ];
+
+    childData = cst[[2, 1, 3]];
+
+    (*
+    Only proceed if LineColumn convention
+    *)
+    If[!MatchQ[childData, KeyValuePattern[Source -> {{_, _}, {_, _}}]],
       Throw[cst]
     ];
 
@@ -633,13 +651,22 @@ RemoveRemainingSimpleLineContinuations::usage =
 
 RemoveRemainingSimpleLineContinuations[cstIn_] :=
   Catch[
-  Module[{data, cst, tokStartLocs, simpleLineContinuations, grouped, poss, tuples, mapSpecs, extracted},
+  Module[{data, cst, tokStartLocs, simpleLineContinuations, grouped, poss, tuples, mapSpecs, extracted, childData},
 
     cst = cstIn;
 
     data = cst[[3]];
 
-    If[!MatchQ[data, KeyValuePattern[Source -> {{_, _}, {_, _}}]],
+    If[empty[cst[[2]]],
+      Throw[cst]
+    ];
+
+    childData = cst[[2, 1, 3]];
+
+    (*
+    Only proceed if LineColumn convention
+    *)
+    If[!MatchQ[childData, KeyValuePattern[Source -> {{_, _}, {_, _}}]],
       Throw[cst]
     ];
 
@@ -706,13 +733,22 @@ StandardizeEmbeddedNewlines::usage = "StandardizeEmbeddedNewlines[cst, newline] 
 
 StandardizeEmbeddedNewlines[cstIn_, newline_String] :=
   Catch[
-  Module[{cst, data, embeddedNewlines, mapSpecs, tuples, poss, tokStartLocs, grouped},
+  Module[{cst, data, embeddedNewlines, mapSpecs, tuples, poss, tokStartLocs, grouped, childData},
 
     cst = cstIn;
 
     data = cst[[3]];
 
-    If[!MatchQ[data, KeyValuePattern[Source -> {{_, _}, {_, _}}]],
+    If[empty[cst[[2]]],
+      Throw[cst]
+    ];
+
+    childData = cst[[2, 1, 3]];
+
+    (*
+    Only proceed if LineColumn convention
+    *)
+    If[!MatchQ[childData, KeyValuePattern[Source -> {{_, _}, {_, _}}]],
       Throw[cst]
     ];
 
@@ -780,13 +816,22 @@ StandardizeEmbeddedTabs::usage = "StandardizeEmbeddedTabs[cst, newline, tabWidth
 
 StandardizeEmbeddedTabs[cstIn_, newline_String, tabWidth_Integer] :=
   Catch[
-  Module[{cst, data, embeddedTabs, mapSpecs, tuples, poss, tokStartLocs, grouped},
+  Module[{cst, data, embeddedTabs, mapSpecs, tuples, poss, tokStartLocs, grouped, childData},
 
     cst = cstIn;
 
     data = cst[[3]];
 
-    If[!MatchQ[data, KeyValuePattern[Source -> {{_, _}, {_, _}}]],
+    If[empty[cst[[2]]],
+      Throw[cst]
+    ];
+
+    childData = cst[[2, 1, 3]];
+
+    (*
+    Only proceed if LineColumn convention
+    *)
+    If[!MatchQ[childData, KeyValuePattern[Source -> {{_, _}, {_, _}}]],
       Throw[cst]
     ];
 
@@ -876,12 +921,22 @@ others?
 *)
 Fragmentize[cstIn_] :=
   Catch[
-  Module[{poss, cst, tokStartLocs, grouped, data, embeddedNewlines, mapSpecs, tuples, allOtherPoss},
+  Module[{poss, cst, tokStartLocs, grouped, data, embeddedNewlines, mapSpecs, tuples, allOtherPoss, childData},
 
     cst = cstIn;
+    
     data = cst[[3]];
 
-    If[!MatchQ[data, KeyValuePattern[Source -> {{_, _}, {_, _}}]],
+    If[empty[cst[[2]]],
+      Throw[cst]
+    ];
+
+    childData = cst[[2, 1, 3]];
+
+    (*
+    Only proceed if LineColumn convention
+    *)
+    If[!MatchQ[childData, KeyValuePattern[Source -> {{_, _}, {_, _}}]],
       Throw[cst]
     ];
 

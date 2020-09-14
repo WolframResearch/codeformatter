@@ -172,7 +172,7 @@ formatProgramCellContents[contents_String] :=
     Catch[
     Module[{formatted, airiness, indentationString, tabWidth},
 
-        airiness = CodeFormatter`$InteractiveAiriness;
+        airiness = massageAiriness[CodeFormatter`$InteractiveAiriness];
         tabWidth = massageTabWidth[CodeFormatter`$InteractiveTabWidth];
         indentationString = massageIndentationString[CodeFormatter`$InteractiveIndentationCharacter, tabWidth];
 
@@ -191,7 +191,7 @@ formatInputContents[contentsBox_] :=
     Catch[
     Module[{cst, formatted, formattedBox, airiness, indentationString, tabWidth},
 
-        airiness = CodeFormatter`$InteractiveAiriness;
+        airiness = massageAiriness[CodeFormatter`$InteractiveAiriness];
         tabWidth = massageTabWidth[CodeFormatter`$InteractiveTabWidth];
         indentationString = massageIndentationString[CodeFormatter`$InteractiveIndentationCharacter, tabWidth];
 
@@ -226,6 +226,11 @@ formatInputContents[contentsBox_] :=
         ];
         formattedBox
     ]]
+
+
+massageAiriness[a_Real] := a
+
+massageAiriness[_] := $DefaultAiriness
 
 
 massageIndentationString[s_String, tabWidth_] :=

@@ -3,7 +3,7 @@
 CodeFormatter is a package that provides functionality for formatting Wolfram Language code.
 
 ```
-In[1]:= Needs["CodeInspector`"]
+In[1]:= Needs["CodeFormatter`"]
 
 In[2]:= CodeFormat["If[a,f/@b,g/@c]"]
 

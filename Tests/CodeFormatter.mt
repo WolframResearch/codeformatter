@@ -175,7 +175,7 @@ Test[
 Test[
 	CodeFormat["_..."]
 	,
-	"_ ..."
+	"_. .."
 	,
 	TestID -> "CodeFormatter-20191113-T8E6X9"
 ]

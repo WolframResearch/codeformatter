@@ -217,6 +217,13 @@ insertNecessarySpaces[tokensIn_] :=
     Scan[(AppendTo[toInsert, #+1])&, poss];
 
     (*
+    Insert space for a_..b
+    *)
+    poss = Position[tokens, LeafNode[Token`UnderDot, _, _]];
+    poss = Select[poss, (#[[1]] < Length[tokens] && MatchQ[tokens[[#[[1]]+1]], LeafNode[Token`Dot | Token`DotDot | Token`DotDotDot, _, _]])&];
+    Scan[(AppendTo[toInsert, #+1])&, poss];
+
+    (*
     Insert space for  a - -b
     *)
     poss = Position[tokens, LeafNode[Token`Minus, _, _]];

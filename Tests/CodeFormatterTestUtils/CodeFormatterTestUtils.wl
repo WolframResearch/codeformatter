@@ -23,19 +23,19 @@ Options[formatTest] = {
   "DryRun" -> False,
   "LineWidth" -> 120,
   "SafetyMargin" -> 10,
-  AirynessLevel -> 0
+  Airiness -> 0
 }
 
 formatTest[file_String, i_Integer, OptionsPattern[]] :=
   Catch[
- Module[{dryRun, prefix, res, lineWidth, airyness, margin},
+ Module[{dryRun, prefix, res, lineWidth, airiness, margin},
    
    prefix = OptionValue["FileNamePrefixPattern"];
    limit = OptionValue["FileSizeLimit"];
    dryRun = OptionValue["DryRun"];
    lineWidth = OptionValue["LineWidth"];
    margin = OptionValue["SafetyMargin"];
-   airyness = OptionValue[AirynessLevel];
+   airiness = OptionValue[Airiness];
 
     If[$Debug, Print["file1: ", File[file]]];
     
@@ -77,7 +77,7 @@ formatTest[file_String, i_Integer, OptionsPattern[]] :=
   Check[
     Check[
     implicitTimesInserted = False;
-    res = CodeFormat[File[file], "LineWidth" -> lineWidth, "SafetyMargin" -> margin, AirynessLevel -> airyness];
+    res = CodeFormat[File[file], "LineWidth" -> lineWidth, "SafetyMargin" -> margin, Airiness -> airiness];
     ,
     implicitTimesInserted = True;
     ,

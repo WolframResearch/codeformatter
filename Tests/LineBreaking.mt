@@ -189,7 +189,7 @@ lowcaseQ :=
 "
 
 TestMatch[
-	CodeFormat[str, "LineWidth" -> 40, "SafetyMargin" -> 10, AirynessLevel -> 0]
+	CodeFormat[str, "LineWidth" -> 40, "SafetyMargin" -> 10, Airiness -> 0]
 	,
 	_String
 	,

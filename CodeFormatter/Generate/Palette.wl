@@ -15,7 +15,7 @@ Module[{nb},
       DynamicModule[{},
       Panel[Column[
       {
-        Button["Format selected cell", Needs["CodeFormatter`Notebooks`"];CodeFormatter`Notebooks`formatSelectedCell[], Method -> "Queued"],
+        Button["Format Selected Cell", Needs["CodeFormatter`Notebooks`"];CodeFormatter`Notebooks`formatSelectedCell[], Method -> "Queued"],
         Spacer[{0, 20}],
         (*
         I would like to use Labeled[content, label, {{Top, Left}}]
@@ -45,7 +45,7 @@ Module[{nb},
           "Settings",
           Panel[Column[{
             Column[{
-              Style["Indentation character", "Item"],
+              Style["Indentation Character", "Item"],
               RadioButtonBar[Dynamic[CodeFormatter`$InteractiveIndentationCharacter, (
                 CodeFormatter`$InteractiveIndentationCharacter = #;
                 If[$VersionNumber >= 12.2,
@@ -57,7 +57,7 @@ Module[{nb},
             }],
             Spacer[{0, 20}],
             Column[{
-              Style["Tab width", "Item"],
+              Style["Tab Width", "Item"],
               RadioButtonBar[Dynamic[CodeFormatter`$InteractiveTabWidth, (
                 CodeFormatter`$InteractiveTabWidth = #;
                 If[$VersionNumber >= 12.2,
@@ -69,7 +69,7 @@ Module[{nb},
             }],
             Spacer[{0, 20}],
             Column[{
-              Style["Reparse boxes before formatting", "Item"],
+              Style["Reparse Boxes Before Formatting", "Item"],
               Checkbox[Dynamic[CodeFormatter`$InteractiveReparse, (
                 CodeFormatter`$InteractiveReparse = #;
                 If[$VersionNumber >= 12.2,

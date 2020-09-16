@@ -6,6 +6,32 @@ Needs["CodeFormatter`Generate`GenerateSources`"]
 
 Print["Generating Palette..."]
 
+$minAirinessIcon =
+Graphics[{GrayLevel[0.5], AbsoluteThickness[1.5], CapForm["Butt"], 
+  Line[{{Offset[{0, 4.949999999999999}, {0, 0}], Offset[{8.6, 4.949999999999999}, {0, 
+      0}]}, {Offset[{10.6, 4.949999999999999}, {0, 0}], 
+     Offset[{17.2, 4.949999999999999}, {0, 0}]}, {Offset[{0, 1.65}, {0, 0}], 
+     Offset[{4.3, 1.65}, {0, 0}]}, {Offset[{6.3, 1.65}, {0, 0}], 
+     Offset[{12.899999999999999, 1.65}, {0, 0}]}, 
+    {Offset[{14.899999999999999, 1.65}, {0, 0}], Offset[{19.349999999999998, 1.65}, {0, 
+      0}]}, {Offset[{0, -1.65}, {0, 0}], Offset[{6.449999999999999, -1.65}, {0, 0}]}, 
+    {Offset[{8.45, -1.65}, {0, 0}], Offset[{16.34, -1.65}, {0, 0}]}, 
+    {Offset[{0, -4.949999999999999}, {0, 0}], Offset[{10.75, -4.949999999999999}, {0, 
+      0}]}, {Offset[{12.75, -4.949999999999999}, {0, 0}], 
+     Offset[{17.2, -4.949999999999999}, {0, 0}]}}]}, ImagePadding -> All, 
+ ImageSize -> {22, 15}, ImageMargins -> 10]
+
+
+$maxAirinessIcon =
+Graphics[{GrayLevel[0.5], AbsoluteThickness[1.5], CapForm["Butt"], 
+  Line[{{Offset[{0, 4.949999999999999}, {0, 0}], Offset[{7.74, 4.949999999999999}, {0, 
+      0}]}, {Offset[{4.3, 1.65}, {0, 0}], Offset[{10.75, 1.65}, {0, 0}]}, 
+    {Offset[{8.6, -1.65}, {0, 0}], Offset[{15.049999999999999, -1.65}, {0, 0}]}, 
+    {Offset[{4.3, -4.949999999999999}, {0, 0}], Offset[{8.6, -4.949999999999999}, {0, 
+      0}]}}]}, ImagePadding -> All, ImageSize -> {17, 15}, ImageMargins -> 10]
+
+
+
 generatePalette[] :=
 Module[{nb},
   
@@ -31,14 +57,18 @@ Module[{nb},
         *)
         Column[{
           Style["Airiness", "Item"],
-          Slider[Dynamic[CodeFormatter`$InteractiveAiriness, (
-            CodeFormatter`$InteractiveAiriness = #;
-            If[$VersionNumber >= 12.2,
-              CurrentValue[$FrontEnd, {CodeAssistOptions, "CodeToolsOptions", "CodeFormatterInteractiveAiriness"}] = #;
-            ];
-            CodeFormatter`Notebooks`formatSelectedCell[];
-            )&], {-1, 1}, ContinuousAction -> False
-          ]
+          Row[{
+            $minAirinessIcon,
+            Slider[Dynamic[CodeFormatter`$InteractiveAiriness, (
+              CodeFormatter`$InteractiveAiriness = #;
+              If[$VersionNumber >= 12.2,
+                CurrentValue[$FrontEnd, {CodeAssistOptions, "CodeToolsOptions", "CodeFormatterInteractiveAiriness"}] = #;
+              ];
+              CodeFormatter`Notebooks`formatSelectedCell[];
+              )&], {-1, 1}, ContinuousAction -> False
+            ],
+            $maxAirinessIcon
+          }]
         }],
         Spacer[{0, 20}],
         OpenerView[{

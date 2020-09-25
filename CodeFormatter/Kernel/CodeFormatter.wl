@@ -1320,16 +1320,16 @@ indent[LeafNode[Token`Comment, fs:{
   ___,
   FragmentNode[Token`Comment, "(*", _],
   ___,
-  FragmentNode[Token`Comment, "*)", _]}, data:KeyValuePattern[Source -> {{_, _}, {_, _}}]], level_] :=
+  FragmentNode[Token`Comment, "*)", _]}, data_], level_] :=
 Module[{min, replaced, origSpaces, strs, minStr, indentStr, frags, inserted, split, fragGroups, nlGroups, firstStrs, replacedStrs, replacedFirstStrs},
 
-  origSpaces = data[[Key[Source], 1, 2]]-1;
+  inserted = Lookup[data, "InsertedFragmentNodes", 0];
+
+  origSpaces = inserted - 1;
 
   If[$Debug,
     Print["origSpaces: ", origSpaces //InputForm];
   ];
-
-  inserted = data["InsertedFragmentNodes"];
 
   (*
   Correctly indent comment, taking into account the original indentation

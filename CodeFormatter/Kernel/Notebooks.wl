@@ -68,10 +68,10 @@ formatSelectedCell[] :=
 
     shouldWrite = False;
 
-    CurrentValue[nb, WindowStatusArea] = "formatting selected cell...";
+    CurrentValue[nb, WindowStatusArea] = "Formatting selected cell...";
 
     toWrite = MapIndexed[Function[{cell, index},
-        CurrentValue[nb, WindowStatusArea] = "formatting selected cell... " <> ToString[Floor[100 index[[1]]/Length[read]]] <> "%";
+        Function[val, CurrentValue[nb, WindowStatusArea] = "Formatting selected cell... " <> ToString[Floor[100 index[[1]]/Length[read]]] <> "%"; val]@
         Switch[cell,
           Cell[_, "Program", ___],
 

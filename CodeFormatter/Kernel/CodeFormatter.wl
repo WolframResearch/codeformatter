@@ -1950,7 +1950,7 @@ indent[n:UnterminatedGroupNode[_, _, _], level_] :=
 (*
 special casing Module | With | Block
 *)
-indent[CallNode[{head : LeafNode[Symbol, "Module" | "With" | "Block", _], trivia1:trivia...}, {
+indent[CallNode[{head : LeafNode[Symbol, "Module" | "With" | "Block" | {FragmentNode[Symbol, "Module" | "With" | "Block", _], ___}, _], trivia1:trivia...}, {
       GroupNode[GroupSquare, {
           opener_, 
           trivia2:trivia..., 
@@ -1999,33 +1999,34 @@ indent[CallNode[{head : LeafNode[Symbol, "Module" | "With" | "Block", _], trivia
           indent[vars, level + 1],
           indent[#, level + 1]& /@ comments3,
           indent[comma1, level + 1],
-          space[],
           indent[#, level + 1]& /@ comments4,
+          space[],
           indent[body, level + 1],
-          betterRiffle[indent[#, level + 1]& /@ comments5, {space[]}],
+          indent[#, level + 1]& /@ comments5,
           indent[closer, level]
         }]
         ,
         data
       ]
       ,
+      (*
+      Redo newlines
+      *)
       CallNode[
         Flatten[{
           indent[head, level],
-          indent[#, level + 1]& /@ comments1
+          surround[indent[#, level + 1]& /@ comments1, {line[level + 1]}]
         }],
         Flatten[{
           indent[opener, level + 1],
-          indent[#, level + 1]& /@ comments2,
+          surround[indent[#, level + 1]& /@ comments2, {line[level + 1]}],
           indent[vars, level + 1],
-          indent[#, level + 1]& /@ comments3,
+          surround[indent[#, level + 1]& /@ comments3, {line[level + 1]}],
           indent[comma1, level + 1],
-          If[!empty[comments4], line[level + 1], nil[]],
-          indent[#, level + 1]& /@ comments4,
+          {line[level + 1], indent[#, level + 1]}& /@ comments4,
           line[level + 1],
           indent[body, level + 1],
-          If[!empty[comments5], line[level + 1], nil[]],
-          betterRiffle[indent[#, level + 1]& /@ comments5, {space[]}],
+          surround[indent[#, level + 1]& /@ comments5, {line[level + 1]}],
           line[level],
           indent[closer, level]
         }]
@@ -2039,7 +2040,7 @@ indent[CallNode[{head : LeafNode[Symbol, "Module" | "With" | "Block", _], trivia
 (*
 special casing Function
 *)
-indent[CallNode[{head:LeafNode[Symbol, "Function", _], trivia1:trivia...}, {
+indent[CallNode[{head:LeafNode[Symbol, "Function" | {FragmentNode[Symbol, "Function", _], ___}, _], trivia1:trivia...}, {
       GroupNode[GroupSquare, {
           opener_, 
           trivia2:trivia..., 
@@ -2060,7 +2061,7 @@ indent[CallNode[{head:LeafNode[Symbol, "Function", _], trivia1:trivia...}, {
     (*
     remove newlines from variable lists
 
-    This is a kind of "pre-processing" that undoes previous line breaks that were inserted just for column limits
+    This is a kind of "pre-processing" that undoes previous line breaks that were inserted just because of hitting column limits
     
     -5 is where LeafNode[xxx, xxx, <|Source->{{1,1},{1,1}}|>] is
 
@@ -2091,7 +2092,7 @@ special casing Switch
 
 completely redo newlines
 *)
-indent[CallNode[{tag:LeafNode[Symbol, "Switch", _], trivia1:trivia...}, {
+indent[CallNode[{tag:LeafNode[Symbol, "Switch" | {FragmentNode[Symbol, "Switch", _], ___}, _], trivia1:trivia...}, {
       GroupNode[GroupSquare, {
           opener_,
           trivia2:trivia...,
@@ -2112,12 +2113,14 @@ indent[CallNode[{tag:LeafNode[Symbol, "Switch", _], trivia1:trivia...}, {
         }, _]
     }, data_], level_] :=
   Module[{aggs, rands, rators, tests, bodies, testsPat, bodiesPat, comments1, comments2, comments3, comments4, comments5, comments6},
+
     comments1 = Cases[{trivia1}, comment];
     comments2 = Cases[{trivia2}, comment];
     comments3 = Cases[{trivia3}, comment];
     comments4 = Cases[{trivia4}, comment];
     comments5 = Cases[{trivia5}, comment];
     comments6 = Cases[{trivia6}, comment];
+
     aggs = DeleteCases[{middle}, trivia];
     graphs = DeleteCases[{middle}, ws | nl];
     rands = aggs[[1 ;; -1 ;; 2]];
@@ -2140,7 +2143,7 @@ indent[CallNode[{tag:LeafNode[Symbol, "Switch", _], trivia1:trivia...}, {
         ,
         Flatten[{
           indent[opener, level + 1],
-          indent[#, level + 1]& /@ comments2, 
+          indent[#, level + 1]& /@ comments2,
           indent[firstRand, level + 1],
           indent[#, level + 1]& /@ comments3,
           indent[firstRator, level + 1],
@@ -2160,29 +2163,32 @@ indent[CallNode[{tag:LeafNode[Symbol, "Switch", _], trivia1:trivia...}, {
         data
       ]
       ,
+      (*
+      Redo newlines
+      *)
       CallNode[
         Flatten[{
           indent[tag, level + 1],
-          indent[#, level + 1]& /@ comments1
+          surround[indent[#, level + 1]& /@ comments1, {line[level + 1]}]
         }]
         ,
         Flatten[{
           indent[opener, level + 1],
-          indent[#, level + 1]& /@ comments2, 
+          surround[indent[#, level + 1]& /@ comments2, {line[level + 1]}],
           indent[firstRand, level + 1],
-          indent[#, level + 1]& /@ comments3,
+          surround[indent[#, level + 1]& /@ comments3, {line[level + 1]}],
           indent[firstRator, level + 1],
-          indent[#, level + 1]& /@ comments4,
+          surround[indent[#, level + 1]& /@ comments4, {line[level + 1]}],
           Replace[graphs, {
               rator : ratorsPat :> indent[rator, level + 1],
               test:testsPat :> {line[level + 1], indent[test, level + 1]},
               body:bodiesPat :> {line[level + 2], indent[body, level + 2], line[level + 1]},
-              other_ :> indent[other, level + 1]
+              other_ :> {line[level + 1], indent[other, level + 1]}
             }, {1}],
+          {line[level + 1], indent[#, level + 1]}& /@ comments5,
           line[level + 2],
-          indent[#, level + 1]& /@ comments5,
           indent[lastRand, level + 2],
-          indent[#, level + 1]& /@ comments6,
+          {line[level + 1], indent[#, level + 1]}& /@ comments6,
           line[level],
           indent[closer, level]
         }]
@@ -2198,7 +2204,7 @@ special casing Which
 
 completely redo newlines
 *)
-indent[CallNode[{tag:LeafNode[Symbol, "Which", _], trivia1:trivia...}, {
+indent[CallNode[{tag:LeafNode[Symbol, "Which" | {FragmentNode[Symbol, "Which", _], ___}, _], trivia1:trivia...}, {
       GroupNode[GroupSquare, {
           opener_,
           trivia2:trivia..., 
@@ -2215,15 +2221,18 @@ indent[CallNode[{tag:LeafNode[Symbol, "Which", _], trivia1:trivia...}, {
     }, data_], level_] :=
   Module[{aggs, rands, rators, tests, bodies, testsPat, bodiesPat,
     comments1, comments2, comments3},
+
     comments1 = Cases[{trivia1}, comment];
     comments2 = Cases[{trivia2}, comment];
     comments3 = Cases[{trivia3}, comment];
+
     aggs = DeleteCases[{most}, trivia];
     graphs = DeleteCases[{most}, ws | nl];
     rands = aggs[[1 ;; -1 ;; 2]];
     tests = rands[[1;;All;;2]];
     bodies = rands[[2;;All;;2]];
-    rators = aggs[[2 ;; -2 ;; 2]];
+    (* normally the end is -2, but we are working with MOST of the children, so make sure to grab the last element, which is a rator *)
+    rators = aggs[[2 ;; (*-2*) ;; 2]];
     ratorsPat = Alternatives @@ rators;
     testsPat = Alternatives @@ tests;
     bodiesPat = Alternatives @@ bodies;
@@ -2255,24 +2264,27 @@ indent[CallNode[{tag:LeafNode[Symbol, "Which", _], trivia1:trivia...}, {
         data
       ]
       ,
+      (*
+      Redo newlines
+      *)
       CallNode[
         Flatten[{
           indent[tag, level + 1],
-          indent[#, level + 1]& /@ comments1
+          surround[indent[#, level + 1]& /@ comments1, {line[level + 1]}]
         }]
         ,
         Flatten[{
           indent[opener, level + 1],
-          indent[#, level + 1]& /@ comments2, 
+          surround[indent[#, level + 1]& /@ comments2, {line[level + 1]}],
           Replace[graphs, {
               rator : ratorsPat :> indent[rator, level + 1],
               test:testsPat :> {line[level + 1], indent[test, level + 1]},
               body:bodiesPat :> {line[level + 2], indent[body, level + 2], line[level + 1]},
-              other_ :> indent[other, level + 1]
+              other_ :> {line[level + 1], indent[other, level + 1]}
             }, {1}],
           line[level + 2],
           indent[lastRand, level + 2],
-          indent[#, level + 1]& /@ comments3,
+          {line[level + 1], indent[#, level + 1]}& /@ comments3,
           line[level],
           indent[closer, level]
         }]
@@ -2288,7 +2300,7 @@ special casing If
 
 completely redo newlines
 *)
-indent[CallNode[{tag : LeafNode[Symbol, "If", _], trivia1 : trivia...}, {
+indent[CallNode[{tag : LeafNode[Symbol, "If" | {FragmentNode[Symbol, "If", _], ___}, _], trivia1 : trivia...}, {
       GroupNode[_, {
           opener_, 
           trivia2 : trivia..., 
@@ -2309,6 +2321,7 @@ indent[CallNode[{tag : LeafNode[Symbol, "If", _], trivia1 : trivia...}, {
 
     comments1 = Cases[{trivia1}, comment];
     comments2 = Cases[{trivia2}, comment];
+
     aggs = DeleteCases[{rest}, trivia];
     graphs = DeleteCases[{rest}, ws | nl];
     comments3 = Cases[{trivia3}, comment];
@@ -2321,6 +2334,9 @@ indent[CallNode[{tag : LeafNode[Symbol, "If", _], trivia1 : trivia...}, {
       $CurrentAiriness <= -0.85,
         condition = SingleLine
       ,
+      !empty[comments2],
+        condition = RedoNewlines
+      ,
       (*
       If[anything, symbol, symbol] => single line
       *)
@@ -2331,16 +2347,15 @@ indent[CallNode[{tag : LeafNode[Symbol, "If", _], trivia1 : trivia...}, {
         condition = RedoNewlines
     ];
 
-    CallNode[
-      Flatten[{
-        indent[tag, level + 1], 
-        indent[#, level + 1]& /@ comments1
-      }]
-      ,
-      Flatten[
-      Switch[condition,
-        SingleLine,
-          {
+    Switch[condition,
+      SingleLine,
+        CallNode[
+          Flatten[{
+            indent[tag, level + 1], 
+            indent[#, level + 1]& /@ comments1
+          }]
+          ,
+          Flatten[{
             indent[opener, level + 1], 
             indent[#, level + 1]& /@ comments2, 
             indent[firstRand, level + 1], 
@@ -2353,27 +2368,35 @@ indent[CallNode[{tag : LeafNode[Symbol, "If", _], trivia1 : trivia...}, {
               }, {1}], 
             indent[#, level]& /@ comments4,
             indent[closer, level]
-          }
-        ,
-        RedoNewlines,
-          {
-            indent[opener, level + 1], 
-            indent[#, level + 1]& /@ comments2, 
-            indent[firstRand, level + 1], 
-            indent[#, level + 1]& /@ comments3, 
-            indent[firstRator, level + 1], 
-            line[level + 1], 
-            Replace[graphs, {
-                rator : ratorsPat :> {line[level + 1], indent[rator, level + 1], line[level + 1]}, 
-                other_ :> indent[other, level + 1]
-              }, {1}], 
-            indent[#, level]& /@ comments4, 
-            line[level], 
-            indent[closer, level]
-          }
-      ]]
+          }]
+          ,
+          data
+        ]
       ,
-      data
+      RedoNewlines,
+        CallNode[
+            Flatten[{
+              indent[tag, level + 1], 
+              surround[indent[#, level + 1]& /@ comments1, {line[level + 1]}]
+            }]
+            ,
+            Flatten[{
+              indent[opener, level + 1],
+              surround[indent[#, level + 1]& /@ comments2, {line[level + 1]}],
+              indent[firstRand, level + 1],
+              surround[indent[#, level + 1]& /@ comments3, {line[level + 1]}],
+              indent[firstRator, level + 1],
+              Replace[graphs, {
+                  rator : ratorsPat :> {line[level + 1], indent[rator, level + 1]}, 
+                  other_ :> {line[level + 1], indent[other, level + 1]}
+                }, {1}], 
+              surround[indent[#, level + 1]& /@ comments4, {line[level + 1]}],
+              line[level],
+              indent[closer, level]
+            }]
+            ,
+            data
+        ]
     ]
   ]
 
@@ -2382,7 +2405,7 @@ special casing For
 
 completely redo newlines
 *)
-indent[CallNode[{tag : LeafNode[Symbol, "For", _], trivia1 : trivia...}, {
+indent[CallNode[{tag : LeafNode[Symbol, "For" | {FragmentNode[Symbol, "For", _], ___}, _], trivia1 : trivia...}, {
       GroupNode[_, {
           opener_, 
           trivia2 : trivia..., 
@@ -2408,6 +2431,7 @@ indent[CallNode[{tag : LeafNode[Symbol, "For", _], trivia1 : trivia...}, {
         }, _]
     }, data_], level_] :=
   Module[{comments1, comments2, comments3, comments4, comments5, comments6, comments7, comments8, comments9},
+
     comments1 = Cases[{trivia1}, comment];
     comments2 = Cases[{trivia2}, comment];
     comments3 = Cases[{trivia3}, comment];
@@ -2451,6 +2475,9 @@ indent[CallNode[{tag : LeafNode[Symbol, "For", _], trivia1 : trivia...}, {
         data
       ]
       ,
+      (*
+      Redo newlines
+      *)
       CallNode[
         Flatten[{
           indent[tag, level],

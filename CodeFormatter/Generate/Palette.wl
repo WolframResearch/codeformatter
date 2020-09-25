@@ -99,6 +99,15 @@ Module[{nb},
             }],
             Spacer[{0, 20}],
             Column[{
+              (*
+              Reparsing boxes before formatting prevents several problems:
+              
+              Sometimes cells are hand-edited and are incorrect.
+
+              The FE has bugs in the Package Editor that this fixes
+
+              Related bugs: 395301
+              *)
               Style["Reparse Boxes Before Formatting", "Item"],
               Checkbox[Dynamic[CodeFormatter`$InteractiveReparse, (
                 CodeFormatter`$InteractiveReparse = #;
@@ -129,7 +138,7 @@ Module[{nb},
             CodeFormatter`$InteractiveIndentationCharacter = Lookup[opts, "CodeFormatterInteractiveIndentationCharacter", "space"];
             CodeFormatter`$InteractiveReparse = Lookup[opts, "CodeFormatterInteractiveReparse", True];
           ];
-        ])], WindowTitle->"CodeFormatter"];
+        ])], WindowTitle->"Code Formatting"];
 
     NotebookSave[nb, FileNameJoin[{generatedWLDir, "CodeFormatter.nb"}]]
   ]

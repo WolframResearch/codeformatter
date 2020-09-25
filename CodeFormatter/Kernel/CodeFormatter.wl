@@ -75,6 +75,16 @@ $DefaultSafetyMargin = 10
 
 
 
+(*
+Less common settings
+*)
+
+$LineBreakWithinComments = False
+
+$AllowSplittingTokens = False
+
+
+
 CodeFormat::implicittimesaftercontinuation = "Replaced implicit Times with explicit * to remove ambiguity."
 
 
@@ -2822,11 +2832,33 @@ breakLines[tokensIn_, Infinity, Infinity] :=
   tokensIn
 
 breakLine[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
-  Module[{tokens, width, tok, toSplit, takeSpecs, kTmp, toInsertAfter},
+  Module[{tokens, width, tok, toSplit, takeSpecs, kTmp, toInsertAfter, firstNonWhitespaceIndex, leadingWhitespace},
 
     tokens = tokensIn;
 
-    width = 0;
+    (*
+    Collect leading whitespace, to be used later when inserting newlines and we want to indent the next line
+    *)
+    firstNonWhitespaceIndex = 1;
+    leadingWhitespace = "";
+    While[True,
+      If[firstNonWhitespaceIndex > Length[tokens],
+        Break[]
+      ];
+      tok = tokens[[firstNonWhitespaceIndex]];
+      If[!MatchQ[tok, LeafNode[Whitespace, _, _]],
+        Break[]
+      ];
+      leadingWhitespace = leadingWhitespace <> tok[[2]];
+      firstNonWhitespaceIndex++;
+    ];
+
+    If[$Debug,
+      Print["firstNonWhitespaceIndex: ", firstNonWhitespaceIndex];
+      Print["leadingWhitespace: ", leadingWhitespace //InputForm];
+    ];
+
+    width = StringLength[leadingWhitespace];
     toSplit = <||>;
     toInsertAfter = {};
     Do[
@@ -2853,19 +2885,16 @@ breakLine[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
         linebreak after the first acceptable operator
         if no breaking before reaching lineWidth2, then just insert a continuation marker
         acceptable operators are:
-          unambiguous openers
+          openers
           unambiguous prefix
           unambiguous binary
           unambiguous infix
-          un ambiguous ternary
-
-        TODO: provide this list programmatically from the parser
-
+          unambiguous ternary
         *)
         If[width <= lineWidth2,
           
           If[isAcceptableOperator[tok[[1]]],
-            AppendTo[toInsertAfter, i];
+            AppendTo[toInsertAfter, {i, leadingWhitespace <> $CurrentIndentationString}];
             width = 0;
           ];
 
@@ -2885,7 +2914,7 @@ breakLine[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
         ]
       ]
       ,
-      {i, 1, Length[tokens]}
+      {i, firstNonWhitespaceIndex, Length[tokens]}
     ];
 
     If[$Debug,
@@ -3007,6 +3036,10 @@ breakLine[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
       Print["toSplit 2: ", toSplit];
     ];
 
+    If[!$AllowSplittingTokens,
+      toSplit = <||>
+    ];
+
     (*
     Now split each token accordingly
     *)
@@ -3020,28 +3053,32 @@ breakLine[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
 
         but at least line break BEFORE this fragment
         *)
-        Which[
-          MatchQ[tok, FragmentNode[Token`Comment, "(*", _]],
+        Switch[tok,
+          FragmentNode[Token`Comment, "(*", _],
             tokens[[key]] = {FragmentNode[Token`Comment, "\\" <> $CurrentNewline, tok[[3]]], tok}
           ,
-          MatchQ[tok, FragmentNode[Token`Comment, "*)", _]],
+          FragmentNode[Token`Comment, "*)", _],
             tokens[[key]] = {FragmentNode[Token`Comment, $CurrentNewline, tok[[3]]], tok}
           ,
-          MatchQ[tok, LeafNode[String, s_ /; !StringStartsQ[s, "\""], _]],
+          LeafNode[String, s_ /; !StringStartsQ[s, "\""], _],
             (*
             just ignore the line break for now
             FIXME: yes this is wrong
             *)
-            tokens[[key]] = tok
+            (* tokens[[key]] = tok *)
+            Null
           ,
-          MatchQ[tok, LeafNode[Token`Fake`ImplicitTimes, _, _]],
+          LeafNode[Token`Fake`ImplicitTimes, _, _],
             (*
             insert a star to work-around design issues of line continuations and implicit Times interfering with each other
             *)
             Message[CodeFormat::implicittimesaftercontinuation];
             tokens[[key]] = {FragmentNode[Token`Fake`ImplicitTimes, "\\" <> $CurrentNewline, tok[[3]]], FragmentNode[Token`Star, "*", <||>]}
           ,
-          MatchQ[tok, LeafNode[Token`LinearSyntaxBlob, _, _]],
+          LeafNode[Token`LinearSyntaxBlob, _, _],
+            (*
+            Never split LinearSyntaxBlobs
+            *)
             tokens[[key]] = {FragmentNode[Token`LinearSyntaxBlob, "\\" <> $CurrentNewline, tok[[3]]], tok}
           ,
           (*
@@ -3049,7 +3086,7 @@ breakLine[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
 
           inside comment, so do not need to insert continuations marks
           *)
-          MatchQ[tok, FragmentNode[Token`Comment, _, _]],
+          FragmentNode[Token`Comment, _, _],
             takeSpecs = Partition[{0} ~Join~ val ~Join~ {StringLength[tok[[2]]]}, 2, 1];
             If[$Debug,
               Print["takeSpecs 1: ", takeSpecs];
@@ -3065,14 +3102,16 @@ breakLine[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
               Print["takeSpecs 2: ", takeSpecs];
             ];
 
-            tokens[[key]] = FragmentNode[tok[[1]], #, tok[[3]]]& /@ betterRiffle[StringTake[tok[[2]], takeSpecs], $CurrentNewline]
+            If[$LineBreakWithinComments,
+              tokens[[key]] = FragmentNode[tok[[1]], #, tok[[3]]]& /@ betterRiffle[StringTake[tok[[2]], takeSpecs], $CurrentNewline]
+            ]
           ,
           (*
           OK to split
           
           No special cases, can use the original split value
           *)
-          True,
+          _,
             takeSpecs = Partition[{0} ~Join~ val ~Join~ {StringLength[tok[[2]]]}, 2, 1];
             If[$Debug,
               Print["takeSpecs 1: ", takeSpecs];
@@ -3099,7 +3138,8 @@ breakLine[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
     Now insert newlines
     *)
     Do[
-      tokens[[i]] = {tokens[[i]], LeafNode[Token`Newline, $CurrentNewline, <||>]}
+      tokens[[i[[1]]]] = {tokens[[i[[1]]]], LeafNode[Token`Newline, $CurrentNewline, <||>]} ~Join~
+        (LeafNode[Whitespace, #, <||>]& /@ Characters[i[[2]]])
       ,
       {i, toInsertAfter}
     ];

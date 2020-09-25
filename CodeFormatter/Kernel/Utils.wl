@@ -22,6 +22,8 @@ insertNecessarySpaces
 
 betterRiffle
 
+surround
+
 
 Begin["`Private`"]
 
@@ -298,11 +300,30 @@ insertNecessarySpaces[tokensIn_] :=
 (*
 It is convenient to have a function that does:
 
-Riffle[{1}, {2}] => {1}
+betterRiffle[{1}, {2}] => {1}
+
+Unfortunately, Riffle does this:
+Riffle[{1}, {2}] => {1, 2}
+
+So introduce betterRiffle
 *)
 betterRiffle[{a_}, _] := {a}
 
 betterRiffle[a_, b_] := Riffle[a, b]
+
+
+
+(*
+
+This is useful for surrounding comments with newlines
+But if there are no comments, then no newlines are injected
+
+surround[{}, x] => {}
+surround[{c1, c2, c3}, x] => {x, c1, x, c2, x, c3, x}
+*)
+surround[{}, _] := {}
+
+surround[a_, b_] := Riffle[a, b, {1, -1, 2}]
 
 
 End[]

@@ -55,9 +55,21 @@ $DefaultNewline = "\n"
 $DefaultTabWidth = 4
 
 (*
-decreed by SW
+Discussed in Live CEOing Ep 392
+
+This RFC:
+https://tools.ietf.org/html/rfc2822.html#section-2.1.1
+
+states:
+
+There are two limits that this standard places on the number of
+characters in a line. Each line of characters MUST be no more than
+998 characters, and SHOULD be no more than 78 characters, excluding
+the CRLF.
+
+And SW thought it was a good idea to follow RFC 2822 for the default
 *)
-$DefaultLineWidth = 70
+$DefaultLineWidth = 78
 
 $DefaultSafetyMargin = 10
 

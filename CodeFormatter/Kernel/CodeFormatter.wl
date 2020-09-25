@@ -405,43 +405,61 @@ matchCommentFragmentNewlineQ := MatchQ[FragmentNode[Token`Comment, $CurrentNewli
 
 
 
+(*
+Flatten comment groups
+*)
 StandardizeCommentGroups::usage = "StandardizeCommentGroups[cst] standardizes comment groups."
 
 StandardizeCommentGroups[cstIn_] :=
-  Module[{cst, reaped, picking, embeddedNewlines, embeddedNewlinesFromCommentGroups},
+  Module[{cst},
 
     cst = cstIn;
 
     poss = Position[cst, GroupNode[Comment, _, _]];
 
-    reaped = Reap[
-      cst = MapAt[convertCommentGroups, cst, poss];
-      ,
-      "containsEmbeddedNewline"
-    ];
-
-    If[!empty[reaped[[2]]],
-      picking = reaped[[2]][[1]];
-      embeddedNewlinesFromCommentGroups = Pick[poss, picking];
-      If[!empty[embeddedNewlinesFromCommentGroups],
-        embeddedNewlines = Lookup[cst[[3]], "EmbeddedNewlines", {}];
-        embeddedNewlines = Union[embeddedNewlines, embeddedNewlinesFromCommentGroups];
-        cst[[3, Key["EmbeddedNewlines"]]] = embeddedNewlines;
-      ];
-    ];
+    cst = MapAt[convertCommentGroups, cst, poss];
 
     cst
   ]
 
-convertCommentGroups[GroupNode[Comment, boxs_, data_]] :=
-  Module[{strs},
-    strs = Cases[boxs, _String, Infinity];
-    If[MemberQ[strs, "\[IndentingNewLine]"],
-      Sow[True, "containsEmbeddedNewline"]
+convertCommentGroups[c:GroupNode[Comment, boxs_, data_]] :=
+  Module[{leafs, src, origSpaces},
+    src = data[Source];
+    leafs = Cases[boxs, LeafNode[_, _, _], Infinity];
+
+    If[MemberQ[leafs, LeafNode[String, "\[IndentingNewLine]" | "\n", _]], 
+      origSpaces = 0;
+      (*
+      Do a little hack here
+
+      It is hard to tell how many spaces were in front of the multiline comment
+
+      so count how many spaces were before the closer and use that
+      *)
+      Do[
+        If[MatchQ[leafs[[i]], LeafNode[String, "\[IndentingNewLine]" | "\n", _]],
+          Break[]
+        ];
+        If[MatchQ[leafs[[i]], LeafNode[String, s_ /; StringMatchQ[s, " "..], _]],
+          origSpaces += StringLength[leafs[[i]][[2]]]
+        ];
+        ,
+        {i, Length[leafs] - 1, 2, -1}
+      ];
+
+      LeafNode[Token`Comment,
+        {FragmentNode[Token`Comment, "\\" <> $CurrentNewline, <||>]} ~Join~
+        Table[FragmentNode[String, " ", <||>], origSpaces] ~Join~
+        (FragmentNode[Token`Comment, #[[2]], <||>]& /@ leafs), <|data, "InsertedFragmentNodes" -> 1 + origSpaces|>
+      ]
       ,
-      Sow[False, "containsEmbeddedNewline"]
-    ];
-    LeafNode[Token`Comment, StringJoin[strs], data]
+      (* single line *)
+      LeafNode[Token`Comment,
+        (FragmentNode[Token`Comment, #[[2]], <||>]& /@ leafs)
+        ,
+        data
+      ]
+    ]
   ]
 
 

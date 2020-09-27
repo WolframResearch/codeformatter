@@ -84,6 +84,16 @@ formatSelectedCell[] :=
             ];
 
             formatted = formatProgramCellContents[formatted[[1]]];
+
+            If[FailureQ[formatted],
+
+                shouldWrite = False;
+
+                CurrentValue[nb, WindowStatusArea] = "";
+                
+                Throw[formatted]
+            ];
+
             Cell[formatted, Sequence @@ cell[[2;;]]]
           ,
           (*
@@ -100,6 +110,16 @@ formatSelectedCell[] :=
             ];
 
             formatted = formatInputContents[formatted[[1, 1]]];
+
+            If[FailureQ[formatted],
+
+                shouldWrite = False;
+
+                CurrentValue[nb, WindowStatusArea] = "";
+
+                Throw[formatted]
+            ];
+
             Cell[BoxData[formatted], Sequence @@ cell[[2;;]]]
           ,
           _,

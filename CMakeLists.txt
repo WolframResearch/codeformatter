@@ -89,6 +89,7 @@ set(GENERATED_SOURCES
 set(DOCUMENTATION_NOTEBOOK_PATHS
 	English/Guides/CodeFormatter.nb
 	English/ReferencePages/Symbols/CodeFormat.nb
+	English/Tutorials/ReleaseNotes.nb
 )
 
 #

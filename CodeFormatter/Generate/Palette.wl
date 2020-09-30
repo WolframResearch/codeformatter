@@ -118,6 +118,14 @@ Module[{nb},
                 )&]
               ]
             }]
+            (*
+            ,
+            Spacer[{0, 20}],
+            Column[{
+              Style["Enable Experimental Toolbar Format Button (12.2+)", "Item"],
+              Checkbox[Dynamic[CurrentValue[$FrontEnd, {PrivateFrontEndOptions, "ExperimentalSettings", "CodeAssist", "ToolbarFormatButton"}, True]]]
+            }]
+            *)
           }]]
         }]
       }]], Initialization :> (

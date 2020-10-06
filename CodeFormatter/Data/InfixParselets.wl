@@ -74,6 +74,8 @@ Token`At -> Parselet`BinaryOperatorParselet[Token`At, Precedence`At, CodeParser`
 Token`AtAtAt -> Parselet`BinaryOperatorParselet[Token`AtAtAt, Precedence`AtAtAt, CodeParser`BinaryAtAtAt],
 Token`SlashSlash -> Parselet`BinaryOperatorParselet[Token`SlashSlash, Precedence`SlashSlash, CodeParser`BinarySlashSlash],
 Token`Question -> Parselet`BinaryOperatorParselet[Token`Question, Precedence`Infix`Question, PatternTest],
+Token`BarMinusGreater -> Parselet`BinaryOperatorParselet[Token`BarMinusGreater, Precedence`BarMinusGreater, Function],
+Token`AtEqual -> Parselet`BinaryOperatorParselet[Token`AtEqual, Precedence`AtEqual, System`ApplyTo],
 
 Token`LongName`Divide -> Parselet`BinaryOperatorParselet[Token`LongName`Divide, Precedence`LongName`Divide, Divide],
 Token`LongName`DivisionSlash -> Parselet`BinaryOperatorParselet[Token`LongName`DivisionSlash, Precedence`LongName`DivisionSlash, Divide],
@@ -99,6 +101,7 @@ Token`LongName`DoubleRightTee -> Parselet`BinaryOperatorParselet[Token`LongName`
 Token`LongName`DoubleLeftTee -> Parselet`BinaryOperatorParselet[Token`LongName`DoubleLeftTee, Precedence`LongName`DoubleLeftTee, DoubleLeftTee],
 Token`LongName`UpTee -> Parselet`BinaryOperatorParselet[Token`LongName`UpTee, Precedence`LongName`UpTee, UpTee],
 Token`LongName`DownTee -> Parselet`BinaryOperatorParselet[Token`LongName`DownTee, Precedence`LongName`DownTee, DownTee],
+Token`LongName`Application -> Parselet`BinaryOperatorParselet[Token`LongName`Application, Precedence`LongName`Application, System`Application],
 
 
 (*

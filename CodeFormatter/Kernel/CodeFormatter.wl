@@ -1305,6 +1305,22 @@ abstractFormatNodes[head_[tag_, ts_, data_]] := head[tag, abstractFormatNodes /@
 
 
 
+(*
+Multiple implicit Times tokens may have been inserted when parsing boxes, so remove them here
+*)
+removeExcessImplicitTimes[Times, children_] :=
+  Module[{removedChildren},
+
+    removedChildren = First /@ Split[children, (MatchQ[#1, LeafNode[Token`Fake`ImplicitTimes, _, _]] && MatchQ[#2, LeafNode[Token`Fake`ImplicitTimes, _, _]])&];
+
+    removedChildren
+  ]
+
+removeExcessImplicitTimes[tag_, children_] :=
+  children
+  
+
+
 line[level_] :=
   {LeafNode[Token`Newline, $CurrentNewline, <||>]} ~Join~
     Table[LeafNode[Whitespace, #, <||>]& /@ Characters[$CurrentIndentationString], level]
@@ -1683,6 +1699,9 @@ indent[(head:(BinaryNode|InfixNode|TernaryNode|QuaternaryNode))[tag_, ts_, data_
   Module[{aggs, rators, graphs, ratorsPat, split, lastGraph},
 
     aggs = DeleteCases[ts, trivia];
+
+    aggs = removeExcessImplicitTimes[tag, aggs];
+
     rators = aggs[[2 ;; All ;; 2]];
     ratorsPat = Alternatives @@ rators;
 
@@ -1691,6 +1710,9 @@ indent[(head:(BinaryNode|InfixNode|TernaryNode|QuaternaryNode))[tag_, ts_, data_
       Always line break, so redo newlines
       *)
       graphs = DeleteCases[ts, ws | nl];
+
+      graphs = removeExcessImplicitTimes[tag, graphs];
+
       lastGraph = Last[graphs];
       If[MatchQ[lastGraph, GroupNode[_, _, _]],
         (*
@@ -1707,6 +1729,9 @@ indent[(head:(BinaryNode|InfixNode|TernaryNode|QuaternaryNode))[tag_, ts_, data_
       split graphs around existing newline tokens 
       *)
       graphs = DeleteCases[ts, ws];
+
+      graphs = removeExcessImplicitTimes[tag, graphs];
+
       split = Split[graphs, (matchNewlineQ[#1] == matchNewlineQ[#2])&];
       (*
       Forget about the actual newline tokens

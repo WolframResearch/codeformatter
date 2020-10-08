@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[      8637,        220]
-NotebookOptionsPosition[      5346,        156]
-NotebookOutlinePosition[      5821,        173]
-CellTagsIndexPosition[      5778,        170]
+NotebookDataLength[     10011,        261]
+NotebookOptionsPosition[      6278,        189]
+NotebookOutlinePosition[      6750,        206]
+CellTagsIndexPosition[      6707,        203]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -151,12 +151,45 @@ to Package Editor toolbar", "Text",
   3.8104866083996763`*^9}},ExpressionUUID->"dc276669-234b-4810-95c6-\
 af6e04b17278"]
 }, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["1.1.1", "Section",
+ CellChangeTimes->{{3.8111754479877253`*^9, 
+  3.8111754486096077`*^9}},ExpressionUUID->"176bb536-ba32-4077-839b-\
+928d06901b2d"],
+
+Cell["October 8, 2020", "Text",
+ CellChangeTimes->{{3.8111754562799053`*^9, 
+  3.8111754619700727`*^9}},ExpressionUUID->"194a5f2e-df7d-47ab-8d53-\
+4bee5a455739"],
+
+Cell[CellGroupData[{
+
+Cell["Fixes", "Subsection",
+ CellChangeTimes->{{3.811175464550408*^9, 
+  3.811175465485669*^9}},ExpressionUUID->"5e1da6ab-bc2e-405b-a9b0-\
+187ac06f12cf"],
+
+Cell["\<\
+The formatter side of what needs to be fixed for 398836
+
+Remove excess implicit Times tokens where needed.
+
+Also make sure to do sanity checking on formatting cells. This will prevent \
+any bugs in the formatter from propagating errors into user source code.\
+\>", "Text",
+ CellChangeTimes->{
+  3.811175450549573*^9},ExpressionUUID->"22af2612-60ff-48e9-93a2-\
+43090b767f38"]
+}, Open  ]]
 }, Open  ]]
 }, Open  ]]
 },
 WindowSize->{700, 770},
 WindowMargins->{{165, Automatic}, {Automatic, 89}},
-FrontEndVersion->"12.2 for Mac OS X x86 (64-bit) (September 26, 2020)",
+FrontEndVersion->"12.2 for Mac OS X x86 (64-bit) (October 3, 2020)",
 StyleDefinitions->FrontEnd`FileName[{"Wolfram"}, "TutorialPageStyles.nb", 
   CharacterEncoding -> "UTF-8"],
 ExpressionUUID->"63fe6859-1ba0-456a-80d1-f2ea25380992"
@@ -219,6 +252,14 @@ Cell[4270, 128, 203, 4, 54, "Subsection",ExpressionUUID->"e6b7c6f2-f56b-42d7-81d
 Cell[4476, 134, 264, 4, 35, "Text",ExpressionUUID->"ab735280-83a5-4612-89de-7b75ec5244f2"],
 Cell[4743, 140, 317, 5, 35, "Text",ExpressionUUID->"63cb16f3-bbde-4c2d-9a53-2f53b7a62c88"],
 Cell[5063, 147, 243, 4, 35, "Text",ExpressionUUID->"dc276669-234b-4810-95c6-af6e04b17278"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[5355, 157, 154, 3, 67, "Section",ExpressionUUID->"176bb536-ba32-4077-839b-928d06901b2d"],
+Cell[5512, 162, 161, 3, 35, "Text",ExpressionUUID->"194a5f2e-df7d-47ab-8d53-4bee5a455739"],
+Cell[CellGroupData[{
+Cell[5698, 169, 153, 3, 54, "Subsection",ExpressionUUID->"5e1da6ab-bc2e-405b-a9b0-187ac06f12cf"],
+Cell[5854, 174, 384, 10, 150, "Text",ExpressionUUID->"22af2612-60ff-48e9-93a2-43090b767f38"]
 }, Open  ]]
 }, Open  ]]
 }, Open  ]]

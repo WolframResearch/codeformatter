@@ -13,6 +13,7 @@ Begin["`Private`"]
 Needs["CodeFormatter`"]
 
 Needs["CodeParser`"]
+Needs["CodeParser`Utils`"]
 
 
 
@@ -20,7 +21,7 @@ Needs["CodeParser`"]
 
 formatSelectedCell[] :=
   Catch[
-  Module[{nb, read, formatted, toWrite, shouldWrite},
+  Module[{nb, read, formatted, toWrite, shouldWrite, failure},
 
     nb = InputNotebook[];
 
@@ -67,6 +68,7 @@ formatSelectedCell[] :=
     ];
 
     shouldWrite = False;
+    failure = False;
 
     CurrentValue[nb, WindowStatusArea] = "Formatting selected cell...";
 
@@ -87,7 +89,7 @@ formatSelectedCell[] :=
 
             If[FailureQ[formatted],
 
-                shouldWrite = False;
+                failure = True;
 
                 CurrentValue[nb, WindowStatusArea] = "";
                 
@@ -113,7 +115,7 @@ formatSelectedCell[] :=
 
             If[FailureQ[formatted],
 
-                shouldWrite = False;
+                failure = True;
 
                 CurrentValue[nb, WindowStatusArea] = "";
 
@@ -127,7 +129,7 @@ formatSelectedCell[] :=
         ]
     ], read];
 
-    If[shouldWrite,
+    If[shouldWrite && !failure,
         NotebookWrite[nb, toWrite, All];
     ];
 
@@ -209,7 +211,7 @@ formatProgramCellContents[contents_String] :=
 
 formatInputContents[contentsBox_] :=
     Catch[
-    Module[{cst, formatted, formattedBox, airiness, indentationString, tabWidth},
+    Module[{cst, formatted, formattedBox, airiness, indentationString, tabWidth, agg, cst2, agg2, aggToCompare, agg2ToCompare},
 
         airiness = massageAiriness[CodeFormatter`$InteractiveAiriness];
         tabWidth = massageTabWidth[CodeFormatter`$InteractiveTabWidth];
@@ -230,7 +232,42 @@ formatInputContents[contentsBox_] :=
         If[FailureQ[formatted],
             Throw[formatted]
         ];
+
         formatted = StringTrim[formatted, "\n"..];
+
+
+        (*
+        CodeFormatCST does not do sanity checking, so must do it here
+        *)
+        If[CodeFormatter`Private`$DisableSanityChecking,
+            Throw[formatted]
+        ];
+
+        agg = CodeParser`Abstract`Aggregate[cst];
+        agg = normalizeTokens[agg, "FormatOnly" -> True, "Newline" -> newline, "TabWidth" -> tabWidth];
+
+        cst2 = CodeConcreteParse[formatted];
+
+        If[MatchQ[cst2[[3]], KeyValuePattern[SyntaxIssues -> {___, SyntaxIssue["UnrecognizedCharacter", _, _, _], ___}]],
+            Message[CodeFormat::syntaxissues, Lookup[cst2[[3]], SyntaxIssues]];
+        ];
+
+        agg2 = CodeParser`Abstract`Aggregate[cst2];
+        agg2 = normalizeTokens[agg2, "FormatOnly" -> True, "Newline" -> newline, "TabWidth" -> tabWidth];
+
+        agg2[[1]] = Box;
+
+        aggToCompare = agg /. _Association -> <||>;
+        agg2ToCompare = agg2 /. _Association -> <||>;
+
+        If[aggToCompare =!= agg2ToCompare,
+            If[$Debug,
+              Print["aggToCompare: ", aggToCompare];
+              Print["agg2ToCompare: ", agg2ToCompare];
+            ];
+            Throw[Failure["SanityCheckFailed", <||>]]
+        ];
+
 
         cst = CodeConcreteParse[formatted];
         If[FailureQ[cst],

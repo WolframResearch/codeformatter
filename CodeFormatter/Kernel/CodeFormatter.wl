@@ -29,6 +29,12 @@ $DefaultIndentationString
 $DefaultTabWidth
 
 
+(*
+Messages
+*)
+CodeFormatter
+
+
 Begin["`Private`"]
 
 Needs["CodeFormatter`AcceptableOperators`"]
@@ -38,10 +44,23 @@ Needs["CodeParser`"]
 Needs["CodeParser`Folds`"] (* for linearize *)
 Needs["CodeParser`Utils`"]
 
+Needs["PacletManager`"] (* for PacletInformation *)
 
+
+
+CodeFormatter::old = "The old Format paclet has been renamed to CodeFormatter. Uninstall Format paclet from your system."
 
 If[PacletFind["Format"] != {},
-  Message[General::obspkg, "Format`"]
+  Message[CodeFormatter::old]
+]
+
+
+CodeFormatter::versions = "CodeParser version `1` and CodeFormatter version `2` are different. There may be unexpected problems."
+
+codeParserVersion = "Version" /. PacletInformation["CodeParser"]
+codeFormatterVersion = "Version" /. PacletInformation["CodeFormatter"]
+If[StringSplit[codeParserVersion, "."][[1;;2]] != StringSplit[codeFormatterVersion, "."][[1;;2]],
+  Message[CodeFormatter::versions, codeParserVersion, codeFormatterVersion]
 ]
 
 

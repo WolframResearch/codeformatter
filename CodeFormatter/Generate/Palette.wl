@@ -41,7 +41,7 @@ Module[{nb},
       DynamicModule[{},
       Panel[Column[
       {
-        Button["Format Selected Cell", Needs["CodeFormatter`Notebooks`"];CodeFormatter`Notebooks`formatSelectedCell[], Method -> "Queued"],
+        Button[Dynamic[FEPrivate`FrontEndResource["CodeFormatterStrings", "PaletteFormatButton"]], Needs["CodeFormatter`Notebooks`"];CodeFormatter`Notebooks`formatSelectedCell[], Method -> "Queued"],
         Spacer[{0, 20}],
         (*
         I would like to use Labeled[content, label, {{Top, Left}}]
@@ -56,7 +56,7 @@ Module[{nb},
         https://mathematica.stackexchange.com/a/126834/63281
         *)
         Column[{
-          Style["Airiness", "Item"],
+          Style[Dynamic[FEPrivate`FrontEndResource["CodeFormatterStrings", "AirinessHeader"]], "Item"],
           Row[{
             $minAirinessIcon,
             Slider[Dynamic[CodeFormatter`$InteractiveAiriness, (
@@ -72,22 +72,22 @@ Module[{nb},
         }],
         Spacer[{0, 20}],
         OpenerView[{
-          "Settings",
+          Dynamic[FEPrivate`FrontEndResource["CodeFormatterStrings", "SettingsHeader"]],
           Panel[Column[{
             Column[{
-              Style["Indentation Character", "Item"],
+              Style[Dynamic[FEPrivate`FrontEndResource["CodeFormatterStrings", "IndentationCharacterHeader"]], "Item"],
               RadioButtonBar[Dynamic[CodeFormatter`$InteractiveIndentationCharacter, (
                 CodeFormatter`$InteractiveIndentationCharacter = #;
                 If[$VersionNumber >= 12.2,
                   CurrentValue[$FrontEnd, {CodeAssistOptions, "CodeToolsOptions", "CodeFormatterInteractiveIndentationCharacter"}] = #;
                 ];
                 (* CodeFormatter`Notebooks`formatSelectedCell[]; *)
-                )&], {"tab", "space"}
+                )&], {Dynamic[FEPrivate`FrontEndResource["CodeFormatterStrings", "TabMenuItem"]], Dynamic[FEPrivate`FrontEndResource["CodeFormatterStrings", "SpaceMenuItem"]]}
               ]
             }],
             Spacer[{0, 20}],
             Column[{
-              Style["Tab Width", "Item"],
+              Style[Dynamic[FEPrivate`FrontEndResource["CodeFormatterStrings", "TabWidthHeader"]], "Item"],
               RadioButtonBar[Dynamic[CodeFormatter`$InteractiveTabWidth, (
                 CodeFormatter`$InteractiveTabWidth = #;
                 If[$VersionNumber >= 12.2,
@@ -108,7 +108,7 @@ Module[{nb},
 
               Related bugs: 395301
               *)
-              Style["Reparse Boxes Before Formatting", "Item"],
+              Style[Dynamic[FEPrivate`FrontEndResource["CodeFormatterStrings", "ReparseHeader"]], "Item"],
               Checkbox[Dynamic[CodeFormatter`$InteractiveReparse, (
                 CodeFormatter`$InteractiveReparse = #;
                 If[$VersionNumber >= 12.2,
@@ -146,7 +146,17 @@ Module[{nb},
             CodeFormatter`$InteractiveIndentationCharacter = Lookup[opts, "CodeFormatterInteractiveIndentationCharacter", "space"];
             CodeFormatter`$InteractiveReparse = Lookup[opts, "CodeFormatterInteractiveReparse", True];
           ];
-        ])], WindowTitle->"Code Formatting"];
+        ])]
+      ,
+      (*
+      WindowTitle->Dynamic[FEPrivate`FrontEndResource["CodeFormatterStrings", "PaletteTitle"]]
+
+      Cannot use FrontEndResource for WindowTitle because $Failed will appear in FE Palettes Menu
+
+      Related bugs: xxx
+      *)
+      WindowTitle->"Code Formatting"
+    ];
 
     NotebookSave[nb, FileNameJoin[{generatedWLDir, "CodeFormatter.nb"}]]
   ]

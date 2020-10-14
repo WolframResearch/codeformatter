@@ -45,10 +45,14 @@ message(STATUS "BUG349779_PAUSE: ${BUG349779_PAUSE}")
 message(STATUS "BUG349779_TIMEOUT: ${BUG349779_TIMEOUT}")
 message(STATUS "CODEPARSER_EXE: ${CODEPARSER_EXE}")
 
-set(STATIC_WL_PACLET_SOURCES
+set(STATIC_WL_PACLET_KERNEL_SOURCES
 	${PROJECT_SOURCE_DIR}/CodeFormatter/Kernel/CodeFormatter.wl
 	${PROJECT_SOURCE_DIR}/CodeFormatter/Kernel/Notebooks.wl
 	${PROJECT_SOURCE_DIR}/CodeFormatter/Kernel/Utils.wl
+)
+
+set(STATIC_WL_PACLET_FRONTEND_TEXTRESOURCES_SOURCES
+	${PROJECT_SOURCE_DIR}/CodeFormatter/FrontEnd/TextResources/CodeFormatter.tr
 )
 
 #
@@ -138,7 +142,7 @@ add_custom_command(
 )
 list(APPEND COPIED_WL_PACLET_SOURCES ${COPIED_PACLETINFO})
 
-foreach(SRC ${STATIC_WL_PACLET_SOURCES})
+foreach(SRC ${STATIC_WL_PACLET_KERNEL_SOURCES})
 	get_filename_component(BARE_SRC ${SRC} NAME)
 	add_custom_command(
 		OUTPUT
@@ -152,6 +156,19 @@ foreach(SRC ${STATIC_WL_PACLET_SOURCES})
 			${PROJECT_SOURCE_DIR}/cmake/InspectFile.cmake
 	)
 	list(APPEND COPIED_WL_PACLET_SOURCES ${PROJECT_BINARY_DIR}/paclet/${PACLET}/Kernel/${BARE_SRC})
+endforeach()
+
+foreach(SRC ${STATIC_WL_PACLET_FRONTEND_TEXTRESOURCES_SOURCES})
+	get_filename_component(BARE_SRC ${SRC} NAME)
+	add_custom_command(
+		OUTPUT
+			${PROJECT_BINARY_DIR}/paclet/${PACLET}/FrontEnd/TextResources/${BARE_SRC}
+		COMMAND
+			${CMAKE_COMMAND} -E copy ${SRC} ${PROJECT_BINARY_DIR}/paclet/${PACLET}/FrontEnd/TextResources/${BARE_SRC}
+		DEPENDS
+			${SRC}
+	)
+	list(APPEND COPIED_WL_PACLET_SOURCES ${PROJECT_BINARY_DIR}/paclet/${PACLET}/FrontEnd/TextResources/${BARE_SRC})
 endforeach()
 
 foreach(SRC ${GENERATED_WL_PACLET_KERNEL_SOURCES})

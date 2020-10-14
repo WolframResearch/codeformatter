@@ -1,0 +1,13 @@
+@@resource CodeFormatterStrings English
+{
+"PaletteTitle" -> "Code Formatting",
+"PaletteFormatButton" -> "Format Selected Cell",
+"AirinessHeader" -> "Airiness",
+"SettingsHeader" -> "Settings",
+"IndentationCharacterHeader" -> "Indentation Character",
+"TabWidthHeader" -> "Tab Width",
+"ReparseHeader" -> "Reparse Boxes Before Formatting",
+"TabMenuItem" -> "tab",
+"SpaceMenuItem" -> "space"
+}
+@|

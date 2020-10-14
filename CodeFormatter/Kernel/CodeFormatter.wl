@@ -2161,7 +2161,8 @@ indent[CallNode[{tag:LeafNode[Symbol, "Switch" | {FragmentNode[Symbol, "Switch",
     rands = aggs[[1 ;; -1 ;; 2]];
     tests = rands[[1;;All;;2]];
     bodies = rands[[2;;All;;2]];
-    rators = aggs[[2 ;; -2 ;; 2]];
+    (* normally the end is -2, but we are working with MOST of the children, so make sure to grab the last element, which is a rator *)
+    rators = aggs[[2 ;; (*-2*) ;; 2]];
     ratorsPat = Alternatives @@ rators;
     testsPat = Alternatives @@ tests;
     bodiesPat = Alternatives @@ bodies;

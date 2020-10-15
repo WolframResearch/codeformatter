@@ -11,3 +11,21 @@
 "SpaceMenuItem" -> "space"
 }
 @|
+
+@@resource CodeFormatterExpressions
+{
+"PackageToolbarPreferencesCellOpen" -> False
+}
+@|
+
+@@resource CodeFormatterLocalizedExpressions English
+{
+(*
+
+To be filled-in later
+
+"PackageToolbarPreferencesCell" -> Cell[BoxData[RowBox[{"1", "+", "2"}]], "Input"]
+*)
+
+}
+@|

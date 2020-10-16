@@ -108,7 +108,8 @@ CodeFormat::implicittimesaftercontinuation = "Replaced implicit Times with expli
 
 
 
-CodeFormat::usage = "CodeFormat[code] returns a string of formatted WL code."
+CodeFormat::usage = "CodeFormat[code] returns a string of formatted WL code. \
+code can be a string, a file, or a list of bytes."
 
 Options[CodeFormat] = {
   Airiness :> $DefaultAiriness,

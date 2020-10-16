@@ -2947,16 +2947,31 @@ breakLine[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
           Break[]
         ];
 
-        If[KeyExistsQ[toSplit, i],
-          toSplit[i] = Join[toSplit[i], { StringLength[tok[[2]]] - (width - lineWidth2) }]
-          ,
-          toSplit[i] = { StringLength[tok[[2]]] - (width - lineWidth2) }
-        ];
+        (*
+        Only add to toSplit if $AllowSplittingTokens is True
+        *)
+        If[TrueQ[$AllowSplittingTokens],
+          If[KeyExistsQ[toSplit, i],
+            toSplit[i] = Join[toSplit[i], { StringLength[tok[[2]]] - (width - lineWidth2) }]
+            ,
+            toSplit[i] = { StringLength[tok[[2]]] - (width - lineWidth2) }
+          ];
 
-        width = StringLength[tok[[2]]] - (StringLength[tok[[2]]] - (width - lineWidth2));
-        If[$Debug,
-          Print["toSplit: ", toSplit];
-          Print["width is (tentatively) now 2: ", width];
+          width = StringLength[tok[[2]]] - (StringLength[tok[[2]]] - (width - lineWidth2));
+          If[$Debug,
+            Print["toSplit: ", toSplit];
+            Print["width is (tentatively) now 2: ", width];
+          ]
+          ,
+          (*
+          if not adding to toSplit, then we still want to try to break after an acceptable operator
+          *)
+          If[isAcceptableOperator[tok[[1]]],
+            AppendTo[toInsertAfter, {i, leadingWhitespace <> $CurrentIndentationString}];
+            width = 0;
+          ];
+
+          Break[]
         ]
       ]
       ,
@@ -2989,7 +3004,7 @@ breakLine[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
               While[True,
                 If[$Debug,
                   Print["kTmp: ", kTmp];
-                  Print["examing: ", StringTake[tok[[2]], kTmp]];
+                  Print["examining: ", StringTake[tok[[2]], kTmp]];
                 ];
                 Which[
                   (*
@@ -3080,10 +3095,6 @@ breakLine[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
 
     If[$Debug,
       Print["toSplit 2: ", toSplit];
-    ];
-
-    If[!$AllowSplittingTokens,
-      toSplit = <||>
     ];
 
     (*

@@ -1725,38 +1725,51 @@ indent[(head:(BinaryNode|InfixNode|TernaryNode|QuaternaryNode))[tag_, ts_, data_
     rators = aggs[[2 ;; All ;; 2]];
     ratorsPat = Alternatives @@ rators;
 
-    If[MemberQ[$AlwaysLineBreak, tag],
+    Which[
       (*
-      Always line break, so redo newlines
+      foo := symbol  =>  single line
       *)
-      graphs = DeleteCases[ts, ws | nl];
-
-      graphs = removeExcessImplicitTimes[tag, graphs];
-
-      lastGraph = Last[graphs];
-      If[MatchQ[lastGraph, GroupNode[_, _, _]],
+      MatchQ[aggs, {_, _, LeafNode[Symbol, _, _]}],
         (*
-        we want the opener of a group to be on same line as everything else
-        Newlines are inserted inside the group itself
+        Single line, so delete newlines
         *)
-        lastGraph = redoGroupNewlines[lastGraph];
-        split = {Most[graphs] ~Join~ {lastGraph}};
-        ,
-        split = {Most[graphs], {lastGraph}};
-      ];
+        graphs = DeleteCases[ts, ws | nl];
+
+        split = {graphs}
       ,
-      (*
-      split graphs around existing newline tokens 
-      *)
-      graphs = DeleteCases[ts, ws];
+      MemberQ[$AlwaysLineBreak, tag],
+        (*
+        Always line break, so redo newlines
+        *)
+        graphs = DeleteCases[ts, ws | nl];
 
-      graphs = removeExcessImplicitTimes[tag, graphs];
+        graphs = removeExcessImplicitTimes[tag, graphs];
 
-      split = Split[graphs, (matchNewlineQ[#1] == matchNewlineQ[#2])&];
-      (*
-      Forget about the actual newline tokens
-      *)
-      split = Take[split, {1, -1, 2}];
+        lastGraph = Last[graphs];
+        If[MatchQ[lastGraph, GroupNode[_, _, _]],
+          (*
+          we want the opener of a group to be on same line as everything else
+          Newlines are inserted inside the group itself
+          *)
+          lastGraph = redoGroupNewlines[lastGraph];
+          split = {Most[graphs] ~Join~ {lastGraph}};
+          ,
+          split = {Most[graphs], {lastGraph}};
+        ]
+      ,
+      True,
+        (*
+        split graphs around existing newline tokens 
+        *)
+        graphs = DeleteCases[ts, ws];
+
+        graphs = removeExcessImplicitTimes[tag, graphs];
+
+        split = Split[graphs, (matchNewlineQ[#1] == matchNewlineQ[#2])&];
+        (*
+        Forget about the actual newline tokens
+        *)
+        split = Take[split, {1, -1, 2}];
     ];
     
     If[$Debug,

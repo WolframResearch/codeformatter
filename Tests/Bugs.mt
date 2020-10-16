@@ -29,7 +29,7 @@ cst = CodeConcreteParseBox[RowBox[{"a", " ", "b"}]]
 Test[
 	CodeFormat["1 + 2222222222222222222222222 + 3", "LineWidth" -> 20]
 	,
-	"1 + 2222222222222222222222222 +
+"1 + 2222222222222222222222222 +
      3"
 	,
 	TestID->"Bugs-20201016-J1C9L9"

@@ -4,7 +4,6 @@ Begin["`Private`"]
 
 Needs["CodeFormatter`Generate`GenerateSources`"]
 
-Print["Generating Palette..."]
 
 $minAirinessIcon =
 Graphics[{GrayLevel[0.5], AbsoluteThickness[1.5], CapForm["Butt"], 
@@ -162,11 +161,20 @@ Module[{nb},
   ]
 ]
 
-Print["UsingFrontEnd... \[WatchIcon]"]
+generate[] := (
 
-generatePalette[]
+Print["Generating Palette..."];
+
+Print["UsingFrontEnd... \[WatchIcon]"];
+
+generatePalette[];
 
 Print["Done Palette"]
+)
+
+If[script === $InputFileName,
+generate[]
+]
 
 End[]
 

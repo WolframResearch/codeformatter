@@ -8,6 +8,8 @@ srcDirFlagPosition
 
 srcDir
 
+script
+
 generatedWLDir
 
 dataDir
@@ -19,8 +21,6 @@ importedInfixParselets
 
 
 Begin["`Private`"]
-
-Print["Generating additional required source files..."]
 
 
 buildDirFlagPosition = FirstPosition[$CommandLine, "-buildDir"]
@@ -51,6 +51,15 @@ If[!DirectoryQ[srcDir],
   Quit[1]
 ]
 
+scriptPosition = FirstPosition[$CommandLine, "-script"]
+
+If[MissingQ[scriptPosition],
+  Print["Cannot proceed; Unsupported script"];
+  Quit[1]
+]
+
+script = $CommandLine[[scriptPosition[[1]] + 1]]
+
 
 
 generatedWLDir = FileNameJoin[{buildDir, "generated", "wl"}]
@@ -58,32 +67,11 @@ generatedWLDir = FileNameJoin[{buildDir, "generated", "wl"}]
 
 dataDir = FileNameJoin[{srcDir, "CodeFormatter", "Data"}]
 
-PrependTo[$Path, srcDir]
-
-If[FailureQ[FindFile["CodeFormatter`Generate`GenerateSources`"]],
-  Print["CodeFormatter`Generate`GenerateSources` could not be found."];
-  Quit[1]
-]
-
-Print["Clean..."]
-
-Quiet[DeleteDirectory[generatedWLDir, DeleteContents -> True], DeleteDirectory::nodir]
-
-Quiet[CreateDirectory[generatedWLDir], CreateDirectory::filex]
-
-Print["Done Clean"]
-
 
 importedPrefixParselets = Get[FileNameJoin[{dataDir, "PrefixParselets.wl"}]]
 
 importedInfixParselets = Get[FileNameJoin[{dataDir, "InfixParselets.wl"}]]
 
-
-Get["CodeFormatter`Generate`AcceptableOperators`"]
-
-Get["CodeFormatter`Generate`Palette`"]
-
-Print["Done generating additional required source files"]
 
 End[]
 

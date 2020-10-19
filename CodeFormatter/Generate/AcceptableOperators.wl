@@ -4,8 +4,6 @@ Begin["`Private`"]
 
 Needs["CodeFormatter`Generate`GenerateSources`"]
 
-Print["Generating Acceptable Operators..."]
-
 
 normalPrefixParselets = Normal[importedPrefixParselets]
 
@@ -39,6 +37,9 @@ acceptableOperators =
 	Cases[normalInfixParselets, Verbatim[Rule][tok_, Parselet`CommaParselet[]] :> tok]
 
 
+generate[] := (
+
+Print["Generating Acceptable Operators..."];
 
 acceptableOperatorsWL = {
 "
@@ -64,19 +65,22 @@ isAcceptableOperator[_] = False
 End[]
 
 EndPackage[]
-"}
+"};
 
-
-
-Print["exporting AcceptableOperators.wl"]
-res = Export[FileNameJoin[{generatedWLDir, "AcceptableOperators.wl"}], Column[acceptableOperatorsWL], "String"]
+Print["exporting AcceptableOperators.wl"];
+res = Export[FileNameJoin[{generatedWLDir, "AcceptableOperators.wl"}], Column[acceptableOperatorsWL], "String"];
 
 If[FailureQ[res],
   Print[res];
   Quit[1]
-]
+];
 
 Print["Done Acceptable Operators..."]
+)
+
+If[script === $InputFileName,
+generate[]
+]
 
 End[]
 

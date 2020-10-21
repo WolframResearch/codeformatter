@@ -82,7 +82,7 @@ Module[{nb},
                   CurrentValue[$FrontEnd, {CodeAssistOptions, "CodeToolsOptions", "CodeFormatterInteractiveIndentationCharacter"}] = #;
                 ];
                 (* CodeFormatter`Notebooks`formatSelectedCell[]; *)
-                )&], {Dynamic[FEPrivate`FrontEndResource["CodeFormatterStrings", "TabMenuItem"]], Dynamic[FEPrivate`FrontEndResource["CodeFormatterStrings", "SpaceMenuItem"]]}
+                )&], {"tab" -> Dynamic[FEPrivate`FrontEndResource["CodeFormatterStrings", "TabMenuItem"]], "space" -> Dynamic[FEPrivate`FrontEndResource["CodeFormatterStrings", "SpaceMenuItem"]]}
               ]
             }],
             Spacer[{0, 20}],

@@ -1,4 +1,4 @@
-BeginPackage["CodeFormatter`Generate`GenerateSources`"]
+BeginPackage["CodeTools`Generate`GenerateSources`"]
 
 buildDirFlagPosition
 
@@ -12,16 +12,7 @@ script
 
 generatedWLDir
 
-dataDir
-
-
-importedPrefixParselets
-
-importedInfixParselets
-
-
 Begin["`Private`"]
-
 
 buildDirFlagPosition = FirstPosition[$CommandLine, "-buildDir"]
 
@@ -60,18 +51,7 @@ If[MissingQ[scriptPosition],
 
 script = $CommandLine[[scriptPosition[[1]] + 1]]
 
-
-
 generatedWLDir = FileNameJoin[{buildDir, "generated", "wl"}]
-
-
-dataDir = FileNameJoin[{srcDir, "CodeFormatter", "Data"}]
-
-
-importedPrefixParselets = Get[FileNameJoin[{dataDir, "PrefixParselets.wl"}]]
-
-importedInfixParselets = Get[FileNameJoin[{dataDir, "InfixParselets.wl"}]]
-
 
 End[]
 

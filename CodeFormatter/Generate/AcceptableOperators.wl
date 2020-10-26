@@ -2,7 +2,15 @@ BeginPackage["CodeFormatter`Generate`AcceptableOperators`"]
 
 Begin["`Private`"]
 
-Needs["CodeFormatter`Generate`GenerateSources`"]
+Needs["CodeTools`Generate`GenerateSources`"]
+
+
+dataDir = FileNameJoin[{srcDir, "CodeParser", "Data"}]
+
+
+importedPrefixParselets = Get[FileNameJoin[{dataDir, "PrefixParselets.wl"}]]
+
+importedInfixParselets = Get[FileNameJoin[{dataDir, "InfixParselets.wl"}]]
 
 
 normalPrefixParselets = Normal[importedPrefixParselets]
@@ -40,6 +48,7 @@ acceptableOperators =
 generate[] := (
 
 Print["Generating Acceptable Operators..."];
+
 
 acceptableOperatorsWL = {
 "

@@ -130,11 +130,12 @@ formatSelectedCell[] :=
     ], read];
 
     If[shouldWrite && !failure,
-        NotebookWrite[nb, toWrite, All];
+        NotebookWrite[nb, toWrite, All]
     ];
 
     CurrentValue[nb, WindowStatusArea] = "";
 
+    Null
   ]]
 
 (*
@@ -211,11 +212,12 @@ formatProgramCellContents[contents_String] :=
 
 formatInputContents[contentsBox_] :=
     Catch[
-    Module[{cst, formatted, formattedBox, airiness, indentationString, tabWidth, agg, cst2, agg2, aggToCompare, agg2ToCompare},
+    Module[{cst, formatted, formattedBox, airiness, indentationString, tabWidth, agg, cst2, agg2, aggToCompare, agg2ToCompare, newline},
 
         airiness = massageAiriness[CodeFormatter`$InteractiveAiriness];
         tabWidth = massageTabWidth[CodeFormatter`$InteractiveTabWidth];
         indentationString = massageIndentationString[CodeFormatter`$InteractiveIndentationCharacter, tabWidth];
+        newline = "\n";
 
         (*
         convert boxes to form that is understood by formatter
@@ -244,16 +246,18 @@ formatInputContents[contentsBox_] :=
         ];
 
         agg = CodeParser`Abstract`Aggregate[cst];
-        agg = normalizeTokens[agg, "FormatOnly" -> True, "Newline" -> newline, "TabWidth" -> tabWidth];
+        agg = expandMultiSingleQuote[agg];
+        agg = expandTernaryOptionalPattern[agg];
+        agg = expandEqualDot[agg];
 
         cst2 = CodeConcreteParse[formatted];
 
         If[MatchQ[cst2[[3]], KeyValuePattern[SyntaxIssues -> {___, SyntaxIssue["UnrecognizedCharacter", _, _, _], ___}]],
-            Message[CodeFormat::syntaxissues, Lookup[cst2[[3]], SyntaxIssues]];
+            Message[CodeFormat::syntaxissues, Lookup[cst2[[3]], SyntaxIssues]]
         ];
 
         agg2 = CodeParser`Abstract`Aggregate[cst2];
-        agg2 = normalizeTokens[agg2, "FormatOnly" -> True, "Newline" -> newline, "TabWidth" -> tabWidth];
+        agg2 = reduceSpan[agg2];
 
         agg2[[1]] = Box;
 
@@ -263,7 +267,7 @@ formatInputContents[contentsBox_] :=
         If[aggToCompare =!= agg2ToCompare,
             If[$Debug,
               Print["aggToCompare: ", aggToCompare];
-              Print["agg2ToCompare: ", agg2ToCompare];
+              Print["agg2ToCompare: ", agg2ToCompare]
             ];
             Throw[Failure["SanityCheckFailed", <||>]]
         ];
@@ -283,6 +287,52 @@ formatInputContents[contentsBox_] :=
         ];
         formattedBox
     ]]
+
+
+(*
+boxes use a single token for '''
+and text uses multiple tokens
+
+must make sure that they are the same when we do a sanity check
+
+it is easier to expand the single token into multiple tokens
+*)
+expandMultiSingleQuote[agg_] :=
+    agg /. {
+        PostfixNode[Derivative, {rand_, LeafNode[Token`Boxes`MultiSingleQuote, s_, _]}, _] :>
+            Nest[PostfixNode[Derivative, {#, LeafNode[Token`SingleQuote, "'", <||>]}, <||>]&, rand, StringLength[s]]
+    }
+
+(*
+boxes use a single RowBox for a:b:c
+and text uses 2 nested BinaryNodes
+
+must make sure that they are the same when we do a sanity check
+
+it is easier to expand the single RowBox into multiple BinaryNodes
+*)
+expandTernaryOptionalPattern[agg_] :=
+    agg /. {
+        TernaryNode[TernaryOptionalPattern, {a_, op1_, b_, op2_, c_}, _] :>
+            BinaryNode[Optional, {BinaryNode[Pattern, {a, op1, b}, <||>], op2, c}, <||>]
+    }
+
+expandEqualDot[agg_] :=
+    agg /. {
+        BinaryNode[Unset, {rand_, LeafNode[Token`Boxes`EqualDot, _, _]}, _] :>
+            BinaryNode[Unset, {rand, LeafNode[Token`Equal, "=", <||>], LeafNode[Token`Dot, ".", <||>]}, <||>]
+    }
+
+(*
+A single ;; does not create a RowBox, so is not parsed correctly
+Need to reduce the correctly parsed ;; with implicit tokens to a single ;;
+*)
+reduceSpan[agg_] :=
+    agg /. {
+        BinaryNode[Span, {LeafNode[Token`Fake`ImplicitOne, _, _], tok:LeafNode[Token`SemiSemi, _, _], LeafNode[Token`Fake`ImplicitAll, _, _]}, _] :>
+            tok
+    }
+
 
 
 massageAiriness[a_Real] := a

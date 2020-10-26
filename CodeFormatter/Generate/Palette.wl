@@ -2,7 +2,7 @@ BeginPackage["CodeFormatter`Generate`Palette`"]
 
 Begin["`Private`"]
 
-Needs["CodeFormatter`Generate`GenerateSources`"]
+Needs["CodeTools`Generate`GenerateSources`"]
 
 
 $minAirinessIcon =

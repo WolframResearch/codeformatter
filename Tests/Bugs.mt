@@ -13,9 +13,7 @@ cst = CodeConcreteParseBox[RowBox[{"a", " ", "b"}]]
 
 Test[
 	CodeFormatCST[cst]
-	,
-"a b
-"
+	,"a b\n"
 	,
 	TestID->"Bugs-20201016-T9R8A5"
 ]

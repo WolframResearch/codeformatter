@@ -172,7 +172,7 @@ generatePalette[];
 Print["Done Palette"]
 )
 
-If[script === $InputFileName,
+If[AbsoluteFileName[script] === AbsoluteFileName[$InputFileName],
 generate[]
 ]
 

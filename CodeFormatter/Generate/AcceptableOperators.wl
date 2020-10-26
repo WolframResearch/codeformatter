@@ -87,7 +87,7 @@ If[FailureQ[res],
 Print["Done Acceptable Operators..."]
 )
 
-If[script === $InputFileName,
+If[AbsoluteFileName[script] === AbsoluteFileName[$InputFileName],
 generate[]
 ]
 

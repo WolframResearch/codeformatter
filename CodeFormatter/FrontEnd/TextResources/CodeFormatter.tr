@@ -12,6 +12,62 @@
 }
 @|
 
+@@resource CodeFormatterStrings Japanese
+{
+"PaletteTitle" -> "\:30b3\:30fc\:30c9\:30d5\:30a9\:30fc\:30de\:30c3\:30c8",
+"PaletteFormatButton" -> "\:9078\:629e\:3055\:308c\:305f\:30bb\:30eb\:3092\:30d5\:30a9\:30fc\:30de\:30c3\:30c8",
+"AirinessHeader" -> "\:7a7a\:767d\:306e\:53d6\:308a\:65b9",
+"SettingsHeader" -> "\:8a2d\:5b9a",
+"IndentationCharacterHeader" -> "\:30a4\:30f3\:30c7\:30f3\:30c8\:6587\:5b57",
+"TabWidthHeader" -> "\:30bf\:30d6\:306e\:5e45",
+"ReparseHeader" -> "\:30d5\:30a9\:30fc\:30de\:30c3\:30c8\:306e\:524d\:306b\:30dc\:30c3\:30af\:30b9\:518d\:89e3\:6790",
+"TabMenuItem" -> "\:30bf\:30d6",
+"SpaceMenuItem" -> "\:30b9\:30da\:30fc\:30b9"
+}
+@|
+
+@@resource CodeFormatterStrings French
+{
+"PaletteTitle" -> "Mise en forme du code",
+"PaletteFormatButton" -> "Mettre en forme la cellule s\[EAcute]lectionn\[EAcute]e",
+"AirinessHeader" -> "A\[EAcute]ration",
+"SettingsHeader" -> "R\[EAcute]glages",
+"IndentationCharacterHeader" -> "Caract\[EGrave]re d\[CloseCurlyQuote]indentation",
+"TabWidthHeader" -> "Largeur de l\[CloseCurlyQuote]onglet",
+"ReparseHeader" -> "R\[EAcute]parer les bo\[IHat]tes avant la mise en forme",
+"TabMenuItem" -> "onglet",
+"SpaceMenuItem" -> "espace"
+}
+@|
+
+@@resource CodeFormatterStrings Spanish
+{
+"PaletteTitle" -> "Formato de c\[OAcute]digo",
+"PaletteFormatButton" -> "Formatear celda seleccionada",
+"AirinessHeader" -> "Proximidad",
+"SettingsHeader" -> "Configuraci\[OAcute]n",
+"IndentationCharacterHeader" -> "Car\[AAcute]cter de sangr\[IAcute]a",
+"TabWidthHeader" -> "Ancho de tabulador",
+"ReparseHeader" -> "Volver a analizar cajas antes de formatear",
+"TabMenuItem" -> "tabulador",
+"SpaceMenuItem" -> “espacio"
+}
+@|
+
+@@resource CodeFormatterStrings ChineseTraditional
+{
+"PaletteTitle" -> "\:7de8\:78bc\:683c\:5f0f\:5316\:4e2d",
+"PaletteFormatButton" -> "\:683c\:5f0f\:5316\:9078\:53d6\:5132\:5b58\:683c",
+"AirinessHeader" -> "\:6e05\:65b0",
+"SettingsHeader" -> "\:8a2d\:5b9a",
+"IndentationCharacterHeader" -> "\:7e2e\:9032\:5b57\:7b26",
+"TabWidthHeader" -> "\:88fd\:8868\:9375\:5bec\:5ea6",
+"ReparseHeader" -> "\:683c\:5f0f\:5316\:524d\:91cd\:65b0\:5256\:6790\:65b9\:584a",
+"TabMenuItem" -> "\:88fd\:8868\:9375",
+"SpaceMenuItem" -> “\:9593\:9694"
+}
+@|
+
 @@resource CodeFormatterExpressions
 {
 "PackageToolbarPreferencesCellOpen" -> False

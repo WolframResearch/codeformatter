@@ -249,6 +249,7 @@ formatInputContents[contentsBox_] :=
         agg = expandMultiSingleQuote[agg];
         agg = expandTernaryOptionalPattern[agg];
         agg = expandEqualDot[agg];
+        agg = coalesceLineContinuation[agg];
 
         cst2 = CodeConcreteParse[formatted];
 
@@ -312,7 +313,7 @@ must make sure that they are the same when we do a sanity check
 it is easier to expand the single RowBox into multiple BinaryNodes
 *)
 expandTernaryOptionalPattern[agg_] :=
-    agg /. {
+    agg //. {
         TernaryNode[TernaryOptionalPattern, {a_, op1_, b_, op2_, c_}, _] :>
             BinaryNode[Optional, {BinaryNode[Pattern, {a, op1, b}, <||>], op2, c}, <||>]
     }
@@ -332,6 +333,41 @@ reduceSpan[agg_] :=
         BinaryNode[Span, {LeafNode[Token`Fake`ImplicitOne, _, _], tok:LeafNode[Token`SemiSemi, _, _], LeafNode[Token`Fake`ImplicitAll, _, _]}, _] :>
             tok
     }
+
+coalesceLineContinuation[aggIn_] :=
+    Module[{agg, poss},
+
+        agg = aggIn;
+
+        poss = Position[agg, {___, BoxNode[RowBox, {{_, LeafNode[Token`Boxes`LineContinuation, _, _]}}, _], ___}];
+
+        agg = MapAt[lcReplace1, agg, poss];
+
+        poss = Position[agg, {___, CodeParser`LeafNode[Token`Boxes`LineContinuation, _, _], ___}];
+
+        agg = MapAt[lcReplace2, agg, poss];
+
+        agg
+    ]
+
+lcReplace1[l_] :=
+    SequenceReplace[l, {BoxNode[RowBox, {{first_, LeafNode[Token`Boxes`LineContinuation, lc_, _]}}, _], LeafNode[tag_, str_, _]} :>
+        Sequence @@ {first, LeafNode[tag, lc <> str, <||>]}]
+
+lcReplace2[{LeafNode[Token`Boxes`LineContinuation, lc_, _], GroupNode[tag_, {LeafNode[tag1_, str_, _], rest___}, data_]}] :=
+    GroupNode[tag, {LeafNode[tag1, lc <> str, <||>], rest}, data]
+
+lcReplace2[l_] :=
+    SequenceReplace[l, {
+            {LeafNode[Token`Boxes`LineContinuation, lc_, _], LeafNode[tag_, str_, data_]} :>
+                LeafNode[tag, lc <> str, data]
+            ,
+            {LeafNode[Token`Boxes`LineContinuation, lc_, _], PrefixNode[tag_, {LeafNode[tag1_, str_, _], rest___}, data_]} :>
+                PrefixNode[tag, {LeafNode[tag1, lc <> str, <||>], rest}, data]
+        }
+    ]
+
+
 
 
 

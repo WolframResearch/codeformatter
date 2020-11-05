@@ -132,7 +132,7 @@ Options[formatPackageEditorTest] = {
 
 formatPackageEditorTest[file_String, i_Integer, OptionsPattern[]] :=
   Catch[
- Module[{dryRun, prefix, res, lineWidth, airiness, margin, nbObj, nb, boxs},
+ Module[{dryRun, prefix, res, lineWidth, airiness, margin, nbObj, nb, cells, cell1},
    
    prefix = OptionValue["FileNamePrefixPattern"];
    limit = OptionValue["FileSizeLimit"];
@@ -182,11 +182,20 @@ formatPackageEditorTest[file_String, i_Integer, OptionsPattern[]] :=
   nbObj = NotebookOpen[file, Visible -> False];
   nb = NotebookGet[nbObj];
 
-  boxs = If[#[[2]] == "Code", #[[1, 1]], Nothing]& /@ nb[[1]];
+  cells = If[Length[#] >= 2 && #[[2]] == "Code", #, Nothing]& /@ nb[[1]];
 
 
   Check[
     Do[
+
+      (*
+      work around very common FE bug
+
+      Related bugs: 395301
+      *)
+      cell1 = FrontEndExecute[FrontEnd`ReparseBoxStructurePacket[cell]];
+
+      box = cell1[[1, 1]];
 
       res = CodeFormatter`Notebooks`Private`formatInputContents[box];
 
@@ -195,6 +204,15 @@ formatPackageEditorTest[file_String, i_Integer, OptionsPattern[]] :=
         If[TrueQ[implicitTimesInserted],
           Throw[Failure["ImplicitTimesAfterLineContinuation", <|"File" -> File[file]|>]]
         ];
+
+        If[MatchQ[res, _Failure] && res[[1]] == "SanityCheckFailed",
+          If[MemberQ[sanityCheckExceptions, FileNameTake[file]],
+            Print[
+             Style[Row[{"index: ", i, " ", File[file]}]]];
+            Print["sanity check exception"]
+          ]
+        ];
+
         Print[
            Style[Row[{"index: ", i, " ", File[file]}], 
             Red]];
@@ -209,7 +227,7 @@ formatPackageEditorTest[file_String, i_Integer, OptionsPattern[]] :=
         Throw[res, "UncaughtNotAString"]
       ] *)
     ,
-    {box, boxs}
+    {cell, cells}
   ]
   ,
     If[!TrueQ[implicitTimesInserted],
@@ -230,6 +248,15 @@ formatPackageEditorTest[file_String, i_Integer, OptionsPattern[]] :=
 ]]
 
 
+sanityCheckExceptions = {
+
+  (*
+  FE parses trailing ; differently than kernel
+
+  Related bugs: 400268
+  *)
+  "PlanetaryAstronomy.m"
+}
 
 
 End[]

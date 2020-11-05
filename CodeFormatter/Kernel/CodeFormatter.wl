@@ -371,6 +371,10 @@ Module[{indentationString, cst, newline, tabWidth, indented, airiness, formatted
       Print["after indent: ", indented];
     ];
 
+    If[FailureQ[indented],
+      Throw[indented]
+    ];
+
     linearized = linearize[indented];
 
     If[$Debug,
@@ -1482,7 +1486,15 @@ indentPostfixRator[_][rator_, level_] :=
   indent[rator, level]
 
 
-indent[PrefixNode[tag_, {rator_, trivia..., rand_}, data_], level_] :=
+(*
+Boxes may come in such as:
+RowBox[{"!", "a", " "}]
+
+with trailing whitespace
+
+CodeParser does not keep whitespace inside the PrefixNode, but the FE does
+*)
+indent[PrefixNode[tag_, {rator_, trivia..., rand_, trivia...}, data_], level_] :=
   PrefixNode[tag, {indent[rator, level], indent[rand, level]}, data]
 
 indent[PostfixNode[tag_, {rand_, trivia..., rator_}, data_], level_] :=
@@ -2573,7 +2585,8 @@ indent[SyntaxErrorNode[tag_, ts_, data_], level_] :=
 
 
 indent[ContainerNode[tag_, ts_, data_], level_] :=
-  Module[{graphs},
+  Catch[
+  Module[{graphs, indented},
 
     graphs = DeleteCases[ts, ws];
 
@@ -2581,16 +2594,22 @@ indent[ContainerNode[tag_, ts_, data_], level_] :=
       AppendTo[graphs, LeafNode[Token`Newline, "", <||>]]
     ];
 
+    indented = Flatten[
+      indent[#, level]& /@ graphs
+    ];
+
+    If[AnyTrue[indented, FailureQ],
+      Throw[FirstCase[indented, _?FailureQ]]
+    ];
+
     ContainerNode[
       tag
       ,
-      Flatten[
-        indent[#, level]& /@ graphs
-      ]
+      indented
       ,
       data
     ]
-  ]
+  ]]
 
 
 
@@ -2612,6 +2631,8 @@ indent[BoxNode[RowBox, {ts_}, data_], level_] :=
 indent[node:BoxNode[_, _, _], level_] :=
   node
 
+
+indent[args___] := Failure["InternalUnhandled", <| "Function" -> indent, "Args" -> {args} |>]
 
 
 mergeLineContinuations[fs_] :=

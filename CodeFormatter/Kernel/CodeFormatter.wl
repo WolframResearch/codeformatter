@@ -106,6 +106,8 @@ $AllowSplittingTokens = False
 
 CodeFormat::implicittimesaftercontinuation = "Replaced implicit Times with explicit * to remove ambiguity."
 
+CodeFormat::syntaxissues = "Input to CodeFormat has syntax issues: `1`"
+
 
 
 CodeFormat::usage = "CodeFormat[code] returns a string of formatted WL code. \

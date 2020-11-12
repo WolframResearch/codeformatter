@@ -254,6 +254,10 @@ formatInputContents[contentsBox_] :=
         cst2 = CodeConcreteParse[formatted];
 
         If[MatchQ[cst2[[3]], KeyValuePattern[SyntaxIssues -> {___, SyntaxIssue["UnrecognizedCharacter", _, _, _], ___}]],
+            (*
+            This message is indicating that there is a syntax error in the input, such as:
+            f["\."]
+            *)
             Message[CodeFormat::syntaxissues, Lookup[cst2[[3]], SyntaxIssues]]
         ];
 

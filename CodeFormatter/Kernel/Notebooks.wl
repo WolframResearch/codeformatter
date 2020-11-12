@@ -376,6 +376,7 @@ lcReplace2[l_] :=
 
 
 massageAiriness[a_Real] := a
+massageAiriness[a_Integer] := a
 
 massageAiriness[_] := $DefaultAiriness
 

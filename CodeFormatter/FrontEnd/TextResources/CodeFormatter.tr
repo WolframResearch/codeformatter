@@ -1,14 +1,14 @@
 @@resource CodeFormatterStrings English
 {
 "PaletteTitle" -> "Code Formatting",
-"PaletteFormatButton" -> "Format Selected Cell",
-"AirinessHeader" -> "Airiness",
-"SettingsHeader" -> "Settings",
-"IndentationCharacterHeader" -> "Indentation Character",
-"TabWidthHeader" -> "Tab Width",
-"ReparseHeader" -> "Reparse Boxes Before Formatting",
-"TabMenuItem" -> "tab",
-"SpaceMenuItem" -> "space"
+"FormatButton" -> "Format Cell",
+"TabMenuItem" -> "Tabs",
+"Space2MenuItem" -> "2 Spaces",
+"Space4MenuItem" -> "4 Spaces",
+"Space6MenuItem" -> "6 Spaces",
+"Space8MenuItem" -> "8 Spaces",
+"AirinessLabel" -> "Airiness",
+"IndentationLabel" -> "Indentation"
 }
 @|
 
@@ -84,18 +84,480 @@
 
 @@resource CodeFormatterExpressions
 {
-"PackageToolbarPreferencesCellOpen" -> False
+"PackageToolbarPreferencesCellOpen" -> Dynamic[CurrentValue[EvaluationNotebook[], {TaggingRules, "CodeFormatter", "ToolbarState"}, False]]
 }
 @|
 
 @@resource CodeFormatterLocalizedExpressions English
 {
-(*
 
-To be filled-in later
 
-"PackageToolbarPreferencesCell" -> Cell[BoxData[RowBox[{"1", "+", "2"}]], "Input"]
-*)
+"PackageToolbarPreferencesCell" -> DynamicModuleBox[{}, 
+  TagBox[GridBox[{
+     {
+      DynamicModuleBox[{CodeFormatterUIResources`hoverQ$$ = False}, 
+       TagBox[GridBox[{
+          {
+           TemplateBox[{
+             DynamicBox[
+              ToBoxes[
+               FEPrivate`FrontEndResource[
+               "CodeFormatterStrings", "AirinessLabel"], 
+               StandardForm]], 
+             TemplateBox[{10, 15}, "Spacer2"]},
+            "RowDefault"], 
+           TagBox[GridBox[{
+              {
+               GraphicsBox[
+                {RGBColor[0.525, 0.525, 0.525], AbsoluteThickness[
+                 1.5], CapForm["Butt"], 
+                 LineBox[{{
+                   Offset[{0, 4.949999999999999}, {0, 0}], 
+                    Offset[{8.6, 4.949999999999999}, {0, 0}]}, {
+                   Offset[{10.6, 4.949999999999999}, {0, 0}], 
+                    Offset[{17.2, 4.949999999999999}, {0, 0}]}, {
+                   Offset[{0, 1.65}, {0, 0}], 
+                    Offset[{4.3, 1.65}, {0, 0}]}, {
+                   Offset[{6.3, 1.65}, {0, 0}], 
+                    Offset[{12.899999999999999`, 1.65}, {0, 0}]}, {
+                   Offset[{14.899999999999999`, 1.65}, {0, 0}], 
+                    Offset[{19.349999999999998`, 1.65}, {0, 0}]}, {
+                   Offset[{0, -1.65}, {0, 0}], 
+                    Offset[{6.449999999999999, -1.65}, {0, 0}]}, {
+                   Offset[{8.45, -1.65}, {0, 0}], 
+                    Offset[{16.34, -1.65}, {0, 0}]}, {
+                   Offset[{0, -4.949999999999999}, {0, 0}], 
+                    Offset[{10.75, -4.949999999999999}, {0, 0}]}, {
+                   Offset[{12.75, -4.949999999999999}, {0, 0}], 
+                    Offset[{17.2, -4.949999999999999}, {0, 0}]}}]},
+                ImagePadding->All,
+                ImageSize->{22, 15}], 
+               TemplateBox[{5},
+                "Spacer1"], 
+               DynamicWrapperBox[
+                OverlayBox[{
+                 StyleBox[
+                  
+                  SliderBox[Dynamic[
+                   CodeFormatter`$InteractiveAiriness, {
+                    
+                    Function[{
+                    CodeFormatterCell`val, CodeFormatterCell`expr}, 
+                    CodeFormatterCell`expr = CodeFormatterCell`val; 
+                    If[$VersionNumber >= 12.2, 
+                    CurrentValue[$FrontEnd, {
+                    CodeAssistOptions, "CodeToolsOptions", 
+                    "CodeFormatterInteractiveAiriness"}] = 
+                    CodeFormatterCell`val], HoldAll], 
+                    Function[{
+                    CodeFormatterCell`val, CodeFormatterCell`expr}, 
+                    CodeFormatterCell`expr = CodeFormatterCell`val; 
+                    If[$VersionNumber >= 12.2, 
+                    CodeFormatter`Notebooks`formatSelectedCell[]], 
+                    HoldAll]}], {{-1, -0.85, -0.75, -0.5, -0.25, 0, 
+                    0.25, 0.5, 0.75, 0.85, 1}},
+                   ContinuousAction->True,
+                   ImageSize->{126, 15}],
+                  ControlsRendering->"Generic",
+                  StripOnInput->False], 
+                 GraphicsBox[
+                  {AbsoluteThickness[2], CapForm["Round"], StrokeForm[
+                   GrayLevel[0.75]], EdgeForm[GrayLevel[0]], EdgeForm[
+                   None], LineBox[{{-1, 0}, {1, 0}}], 
+                   {EdgeForm[None], FaceForm[GrayLevel[
+                    0.75]], {
+                    DiskBox[NCache[{Rational[-9, 10], 0}, {-0.9, 0}], 
+                    Offset[2.5]], 
+                    DiskBox[
+                    NCache[{Rational[-18, 25], 0}, {-0.72, 0}], 
+                    Offset[2.5]], 
+                    DiskBox[
+                    NCache[{Rational[-27, 50], 0}, {-0.54, 0}], 
+                    Offset[2.5]], 
+                    DiskBox[NCache[{Rational[-9, 25], 0}, {-0.36, 0}],
+                     Offset[2.5]], 
+                    DiskBox[NCache[{Rational[-9, 50], 0}, {-0.18, 0}],
+                     Offset[2.5]], DiskBox[{0, 0}, Offset[2.5]], 
+                    DiskBox[NCache[{Rational[9, 50], 0}, {0.18, 0}], 
+                    Offset[2.5]], 
+                    DiskBox[NCache[{Rational[9, 25], 0}, {0.36, 0}], 
+                    Offset[2.5]], 
+                    DiskBox[NCache[{Rational[27, 50], 0}, {0.54, 0}], 
+                    Offset[2.5]], 
+                    DiskBox[NCache[{Rational[18, 25], 0}, {0.72, 0}], 
+                    Offset[2.5]], 
+                    DiskBox[NCache[{Rational[9, 10], 0}, {0.9, 0}], 
+                    Offset[2.5]], DiskBox[{0, 0}, Offset[2.5]]}, 
+                    {FaceForm[GrayLevel[1]], 
+                    DynamicBox[Typeset`ToBoxes[
+                    If[CodeFormatterUIResources`hoverQ$$, 
+                    EdgeForm[{
+                    AbsoluteThickness[1], 
+                    CurrentValue[
+                    EvaluationNotebook[], {
+                    TaggingRules, "CodeFormatter", 
+                    "ToolbarAccentColor"}, 
+                    RGBColor["#2497b7"]]}], 
+                    EdgeForm[{
+                    AbsoluteThickness[0.5], 
+                    GrayLevel[0.6]}]], StandardForm, Graphics],
+                    
+                    ImageSizeCache->{{
+                    4.503599627370496*^15, -4.503599627370496*^15}, {
+                    4.503599627370496*^15, -4.503599627370496*^15}}], 
+                    DiskBox[{
+                    Dynamic[
+                    Replace[
+                    CodeFormatter`$InteractiveAiriness, {-1 -> 
+                    Rational[-9, 10], -0.85 -> 
+                    Rational[-18, 25], -0.75 -> 
+                    Rational[-27, 50], -0.5 -> 
+                    Rational[-9, 25], -0.25 -> Rational[-9, 50], 0 -> 
+                    0, 0.25 -> Rational[9, 50], 0.5 -> 
+                    Rational[9, 25], 0.75 -> Rational[27, 50], 0.85 -> 
+                    Rational[18, 25], 1 -> Rational[9, 10], Blank[] -> 
+                    0}]], 0}, Offset[6]]}}},
+                  AspectRatio->Full,
+                  Background->GrayLevel[0.95],
+                  ImagePadding->{{2, 2}, {0, 0}},
+                  ImageSize->{130, 15},
+                  PlotRange->{{-1, 1}, {-1, 1}}]}, {1, 2}, 1,
+                 Alignment->Center,
+                 ImageSize->{130, 15}], 
+                CodeFormatterUIResources`hoverQ$$ = 
+                CurrentValue["MouseOver"],
+                ImageSizeCache->{130., {4., 11.}}], 
+               TemplateBox[{5},
+                "Spacer1"], 
+               GraphicsBox[
+                {RGBColor[0.525, 0.525, 0.525], AbsoluteThickness[
+                 1.5], CapForm["Butt"], 
+                 LineBox[{{
+                   Offset[{0, 4.949999999999999}, {0, 0}], 
+                    Offset[{7.74, 4.949999999999999}, {0, 0}]}, {
+                   Offset[{4.3, 1.65}, {0, 0}], 
+                    Offset[{10.75, 1.65}, {0, 0}]}, {
+                   Offset[{8.6, -1.65}, {0, 0}], 
+                    Offset[{15.049999999999999`, -1.65}, {0, 0}]}, {
+                   Offset[{4.3, -4.949999999999999}, {0, 0}], 
+                    Offset[{8.6, -4.949999999999999}, {0, 0}]}}]},
+                ImagePadding->All,
+                ImageSize->{17, 15}]}
+             },
+             AutoDelete->False,
+             
+             BaseStyle->{
+              FontFamily -> "SourceSansPro", FontSize -> 13, 
+               FontWeight -> Plain, FontSlant -> Plain, FontColor -> 
+               GrayLevel[0], Background -> None},
+             GridBoxAlignment->{"Columns" -> {{Center}}},
+             GridBoxItemSize->{"Columns" -> {{0}}, "Rows" -> {{0}}},
+             GridBoxSpacings->{"Columns" -> {{0}}}],
+            "Grid"]}
+         },
+         AutoDelete->False,
+         
+         BaseStyle->{
+          FontFamily -> "SourceSansPro", FontSize -> 13, FontWeight -> 
+           Plain, FontSlant -> Plain, FontColor -> GrayLevel[0], 
+           Background -> None},
+         GridBoxAlignment->{"Columns" -> {{Center}}},
+         GridBoxItemSize->{"Columns" -> {{0}}, "Rows" -> {{0}}},
+         GridBoxSpacings->{"Columns" -> {{0}}}],
+        "Grid"],
+       DynamicModuleValues:>{}], 
+      GraphicsBox[
+       {GrayLevel[0.6], AbsoluteThickness[1], CapForm["Round"], 
+        LineBox[{{0, 0}, {0, 1}}]},
+       AspectRatio->Full,
+       ImageSize->{32, 18}], 
+      TagBox[GridBox[{
+         {
+          TemplateBox[{
+            DynamicBox[
+             ToBoxes[
+              FEPrivate`FrontEndResource[
+              "CodeFormatterStrings", "IndentationLabel"], 
+              StandardForm]], 
+            TemplateBox[{10, 15}, "Spacer2"]},
+           "RowDefault"], 
+          ActionMenuBox[
+           TemplateBox[{
+             TagBox[
+              GridBox[{{
+                 TemplateBox[{
+                   DynamicBox[
+                    ToBoxes[
+                    Which[
+                    CodeFormatter`$InteractiveIndentationCharacter === 
+                    "tab", 
+                    Dynamic[
+                    FEPrivate`FrontEndResource[
+                    "CodeFormatterStrings", "TabMenuItem"]], 
+                    CodeFormatter`$InteractiveTabWidth === "2", 
+                    Dynamic[
+                    FEPrivate`FrontEndResource[
+                    "CodeFormatterStrings", "Space2MenuItem"]], 
+                    CodeFormatter`$InteractiveTabWidth === "4", 
+                    Dynamic[
+                    FEPrivate`FrontEndResource[
+                    "CodeFormatterStrings", "Space4MenuItem"]], 
+                    CodeFormatter`$InteractiveTabWidth === "6", 
+                    Dynamic[
+                    FEPrivate`FrontEndResource[
+                    "CodeFormatterStrings", "Space6MenuItem"]], 
+                    CodeFormatter`$InteractiveTabWidth === "8", 
+                    Dynamic[
+                    FEPrivate`FrontEndResource[
+                    "CodeFormatterStrings", "Space8MenuItem"]], True, 
+                    ""], StandardForm]], FrameStyle -> None, 
+                   Background -> None, ImageSize -> {63, 17}, 
+                   FrameMargins -> None}, "Highlighted"], 
+                 GraphicsBox[{
+                   AbsoluteThickness[2], 
+                   JoinForm["Round"], 
+                   CapForm["Round"], 
+                   DynamicBox[
+                    Typeset`ToBoxes[
+                    CurrentValue[
+                    EvaluationNotebook[], {
+                    TaggingRules, "CodeFormatter", 
+                    "ToolbarAccentColor"}, 
+                    RGBColor["#2497b7"]], StandardForm, Graphics]], 
+                   DynamicBox[
+                    Typeset`ToBoxes[
+                    Line[
+                    Switch[
+                    Down, Left, {{0.5, -1}, {-0.5, 0}, {0.5, 1}}, 
+                    Right, {{-0.5, -1}, {0.5, 0}, {-0.5, 1}}, 
+                    Up, {{-1, -0.5}, {0, 0.5}, {1, -0.5}}, 
+                    Blank[], {{-1, 0.5}, {0, -0.5}, {1, 0.5}}]], 
+                    StandardForm, Graphics]]}, ImageSize -> {10, 10}, 
+                  BaselinePosition -> Bottom]}}, 
+               GridBoxAlignment -> {"Rows" -> {{Baseline}}}, 
+               AutoDelete -> False, 
+               GridBoxItemSize -> {"Columns" -> {{0}}}, 
+               GridBoxSpacings -> {"Columns" -> {{0}}}, 
+               BaseStyle -> {
+                FontFamily -> "SourceSansPro", FontSize -> 12, 
+                 FontWeight -> Plain, FontSlant -> Plain, FontColor -> 
+                 GrayLevel[0], Background -> None}], "Grid"], 
+             Background -> GrayLevel[1], 
+             FrameMargins -> {{5, 5}, {1, 1}}, RoundingRadius -> 3, 
+             FrameStyle -> Dynamic[
+               If[
+                CurrentValue["MouseOver"], 
+                Directive[
+                 CurrentValue[
+                  EvaluationNotebook[], {
+                  TaggingRules, "CodeFormatter", 
+                   "ToolbarAccentColor"}, 
+                  RGBColor["#2497b7"]], 
+                 AbsoluteThickness[1]], 
+                Directive[
+                 GrayLevel[0.7], 
+                 AbsoluteThickness[1]]]]},
+            "Highlighted"], {
+           DynamicBox[ToBoxes[
+             FEPrivate`FrontEndResource[
+             "CodeFormatterStrings", "TabMenuItem"], StandardForm]]:>(
+           CodeFormatter`$InteractiveIndentationCharacter = "tab"; 
+           Through[
+             Flatten[{
+               Function[{CodeFormatterCell`val}, 
+                
+                If[$VersionNumber >= 12.2, 
+                 CurrentValue[$FrontEnd, {
+                    CodeAssistOptions, "CodeToolsOptions", 
+                    "CodeFormatterInteractiveIndentationCharacter"}] = 
+                  CodeFormatterCell`val; Null]]}][
+             CodeFormatter`$InteractiveIndentationCharacter]]; Through[
+             Flatten[{
+               Function[{CodeFormatterCell`val}, 
+                
+                If[$VersionNumber >= 12.2, 
+                 CurrentValue[$FrontEnd, {
+                    CodeAssistOptions, "CodeToolsOptions", 
+                    "CodeFormatterInteractiveTabWidth"}] = 
+                  CodeFormatterCell`val; Null]], 
+               Function[{CodeFormatterCell`val}, 
+                If[$VersionNumber >= 12.2, 
+                 CodeFormatter`Notebooks`formatSelectedCell[]], 
+                HoldAll]}][CodeFormatter`$InteractiveTabWidth]]), 
+           Delimiter, 
+           DynamicBox[ToBoxes[
+             FEPrivate`FrontEndResource[
+             "CodeFormatterStrings", "Space2MenuItem"], 
+             StandardForm]]:>(
+           CodeFormatter`$InteractiveIndentationCharacter = "space"; 
+           CodeFormatter`$InteractiveTabWidth = "2"; Through[
+             Flatten[{
+               Function[{CodeFormatterCell`val}, 
+                
+                If[$VersionNumber >= 12.2, 
+                 CurrentValue[$FrontEnd, {
+                    CodeAssistOptions, "CodeToolsOptions", 
+                    "CodeFormatterInteractiveIndentationCharacter"}] = 
+                  CodeFormatterCell`val; Null]]}][
+             CodeFormatter`$InteractiveIndentationCharacter]]; Through[
+             Flatten[{
+               Function[{CodeFormatterCell`val}, 
+                
+                If[$VersionNumber >= 12.2, 
+                 CurrentValue[$FrontEnd, {
+                    CodeAssistOptions, "CodeToolsOptions", 
+                    "CodeFormatterInteractiveTabWidth"}] = 
+                  CodeFormatterCell`val; Null]], 
+               Function[{CodeFormatterCell`val}, 
+                If[$VersionNumber >= 12.2, 
+                 CodeFormatter`Notebooks`formatSelectedCell[]], 
+                HoldAll]}][CodeFormatter`$InteractiveTabWidth]]), 
+           DynamicBox[ToBoxes[
+             FEPrivate`FrontEndResource[
+             "CodeFormatterStrings", "Space4MenuItem"], 
+             StandardForm]]:>(
+           CodeFormatter`$InteractiveIndentationCharacter = "space"; 
+           CodeFormatter`$InteractiveTabWidth = "4"; Through[
+             Flatten[{
+               Function[{CodeFormatterCell`val}, 
+                
+                If[$VersionNumber >= 12.2, 
+                 CurrentValue[$FrontEnd, {
+                    CodeAssistOptions, "CodeToolsOptions", 
+                    "CodeFormatterInteractiveIndentationCharacter"}] = 
+                  CodeFormatterCell`val; Null]]}][
+             CodeFormatter`$InteractiveIndentationCharacter]]; Through[
+             Flatten[{
+               Function[{CodeFormatterCell`val}, 
+                
+                If[$VersionNumber >= 12.2, 
+                 CurrentValue[$FrontEnd, {
+                    CodeAssistOptions, "CodeToolsOptions", 
+                    "CodeFormatterInteractiveTabWidth"}] = 
+                  CodeFormatterCell`val; Null]], 
+               Function[{CodeFormatterCell`val}, 
+                If[$VersionNumber >= 12.2, 
+                 CodeFormatter`Notebooks`formatSelectedCell[]], 
+                HoldAll]}][CodeFormatter`$InteractiveTabWidth]]), 
+           DynamicBox[ToBoxes[
+             FEPrivate`FrontEndResource[
+             "CodeFormatterStrings", "Space6MenuItem"], 
+             StandardForm]]:>(
+           CodeFormatter`$InteractiveIndentationCharacter = "space"; 
+           CodeFormatter`$InteractiveTabWidth = "6"; Through[
+             Flatten[{
+               Function[{CodeFormatterCell`val}, 
+                
+                If[$VersionNumber >= 12.2, 
+                 CurrentValue[$FrontEnd, {
+                    CodeAssistOptions, "CodeToolsOptions", 
+                    "CodeFormatterInteractiveIndentationCharacter"}] = 
+                  CodeFormatterCell`val; Null]]}][
+             CodeFormatter`$InteractiveIndentationCharacter]]; Through[
+             Flatten[{
+               Function[{CodeFormatterCell`val}, 
+                
+                If[$VersionNumber >= 12.2, 
+                 CurrentValue[$FrontEnd, {
+                    CodeAssistOptions, "CodeToolsOptions", 
+                    "CodeFormatterInteractiveTabWidth"}] = 
+                  CodeFormatterCell`val; Null]], 
+               Function[{CodeFormatterCell`val}, 
+                If[$VersionNumber >= 12.2, 
+                 CodeFormatter`Notebooks`formatSelectedCell[]], 
+                HoldAll]}][CodeFormatter`$InteractiveTabWidth]]), 
+           DynamicBox[ToBoxes[
+             FEPrivate`FrontEndResource[
+             "CodeFormatterStrings", "Space8MenuItem"], 
+             StandardForm]]:>(
+           CodeFormatter`$InteractiveIndentationCharacter = "space"; 
+           CodeFormatter`$InteractiveTabWidth = "8"; Through[
+             Flatten[{
+               Function[{CodeFormatterCell`val}, 
+                
+                If[$VersionNumber >= 12.2, 
+                 CurrentValue[$FrontEnd, {
+                    CodeAssistOptions, "CodeToolsOptions", 
+                    "CodeFormatterInteractiveIndentationCharacter"}] = 
+                  CodeFormatterCell`val; Null]]}][
+             CodeFormatter`$InteractiveIndentationCharacter]]; Through[
+             Flatten[{
+               Function[{CodeFormatterCell`val}, 
+                
+                If[$VersionNumber >= 12.2, 
+                 CurrentValue[$FrontEnd, {
+                    CodeAssistOptions, "CodeToolsOptions", 
+                    "CodeFormatterInteractiveTabWidth"}] = 
+                  CodeFormatterCell`val; Null]], 
+               Function[{CodeFormatterCell`val}, 
+                If[$VersionNumber >= 12.2, 
+                 CodeFormatter`Notebooks`formatSelectedCell[]], 
+                HoldAll]}][CodeFormatter`$InteractiveTabWidth]])},
+           Appearance->None]}
+        },
+        AutoDelete->False,
+        BaseStyle->{
+         FontFamily -> "SourceSansPro", FontSize -> 13, FontWeight -> 
+          Plain, FontSlant -> Plain, FontColor -> GrayLevel[0], 
+          Background -> None},
+        GridBoxAlignment->{"Columns" -> {{Center}}},
+        GridBoxItemSize->{"Columns" -> {{0}}, "Rows" -> {{0}}},
+        GridBoxSpacings->{"Columns" -> {{0}}}],
+       "Grid"]}
+    },
+    AutoDelete->False,
+    BaseStyle->{
+     FontFamily -> "SourceSansPro", FontSize -> 13, FontWeight -> 
+      Plain, FontSlant -> Plain, FontColor -> GrayLevel[0], 
+      Background -> None},
+    GridBoxAlignment->{"Columns" -> {{Center}}},
+    GridBoxItemSize->{"Columns" -> {{0}}, "Rows" -> {{0}}},
+    GridBoxSpacings->{"Columns" -> {{0}}}],
+   "Grid"],
+  DynamicModuleValues:>{},
+  Initialization:>(
+   Module[{CodeFormatterCell`opts}, Needs["CodeFormatter`Notebooks`"]; 
+     If[$VersionNumber >= 12.2, 
+       CurrentValue[$FrontEnd, {
+          CodeAssistOptions, "CodeToolsOptions", 
+           "CodeFormatterInteractiveReparse"}] = True; 
+       CodeFormatterCell`opts = 
+        CurrentValue[$FrontEnd, {
+          CodeAssistOptions, "CodeToolsOptions"}]; If[
+         FailureQ[CodeFormatterCell`opts], CodeFormatterCell`opts = 
+         Association[]]; 
+       CodeFormatter`$InteractiveAiriness = 
+        Lookup[CodeFormatterCell`opts, 
+          "CodeFormatterInteractiveAiriness", 0]; 
+       CodeFormatter`$InteractiveTabWidth = 
+        Lookup[CodeFormatterCell`opts, 
+          "CodeFormatterInteractiveTabWidth", "4"]; 
+       CodeFormatter`$InteractiveIndentationCharacter = 
+        Lookup[CodeFormatterCell`opts, 
+          "CodeFormatterInteractiveIndentationCharacter", "space"]; 
+       CodeFormatter`$InteractiveReparse = 
+        Lookup[CodeFormatterCell`opts, 
+          "CodeFormatterInteractiveReparse", True]; Null]; Null]; 
+   CurrentValue[$FrontEnd, {
+      PrivateFrontEndOptions, "InterfaceSettings", "CodeFormatter", 
+       "ShowDropDown"}] = True; SetOptions[
+     EvaluationCell[], {
+     CellMargins -> {{0, 0}, {0, 0}}, 
+      CellFrameMargins -> {{15, 0}, {4, 4}}, CellFrame -> Dynamic[
+        If[
+         Dynamic[
+          CurrentValue[
+           EvaluationNotebook[], {
+           TaggingRules, "CodeFormatter", "ToolbarState"}, False]], {{
+         0, 0}, {2, 0}}, None, None]], CellFrameColor -> Dynamic[
+        CurrentValue[
+         EvaluationNotebook[], {
+         TaggingRules, "CodeFormatter", "ToolbarAccentColor"}, 
+         RGBColor["#2497b7"]]], Background -> GrayLevel[0.95], 
+      FontSize -> 13, FontColor -> Black, FontWeight -> Plain, 
+      Magnification -> 1, Deployed -> True, Evaluator -> "System", 
+      DynamicUpdating -> True, DynamicEvaluationTimeout -> 12}])]
+
 
 }
 @|

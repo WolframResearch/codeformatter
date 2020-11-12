@@ -286,6 +286,7 @@ formatInputContents[contentsBox_] :=
 
 
 massageAiriness[a_Real] := a
+massageAiriness[a_Integer] := a
 
 massageAiriness[_] := $DefaultAiriness
 

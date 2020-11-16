@@ -212,7 +212,8 @@ formatProgramCellContents[contents_String] :=
 
 formatInputContents[contentsBox_] :=
     Catch[
-    Module[{cst, formatted, formattedBox, airiness, indentationString, tabWidth, agg, cst2, agg2, aggToCompare, agg2ToCompare, newline},
+    Module[{cst, formatted, formattedBox, airiness, indentationString, tabWidth, agg, cst2, agg2, aggToCompare, agg2ToCompare, newline,
+        issues},
 
         airiness = massageAiriness[CodeFormatter`$InteractiveAiriness];
         tabWidth = massageTabWidth[CodeFormatter`$InteractiveTabWidth];
@@ -254,11 +255,15 @@ formatInputContents[contentsBox_] :=
         cst2 = CodeConcreteParse[formatted];
 
         If[MatchQ[cst2[[3]], KeyValuePattern[SyntaxIssues -> {___, SyntaxIssue["UnrecognizedCharacter", _, _, _], ___}]],
+            
+            issues = Lookup[cst2[[3]], SyntaxIssues];
+            issues = boldify[#[[2]]]& /@ issues;
+
             (*
             This message is indicating that there is a syntax error in the input, such as:
             f["\."]
             *)
-            Message[CodeFormat::syntaxissues, Lookup[cst2[[3]], SyntaxIssues]]
+            Message[CodeFormat::syntaxissues, issues]
         ];
 
         agg2 = CodeParser`Abstract`Aggregate[cst2];
@@ -371,6 +376,16 @@ lcReplace2[l_] :=
         }
     ]
 
+
+(*
+replace `` and ** markup
+*)
+boldify[s_String] :=
+    StringReplace[s, {
+        RegularExpression["``(.*?)``"] :> ToString[Style["$1", Bold], StandardForm],
+        RegularExpression["\\*\\*(.*?)\\*\\*"] :> ToString[Style["$1", Bold], StandardForm],
+        RegularExpression["\\?\\?(.*?)\\?\\?"] :> "$1"}
+    ]
 
 
 

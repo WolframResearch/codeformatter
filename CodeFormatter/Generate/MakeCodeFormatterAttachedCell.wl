@@ -1,6 +1,6 @@
 (* ::Package:: *)
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*Package Header*)
 
 
@@ -110,7 +110,7 @@ formatter = With[{BackgroundCol = BackgroundCol}, controlRow[
 		SetOptions[EvaluationCell[],
 			{
 				CellMargins->{{0, 0}, {0, 0}},
-				CellFrameMargins->{{15, 0}, {4, 4}},
+				CellFrameMargins->{{15, 0}, {3, 4}},
 				CellFrame->Dynamic[If[
 					Dynamic[CurrentValue[EvaluationNotebook[], {TaggingRules, "CodeFormatter", "ToolbarState"}, False]],
 					{{0,0},{2,0}}, None, None

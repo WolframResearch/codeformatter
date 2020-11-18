@@ -97,7 +97,15 @@ Options[CodeFormat] = {
   "Newline" :> $DefaultNewline,
   "TabWidth" :> $DefaultTabWidth,
   "LineWidth" :> $DefaultLineWidth,
-  "SafetyMargin" :> $DefaultSafetyMargin
+  "SafetyMargin" :> $DefaultSafetyMargin,
+
+  "NewlinesBetweenCommas" -> Automatic,
+  "NewlinesBetweenCompoundExpressions" -> Automatic,
+  "NewlinesBetweenOperators" -> Automatic,
+  "NewlinesInComments" -> Automatic,
+  "NewlinesInControl" -> Automatic,
+  "NewlinesInGroups" -> Automatic,
+  "NewlinesInScoping" -> Automatic
 }
 
 
@@ -257,12 +265,56 @@ Options[CodeFormatCST] = Options[CodeFormat]
 CodeFormatCST[cstIn_, opts:OptionsPattern[]] :=
 Catch[
 Module[{indentationString, cst, newline, tabWidth, indented, airiness, formattedStr, merged,
-  linearized, strs, spaced, breaked, lineWidth1, lineWidth2, lineWidth, safetyMargin},
+  linearized, strs, spaced, breaked, lineWidth1, lineWidth2, lineWidth, safetyMargin,
+  style},
 
   indentationString = OptionValue["IndentationString"];
   newline = OptionValue["Newline"];
   tabWidth = OptionValue["TabWidth"];
+
+  style = <||>;
+
+  style["NewlinesBetweenCommas"] = OptionValue["NewlinesBetweenCommas"];
+  style["NewlinesBetweenCompoundExpressions"] = OptionValue["NewlinesBetweenCompoundExpressions"];
+  style["NewlinesBetweenOperators"] = OptionValue["NewlinesBetweenOperators"];
+  style["NewlinesInComments"] = OptionValue["NewlinesInComments"];
+  style["NewlinesInControl"] = OptionValue["NewlinesInControl"];
+  style["NewlinesInGroups"] = OptionValue["NewlinesInGroups"];
+  style["NewlinesInScoping"] = OptionValue["NewlinesInScoping"];
+
   airiness = OptionValue[Airiness];
+
+  If[airiness == -1,
+    style["NewlinesInComments"] = Delete
+  ];
+  If[airiness <= -0.85,
+    style["NewlinesInScoping"] = Delete;
+    style["NewlinesInControl"] = Delete
+  ];
+  If[airiness <= -0.75,
+    style["NewlinesInGroups"] = Delete
+  ];
+  If[airiness <= -0.5,
+    style["NewlinesBetweenOperators"] = Delete
+  ];
+  If[airiness <= -0.25,
+    style["NewlinesBetweenCompoundExpressions"] = Delete
+  ];
+  If[airiness >= 0.25,
+    style["NewlinesBetweenCompoundExpressions"] = Insert
+  ];
+  If[airiness > 0.5,
+    style["NewlinesBetweenOperators"] = Insert
+  ];
+  If[airiness >= 0.75,
+    style["NewlinesInGroups"] = Insert
+  ];
+  If[airiness >= 0.85,
+    style["NewlinesBetweenCommas"] = Insert
+  ];
+
+
+
 
   safetyMargin = OptionValue["SafetyMargin"];
   lineWidth = OptionValue["LineWidth"];
@@ -276,13 +328,13 @@ Module[{indentationString, cst, newline, tabWidth, indented, airiness, formatted
     Print["CodeFormatCST: ", cst];
   ];
 
-  Block[{$CurrentIndentationString, $CurrentNewline, $CurrentAiriness},
+  Block[{$CurrentIndentationString, $CurrentNewline, $CurrentStyle},
 
     $CurrentIndentationString = indentationString;
 
     $CurrentNewline = newline;
 
-    $CurrentAiriness = airiness;
+    $CurrentStyle = style;
 
     cst = StandardizeCommentGroups[cst];
 
@@ -1424,7 +1476,7 @@ Module[{min, replaced, origSpaces, strs, minStr, indentStr, frags, inserted, spl
     Print["replacedStrs: ", replacedStrs //InputForm];
   ];
 
-  If[$CurrentAiriness == -1,
+  If[$CurrentStyle["NewlinesInComments"] === Delete,
     LeafNode[Token`Comment,
       Flatten[
         replacedOrigSpaces ~Join~
@@ -1550,7 +1602,7 @@ Module[{aggs, rands, rators, graphs, lastRator, lastRand,
   randsPat = Alternatives @@ rands;
 
   Which[
-    $CurrentAiriness <= -0.25,
+    $CurrentStyle["NewlinesBetweenCompoundExpressions"] === Delete,
       shouldStayOnSingleLine = True
     ,
     !FreeQ[ts, LeafNode[Token`Newline, _, _]],
@@ -1570,7 +1622,7 @@ Module[{aggs, rands, rators, graphs, lastRator, lastRand,
     ,
     Flatten[
     Which[
-      $CurrentAiriness >= 0.25,
+      $CurrentStyle["NewlinesBetweenCompoundExpressions"] === Insert,
         Replace[graphs, {
             lastRator /; MatchQ[lastRand, LeafNode[Token`Fake`ImplicitNull, _, _]] :> indent[lastRator, level], 
             rator : ratorsPat :> {indent[rator, level], line[level], line[level]}, 
@@ -1631,10 +1683,10 @@ indentInfixRator[Pattern | Optional | PatternTest | MessageName | Power][rator_,
 (*
 No spaces before Comma
 *)
-indentInfixRator[Comma][rator_, level_] /; $CurrentAiriness >= 0.85 :=
+indentInfixRator[Comma][rator_, level_] /; $CurrentStyle["NewlinesBetweenCommas"] === Insert :=
   {line[level], indent[rator, level], line[level]}
 
-indentInfixRatorNoTrailingSpace[Comma][rator_, level_] /; $CurrentAiriness >= 0.85 :=
+indentInfixRatorNoTrailingSpace[Comma][rator_, level_] /; $CurrentStyle["NewlinesBetweenCommas"] === Insert :=
   {line[level], indent[rator, level], line[level]}
 
 indentInfixRator[Comma][rator_, level_] :=
@@ -1743,7 +1795,7 @@ indent[(head:(BinaryNode|InfixNode|TernaryNode|QuaternaryNode))[tag_, ts_, data_
       Print["split: ", split];
     ];
 
-    If[$CurrentAiriness <= -0.5 || (Length[split] == 1 && $CurrentAiriness <= 0.5),
+    If[$CurrentStyle["NewlinesBetweenOperators"] === Delete || (Length[split] == 1 && $CurrentStyle["NewlinesBetweenOperators"] =!= Insert),
       (*
       There were no newline tokens
       *)
@@ -1830,10 +1882,10 @@ indent[GroupNode[tag_, {
     triviaGraphs = DeleteCases[{trivia}, ws | nl];
 
     Which[
-      $CurrentAiriness >= 0.75,
+      $CurrentStyle["NewlinesInGroups"] === Insert,
         condition = MultiLineEnum
       ,
-      $CurrentAiriness <= -0.75,
+      $CurrentStyle["NewlinesInGroups"] === Delete,
         condition = SingleLineEnum
       ,
       !FreeQ[triviaAggs, LeafNode[Token`Newline, _, _]],
@@ -1890,10 +1942,10 @@ indent[GroupNode[tag_, {
     trivia2Graphs = DeleteCases[{trivia2}, ws | nl];
 
     Which[
-      $CurrentAiriness >= 0.75,
+      $CurrentStyle["NewlinesInGroups"] === Insert,
         condition = MultiLineEnum
       ,
-      $CurrentAiriness <= -0.75,
+      $CurrentStyle["NewlinesInGroups"] === Delete,
         condition = SingleLineEnum
       ,
       !FreeQ[trivia1Aggs, LeafNode[Token`Newline, _, _]],
@@ -2019,7 +2071,7 @@ indent[CallNode[{head : LeafNode[Symbol, "Module" | "With" | "Block" | {Fragment
     *)
     vars = DeleteCases[vars, LeafNode[Token`Newline, _, _], {-5, -3}];
 
-    If[$CurrentAiriness <= -0.85,
+    If[$CurrentStyle["NewlinesInScoping"] === Delete,
       (*
       no newlines
       *)
@@ -2167,7 +2219,7 @@ indent[CallNode[{tag:LeafNode[Symbol, "Switch" | {FragmentNode[Symbol, "Switch",
     testsPat = Alternatives @@ tests;
     bodiesPat = Alternatives @@ bodies;
 
-    If[$CurrentAiriness <= -0.85,
+    If[$CurrentStyle["NewlinesInControl"] === Delete,
       (*
       no newlines
       *)
@@ -2273,7 +2325,7 @@ indent[CallNode[{tag:LeafNode[Symbol, "Which" | {FragmentNode[Symbol, "Which", _
     testsPat = Alternatives @@ tests;
     bodiesPat = Alternatives @@ bodies;
 
-    If[$CurrentAiriness <= -0.85,
+    If[$CurrentStyle["NewlinesInControl"] === Delete,
       (*
       no newlines
       *)
@@ -2367,7 +2419,7 @@ indent[CallNode[{tag : LeafNode[Symbol, "If" | {FragmentNode[Symbol, "If", _], _
     ratorsPat = Alternatives @@ rators;
 
     Which[
-      $CurrentAiriness <= -0.85,
+      $CurrentStyle["NewlinesInControl"] === Delete,
         condition = SingleLine
       ,
       !empty[comments2],
@@ -2478,7 +2530,7 @@ indent[CallNode[{tag : LeafNode[Symbol, "For" | {FragmentNode[Symbol, "For", _],
     comments8 = Cases[{trivia8}, comment];
     comments9 = Cases[{trivia9}, comment];
 
-    If[$CurrentAiriness <= -0.85,
+    If[$CurrentStyle["NewlinesInControl"] === Delete,
       (*
       no newlines
       *)

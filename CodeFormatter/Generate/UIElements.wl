@@ -167,7 +167,7 @@ With[
 	
 	DynamicModule[{hoverQ},
 	RowOrColumn[rowOrColumn] @ {
-			Row[{Dynamic@FEPrivate`FrontEndResource["CodeFormatterStrings", "AirinessLabel"], Spacer[{10, 15}]}],
+			Row[{Dynamic@FEPrivate`FrontEndResource["CodeFormatterStrings", "AirinessLabel"], Spacer[10]}, BaselinePosition -> (Baseline -> Baseline)],
 			
 			Grid[{{
 			DenseIcon[Darker[sliderCol, .3]],
@@ -215,7 +215,7 @@ With[
 			
 			Spacer[5],
 			AiryIcon[Darker[sliderCol, .3]]
-			}}, GridOpts]
+			}}, BaselinePosition -> (Center -> Center), GridOpts]
 		}
 	]
 ]
@@ -229,7 +229,7 @@ With[
 
 IndentationMenu[Dynamic[HighlightCol_], Dynamic[indentation_, fi___], Dynamic[width_, fw___], rowOrColumn_:"Row"] :=
 	RowOrColumn[rowOrColumn] @ {
-		Row[{Dynamic@FEPrivate`FrontEndResource["CodeFormatterStrings", "IndentationLabel"], Spacer[{10, 15}]}],
+		Row[{Dynamic@FEPrivate`FrontEndResource["CodeFormatterStrings", "IndentationLabel"], Spacer[10]}, BaselinePosition -> (Baseline -> Baseline)],
 		
 		ActionMenu[
 			Highlighted[
@@ -244,7 +244,7 @@ IndentationMenu[Dynamic[HighlightCol_], Dynamic[indentation_, fi___], Dynamic[wi
 								width === "8", Dynamic@FEPrivate`FrontEndResource["CodeFormatterStrings", "Space8MenuItem"],
 								True, ""
 							]],
-							Background -> None, ImageSize -> {63, 17}, FrameMargins -> None
+							Background -> None, ImageSize -> {80, 17}, FrameMargins -> None
 						],
 						Chevron[Dynamic[HighlightCol], Dynamic[Down]]
 					}},
@@ -275,7 +275,7 @@ IndentationMenu[Dynamic[HighlightCol_], Dynamic[indentation_, fi___], Dynamic[wi
 				Dynamic@FEPrivate`FrontEndResource["CodeFormatterStrings", "Space8MenuItem"] :>
 					(indentation = "space"; width = "8"; Through[Flatten[{fi}][indentation]]; Through[Flatten[{fw}][width]])
 			},
-			Appearance->None
+			Appearance->None, BaselinePosition -> (Center -> Center), ImageMargins -> {{0, 0}, {0, 1}}
 		]
 	}
 

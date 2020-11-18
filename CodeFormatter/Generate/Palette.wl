@@ -95,7 +95,7 @@ Module[{nb},
 							];
 						]
 				],
-				Background -> BackgroundCol, RoundingRadius -> 0, FrameMargins -> {{15, 15}, {20, 15}}
+				Background -> BackgroundCol, RoundingRadius -> 0, FrameMargins -> {{15, 15}, {20, 10}}
 			]
       ,
       (*

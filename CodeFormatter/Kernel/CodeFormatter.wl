@@ -288,6 +288,7 @@ Module[{indentationString, cst, newline, tabWidth, indented, airiness, formatted
     style["NewlinesInComments"] = Delete
   ];
   If[airiness <= -0.85,
+    style["NewlinesBetweenCommas"] = Delete;
     style["NewlinesInScoping"] = Delete;
     style["NewlinesInControl"] = Delete
   ];
@@ -328,13 +329,15 @@ Module[{indentationString, cst, newline, tabWidth, indented, airiness, formatted
     Print["CodeFormatCST: ", cst];
   ];
 
-  Block[{$CurrentIndentationString, $CurrentNewline, $CurrentStyle},
+  Block[{$CurrentIndentationString, $CurrentNewline, $CurrentStyle, $Toplevel},
 
     $CurrentIndentationString = indentationString;
 
     $CurrentNewline = newline;
 
     $CurrentStyle = style;
+
+    $Toplevel = True;
 
     cst = StandardizeCommentGroups[cst];
 
@@ -1545,7 +1548,7 @@ Completely preserve newlines for CompoundExpression at top-level
 Breaking up lines or gluing lines together may change the actual CompoundExpressions and
 how expressions are parsed
 *)
-indent[InfixNode[CompoundExpression, ts_, data_], level:0] :=
+indent[InfixNode[CompoundExpression, ts_, data_], level_] /; TrueQ[$Toplevel] :=
 Catch[
 Module[{aggs, rands, rators, graphs, lastRator, lastRand, 
   ratorsPat, randsPat},
@@ -1588,7 +1591,7 @@ else:
   do not insert space before or after semi
   completely redo newlines
 *)
-indent[InfixNode[CompoundExpression, ts_, data_], level_] :=
+indent[InfixNode[CompoundExpression, ts_, data_], level_] /; !TrueQ[$Toplevel] :=
 Catch[
 Module[{aggs, rands, rators, graphs, lastRator, lastRand, 
   ratorsPat, randsPat, shouldStayOnSingleLine},
@@ -1895,6 +1898,7 @@ indent[GroupNode[tag_, {
         condition = SingleLineEnum
     ];
 
+    Block[{$Toplevel = False},
     GroupNode[tag,
       Flatten[
       Which[
@@ -1922,6 +1926,7 @@ indent[GroupNode[tag_, {
       ]]
       ,
       data
+    ]
     ]
   ]
 
@@ -1969,6 +1974,7 @@ indent[GroupNode[tag_, {
         condition = WeirdMiddleEnum
     ];
 
+    Block[{$Toplevel = False},
     GroupNode[tag,
       Flatten[
       Which[
@@ -2023,6 +2029,7 @@ indent[GroupNode[tag_, {
       ]]
       ,
       data
+    ]
     ]
   ]
 
@@ -2080,6 +2087,7 @@ indent[CallNode[{head : LeafNode[Symbol, "Module" | "With" | "Block" | {Fragment
           indent[head, level],
           indent[#, level + 1]& /@ comments1
         }],
+        Block[{$Toplevel = False},
         Flatten[{
           indent[opener, level + 1],
           indent[#, level + 1]& /@ comments2,
@@ -2092,6 +2100,7 @@ indent[CallNode[{head : LeafNode[Symbol, "Module" | "With" | "Block" | {Fragment
           indent[#, level + 1]& /@ comments5,
           indent[closer, level]
         }]
+        ]
         ,
         data
       ]
@@ -2104,6 +2113,7 @@ indent[CallNode[{head : LeafNode[Symbol, "Module" | "With" | "Block" | {Fragment
           indent[head, level],
           surround[indent[#, level + 1]& /@ comments1, {line[level + 1]}]
         }],
+        Block[{$Toplevel = False},
         Flatten[{
           indent[opener, level + 1],
           surround[indent[#, level + 1]& /@ comments2, {line[level + 1]}],
@@ -2117,6 +2127,7 @@ indent[CallNode[{head : LeafNode[Symbol, "Module" | "With" | "Block" | {Fragment
           line[level],
           indent[closer, level]
         }]
+        ]
         ,
         data
       ]
@@ -2161,6 +2172,7 @@ indent[CallNode[{head:LeafNode[Symbol, "Function" | {FragmentNode[Symbol, "Funct
         indent[head, level],
         indent[#, level]& /@ comments1}]
       ,
+      Block[{$Toplevel = False},
       Flatten[{
         indent[GroupNode[GroupSquare,
             {opener} ~Join~
@@ -2168,6 +2180,7 @@ indent[CallNode[{head:LeafNode[Symbol, "Function" | {FragmentNode[Symbol, "Funct
             {InfixNode[Comma, vars ~Join~ {rest}, data2]} ~Join~
             {trivia4, closer}, data1], level]
       }]
+      ]
       ,
       data
     ]
@@ -2229,6 +2242,7 @@ indent[CallNode[{tag:LeafNode[Symbol, "Switch" | {FragmentNode[Symbol, "Switch",
           indent[#, level + 1]& /@ comments1
         }]
         ,
+        Block[{$Toplevel = False},
         Flatten[{
           indent[opener, level + 1],
           indent[#, level + 1]& /@ comments2,
@@ -2247,6 +2261,7 @@ indent[CallNode[{tag:LeafNode[Symbol, "Switch" | {FragmentNode[Symbol, "Switch",
           indent[#, level + 1]& /@ comments6,
           indent[closer, level]
         }]
+        ]
         ,
         data
       ]
@@ -2260,6 +2275,7 @@ indent[CallNode[{tag:LeafNode[Symbol, "Switch" | {FragmentNode[Symbol, "Switch",
           surround[indent[#, level + 1]& /@ comments1, {line[level + 1]}]
         }]
         ,
+        Block[{$Toplevel = False},
         Flatten[{
           indent[opener, level + 1],
           surround[indent[#, level + 1]& /@ comments2, {line[level + 1]}],
@@ -2280,6 +2296,7 @@ indent[CallNode[{tag:LeafNode[Symbol, "Switch" | {FragmentNode[Symbol, "Switch",
           line[level],
           indent[closer, level]
         }]
+        ]
         ,
         data
       ]
@@ -2335,6 +2352,7 @@ indent[CallNode[{tag:LeafNode[Symbol, "Which" | {FragmentNode[Symbol, "Which", _
           indent[#, level + 1]& /@ comments1
         }]
         ,
+        Block[{$Toplevel = False},
         Flatten[{
           indent[opener, level + 1],
           indent[#, level + 1]& /@ comments2, 
@@ -2348,6 +2366,7 @@ indent[CallNode[{tag:LeafNode[Symbol, "Which" | {FragmentNode[Symbol, "Which", _
           indent[#, level + 1]& /@ comments3,
           indent[closer, level]
         }]
+        ]
         ,
         data
       ]
@@ -2361,6 +2380,7 @@ indent[CallNode[{tag:LeafNode[Symbol, "Which" | {FragmentNode[Symbol, "Which", _
           surround[indent[#, level + 1]& /@ comments1, {line[level + 1]}]
         }]
         ,
+        Block[{$Toplevel = False},
         Flatten[{
           indent[opener, level + 1],
           surround[indent[#, level + 1]& /@ comments2, {line[level + 1]}],
@@ -2376,6 +2396,7 @@ indent[CallNode[{tag:LeafNode[Symbol, "Which" | {FragmentNode[Symbol, "Which", _
           line[level],
           indent[closer, level]
         }]
+        ]
         ,
         data
       ]
@@ -2443,6 +2464,7 @@ indent[CallNode[{tag : LeafNode[Symbol, "If" | {FragmentNode[Symbol, "If", _], _
             indent[#, level + 1]& /@ comments1
           }]
           ,
+          Block[{$Toplevel = False},
           Flatten[{
             indent[opener, level + 1], 
             indent[#, level + 1]& /@ comments2, 
@@ -2457,6 +2479,7 @@ indent[CallNode[{tag : LeafNode[Symbol, "If" | {FragmentNode[Symbol, "If", _], _
             indent[#, level]& /@ comments4,
             indent[closer, level]
           }]
+          ]
           ,
           data
         ]
@@ -2468,6 +2491,7 @@ indent[CallNode[{tag : LeafNode[Symbol, "If" | {FragmentNode[Symbol, "If", _], _
               surround[indent[#, level + 1]& /@ comments1, {line[level + 1]}]
             }]
             ,
+            Block[{$Toplevel = False},
             Flatten[{
               indent[opener, level + 1],
               surround[indent[#, level + 1]& /@ comments2, {line[level + 1]}],
@@ -2482,6 +2506,7 @@ indent[CallNode[{tag : LeafNode[Symbol, "If" | {FragmentNode[Symbol, "If", _], _
               line[level],
               indent[closer, level]
             }]
+            ]
             ,
             data
         ]
@@ -2540,6 +2565,7 @@ indent[CallNode[{tag : LeafNode[Symbol, "For" | {FragmentNode[Symbol, "For", _],
           betterRiffle[indent[#, level]& /@ comments1, {space[]}]
         }]
         ,
+        Block[{$Toplevel = False},
         Flatten[{
           indent[opener, level],
           betterRiffle[indent[#, level]& /@ comments2, {space[]}],
@@ -2559,6 +2585,7 @@ indent[CallNode[{tag : LeafNode[Symbol, "For" | {FragmentNode[Symbol, "For", _],
           betterRiffle[indent[#, level + 1]& /@ comments9, {space[]}],
           indent[closer, level]
         }]
+        ]
         ,
         data
       ]
@@ -2572,6 +2599,7 @@ indent[CallNode[{tag : LeafNode[Symbol, "For" | {FragmentNode[Symbol, "For", _],
           betterRiffle[indent[#, level]& /@ comments1, {space[]}]
         }]
         ,
+        Block[{$Toplevel = False},
         Flatten[{
           indent[opener, level],
           betterRiffle[indent[#, level]& /@ comments2, {space[]}],
@@ -2594,6 +2622,7 @@ indent[CallNode[{tag : LeafNode[Symbol, "For" | {FragmentNode[Symbol, "For", _],
           line[level], 
           indent[closer, level]
         }]
+        ]
         ,
         data
       ]
@@ -2603,7 +2632,9 @@ indent[CallNode[{tag : LeafNode[Symbol, "For" | {FragmentNode[Symbol, "For", _],
 indent[CallNode[{tag_, trivia...}, ts_, data_], level_] :=
   CallNode[{indent[tag, level]}
     ,
+    Block[{$Toplevel = False},
     indent[#, level]& /@ ts
+    ]
     ,
     data
   ]

@@ -88,6 +88,8 @@ $AllowSplittingTokens = False
 CodeFormat::implicittimesaftercontinuation = "Replaced implicit Times with explicit * to remove ambiguity."
 
 
+CodeFormat::cellfailure = "This cell cannot currently be formatted."
+
 
 CodeFormat::usage = "CodeFormat[code] returns a string of formatted WL code."
 

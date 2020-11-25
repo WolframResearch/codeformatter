@@ -108,6 +108,8 @@ CodeFormat::implicittimesaftercontinuation = "Replaced implicit Times with expli
 
 CodeFormat::syntaxissues = "Input to CodeFormat has syntax issues: `1`"
 
+CodeFormat::cellfailure = "This cell cannot currently be formatted."
+
 
 
 CodeFormat::usage = "CodeFormat[code] returns a string of formatted WL code. \

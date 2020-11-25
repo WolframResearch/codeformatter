@@ -119,6 +119,17 @@ formatSelectedCell[] :=
 
                 CurrentValue[nb, WindowStatusArea] = "";
 
+                (*
+                Ideally, this would be a Beep[] and populate the Why the Beep? dialog
+
+                But that is not really possible
+
+                So just do a message for now
+                
+                Related threads: https://mail-archive.wolfram.com/archive/l-kernel/2020/Aug00/0035.html
+                *)
+                Message[CodeFormat::cellfailure];
+
                 Throw[formatted]
             ];
 

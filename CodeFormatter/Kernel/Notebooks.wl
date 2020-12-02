@@ -135,7 +135,11 @@ formatSelectedCell[] :=
 
             Cell[BoxData[formatted], Sequence @@ cell[[2;;]]]
           ,
+          (*
+          Some other box
+          *)
           _,
+            Message[CodeFormat::cellfailure];
             cell
         ]
     ], read];

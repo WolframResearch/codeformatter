@@ -328,14 +328,19 @@ Module[{indentationString, cst, newline, tabWidth, indented, airiness, formatted
   If[airiness >= 0.25,
     style["NewlinesBetweenCompoundExpressions"] = Insert
   ];
-  If[airiness > 0.5,
+  If[airiness >= 0.5,
     style["NewlinesBetweenOperators"] = Insert
   ];
   If[airiness >= 0.75,
     style["NewlinesInGroups"] = Insert
   ];
   If[airiness >= 0.85,
-    style["NewlinesBetweenCommas"] = Insert
+    style["NewlinesBetweenCommas"] = Insert;
+    style["NewlinesInScoping"] = Insert;
+    style["NewlinesInControl"] = Insert
+  ];
+  If[airiness == 1,
+    style["NewlinesInComments"] = Insert
   ];
 
 

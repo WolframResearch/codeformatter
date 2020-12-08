@@ -16,6 +16,8 @@ Out[2]= If[a,
 
 ```
 
+[Formatting the Wolfram Language from WTC 2020: Watch Video (youtube)](https://www.youtube.com/watch?v=eGvvKlfaPsQ)
+
 
 ## Setup
 

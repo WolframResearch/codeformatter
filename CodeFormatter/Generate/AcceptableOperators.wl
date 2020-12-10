@@ -1,3 +1,6 @@
+
+If[!MemberQ[$Path, #], PrependTo[$Path, #]]&[DirectoryName[$InputFileName, 3]]
+
 BeginPackage["CodeFormatter`Generate`AcceptableOperators`"]
 
 Begin["`Private`"]

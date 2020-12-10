@@ -1,5 +1,7 @@
 (* ::Package:: *)
 
+If[!MemberQ[$Path, #], PrependTo[$Path, #]]&[DirectoryName[$InputFileName, 3]]
+
 BeginPackage["CodeFormatter`Generate`Palette`"]
 
 Begin["`Private`"]

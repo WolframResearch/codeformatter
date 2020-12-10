@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[     10337,        279]
-NotebookOptionsPosition[      6502,        201]
-NotebookOutlinePosition[      6974,        218]
-CellTagsIndexPosition[      6931,        215]
+NotebookDataLength[     14561,        372]
+NotebookOptionsPosition[      9264,        268]
+NotebookOutlinePosition[      9736,        285]
+CellTagsIndexPosition[      9693,        282]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -55,7 +55,7 @@ Cell["CodeFormatter`", "Categorization",
 
 Cell["CodeFormatter/tutorial/ReleaseNotes", "Categorization",
  CellLabel->"URI",ExpressionUUID->"8d50d0f9-3588-494e-8ee3-28b7a1a9a486"]
-}, Open  ]],
+}, Closed]],
 
 Cell[CellGroupData[{
 
@@ -64,7 +64,7 @@ Cell["Keywords", "KeywordsSection",
 
 Cell["XXXX", "Keywords",
  CellID->1251852827,ExpressionUUID->"29905d2f-c89a-4a1d-a1e3-8dd2435177c8"]
-}, Open  ]],
+}, Closed]],
 
 Cell[CellGroupData[{
 
@@ -106,14 +106,15 @@ Cell["XXXX", "Details",
 Cell["XXXX", "Details",
  CellLabel->"Comments",
  CellID->240026365,ExpressionUUID->"50863275-18b3-430b-b4cf-d17a62b32a73"]
-}, Open  ]],
+}, Closed]],
 
 Cell[CellGroupData[{
 
 Cell["CodeFormatter Release Notes", "Title",
  CellChangeTimes->{
   3.794046627898847*^9, {3.794065996322307*^9, 3.794066000585916*^9}, 
-   3.7940667950001163`*^9, {3.810486473631296*^9, 3.81048647720977*^9}},
+   3.7940667950001163`*^9, {3.810486473631296*^9, 3.81048647720977*^9}, {
+   3.816535728328018*^9, 3.8165357285747967`*^9}},
  CellID->509267359,ExpressionUUID->"ff361fc3-ec22-4b1f-9c97-fe0285c5c54a"],
 
 Cell[CellGroupData[{
@@ -170,10 +171,15 @@ Cell["1.1.1", "Section",
   3.8111754486096077`*^9}},ExpressionUUID->"176bb536-ba32-4077-839b-\
 928d06901b2d"],
 
-Cell["October 8, 2020", "Text",
- CellChangeTimes->{{3.8111754562799053`*^9, 
-  3.8111754619700727`*^9}},ExpressionUUID->"194a5f2e-df7d-47ab-8d53-\
+Cell["December 8, 2020", "Text",
+ CellChangeTimes->{{3.8111754562799053`*^9, 3.8111754619700727`*^9}, {
+  3.816625202039852*^9, 
+  3.816625204179419*^9}},ExpressionUUID->"194a5f2e-df7d-47ab-8d53-\
 4bee5a455739"],
+
+Cell["Included in Mathematica 12.2", "Text",
+ CellChangeTimes->{{3.816625918791564*^9, 3.816625928601293*^9}},
+ CellID->94465146,ExpressionUUID->"3cd8a5c3-c220-409d-8709-3156a671dfe8"],
 
 Cell[CellGroupData[{
 
@@ -194,14 +200,75 @@ any bugs in the formatter from propagating errors into user source code.\
  CellChangeTimes->{
   3.811175450549573*^9, {3.811846236543079*^9, 
    3.811846237415633*^9}},ExpressionUUID->"22af2612-60ff-48e9-93a2-\
-43090b767f38"]
+43090b767f38"],
+
+Cell["Fix CodeFormat mis-formatting last comma in Switch", "Text",
+ CellChangeTimes->{{3.8166252710961*^9, 3.816625271423571*^9}, 
+   3.8166257454410753`*^9},
+ CellID->1180498580,ExpressionUUID->"ea35a2af-7965-40a4-bd2d-abe536da09a3"],
+
+Cell["Convert string literals in palette to use FrontEndResource", "Text",
+ CellID->190719926,ExpressionUUID->"7f9d288e-bdfb-4761-b4bc-c077164fbda8"],
+
+Cell["Add text resources to be used by FE", "Text",
+ CellID->1384194958,ExpressionUUID->"3f90db9c-c1a4-433b-8c77-6fa070be0fd6"],
+
+Cell["\<\
+Make sure to only use the FE text resources as labels for the radio button bar
+
+The actual values should still be \"tab\" and \"space\"\
+\>", "Text",
+ CellID->474311155,ExpressionUUID->"1e19a14d-c2e5-4d35-94a5-a09d87220b19"],
+
+Cell["Translation of CodeFormatting palette's strings", "Text",
+ CellID->288284421,ExpressionUUID->"ae7d2b88-abc1-4c83-80a9-722291952e32"],
+
+Cell["Adding simplified Chinese strings", "Text",
+ CellID->473156115,ExpressionUUID->"3fbbe14f-0f67-4eca-a66c-560448894ef7"],
+
+Cell["Redesign CodeFormatter settings DockedCell and palette", "Text",
+ CellID->202879964,ExpressionUUID->"22695b1b-919b-4119-a816-e2b827b7993a"],
+
+Cell["Handle integer Airiness values of -1, 0, 1", "Text",
+ CellID->1747007159,ExpressionUUID->"36c31425-e8e8-4d3b-a996-0cb1054d66a0"],
+
+Cell["\<\
+- Increased the width of the Indentation Menu to fit the Spanish resource \
+`\"TabMenuItem\" -> \"Tabulaciones\"` in CodeFormatter.tr
+- Fixed a missalignment of the Indentation Menu in the formatter toolbar.
+- Reduced the margin at the top of the formatter palette (looks a bit neater \
+now).\
+\>", "Text",
+ CellID->1552899529,ExpressionUUID->"e193cc44-e259-439c-90a4-d5df37b46ebd"],
+
+Cell["\<\
+Start adding individual style options, and have Airiness resolve to these \
+options\
+\>", "Text",
+ CellID->1213621912,ExpressionUUID->"26e12710-b481-413d-867f-3bd6abc2cf17"],
+
+Cell["\<\
+Fix the conflation of level == 0 with being top-level
+
+I was testing level == 0 when formatting CompoundExpressions as a way to \
+prevent newlines from being inserted (CompoundExpressions on a single line at \
+top-level need to stay on a single line)
+
+Introduce a new symbol $Toplevel and control that appropriately\
+\>", "Text",
+ CellID->543795778,ExpressionUUID->"bb3e032d-c923-447b-9617-434881427356"],
+
+Cell["\<\
+Provide a message for when a cell cannot currently be formatted\
+\>", "Text",
+ CellID->2032722861,ExpressionUUID->"60d6088b-1267-4703-b8be-a2a76d9f7b30"]
 }, Open  ]]
 }, Open  ]]
 }, Open  ]]
 },
 WindowSize->{700, 770},
 WindowMargins->{{32, Automatic}, {Automatic, 35}},
-FrontEndVersion->"12.2 for Mac OS X x86 (64-bit) (October 14, 2020)",
+FrontEndVersion->"12.2 for Mac OS X x86 (64-bit) (December 3, 2020)",
 StyleDefinitions->FrontEnd`FileName[{"Wolfram"}, "TutorialPageStyles.nb", 
   CharacterEncoding -> "UTF-8"],
 ExpressionUUID->"63fe6859-1ba0-456a-80d1-f2ea25380992"
@@ -229,15 +296,15 @@ Cell[1447, 45, 215, 3, 30, "Categorization",ExpressionUUID->"07d6e11a-35e5-4271-
 Cell[1665, 50, 180, 3, 30, "Categorization",ExpressionUUID->"5d6f4938-b2f3-4987-9800-752372f73050",
  CellID->468444828],
 Cell[1848, 55, 135, 1, 30, "Categorization",ExpressionUUID->"8d50d0f9-3588-494e-8ee3-28b7a1a9a486"]
-}, Open  ]],
+}, Closed]],
 Cell[CellGroupData[{
-Cell[2020, 61, 111, 1, 29, "KeywordsSection",ExpressionUUID->"76b3f888-820a-4024-b7fb-c09292698ac6",
+Cell[2020, 61, 111, 1, 19, "KeywordsSection",ExpressionUUID->"76b3f888-820a-4024-b7fb-c09292698ac6",
  CellID->1427428552],
 Cell[2134, 64, 100, 1, 19, "Keywords",ExpressionUUID->"29905d2f-c89a-4a1d-a1e3-8dd2435177c8",
  CellID->1251852827]
-}, Open  ]],
+}, Closed]],
 Cell[CellGroupData[{
-Cell[2271, 70, 108, 1, 29, "DetailsSection",ExpressionUUID->"ad148cb3-d1e2-457f-9865-de213553dda2",
+Cell[2271, 70, 108, 1, 19, "DetailsSection",ExpressionUUID->"ad148cb3-d1e2-457f-9865-de213553dda2",
  CellID->307771771],
 Cell[2382, 73, 118, 2, 30, "Details",ExpressionUUID->"b32d6569-91d9-4ce3-b3ad-ade24d7fdc29",
  CellID->218895918],
@@ -257,27 +324,53 @@ Cell[3240, 101, 133, 2, 30, "Details",ExpressionUUID->"60b993bd-643f-498c-b562-1
  CellID->929432370],
 Cell[3376, 105, 122, 2, 30, "Details",ExpressionUUID->"50863275-18b3-430b-b4cf-d17a62b32a73",
  CellID->240026365]
-}, Open  ]],
+}, Closed]],
 Cell[CellGroupData[{
-Cell[3535, 112, 283, 4, 106, "Title",ExpressionUUID->"ff361fc3-ec22-4b1f-9c97-fe0285c5c54a",
+Cell[3535, 112, 335, 5, 106, "Title",ExpressionUUID->"ff361fc3-ec22-4b1f-9c97-fe0285c5c54a",
  CellID->509267359],
 Cell[CellGroupData[{
-Cell[3843, 120, 150, 3, 43, "Section",ExpressionUUID->"4fe0ea0f-958d-48c8-b9af-eb610fd45000"],
-Cell[3996, 125, 211, 4, 23, "Text",ExpressionUUID->"2a96363a-d446-42df-b65f-e345c0925c4a"],
-Cell[4210, 131, 164, 3, 23, "Text",ExpressionUUID->"d0d6aa10-fd54-4fc9-b91e-6821efbeb32b"],
+Cell[3895, 121, 150, 3, 43, "Section",ExpressionUUID->"4fe0ea0f-958d-48c8-b9af-eb610fd45000"],
+Cell[4048, 126, 211, 4, 23, "Text",ExpressionUUID->"2a96363a-d446-42df-b65f-e345c0925c4a"],
+Cell[4262, 132, 164, 3, 23, "Text",ExpressionUUID->"d0d6aa10-fd54-4fc9-b91e-6821efbeb32b"],
 Cell[CellGroupData[{
-Cell[4399, 138, 203, 4, 39, "Subsection",ExpressionUUID->"e6b7c6f2-f56b-42d7-81db-38d53775e5d6"],
-Cell[4605, 144, 264, 4, 23, "Text",ExpressionUUID->"ab735280-83a5-4612-89de-7b75ec5244f2"],
-Cell[4872, 150, 317, 5, 23, "Text",ExpressionUUID->"63cb16f3-bbde-4c2d-9a53-2f53b7a62c88"],
-Cell[5192, 157, 243, 4, 23, "Text",ExpressionUUID->"dc276669-234b-4810-95c6-af6e04b17278"]
+Cell[4451, 139, 203, 4, 39, "Subsection",ExpressionUUID->"e6b7c6f2-f56b-42d7-81db-38d53775e5d6"],
+Cell[4657, 145, 264, 4, 23, "Text",ExpressionUUID->"ab735280-83a5-4612-89de-7b75ec5244f2"],
+Cell[4924, 151, 317, 5, 23, "Text",ExpressionUUID->"63cb16f3-bbde-4c2d-9a53-2f53b7a62c88"],
+Cell[5244, 158, 243, 4, 23, "Text",ExpressionUUID->"dc276669-234b-4810-95c6-af6e04b17278"]
 }, Open  ]]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[5484, 167, 154, 3, 43, "Section",ExpressionUUID->"176bb536-ba32-4077-839b-928d06901b2d"],
-Cell[5641, 172, 161, 3, 23, "Text",ExpressionUUID->"194a5f2e-df7d-47ab-8d53-4bee5a455739"],
+Cell[5536, 168, 154, 3, 43, "Section",ExpressionUUID->"176bb536-ba32-4077-839b-928d06901b2d"],
+Cell[5693, 173, 211, 4, 23, "Text",ExpressionUUID->"194a5f2e-df7d-47ab-8d53-4bee5a455739"],
+Cell[5907, 179, 184, 2, 23, "Text",ExpressionUUID->"3cd8a5c3-c220-409d-8709-3156a671dfe8",
+ CellID->94465146],
 Cell[CellGroupData[{
-Cell[5827, 179, 153, 3, 39, "Subsection",ExpressionUUID->"5e1da6ab-bc2e-405b-a9b0-187ac06f12cf"],
-Cell[5983, 184, 479, 12, 156, "Text",ExpressionUUID->"22af2612-60ff-48e9-93a2-43090b767f38"]
+Cell[6116, 185, 153, 3, 39, "Subsection",ExpressionUUID->"5e1da6ab-bc2e-405b-a9b0-187ac06f12cf"],
+Cell[6272, 190, 479, 12, 156, "Text",ExpressionUUID->"22af2612-60ff-48e9-93a2-43090b767f38"],
+Cell[6754, 204, 234, 3, 23, "Text",ExpressionUUID->"ea35a2af-7965-40a4-bd2d-abe536da09a3",
+ CellID->1180498580],
+Cell[6991, 209, 149, 1, 23, "Text",ExpressionUUID->"7f9d288e-bdfb-4761-b4bc-c077164fbda8",
+ CellID->190719926],
+Cell[7143, 212, 127, 1, 23, "Text",ExpressionUUID->"3f90db9c-c1a4-433b-8c77-6fa070be0fd6",
+ CellID->1384194958],
+Cell[7273, 215, 234, 5, 81, "Text",ExpressionUUID->"1e19a14d-c2e5-4d35-94a5-a09d87220b19",
+ CellID->474311155],
+Cell[7510, 222, 138, 1, 23, "Text",ExpressionUUID->"ae7d2b88-abc1-4c83-80a9-722291952e32",
+ CellID->288284421],
+Cell[7651, 225, 124, 1, 23, "Text",ExpressionUUID->"3fbbe14f-0f67-4eca-a66c-560448894ef7",
+ CellID->473156115],
+Cell[7778, 228, 145, 1, 23, "Text",ExpressionUUID->"22695b1b-919b-4119-a816-e2b827b7993a",
+ CellID->202879964],
+Cell[7926, 231, 134, 1, 23, "Text",ExpressionUUID->"36c31425-e8e8-4d3b-a996-0cb1054d66a0",
+ CellID->1747007159],
+Cell[8063, 234, 392, 7, 98, "Text",ExpressionUUID->"e193cc44-e259-439c-90a4-d5df37b46ebd",
+ CellID->1552899529],
+Cell[8458, 243, 183, 4, 23, "Text",ExpressionUUID->"26e12710-b481-413d-867f-3bd6abc2cf17",
+ CellID->1213621912],
+Cell[8644, 249, 414, 9, 156, "Text",ExpressionUUID->"bb3e032d-c923-447b-9617-434881427356",
+ CellID->543795778],
+Cell[9061, 260, 163, 3, 23, "Text",ExpressionUUID->"60d6088b-1267-4703-b8be-a2a76d9f7b30",
+ CellID->2032722861]
 }, Open  ]]
 }, Open  ]]
 }, Open  ]]

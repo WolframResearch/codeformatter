@@ -126,6 +126,9 @@ generatePalette[];
 Print["Done Palette"]
 )
 
+If[!StringQ[script],
+  Quit[1]
+]
 If[AbsoluteFileName[script] === AbsoluteFileName[$InputFileName],
 generate[]
 ]

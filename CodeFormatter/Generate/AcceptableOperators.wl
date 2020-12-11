@@ -52,7 +52,6 @@ generate[] := (
 
 Print["Generating Acceptable Operators..."];
 
-
 acceptableOperatorsWL = {
 "
 (*
@@ -87,9 +86,12 @@ If[FailureQ[res],
   Quit[1]
 ];
 
-Print["Done Acceptable Operators..."]
+Print["Done Acceptable Operators"]
 )
 
+If[!StringQ[script],
+  Quit[1]
+]
 If[AbsoluteFileName[script] === AbsoluteFileName[$InputFileName],
 generate[]
 ]

@@ -3,5 +3,6 @@
 TestSuite[{
 	"Bugs.mt",
 	"CodeFormatter.mt",
-	"LineBreaking.mt"
+	"LineBreaking.mt",
+	"Newlines.mt"
 }]

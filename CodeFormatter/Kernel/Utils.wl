@@ -1,5 +1,11 @@
 BeginPackage["CodeFormatter`Utils`"]
 
+trivia
+ws
+nl
+comment
+matchNewlineQ
+matchCommentFragmentNewlineQ
 
 
 lexSort
@@ -27,7 +33,22 @@ surround
 
 Begin["`Private`"]
 
+Needs["CodeFormatter`"]
 Needs["CodeParser`"]
+
+
+trivia = LeafNode[Whitespace | Token`Boxes`MultiWhitespace | Token`Comment | Token`Newline, _, _]
+
+ws = LeafNode[Whitespace | Token`Boxes`MultiWhitespace, _, _]
+
+nl = LeafNode[Token`Newline, _, _]
+
+comment = LeafNode[Token`Comment, _, _]
+
+matchNewlineQ = MatchQ[nl]
+
+matchCommentFragmentNewlineQ := MatchQ[FragmentNode[Token`Comment, $CurrentNewline, _]]
+
 
 
 (*

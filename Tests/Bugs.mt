@@ -22,8 +22,6 @@ Test[
 
 
 
-cst = CodeConcreteParseBox[RowBox[{"a", " ", "b"}]]
-
 Test[
 	CodeFormat["1 + 2222222222222222222222222 + 3", "LineWidth" -> 20]
 	,

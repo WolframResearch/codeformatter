@@ -2,74 +2,70 @@
 # Airiness
 
 
-
 airiness == -1
 
-newlines are removed from comments
+newlines in comments are deleted
 
 
 
+airiness <= -0.85
+
+newlines between commas are deleted
+newlines in scoping constructs are deleted
 
 
 
-airiness < -0.85
+airiness <= -0.75
 
-all stay on single line:
-Module
-If
-Switch
-Which
-For
+newlines in groups are deleted
 
 
 
-airiness < -0.75
+airiness <= -0.5
 
-groups stay on single line
-
-
-
-airiness < -0.5
-
-binary / infix / ternary stay on single line
+newlines between operators are deleted
 
 
 
-airiness < -0.25
+airiness <= -0.25
 
-CompoundExpressions stay on single line
+newlines between semicolons are deleted
 
 
 
-airiness = 0
+airiness == 0
 
 normal
 
 
 
-0.25 < airiness
+0.25 <= airiness
 
-newlines between elements of CompoundExpression
-
-
-
-0.5 < airiness
-
-newlines between binary / infix / ternary stay
+newlines between semicolons are inserted
 
 
 
-0.75 < airiness
+0.5 <= airiness
 
-newlines between groups
-
-
-
-0.85 < airiness
-
-newlines between Commas
+newlines between operators are inserted
 
 
 
+0.75 <= airiness
+
+newlines in groups are inserted
+
+
+
+0.85 <= airiness
+
+newlines between commas are inserted
+newlines in scoping constructs are inserted
+
+
+
+1.0 <= airiness
+
+newlines in comments are inserted
 
 

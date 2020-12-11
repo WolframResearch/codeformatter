@@ -87,7 +87,7 @@ So do a direct test for the continuation being placed before the long name
 str = "\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\\[DiscretionaryParagraphSeparator]\"";
 
 Test[
-	Block[{CodeFormatter`Private`$AllowSplittingTokens = True},
+	Block[{CodeFormatter`BreakLines`Private`$AllowSplittingTokens = True},
 		CodeFormat[str, "LineWidth" -> 120]
 	]
 	,
@@ -154,7 +154,7 @@ str = "(aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 
 TestMatch[
 	Block[{CodeFormatter`Private`$DisableSanityChecking = True,
-		CodeFormatter`Private`$AllowSplittingTokens = True},
+		CodeFormatter`BreakLines`Private`$AllowSplittingTokens = True},
 		CodeFormat[str, "LineWidth" -> 120]
 	]
 	,

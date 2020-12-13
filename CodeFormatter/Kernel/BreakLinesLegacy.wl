@@ -1,13 +1,15 @@
-BeginPackage["CodeFormatter`BreakLines`"]
+BeginPackage["CodeFormatter`BreakLinesLegacy`"]
 
-breakLines
+breakLinesLegacy
 
 Begin["`Private`"]
 
 Needs["CodeFormatter`"]
-Needs["CodeFormatter`AcceptableOperators`"]
+Needs["CodeFormatter`AcceptableOperators`"] (* for isAcceptableOperator *)
 Needs["CodeFormatter`Utils`"]
 Needs["CodeParser`"]
+Needs["CodeParser`Utils`"]
+
 
 
 (*
@@ -19,7 +21,7 @@ $LineBreakWithinComments = False
 $AllowSplittingTokens = False
 
 
-breakLines[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
+breakLinesLegacy[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
   Module[{tokens, lines},
 
     tokens = tokensIn;
@@ -53,7 +55,7 @@ breakLines[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
     tokens
   ]
 
-breakLines[tokensIn_, Infinity, Infinity] :=
+breakLinesLegacy[tokensIn_, Infinity, Infinity] :=
   tokensIn
 
 breakLine[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
@@ -84,7 +86,6 @@ breakLine[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
       Print["leadingWhitespace: ", leadingWhitespace //InputForm];
     ];
 
-
     width = StringLength[leadingWhitespace];
     toSplit = <||>;
     toInsertAfter = {};
@@ -105,12 +106,8 @@ breakLine[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
         (*
         Openers
         *)
-        LeafNode[Token`OpenParen | Token`OpenSquare | Token`OpenCurly | Token`LessBar | Token`LongName`LeftCeiling | Token`LongName`LeftFloor |
-          Token`LongName`LeftAngleBracket | Token`LongName`LeftDoubleBracket | Token`LongName`LeftBracketingBar | Token`LongName`LeftDoubleBracketingBar |
-          Token`LongName`LeftAssociation | Token`LongName`OpenCurlyQuote | Token`LongName`OpenCurlyDoubleQuote, _, _] |
-        FragmentNode[Token`OpenParen | Token`OpenSquare | Token`OpenCurly | Token`LessBar | Token`LongName`LeftCeiling | Token`LongName`LeftFloor |
-          Token`LongName`LeftAngleBracket | Token`LongName`LeftDoubleBracket | Token`LongName`LeftBracketingBar | Token`LongName`LeftDoubleBracketingBar |
-          Token`LongName`LeftAssociation | Token`LongName`OpenCurlyQuote | Token`LongName`OpenCurlyDoubleQuote, _, _],
+        LeafNode[_?isOpener, _, _] |
+        FragmentNode[_?isOpener, _, _],
           $groupDepth++;
           If[$Debug,
             Print["tok: ", tok];
@@ -120,12 +117,8 @@ breakLine[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
         (*
         Closers
         *)
-        LeafNode[Token`CloseParen | Token`CloseSquare | Token`CloseCurly | Token`BarGreater | Token`LongName`RightCeiling | Token`LongName`RightFloor |
-          Token`LongName`RightAngleBracket | Token`LongName`RightDoubleBracket | Token`LongName`RightBracketingBar | Token`LongName`RightDoubleBracketingBar |
-          Token`LongName`RightAssociation | Token`LongName`CloseCurlyQuote | Token`LongName`CloseCurlyDoubleQuote, _, _] |
-        FragmentNode[Token`CloseParen | Token`CloseSquare | Token`CloseCurly | Token`BarGreater | Token`LongName`RightCeiling | Token`LongName`RightFloor |
-          Token`LongName`RightAngleBracket | Token`LongName`RightDoubleBracket | Token`LongName`RightBracketingBar | Token`LongName`RightDoubleBracketingBar |
-          Token`LongName`RightAssociation | Token`LongName`CloseCurlyQuote | Token`LongName`CloseCurlyDoubleQuote, _, _],
+        LeafNode[_?isCloser, _, _] |
+        FragmentNode[_?isCloser, _, _],
           $groupDepth--;
           If[$Debug,
             Print["tok: ", tok];
@@ -372,6 +365,24 @@ breakLine[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
           LeafNode[Token`Fake`ImplicitTimes, _, _],
             (*
             insert a star to work-around design issues of line continuations and implicit Times interfering with each other
+
+            Here is an example:
+            CodeFormatter`BreakLines`Private`$AllowSplittingTokens = True;
+            CodeFormat["aaaaaaaaaa b", "LineWidth" -> 10]
+
+            aaaaaaaaaa b
+
+            and:
+
+            aaaaaaaaaa\
+             b
+            
+            are not the same expressions!
+
+            aaaaaaaaaa\
+             b
+            
+            is parsed as the symbol aaaaaaaaaab because line continuations also eat all of the leading whitespace on the nextline
             *)
             Message[CodeFormat::implicittimesaftercontinuation];
             tokens[[key]] = {FragmentNode[Token`Fake`ImplicitTimes, "\\" <> $CurrentNewlineString, tok[[3]]], FragmentNode[Token`Star, "*", <||>]}

@@ -1,29 +1,75 @@
 BeginPackage["CodeFormatter`Indent`"]
 
-indent
+IndentCST
 
 Begin["`Private`"]
 
 Needs["CodeFormatter`"]
 Needs["CodeFormatter`Utils`"]
 Needs["CodeParser`"]
-Needs["CodeParser`Utils`"] (* for empty *)
+Needs["CodeParser`Utils`"]
 
 
-line[level_] :=
-  {LeafNode[Token`Newline, $CurrentNewlineString, <||>]} ~Join~
-    Table[LeafNode[Whitespace, #, <||>]& /@ Characters[$CurrentIndentationString], level]
+(*
+Would like to use symbol Indent, but Indent is an undocumented System` symbol
+*)
 
-space[] = LeafNode[Whitespace, " ", <||>]
-
-tab[] = LeafNode[Whitespace, "\t", <||>]
-
-nil[] = {}
+IndentCST[gst_] :=
+  indent[gst]
 
 
 
-indent[LeafNode[Token`Newline, _, _], level_] :=
-  line[level]
+line[] :=
+  LeafNode[Token`Newline, $CurrentNewlineString, <||>]
+
+space[] =
+  LeafNode[Whitespace, " ", <||>]
+
+tab[] =
+  LeafNode[Whitespace, "\t", <||>]
+
+nil[] =
+  {}
+
+
+(*
+Replace all newline leafs with the sequence: newline + indentation
+
+Make sure to handle the cases of newlines inside of multiline comments
+*)
+incrementIndent[n_] :=
+Module[{},
+
+  If[$Debug,
+    Print["calling incrementIndent: ", n];
+  ];
+
+  ReplaceAll[n,
+    {
+      nl:LeafNode[Token`Newline, $CurrentNewlineString, _] :>
+        Sequence @@ ({nl} ~Join~ $CurrentIndentationNodeList)
+      ,
+      continuation:FragmentNode[Token`Comment, "\\" <> $CurrentNewlineString, _] :>
+        Sequence @@ ({continuation} ~Join~ $CurrentIndentationCommentFragmentNodeList)
+      ,
+      nl:FragmentNode[Token`Comment, $CurrentNewlineString, _] :>
+        Sequence @@ ({nl} ~Join~ $CurrentIndentationCommentFragmentNodeList)
+    }
+  ]
+]
+
+
+
+
+
+Options[indent] = {
+  "NewlinesInGroups" -> Automatic
+}
+
+
+
+(* indent[LeafNode[Token`Newline, _, _], level_] :=
+  line[level] *)
 
 (*
 Special case multiline comments
@@ -31,20 +77,31 @@ Special case multiline comments
 It is ok to change the internal indentation of comments, as long as everything is still aligned
 *)
 indent[LeafNode[Token`Comment, fs:{
+  (*
+  needs to be s_ /; ... because we do not want to use the value of $CurrentNewlineString at definition time
+  *)
   FragmentNode[Token`Comment, s_ /; s == "\\" <> $CurrentNewlineString, _],
   ___,
   FragmentNode[Token`Comment, "(*", _],
   ___,
-  FragmentNode[Token`Comment, "*)", _]}, data_], level_] :=
-Module[{min, replaced, origSpaces, strs, minStr, indentStr, frags, inserted, split, fragGroups, nlGroups, firstStrs, replacedStrs, replacedFirstStrs},
+  FragmentNode[Token`Comment, "*)", _]}, data_], OptionsPattern[]] :=
+Module[{min, replaced, origSpaces, strs, minStr, indentStr, frags, inserted, split, fragGroups, nlGroups, firstStrs, replacedStrs, replacedFirstStrs,
+  replacedOrigSpaces, level},
 
-  inserted = Lookup[data, "InsertedFragmentNodes", 0];
+  If[$Debug,
+    Print["calling indent multiline Comment"];
+  ];
 
-  origSpaces = inserted - 1;
+  origSpaces = Count[fs, FragmentNode[Token`Comment, " ", <|"Temporary" -> True|>]];
 
   If[$Debug,
     Print["origSpaces: ", origSpaces //InputForm];
   ];
+
+  (*
+  There is also the line continuation that was inserted
+  *)
+  inserted = origSpaces + 1;
 
   (*
   Correctly indent comment, taking into account the original indentation
@@ -92,12 +149,14 @@ Module[{min, replaced, origSpaces, strs, minStr, indentStr, frags, inserted, spl
     Print["min: ", min];
   ];
 
+  level = 0;
+
   minStr = StringJoin[Table[" ", min]];
   indentStr = StringJoin[Table[$CurrentIndentationString, level]];
   
   replacedFirstStrs = StringReplace[firstStrs[[2;;]], StartOfString ~~ minStr :> indentStr];
 
-  replacedStrs = MapThread[{#1}~Join~Rest[#2] &, {replacedFirstStrs, strs[[2;;]]}];
+  replacedStrs = MapThread[({#1} ~Join~ Rest[#2])&, {replacedFirstStrs, strs[[2;;]]}];
 
   replacedOrigSpaces =
     Join[
@@ -117,7 +176,7 @@ Module[{min, replaced, origSpaces, strs, minStr, indentStr, frags, inserted, spl
     LeafNode[Token`Comment,
       Flatten[
         replacedOrigSpaces ~Join~
-        {fragGroups[[1]]} ~Join~ ((FragmentNode[Token`Comment, #, <||>]& /@ #)& /@ replacedStrs)
+        {fragGroups[[1]]} ~Join~ (Function[{replacedStr}, FragmentNode[Token`Comment, #, <||>]& /@ replacedStr] /@ replacedStrs)
       ]
       ,
       data
@@ -127,14 +186,24 @@ Module[{min, replaced, origSpaces, strs, minStr, indentStr, frags, inserted, spl
       Flatten[
         {fs[[1]]} ~Join~
         replacedOrigSpaces ~Join~
-        betterRiffle[{fragGroups[[1]]} ~Join~ ((FragmentNode[Token`Comment, #, <||>]& /@ #)& /@ replacedStrs), nlGroups]
+        betterRiffle[{fragGroups[[1]]} ~Join~ (Function[{replacedStr}, FragmentNode[Token`Comment, #, <||>]& /@ replacedStr] /@ replacedStrs), nlGroups]
       ]
       ,
-      data
+      <|data, "Multiline" -> True|>
     ]
   ]
 ]
 
+
+indent[n:LeafNode[Token`Comment, _, _], OptionsPattern[]] :=
+Module[{},
+
+  If[$Debug,
+    Print["indent comment"];
+  ];
+
+  n
+]
 
 (*
 All other leafs:
@@ -144,17 +213,13 @@ All other leafs:
   singleline strings,
   singleline comments,
   multiline string from FE,
-  multiline comments from FE, setc.
+  multiline comments from FE, etc.
 *)
-indent[n:LeafNode[_, _, _], level_] :=
+indent[n:LeafNode[_, _, _], OptionsPattern[]] :=
   n
 
-indent[n:ErrorNode[_, _, _], level_] :=
+indent[n:ErrorNode[_, _, _], OptionsPattern[]] :=
   n
-
-
-indent[CompoundNode[tag_, {rand1_, rand2_}, data_], level_] :=
-  CompoundNode[tag, {indent[rand1, level], indent[rand2, level]}, data]
 
 
 (*
@@ -163,27 +228,131 @@ indentPostfixRator[Function][rator_, level_] :=
   {space[], indent[rator, level]}
 *)
 
-indentPostfixRator[_][rator_, level_] :=
-  indent[rator, level]
+(* indentPostfixRator[_][rator_, level_] :=
+  indent[rator, level] *)
+
+indent[PrefixNode[tag_, {rator_, randSeq:comment..., rand_}, data_], OptionsPattern[]] :=
+Module[{indentedRator, indentedRandSeq, indentedRand, indentedRandMultiline},
+
+  indentedRator = indent[rator];
+  indentedRandSeq = indent /@ {randSeq};
+  indentedRand = indent[rand];
+
+  indentedRandMultiline = Lookup[indentedRand[[3]], "Multiline", False];
+
+  If[$Debug,
+    Print["enter Prefix"];
+    Print["rand: ", indentedRand];
+  ];
+
+  If[indentedRandMultiline,
+    PrefixNode[tag,
+      Flatten[{
+        indentedRator,
+        indentedRandSeq,
+        indentedRand
+      }]
+      ,
+      <|data, "Multiline" -> True|>
+    ]
+    ,
+    PrefixNode[tag,
+      Flatten[{
+        indentedRator,
+        indentedRandSeq,
+        indentedRand
+      }]
+      ,
+      data
+    ]
+  ]
+]
+
+indent[PostfixNode[tag_, {rand_, randSeq:comment..., rator_}, data_], OptionsPattern[]] :=
+Module[{indentedRand, indentedRandSeq, indentedRator, indentedRandMultiline},
+
+  indentedRand = indent[rand];
+  indentedRandSeq = indent /@ {randSeq};
+  indentedRator = indent[rator];
+
+  indentedRandMultiline = Lookup[indentedRand[[3]], "Multiline", False];
+
+  If[$Debug,
+    Print["enter Postfix"];
+    Print["rand: ", indentedRand];
+  ];
+
+  If[indentedRandMultiline,
+    PostfixNode[tag,
+      Flatten[{
+        indentedRand,
+        indentedRandSeq,
+        indentedRator
+      }]
+      ,
+      <|data, "Multiline" -> True|>
+    ]
+    ,
+    PostfixNode[tag,
+      Flatten[{
+        indentedRand,
+        indentedRandSeq,
+        indentedRator
+      }]
+      ,
+      data
+    ]
+  ]
+]
+
+
+indent[PrefixBinaryNode[tag_, {rator_, rand1Seq:comment..., rand1_, rand2Seq:comment..., rand2_}, data_], OptionsPattern[]] :=
+Module[{indentedRator, indentedRand1Seq, indentedRand1, indentedRand2Seq, indentedRand2, indentedRandMultiline},
+
+  indentedRator = indent[rator];
+  indentedRand1Seq = indent /@ {rand1Seq};
+  indentedRand1 = indent[rand1];
+  indentedRand2Seq = indent /@ {rand2Seq};
+  indentedRand2 = indent[rand2];
+
+  indentedRandMultiline = Lookup[indentedRand1[[3]], "Multiline", False] || Lookup[indentedRand2[[3]], "Multiline", False];
+
+  If[$Debug,
+    Print["enter PrefixBinary"];
+    Print["rand1: ", indentedRand1];
+    Print["rand2: ", indentedRand2];
+  ];
+
+  If[indentedRandMultiline,
+    PrefixBinaryNode[tag,
+      Flatten[{
+        indentedRator,
+        indentedRand1Seq,
+        indentedRand1,
+        indentedRand2Seq,
+        indentedRand2
+      }]
+      ,
+      <|data, "Multiline" -> True|>
+    ]
+    ,
+    PrefixBinaryNode[tag,
+      Flatten[{
+        indentedRator,
+        indentedRand1Seq,
+        indentedRand1,
+        indentedRand2Seq,
+        indentedRand2
+      }]
+      ,
+      data
+    ]
+  ]
+]
 
 
 (*
-Boxes may come in such as:
-RowBox[{"!", "a", " "}]
-
-with trailing whitespace
-
-CodeParser does not keep whitespace inside the PrefixNode, but the FE does
-*)
-indent[PrefixNode[tag_, {rator_, trivia..., rand_, trivia...}, data_], level_] :=
-  PrefixNode[tag, {indent[rator, level], indent[rand, level]}, data]
-
-indent[PostfixNode[tag_, {rand_, trivia..., rator_}, data_], level_] :=
-  PostfixNode[tag, {indent[rand, level], indentPostfixRator[tag][rator, level]}, data]
-
-
-(*
-special casing CompoundExpression:
+special casing semicolons:
 
 shouldStayOnSingleLine =
 matches these cases:
@@ -198,97 +367,136 @@ else:
   do not insert space before or after semi
   completely redo newlines
 *)
-indent[InfixNode[CompoundExpression, ts_, data_], level_] :=
+indent[InfixNode[CompoundExpression, graphs_, data_], OptionsPattern[]] :=
 Catch[
-Module[{aggs, rands, rators, graphs, lastRator, lastRand, 
-  ratorsPat, randsPat,
-  definitelyPreserve, definitelyDelete, definitelyInsert},
+Module[{ratorsPat, definitelyDelete, definitelyInsert, split, indentedGraphs, anyIndentedGraphsMultiline},
 
-  aggs = DeleteCases[ts, trivia];
-  rands = aggs[[1 ;; All ;; 2]];
-  rators = aggs[[2 ;; All ;; 2]];
-  lastRator = Last[rators];
-  lastRand = Last[rands];
-  ratorsPat = Alternatives @@ rators;
-  randsPat = Alternatives @@ rands;
+  If[$Debug,
+    Print["indent CompoundExpression"];
+  ];
+
+  indentedGraphs = Flatten[indent /@ graphs];
+
+  anyIndentedGraphsMultiline = AnyTrue[indentedGraphs, Lookup[#[[3]], "Multiline", False]&];
+
+  ratorsPat = LeafNode[Token`Semi, _, _];
 
   (*
-  Completely preserve newlines for CompoundExpression at top-level
+  Override settings and always definitely delete newlines for CompoundExpression at top-level
+
+  If we are at top-level, then we know there must not be any newlines, other-wise this would not be a single CompoundExpression
+  e.g.:
+  
+  a;
+  b
+
+  at top-level is 2 different expressions.
 
   Breaking up lines or gluing lines together may change the actual CompoundExpressions and
   how expressions are parsed
   *)
-  definitelyPreserve = TrueQ[$Toplevel];
-  definitelyDelete = $CurrentStyle["NewlinesBetweenSemicolons"] === Delete;
-  definitelyInsert = $CurrentStyle["NewlinesBetweenSemicolons"] === Insert;
-
-  If[!(definitelyPreserve || definitelyDelete || definitelyInsert),
-    Which[
-      !FreeQ[ts, LeafNode[Token`Newline, _, _]],
-        (*
-        CompoundExpression is already on multiple lines, so preserve
-        *)
-        definitelyPreserve = True
-      (*
-      This heuristic is confusing
-      ,
-      Length[rands] <= 2,
-        (*
-        Hueristic for small CompoundExpressions to stay on single line
-        *)
-        definitelyDelete = True
-      *)
-      ,
-      True,
-        (*
-        Redo
-        *)
-        definitelyInsert = True
-    ]
+  If[TrueQ[$Toplevel],
+    definitelyDelete = True;
   ];
 
-  If[definitelyPreserve,
-    graphs = DeleteCases[ts, ws];
-    ,
-    graphs = DeleteCases[ts, ws | nl];
+  If[!TrueQ[(definitelyDelete || definitelyInsert)],
+    definitelyDelete = $CurrentStyle["NewlinesBetweenSemicolons"] === Delete;
+    definitelyInsert = $CurrentStyle["NewlinesBetweenSemicolons"] === Insert;
   ];
 
-  If[$Debug,
-    Print["definitelyPreserve: ", definitelyPreserve];
-    Print["definitelyDelete: ", definitelyDelete];
-    Print["definitelyInsert: ", definitelyInsert];
+  If[!TrueQ[(definitelyDelete || definitelyInsert)],
+    definitelyInsert = True
   ];
 
   Which[
-    definitelyPreserve || definitelyDelete,
-      InfixNode[CompoundExpression
-        ,
-        Flatten[
-        Replace[graphs, {
-          lastRator /; MatchQ[lastRand, LeafNode[Token`Fake`ImplicitNull, _, _]] :> indent[lastRator, level], 
-          rator : ratorsPat :> {indent[rator, level], space[]},
-          rand : randsPat :> indent[rand, level], 
-          other_ :> indent[other, level]
-        }, {1}]]
-        ,
-        data
-      ]
+    TrueQ[definitelyInsert],
+      split = Split[indentedGraphs, MatchQ[#2, LeafNode[Token`Semi, _, _]]&];
     ,
-    definitelyInsert,
-      InfixNode[CompoundExpression
-        ,
-        Flatten[
-        Replace[graphs, {
-          lastRator /; MatchQ[lastRand, LeafNode[Token`Fake`ImplicitNull, _, _]] :> indent[lastRator, level], 
-          rator : ratorsPat :> {indent[rator, level], line[level]}, 
-          rand : randsPat :> indent[rand, level], 
-          other_ :> {indent[other, level], line[level]}
-        }, {1}]]
-        ,
-        data
-      ]
-  ]
+    TrueQ[definitelyDelete],
+      split = {indentedGraphs};
+  ];
+
+  baseOperatorNodeIndent[InfixNode, CompoundExpression, data, split, ratorsPat, anyIndentedGraphsMultiline]
 ]]
+
+
+(*
+special casing commas:
+
+Automatic behavior for Comma:
+
+if fewer than 10 elements (not counting Token`Comma), then just do Delete
+
+else:
+format with commas on same line as preceding element:
+
+a,
+b,
+c,
+d,
+e
+
+*)
+
+indent[InfixNode[Comma, graphs_, data_], OptionsPattern[]] :=
+  Catch[
+  Module[{aggs, ratorsPat, split, definitelyDelete, definitelyInsert, definitelyAutomatic,
+    indentedGraphs, anyIndentedGraphsMultiline},
+
+    If[$Debug,
+      Print["enter comma"];
+    ];
+
+    ratorsPat = LeafNode[Token`Comma, _, _];
+
+    indentedGraphs = Flatten[indent /@ graphs];
+
+    aggs = DeleteCases[indentedGraphs, comment];
+
+    anyIndentedGraphsMultiline = AnyTrue[indentedGraphs, Lookup[#[[3]], "Multiline", False]&];
+
+    If[$Debug,
+      Print["comma anyIndentedGraphsMultiline: ", anyIndentedGraphsMultiline];
+    ];
+
+    If[anyIndentedGraphsMultiline,
+      definitelyInsert = True;
+    ];
+
+    If[!TrueQ[(definitelyDelete || definitelyInsert)],
+      definitelyDelete = $CurrentStyle["NewlinesBetweenCommas"] === Delete;
+      definitelyInsert = $CurrentStyle["NewlinesBetweenCommas"] === Insert;
+    ];
+
+    If[!TrueQ[(definitelyDelete || definitelyInsert)],
+      Which[
+        True,
+          definitelyDelete = True
+      ]
+    ];
+
+    If[$Debug,
+      Print["comma choice: ", {definitelyDelete, definitelyInsert, definitelyAutomatic}];
+    ];
+
+    Which[
+      TrueQ[definitelyInsert],
+        split = {#}& /@ indentedGraphs;
+      ,
+      TrueQ[definitelyDelete],
+        split = {indentedGraphs};
+      ,
+      TrueQ[definitelyAutomatic],
+        split = Split[indentedGraphs, (!MatchQ[#1, LeafNode[Token`Comment, _, _]] && MatchQ[#2, LeafNode[Token`Comma, _, _]])&]
+    ];
+    
+    If[$Debug,
+      Print["Comma split: ", split];
+    ];
+
+    baseOperatorNodeIndent[InfixNode, Comma, data, split, ratorsPat, anyIndentedGraphsMultiline]
+  ]]
+
 
 
 (*
@@ -309,73 +517,69 @@ no spaces around Power:
 a^b
 
 *)
-indentInfixRator[Pattern | Optional | PatternTest | MessageName | Power][rator_, level_] :=
-  indent[rator, level]
+indentInfixRator[Pattern | Optional | PatternTest | MessageName | Power][rator_] :=
+  rator
 
-indentInfixRator[Pattern | Optional | PatternTest | MessageName | Power][rator_, level_] :=
-  indent[rator, level]
+indentInfixRator[Pattern | Optional | PatternTest | MessageName | Power][rator_] :=
+  rator
 
-
-(*
-No spaces before Comma
-*)
-indentInfixRator[Comma][rator_, level_] :=
-  {indent[rator, level], space[]}
-
-indentInfixRatorGrouped[Comma][rator_, level_] :=
-  {indent[rator, level], space[]}
-
-indentInfixRatorGroupedLast[Comma][rator_, level_] :=
-  indent[rator, level]
 
 (*
 special case implicit Times
 *)
-indentInfixRator[Times][l:LeafNode[Token`Fake`ImplicitTimes, _, _], level_] :=
+indentInfixRator[Times][l:LeafNode[Token`Fake`ImplicitTimes, _, _]] :=
   l
 
-indentInfixRatorGrouped[Times][l:LeafNode[Token`Fake`ImplicitTimes, _, _], level_] :=
+indentInfixRatorGrouped[Times][l:LeafNode[Token`Fake`ImplicitTimes, _, _]] :=
   l
 
-indentInfixRatorGroupedLast[Times][LeafNode[Token`Fake`ImplicitTimes, _, _], level_] :=
+indentInfixRatorGroupedLast[Times][LeafNode[Token`Fake`ImplicitTimes, _, _]] :=
   nil[]
 
-indentInfixRatorGroupedOnly[Times][LeafNode[Token`Fake`ImplicitTimes, _, _], level_] :=
+indentInfixRatorGroupedOnly[Times][LeafNode[Token`Fake`ImplicitTimes, _, _]] :=
   nil[]
-
-
-indentInfixRator[_][rator_, level_] :=
-  {space[], indent[rator, level], space[]}
-
-indentInfixRatorGrouped[_][rator_, level_] :=
-  {space[], indent[rator, level], space[]}
-
-indentInfixRatorGroupedLast[_][rator_, level_] :=
-  {space[], indent[rator, level]}
-
-indentInfixRatorGroupedOnly[_][rator_, level_] :=
-  indent[rator, level]
 
 
 (*
-Do not indent Comma
+no space before commas or semi
 *)
-indentIncrement[Comma, level_] := level
+indentInfixRator[Comma | CompoundExpression][rator_] :=
+  {rator, space[]}
 
-indentIncrement[_, level_] := level + 1
+indentInfixRatorGrouped[Comma | CompoundExpression][rator_] :=
+  {rator, space[]}
+
+indentInfixRatorGroupedLast[Comma | CompoundExpression][rator_] :=
+  rator
 
 
-$AlwaysLineBreakSpecial = {
+indentInfixRator[_][rator_] :=
+  {space[], rator, space[]}
+
+indentInfixRatorGrouped[_][rator_] :=
+  {space[], rator, space[]}
+
+indentInfixRatorGroupedLast[_][rator_] :=
+  {space[], rator}
+
+indentInfixRatorGroupedOnly[_][rator_] :=
+  rator
+
+
+(*
+if top-level, then newline after last rator
+*)
+$SpecialBreakAfterLastRator = {
 
   (*
   BinaryNode
   *)
-  SetDelayed,
+  SetDelayed, UpSetDelayed,
 
   (*
   TernaryNode
   *)
-  TagSetDelayed, MemoizedSetDelayed,
+  TagSetDelayed, MemoizedSetDelayed, MemoizedUpSetDelayed,
 
   (*
   QuaternaryNode
@@ -391,966 +595,941 @@ This is the big function for all BinaryNodes, InfixNodes, and TernaryNodes
 The logic for all 3 is so similar, it should all be in a single function
 
 *)
-indent[(head:(BinaryNode|InfixNode|TernaryNode|QuaternaryNode))[tag_, ts_, data_], level_] :=
+indent[(type:BinaryNode|InfixNode|TernaryNode|QuaternaryNode)[tag_, graphs_, data_], OptionsPattern[]] :=
   Catch[
-  Module[{aggs, rators, graphs, ratorsPat, split, lastGraph,
-    definitelyDelete, definitelyInsert},
+  Module[{aggs, rators, ratorsPat, split,
+    definitelyDelete, definitelyInsert, definitelyAutomatic, indentedGraphs, anyIndentedGraphsMultiline, lastRator, lastRatorPos},
 
-    aggs = DeleteCases[ts, trivia];
+    If[$Debug,
+      Print["inside indent operator"]
+    ];
 
-    rators = aggs[[2 ;; All ;; 2]];
-    ratorsPat = Alternatives @@ rators;
+    indentedGraphs = Flatten[indent /@ graphs];
 
-    definitelyDelete = (tag === Comma && $CurrentStyle["NewlinesBetweenCommas"] === Delete) || $CurrentStyle["NewlinesBetweenOperators"] === Delete;
-    definitelyInsert = (tag === Comma && $CurrentStyle["NewlinesBetweenCommas"] === Insert) || $CurrentStyle["NewlinesBetweenOperators"] === Insert;
+    anyIndentedGraphsMultiline = AnyTrue[indentedGraphs, Lookup[#[[3]], "Multiline", False]&];
+
+    If[$Debug,
+      Print["anyIndentedGraphsMultiline: ", anyIndentedGraphsMultiline]
+    ];
+
+    aggs = DeleteCases[indentedGraphs, comment];
+
+    rators = aggs[[2;;;;2]];
+
+    (*
+    TODO: this can be derived directly from tag as a function
+    *)
+    ratorsPat = LeafNode[Alternatives @@ DeleteDuplicates[#[[1]]& /@ rators], _, _];
+
+    (*
+    Override settings and always definitely delete newlines for operators at top-level
+
+    If we are at top-level, then we know there must not be any newlines, other-wise this would not be a single operator
+    e.g.:
+    
+    a
+    +
+    b
+
+    at top-level is 2 different expressions.
+
+    Breaking up lines or gluing lines together may change the actual operators and
+    how expressions are parsed
+    *)
 
     Which[
-      (*
-      heuristically simple thing to keep on single line
-
-      foo := symbol  =>  single line
-      *)
-      MatchQ[aggs, {_, _, LeafNode[Symbol, _, _]}] && !definitelyInsert,
-        (*
-        Single line, so delete newlines
-        *)
-        graphs = DeleteCases[ts, ws | nl];
-
-        split = {graphs}
+      TrueQ[$Toplevel],
+        definitelyDelete = $CurrentStyle["NewlinesBetweenOperators"] === Delete;
       ,
-      (*
-      Special hard-coded
-
-      Always line break after last rator, so redo newlines
-      *)
-      MemberQ[$AlwaysLineBreakSpecial, tag] && !definitelyDelete,
-        graphs = DeleteCases[ts, ws | nl];
-
-        lastGraph = Last[graphs];
-        If[MatchQ[lastGraph, GroupNode[_, _, _]],
-          (*
-          we want the opener of a group to be on same line as everything else
-          Newlines are inserted inside the group itself
-          *)
-          lastGraph = redoGroupNewlines[lastGraph];
-          split = {Most[graphs] ~Join~ {lastGraph}};
-          ,
-          split = {Most[graphs], {lastGraph}};
-        ]
-      ,
-      (*
-      definitely Insert, so redo newlines
-      *)
-      definitelyInsert,
-        graphs = DeleteCases[ts, ws | nl];
-
-        split = {#}& /@ graphs;
-      ,
-      (*
-      definitely Delete
-      *)
-      definitelyDelete,
-        graphs = DeleteCases[ts, ws | nl];
-
-        split = {graphs};
-      ,
-      (*
-      Preserve
-
-      split graphs around existing newline tokens 
-      *)
       True,
-        graphs = DeleteCases[ts, ws];
+        definitelyDelete = $CurrentStyle["NewlinesBetweenOperators"] === Delete;
+        definitelyInsert = $CurrentStyle["NewlinesBetweenOperators"] === Insert;
+    ];
 
-        split = Split[graphs, (matchNewlineQ[#1] == matchNewlineQ[#2])&];
-        (*
-        Forget about the actual newline tokens
-        *)
-        split = Take[split, {1, -1, 2}];
+    If[!TrueQ[(definitelyDelete || definitelyInsert)],
+      definitelyAutomatic = True;
+    ];
+
+    If[$Debug,
+      Print["indent operator choice: ", {definitelyDelete, definitelyInsert, definitelyAutomatic}]
+    ];
+
+    Which[
+      TrueQ[definitelyInsert],
+        split = {#}& /@ indentedGraphs;
+      ,
+      TrueQ[definitelyDelete],
+        split = {indentedGraphs};
+      ,
+      TrueQ[definitelyAutomatic],
+        Which[
+          (*
+          Special hard-coded
+
+          Always line break after last rator, so redo newlines
+          *)
+          MemberQ[$SpecialBreakAfterLastRator, tag] && $Toplevel,
+            lastRator = rators[[-1]];
+            lastRatorPos = Position[indentedGraphs, lastRator][[1]];
+            split = {Take[indentedGraphs, lastRatorPos[[1]]], Drop[indentedGraphs, lastRatorPos[[1]]]};
+          ,
+          True,
+            split =
+              Split[indentedGraphs,
+                  Which[
+                    (*
+                    Do not split lines if $Toplevel and either side of implicit Times
+                    This would change the expression!!
+
+                    So return True if either is implicit Times
+                    *)
+                    $Toplevel && (MatchQ[#1, LeafNode[Token`Fake`ImplicitTimes, _,_]] || MatchQ[#2, LeafNode[Token`Fake`ImplicitTimes, _,_]]),
+                      True
+                    ,
+                    (*
+                    If both are single line, then keep on single line
+                    *)
+                    !Lookup[#1[[3]], "Multiline", False] && !Lookup[#2[[3]], "Multiline", False],
+                      True
+                    ,
+                    (*
+                    If second arg is a rator, then do not split
+                    *)
+                    MatchQ[#2, ratorsPat],
+                      True
+                    ,
+                    True,
+                      False                    
+                  ]&
+              ]
+        ]
     ];
     
     If[$Debug,
-      Print["split: ", split];
-    ];
-    
-    If[Length[split] == 1,
-      (*
-      There were no newline tokens
-      *)
-      Throw[
-        head[tag,
-          Flatten[
-          Map[
-            Function[{grouped},
-              Replace[grouped, {
-                rator : ratorsPat :> indentInfixRator[tag][rator, level], 
-                randOrComment_ :> indent[randOrComment, level]
-              }, {1}]
-            ]
-            ,
-            split
-          ]]
-          ,
-          data
-        ]
-      ]
+      Print["Operators split: ", split];
     ];
 
-    head[tag,
-      With[{newLevel = indentIncrement[tag, level]},
+    incrementIndentAfterFirstRator @
+      baseOperatorNodeIndent[type, tag, data, split, ratorsPat, anyIndentedGraphsMultiline]
+
+  ]]
+
+
+baseOperatorNodeIndent[type_, tag_, data_, split_, ratorsPat_, anyIndentedGraphsMultiline_] :=
+Catch[
+Module[{},
+
+  If[$Debug,
+    Print["inside baseOperatorNodeIndent"];
+    Print["type: ", type];
+    Print["tag: ", tag];
+    Print["split: ", split];
+    Print["ratorsPat: ", ratorsPat];
+  ];
+
+  If[Length[split] == 1,
+    (*
+    There were no newline tokens
+    *)
+    Throw[
+      type[tag,
         Flatten[
-        betterRiffle[
-          Map[
-            (*
-            grouped is a list of tokens with no newline tokens
-            *)
-            Function[{grouped},
-              Which[
-                (*
-                Single token on a line
-                *)
-                Length[grouped] == 1,
-                  Replace[grouped, {
-                    (* do not insert space after rator if immediately followed by newline *)
-                    rator : ratorsPat :> indentInfixRatorGroupedOnly[tag][rator, newLevel], 
-                    randOrComment_ :> indent[randOrComment, newLevel]
-                  }, {1}]
-                ,
-                (*
-                Multiple tokens on a line
-                *)
-                True,
-                  {
-                    Replace[Most[grouped], {
-                      rator : ratorsPat :> indentInfixRatorGrouped[tag][rator, newLevel], 
-                      randOrComment_ :> indent[randOrComment, newLevel]
-                    }, {1}]
-                    ,
-                    Replace[{Last[grouped]}, {
-                      (* do not insert space after rator if immediately followed by newline *)
-                      rator : ratorsPat :> indentInfixRatorGroupedLast[tag][rator, newLevel], 
-                      randOrComment_ :> indent[randOrComment, newLevel]
-                    }, {1}]
-                  }
-              ]
-            ]
-            ,
-            split
+        Map[
+          Function[{grouped},
+            Replace[grouped, {
+              rator:ratorsPat :> indentInfixRator[tag][rator]
+            }, {1}]
           ]
           ,
-          {line[newLevel]}
+          split
         ]]
+        ,
+        <|data, "Multiline" -> anyIndentedGraphsMultiline|>
       ]
+    ]
+  ];
+
+  type[tag,
+    Flatten[
+    betterRiffle[
+      Map[
+        (*
+        grouped is a list of tokens with no newline tokens
+        *)
+        Function[{grouped},
+          Which[
+            Length[grouped] == 0,
+            {}
+            ,
+            (*
+            Single token on a line
+            *)
+            Length[grouped] == 1,
+              Replace[grouped, {
+                rator:ratorsPat :> indentInfixRatorGroupedOnly[tag][rator]
+              }, {1}]
+            ,
+            (*
+            Multiple tokens on a line
+            *)
+            True,
+              {
+                Replace[Most[grouped], {
+                  rator:ratorsPat :> indentInfixRatorGrouped[tag][rator]
+                }, {1}]
+                ,
+                Replace[{Last[grouped]}, {
+                  rator:ratorsPat :> indentInfixRatorGroupedLast[tag][rator]
+                }, {1}]
+              }
+          ]
+        ]
+        ,
+        split
+      ]
+      ,
+      {line[]}
+    ]
+    ]
+    ,
+    <|data, "Multiline" -> True|>
+  ]
+]]
+
+
+incrementIndentAfterFirstRator[(type:BinaryNode|InfixNode|TernaryNode|QuaternaryNode)[tag_, graphs_, data_], OptionsPattern[]] :=
+Catch[
+Module[{aggs, rators, firstRatorPos, first, rest},
+
+  If[$Debug,
+    Print["inside incrementIndentAfterFirstRator"];
+    Print["graphs: ", graphs]
+  ];
+
+  aggs = DeleteCases[graphs, comment];
+
+  rators = aggs[[2;;;;2]];
+
+  firstRatorPos = Position[graphs, rators[[1]]][[1]];
+
+  {first, rest} = TakeDrop[graphs, firstRatorPos[[1]]];
+
+  type[tag, Flatten[{first, incrementIndent /@ rest}], data]
+]]
+
+
+(*
+Empty group
+*)
+indent[GroupNode[tag_, {
+      opener_,
+      closer_
+    }, data_], OptionsPattern[]] :=
+  Module[{},
+
+  Block[{$Toplevel = False},
+    GroupNode[tag,
+      {
+        indent[opener],
+        indent[closer]
+      }
       ,
       data
     ]
   ]]
 
-
-redoGroupNewlines[GroupNode[tag_, {
-  opener_,
-  trivia...,
-  ts:Except[trivia]...,
-  trivia...,
-  closer_
-  }, data_]] :=
-  GroupNode[tag, {
-    opener,
-    LeafNode[Token`Newline, $CurrentNewlineString, <||>],
-    ts,
-    LeafNode[Token`Newline, $CurrentNewlineString, <||>],
-    closer
-  }, data]
-
-
-
 indent[GroupNode[tag_, {
       opener_, 
-      trivia1 : trivia...,
+      graphSeq___,
       closer_
-    }, data_], level_] :=
-  Module[{triviaAggs, triviaGraphs, condition},
+    }, data_], OptionsPattern[]] :=
+  Module[{graphs, aggs, x,
+    definitelyDelete, definitelyInsert,
+    indentedOpener, indentedGraphs, indentedCloser,
+    anyIndentedGraphsMultiline},
+  
+  Block[{$Toplevel = False},
 
-    triviaAggs = DeleteCases[{trivia1}, ws];
+    graphs = {graphSeq};
 
-    triviaGraphs = DeleteCases[{trivia1}, ws | nl];
+    indentedOpener = indent[opener];
+    indentedGraphs = Flatten[indent /@ graphs];
+    indentedCloser = indent[closer];
 
-    Which[
-      $CurrentStyle["NewlinesInGroups"] === Insert,
-        condition = MultiLineEnum
-      ,
-      $CurrentStyle["NewlinesInGroups"] === Delete,
-        condition = SingleLineEnum
-      ,
-      !FreeQ[triviaAggs, LeafNode[Token`Newline, _, _]],
-        condition = MultiLineEnum
-      ,
-      True,
-        condition = SingleLineEnum
+    If[$Debug,
+      Print["enter indent Group"];
+      Print["graphs to test: ", indentedGraphs];
     ];
 
-    Block[{$Toplevel = False},
-    GroupNode[tag,
-      Flatten[
-      Which[
-        condition === MultiLineEnum,
-        (*
-        if multiline, then keep as multiline, but redo newlines
-        *)
-        {
-          indent[opener, level], 
-          indent[#, level + 1]& /@ triviaGraphs,
-          line[level],
-          indent[closer, level]
-        }
-        ,
-        condition === SingleLineEnum,
-        (*
-        if will NOT make multiline, then keep everything on 1 line,
-        and do not indent
-        *)
-        {
-          indent[opener, level], 
-          indent[#, level]& /@ triviaGraphs, 
-          indent[closer, level]
-        }
-      ]]
-      ,
-      data
-    ]
-    ]
-  ]
+    anyIndentedGraphsMultiline = AnyTrue[indentedGraphs, Lookup[#[[3]], "Multiline", False]&];
 
-indent[GroupNode[tag_, {
-      opener_, 
-      trivia1 : trivia...,
-      ts:PatternSequence[Except[trivia], ___, Except[trivia]] | Except[trivia],
-      trivia2 : trivia...,
-      closer_
-    }, data_], level_] :=
-  Module[{aggs, trivia1Aggs, trivia2Aggs, trivia1Graphs, trivia2Graphs, condition, x},
-
-    trivia1Aggs = DeleteCases[{trivia1}, ws];
-    aggs = DeleteCases[{ts}, ws];
-    trivia2Aggs = DeleteCases[{trivia2}, ws];
-
-    trivia1Graphs = DeleteCases[{trivia1}, ws | nl];
-    trivia2Graphs = DeleteCases[{trivia2}, ws | nl];
-
-    Which[
-      $CurrentStyle["NewlinesInGroups"] === Insert,
-        condition = MultiLineEnum
-      ,
-      $CurrentStyle["NewlinesInGroups"] === Delete,
-        condition = SingleLineEnum
-      ,
-      !FreeQ[trivia1Aggs, LeafNode[Token`Newline, _, _]],
-        condition = MultiLineEnum
-      ,
-      FreeQ[aggs, LeafNode[Token`Newline, _, _]],
-        condition = SingleLineEnum
-      ,
-      MatchQ[aggs, {(GroupNode|CallNode)[_, _, _]}],
-        condition = SingleLineEnum
-      ,
-      MatchQ[aggs, {InfixNode[Comma, {(GroupNode|CallNode)[_, _, _], ___}, _]}] && FreeQ[trivia2Aggs, LeafNode[Token`Newline, _, _]],
-        condition = SingleLineEnum
-      ,
-      (*
-      MatchQ[aggs, {InfixNode[Comma, {___, GroupNode[_, _, _]}, _]}] && FreeQ[trivia2Aggs, LeafNode[Token`Newline, _, _]],
-        condition = SingleLineEnum
-      ,
-      *)
-      True,
-        condition = WeirdMiddleEnum
+    If[$Debug,
+      Print["anyIndentedGraphsMultiline: ", anyIndentedGraphsMultiline];
     ];
 
-    Block[{$Toplevel = False},
-    GroupNode[tag,
-      Flatten[
-      Which[
-        condition === WeirdMiddleEnum,
+    aggs = DeleteCases[graphs, comment];
 
-        (*
-        Comma does not indent, so must indent manually here
-        *)
-        If[MatchQ[aggs, {InfixNode[Comma | CompoundExpression, _, _]}],
-          x = 1
+    If[anyIndentedGraphsMultiline,
+      definitelyInsert = True;
+    ];
+
+    If[!TrueQ[(definitelyDelete || definitelyInsert)],
+      definitelyDelete = OptionValue["NewlinesInGroups"] === Delete;
+      definitelyInsert = OptionValue["NewlinesInGroups"] === Insert;
+    ];
+
+    If[$Debug,
+      Print["1 indent Group definitely: ", {definitelyDelete, definitelyInsert}];
+    ];
+
+    If[!TrueQ[(definitelyDelete || definitelyInsert)],
+      definitelyDelete = $CurrentStyle["NewlinesInGroups"] === Delete;
+      definitelyInsert = $CurrentStyle["NewlinesInGroups"] === Insert;
+    ];
+
+    If[$Debug,
+      Print["2 indent Group definitely: ", {definitelyDelete, definitelyInsert}];
+    ];
+
+    If[!TrueQ[(definitelyDelete || definitelyInsert)],
+      Which[
+        True,
+          definitelyDelete = True
+      ];
+    ];
+
+    If[$Debug,
+      Print["indent Group definitely: ", {definitelyDelete, definitelyInsert}];
+    ];
+
+    Which[
+      TrueQ[definitelyInsert],
+        GroupNode[tag,
+          Flatten[
+          {
+            indentedOpener,
+            incrementIndent /@ surround[indentedGraphs, {line[]}, "AlreadyPresent" -> {After}],
+            line[],
+            indentedCloser
+          }
+          ]
           ,
-          x = 0
-        ];
-        (*
-        format as single line, except there are newlines inside, so also line break before the closer
-        *)
-        {
-          indent[opener, level], 
-          indent[#, level]& /@ trivia1Graphs, 
-          indent[#, level + x]& /@ aggs, 
-          indent[#, level]& /@ trivia2Graphs,
-          line[level],
-          indent[closer, level]
-        }
-        ,
-        condition === MultiLineEnum,
-        (*
-        if multiline, then keep as multiline, but redo newlines
-        *)
-        {
-          indent[opener, level], 
-          indent[#, level + 1]& /@ trivia1Graphs,
-          line[level + 1],
-          indent[#, level + 1]& /@ aggs, 
-          indent[#, level]& /@ trivia2Graphs,
-          line[level],
-          indent[closer, level]
-        }
-        ,
-        condition === SingleLineEnum,
-        (*
-        if will NOT make multiline, then keep everything on 1 line,
-        and do not indent
-        *)
-        {
-          indent[opener, level], 
-          indent[#, level]& /@ trivia1Graphs, 
-          indent[#, level]& /@ aggs, 
-          indent[#, level]& /@ trivia2Graphs, 
-          indent[closer, level]
-        }
-      ]]
+          <|data, "Multiline" -> True|>
+        ]
       ,
-      data
+      TrueQ[definitelyDelete],
+        GroupNode[tag,
+          Flatten[
+          {
+            indentedOpener,
+            indentedGraphs, 
+            indentedCloser
+          }
+          ]
+          ,
+          (*
+          may want to do:
+          <|data, "Multiline" -> anyIndentedGraphsMultiline|>
+          *)
+          data
+        ]
     ]
-    ]
-  ]
+  ]]
 
-indent[n:GroupMissingCloserNode[_, _, _], level_] :=
+indent[n:GroupMissingCloserNode[_, _, _], OptionsPattern[]] :=
   n
 
-indent[n:UnterminatedGroupNode[_, _, _], level_] :=
+indent[n:UnterminatedGroupNode[_, _, _], OptionsPattern[]] :=
   n
 
 
 
 (*
-special casing Module | With | Block
+special casing Module | Block | With | Function:
+
+Module[{x},
+  x + 1
+]
+
 *)
-indent[CallNode[{head : LeafNode[Symbol, "Module" | "With" | "Block" | {FragmentNode[Symbol, "Module" | "With" | "Block", _], ___}, _], trivia1:trivia...}, {
+indent[node:CallNode[{head:LeafNode[Symbol, "Module" | "Block" | "With" | "Function" | {FragmentNode[Symbol, "Module" | "Block" | "With" | "Function", _], ___}, _], headSeq:comment...}, {
       GroupNode[GroupSquare, {
           opener_, 
-          trivia2:trivia..., 
-          InfixNode[
-            Comma, {varsIn_, trivia3:trivia..., comma1:LeafNode[Token`Comma, _, _], trivia4:trivia..., 
-              body_
-            }, _
-          ], 
-          trivia5:trivia..., 
+          openerSeq:comment..., 
+          InfixNode[Comma, {
+              varsSeq:Except[LeafNode[Token`Comma, _, _]]...,
+              comma1:LeafNode[Token`Comma, _, _],
+              bodySeq:Except[LeafNode[Token`Comma, _, _]...]
+            }
+            , _],
+          closerSeq:comment..., 
           closer_
         }, _]
-    }, data_], level_] :=
-  Module[{vars, comments1, comments2, comments3, comments4, comments5},
+    }, data_], OptionsPattern[]] :=
+  Module[{indentedHead, indentedHeadSeq, indentedOpener, indentedOpenerSeq, indentedVars, indentedComma1, indentedBody, indentedCloserSeq, indentedCloser,
+    definitelyDelete, definitelyInsert, definitelyAutomatic},
 
-    vars = varsIn;
+    indentedHead = indent[head];
+    indentedHeadSeq = indent /@ {headSeq};
+    Block[{$Toplevel = False},
+      indentedOpener = indent[opener];
+      indentedOpenerSeq = indent /@ {openerSeq};
+      indentedVars = indent /@ {varsSeq};
+      indentedComma1 = indent[comma1];
+      indentedBody = indent /@ {bodySeq};
+      indentedCloserSeq = indent /@ {closerSeq};
+      indentedCloser = indent[closer];
+    ];
 
-    comments1 = Cases[{trivia1}, comment];
-    comments2 = Cases[{trivia2}, comment];
-    comments3 = Cases[{trivia3}, comment];
-    comments4 = Cases[{trivia4}, comment];
-    comments5 = Cases[{trivia5}, comment];
+    definitelyDelete = $CurrentStyle["NewlinesInScoping"] === Delete;
+    definitelyInsert = $CurrentStyle["NewlinesInScoping"] === Insert;
 
-    (*
-    remove newlines from variable lists
+    If[!TrueQ[(definitelyDelete || definitelyInsert)],
+      definitelyAutomatic = True
+    ];
 
-    This is a kind of "pre-processing" that undoes previous line breaks that were inserted just for column limits
-
-    -5 is where LeafNode[xxx, xxx, <|Source->{{1,1},{1,1}}|>] is
-
-    -3 is where LeafNode[xxx, xxx, <||>] is
-    *)
-    vars = DeleteCases[vars, LeafNode[Token`Newline, _, _], {-5, -3}];
-
-    If[$CurrentStyle["NewlinesInScoping"] === Delete,
-      (*
-      no newlines
-      *)
-      CallNode[
-        Flatten[{
-          indent[head, level],
-          indent[#, level + 1]& /@ comments1
-        }],
-        Block[{$Toplevel = False},
-        Flatten[{
-          indent[opener, level + 1],
-          indent[#, level + 1]& /@ comments2,
-          indent[vars, level + 1],
-          indent[#, level + 1]& /@ comments3,
-          indent[comma1, level + 1],
-          indent[#, level + 1]& /@ comments4,
-          space[],
-          indent[body, level + 1],
-          indent[#, level + 1]& /@ comments5,
-          indent[closer, level]
-        }]
-        ]
-        ,
-        data
-      ]
+    Which[
+      TrueQ[definitelyDelete],
+        commonCallNodeIndent[node]
       ,
-      (*
-      Redo newlines
-      *)
-      CallNode[
-        Flatten[{
-          indent[head, level],
-          surround[indent[#, level + 1]& /@ comments1, {line[level + 1]}]
-        }],
-        Block[{$Toplevel = False},
-        Flatten[{
-          indent[opener, level + 1],
-          surround[indent[#, level + 1]& /@ comments2, {line[level + 1]}],
-          indent[vars, level + 1],
-          surround[indent[#, level + 1]& /@ comments3, {line[level + 1]}],
-          indent[comma1, level + 1],
-          {line[level + 1], indent[#, level + 1]}& /@ comments4,
-          line[level + 1],
-          indent[body, level + 1],
-          surround[indent[#, level + 1]& /@ comments5, {line[level + 1]}],
-          line[level],
-          indent[closer, level]
-        }]
+      TrueQ[definitelyInsert],
+        commonCallNodeIndent[node]
+      ,
+      TrueQ[definitelyAutomatic],
+        CallNode[
+          Flatten[{
+            indentedHead,
+            indentedHeadSeq
+          }],
+          Block[{$Toplevel = False},
+          Flatten[{
+            indentedOpener,
+            incrementIndent /@ indentedOpenerSeq,
+            incrementIndent /@ indentedVars,
+            incrementIndent[indentedComma1],
+            incrementIndent[line[]],
+            incrementIndent /@ indentedBody,
+            incrementIndent /@ indentedCloserSeq,
+            line[],
+            indentedCloser
+          }]
+          ]
+          ,
+          <|data, "Multiline" -> True|>
         ]
-        ,
-        data
-      ]
     ]
   ]
 
 
 (*
-special casing Function
+special casing multi-arg With:
+
+With[
+  {a = 1}
+  ,
+  {b = a + 1}
+  ,
+  a + b
+]
+
 *)
-indent[CallNode[{head:LeafNode[Symbol, "Function" | {FragmentNode[Symbol, "Function", _], ___}, _], trivia1:trivia...}, {
+indent[node:CallNode[{head:LeafNode[Symbol, "With" | {FragmentNode[Symbol, "With", _], ___}, _], headSeq:comment...}, {
       GroupNode[GroupSquare, {
           opener_, 
-          trivia2:trivia..., 
-          InfixNode[
-            Comma, {varsIn_, rest___}, data2_
-          ], 
-          trivia4:trivia..., 
+          openerSeq:comment..., 
+          InfixNode[Comma, {
+              varsFirstSeq:Except[LeafNode[Token`Comma, _, _]]...,
+              comma1:LeafNode[Token`Comma, _, _],
+              varsSecondSeq:Except[LeafNode[Token`Comma, _, _]]...,
+              comma2:LeafNode[Token`Comma, _, _],
+              varsRestSeq:PatternSequence[Except[LeafNode[Token`Comma, _, _]]..., LeafNode[Token`Comma, _, _]]...,
+              bodySeq:Except[LeafNode[Token`Comma, _, _]...]
+            }, _],
+          closerSeq:comment..., 
           closer_
-        }, data1_]
-    }, data_], level_] :=
-  Module[{vars, comments1, comments2},
+        }, _]
+    }, data_], OptionsPattern[]] :=
+  Module[{indentedHead, indentedHeadSeq, indentedOpener, indentedOpenerSeq, indentedVarsFirst, indentedComma1, indentedVarsSecond,
+    indentedComma2, indentedVarsRest, indentedBody, indentedCloserSeq, indentedCloser,
+    definitelyDelete, definitelyInsert, definitelyAutomatic},
 
-    vars = varsIn;
+    indentedHead = indent[head];
+    indentedHeadSeq = indent /@ {headSeq};
+    Block[{$Toplevel = False},
+      indentedOpener = indent[opener];
+      indentedOpenerSeq = indent /@ {openerSeq};
+      indentedVarsFirst = indent /@ {varsFirstSeq};
+      indentedComma1 = indent[comma1];
+      indentedVarsSecond = indent /@ {varsSecondSeq};
+      indentedComma2 = indent[comma2];
+      indentedVarsRest = indent /@ {varsRestSeq};
+      indentedBody = indent /@ {bodySeq};
+      indentedCloserSeq = indent /@ {closerSeq};
+      indentedCloser = indent[closer];
+    ];
 
-    comments1 = Cases[{trivia1}, comment];
-    comments2 = Cases[{trivia2}, comment];
+    definitelyDelete = $CurrentStyle["NewlinesInScoping"] === Delete;
+    definitelyInsert = $CurrentStyle["NewlinesInScoping"] === Insert;
 
-    (*
-    remove newlines from variable lists
+    If[!TrueQ[(definitelyDelete || definitelyInsert)],
+      definitelyAutomatic = True
+    ];
 
-    This is a kind of "pre-processing" that undoes previous line breaks that were inserted just because of hitting column limits
-    
-    -5 is where LeafNode[xxx, xxx, <|Source->{{1,1},{1,1}}|>] is
-
-    -3 is where LeafNode[xxx, xxx, <||>] is
-    *)
-    vars = DeleteCases[{varsIn}, LeafNode[Token`Newline, _, _], {-5, -3}];
-
-    CallNode[
-      Flatten[{
-        indent[head, level],
-        indent[#, level]& /@ comments1}]
+    Which[
+      TrueQ[definitelyDelete],
+        commonCallNodeIndent[node]
       ,
-      Block[{$Toplevel = False},
-      Flatten[{
-        indent[GroupNode[GroupSquare,
-            {opener} ~Join~
-            comments2 ~Join~
-            {InfixNode[Comma, vars ~Join~ {rest}, data2]} ~Join~
-            {trivia4, closer}, data1], level]
-      }]
-      ]
+      TrueQ[definitelyInsert],
+        commonCallNodeIndent[node]
       ,
-      data
+      TrueQ[definitelyAutomatic],
+        CallNode[
+          Flatten[{
+            indentedHead,
+            indentedHeadSeq
+          }],
+          Block[{$Toplevel = False},
+          Flatten[{
+            indentedOpener,
+            incrementIndent[line[]],
+            incrementIndent /@ indentedOpenerSeq,
+            incrementIndent /@ indentedVarsFirst,
+            incrementIndent[line[]],
+            incrementIndent[indentedComma1],
+            incrementIndent[line[]],
+            incrementIndent /@ indentedVarsSecond,
+            incrementIndent[line[]],
+            incrementIndent[indentedComma2],
+            surround[incrementIndent /@ indentedVarsRest, {incrementIndent[line[]]}, "AlreadyPresent" -> {Before, After}],
+            incrementIndent[line[]],
+            incrementIndent /@ indentedBody,
+            incrementIndent /@ indentedCloserSeq,
+            line[],
+            indentedCloser
+          }]
+          ]
+          ,
+          <|data, "Multiline" -> True|>
+        ]
     ]
   ]
 
 
 (*
-special casing Switch
+special casing If | Switch
 
-completely redo newlines
+If[a,
+  b
+  ,
+  c
+]
+
+Switch[a,
+  b,
+    c
+  ,
+  d,
+    e
+]
+
 *)
-indent[CallNode[{tag:LeafNode[Symbol, "Switch" | {FragmentNode[Symbol, "Switch", _], ___}, _], trivia1:trivia...}, {
+indent[node:CallNode[{head:LeafNode[Symbol, "If" | "Switch" | {FragmentNode[Symbol, "If" | "Switch", _], ___}, _], headSeq___}, {
       GroupNode[GroupSquare, {
           opener_,
-          trivia2:trivia...,
+          openerSeq___,
           InfixNode[
             Comma, {
-              firstRand_,
-              trivia3:trivia...,
-              firstRator:Except[trivia],
-              trivia4:trivia...,
-              middle:Repeated[_, {2, Infinity}],
-              trivia5:trivia...,
-              lastRand_
+              expr:Except[LeafNode[Token`Comma, _, _]],
+              exprSeq:Except[LeafNode[Token`Comma, _, _]]...,
+              comma1:LeafNode[Token`Comma, _, _],
+              rest___
             },
             _
           ], 
-          trivia6:trivia..., 
+          closerSeq___,
           closer_
         }, _]
-    }, data_], level_] :=
-  Module[{aggs, graphs, rands, rators, tests, bodies, ratorsPat, testsPat, bodiesPat, comments1, comments2, comments3, comments4, comments5, comments6},
+    }, data_], OptionsPattern[]] :=
+  Module[{indentedHead, indentedHeadSeq, indentedOpener, indentedOpenerSeq, indentedExpr, indentedExprSeq, indentedComma1, indentedRest,
+    indentedCloserSeq, indentedCloser,
+    definitelyDelete, definitelyInsert, definitelyAutomatic},
 
-    comments1 = Cases[{trivia1}, comment];
-    comments2 = Cases[{trivia2}, comment];
-    comments3 = Cases[{trivia3}, comment];
-    comments4 = Cases[{trivia4}, comment];
-    comments5 = Cases[{trivia5}, comment];
-    comments6 = Cases[{trivia6}, comment];
+    indentedHead = indent[head];
+    indentedHeadSeq = indent /@ {headSeq};
+    Block[{$Toplevel = False},
+      indentedOpener = indent[opener];
+      indentedOpenerSeq = indent /@ {openerSeq};
+      indentedExpr = indent[expr];
+      indentedExprSeq = indent /@ {exprSeq};
+      indentedComma1 = indent[comma1];
+      indentedRest = indent /@ {rest};
+      indentedCloserSeq = indent /@ {closerSeq};
+      indentedCloser = indent[closer];
+    ];
 
-    aggs = DeleteCases[{middle}, trivia];
-    graphs = DeleteCases[{middle}, ws | nl];
-    rands = aggs[[1 ;; -1 ;; 2]];
-    tests = rands[[1;;All;;2]];
-    bodies = rands[[2;;All;;2]];
-    (* normally the end is -2, but we are working with MOST of the children, so make sure to grab the last element, which is a rator *)
-    rators = aggs[[2 ;; (*-2*) ;; 2]];
-    ratorsPat = Alternatives @@ rators;
-    testsPat = Alternatives @@ tests;
-    bodiesPat = Alternatives @@ bodies;
+    definitelyDelete = $CurrentStyle["NewlinesInControl"] === Delete;
+    definitelyInsert = $CurrentStyle["NewlinesInControl"] === Insert;
 
-    If[$CurrentStyle["NewlinesInControl"] === Delete,
-      (*
-      no newlines
-      *)
-      CallNode[
-        Flatten[{
-          indent[tag, level + 1],
-          indent[#, level + 1]& /@ comments1
-        }]
-        ,
-        Block[{$Toplevel = False},
-        Flatten[{
-          indent[opener, level + 1],
-          indent[#, level + 1]& /@ comments2,
-          indent[firstRand, level + 1],
-          indent[#, level + 1]& /@ comments3,
-          indent[firstRator, level + 1],
-          indent[#, level + 1]& /@ comments4,
-          Replace[graphs, {
-              rator : ratorsPat :> indent[rator, level + 1],
-              test:testsPat :> indent[test, level + 1],
-              body:bodiesPat :> indent[body, level + 2],
-              other_ :> indent[other, level + 1]
-            }, {1}],
-          indent[#, level + 1]& /@ comments5,
-          indent[lastRand, level + 2],
-          indent[#, level + 1]& /@ comments6,
-          indent[closer, level]
-        }]
-        ]
-        ,
-        data
-      ]
+    If[!TrueQ[(definitelyDelete || definitelyInsert)],
+      definitelyAutomatic = True;
+    ];
+
+    Which[
+      TrueQ[definitelyDelete],
+        commonCallNodeIndent[node]
       ,
-      (*
-      Redo newlines
-      *)
-      CallNode[
-        Flatten[{
-          indent[tag, level + 1],
-          surround[indent[#, level + 1]& /@ comments1, {line[level + 1]}]
-        }]
-        ,
-        Block[{$Toplevel = False},
-        Flatten[{
-          indent[opener, level + 1],
-          surround[indent[#, level + 1]& /@ comments2, {line[level + 1]}],
-          indent[firstRand, level + 1],
-          surround[indent[#, level + 1]& /@ comments3, {line[level + 1]}],
-          indent[firstRator, level + 1],
-          surround[indent[#, level + 1]& /@ comments4, {line[level + 1]}],
-          Replace[graphs, {
-              rator : ratorsPat :> indent[rator, level + 1],
-              test:testsPat :> {line[level + 1], indent[test, level + 1]},
-              body:bodiesPat :> {line[level + 2], indent[body, level + 2], line[level + 1]},
-              other_ :> {line[level + 1], indent[other, level + 1]}
-            }, {1}],
-          {line[level + 1], indent[#, level + 1]}& /@ comments5,
-          line[level + 2],
-          indent[lastRand, level + 2],
-          {line[level + 1], indent[#, level + 1]}& /@ comments6,
-          line[level],
-          indent[closer, level]
-        }]
+      TrueQ[definitelyInsert],
+        commonCallNodeIndent[node]
+      ,
+      TrueQ[definitelyAutomatic],
+        CallNode[
+          Flatten[{
+            indentedHead,
+            indentedHeadSeq
+          }]
+          ,
+          Block[{$Toplevel = False},
+          Flatten[{
+            indentedOpener,
+            indentedOpenerSeq,
+            incrementIndent[indentedExpr],
+            incrementIndent /@ indentedExprSeq,
+            incrementIndent[indentedComma1],
+            {incrementIndent[line[]], incrementIndent[#]}& /@ indentedRest,
+            incrementIndent /@ indentedCloserSeq,
+            line[],
+            indentedCloser
+          }]
+          ]
+          ,
+          <|data, "Multiline" -> True|>
         ]
-        ,
-        data
-      ]
     ]
   ]
+
+
+indent[ClauseNode[tag_, {
+    test:Except[LeafNode[Token`Comma, _, _]], testSeq:Except[LeafNode[Token`Comma, _, _]]...,
+    comma1:LeafNode[Token`Comma, _, _],
+    val:Except[LeafNode[Token`Comma, _, _]], valSeq:Except[LeafNode[Token`Comma, _, _]]...
+  }, data_], OptionsPattern[]] :=
+Module[{indentedTest, indentedTestSeq, indentedComma1, indentedVal, indentedValSeq,
+    definitelyDelete, definitelyInsert, definitelyAutomatic},
+
+  indentedTest = indent[test];
+  indentedTestSeq = indent /@ {testSeq};
+  indentedComma1 = indent[comma1];
+  indentedVal = indent[val];
+  indentedValSeq = indent /@ {valSeq};
+
+  definitelyDelete = $CurrentStyle["NewlinesInControl"] === Delete;
+  definitelyInsert = $CurrentStyle["NewlinesInControl"] === Insert;
+
+  If[!TrueQ[(definitelyDelete || definitelyInsert)],
+    definitelyAutomatic = True;
+  ];
+
+  Which[
+    TrueQ[definitelyDelete],
+      ClauseNode[
+        tag
+        ,
+        Flatten[{
+          indentedTest, indentedTestSeq,
+          indentedComma1, space[],
+          indentedVal, indentedValSeq
+        }]
+        ,
+        data
+      ]
+    ,
+    TrueQ[definitelyInsert],
+      ClauseNode[
+        tag
+        ,
+        Flatten[{
+          indentedTest,
+          {line[], #}& /@ indentedTestSeq,
+          line[],
+          indentedComma1,
+          line[],
+          indentedVal,
+          {line[], #}& /@ indentedValSeq
+        }]
+        ,
+        <|data, "Multiline" -> True|>
+      ]
+    ,
+    TrueQ[definitelyAutomatic],
+      ClauseNode[
+        tag
+        ,
+        Flatten[{
+          indentedTest, indentedTestSeq, indentedComma1,
+          incrementIndent[line[]],
+          incrementIndent[indentedVal], indentedValSeq
+        }]
+        ,
+        <|data, "Multiline" -> True|>
+      ]
+  ]
+]
+
 
 
 (*
 special casing Which
 
-completely redo newlines
+Which[
+  a,
+    b
+  ,
+  c,
+    d
+]
+
 *)
-indent[CallNode[{tag:LeafNode[Symbol, "Which" | {FragmentNode[Symbol, "Which", _], ___}, _], trivia1:trivia...}, {
+indent[node:CallNode[{head:LeafNode[Symbol, "Which" | {FragmentNode[Symbol, "Which", _], ___}, _], headSeq___}, {
       GroupNode[GroupSquare, {
           opener_,
-          trivia2:trivia..., 
+          openerSeq___, 
           InfixNode[
-            Comma, {
-              most___,
-              lastRand_
-            },
+            Comma,
+            commaChildren_,
             _
           ], 
-          trivia3:trivia..., 
+          closerSeq___, 
           closer_
         }, _]
-    }, data_], level_] :=
-  Module[{aggs, graphs, rands, rators, tests, bodies, ratorsPat, testsPat, bodiesPat,
-    comments1, comments2, comments3},
+    }, data_], OptionsPattern[]] :=
+  Module[{indentedHead, indentedHeadSeq, indentedOpener, indentedOpenerSeq, indentedCommaChildren, indentedCloserSeq, indentedCloser,
+    definitelyDelete, definitelyInsert, definitelyAutomatic},
 
-    comments1 = Cases[{trivia1}, comment];
-    comments2 = Cases[{trivia2}, comment];
-    comments3 = Cases[{trivia3}, comment];
-
-    aggs = DeleteCases[{most}, trivia];
-    graphs = DeleteCases[{most}, ws | nl];
-    rands = aggs[[1 ;; -1 ;; 2]];
-    tests = rands[[1;;All;;2]];
-    bodies = rands[[2;;All;;2]];
-    (* normally the end is -2, but we are working with MOST of the children, so make sure to grab the last element, which is a rator *)
-    rators = aggs[[2 ;; (*-2*) ;; 2]];
-    ratorsPat = Alternatives @@ rators;
-    testsPat = Alternatives @@ tests;
-    bodiesPat = Alternatives @@ bodies;
-
-    If[$CurrentStyle["NewlinesInControl"] === Delete,
-      (*
-      no newlines
-      *)
-      CallNode[
-        Flatten[{
-          indent[tag, level + 1],
-          indent[#, level + 1]& /@ comments1
-        }]
-        ,
-        Block[{$Toplevel = False},
-        Flatten[{
-          indent[opener, level + 1],
-          indent[#, level + 1]& /@ comments2, 
-          Replace[graphs, {
-              rator : ratorsPat :> indent[rator, level + 1],
-              test:testsPat :> indent[test, level + 1],
-              body:bodiesPat :> indent[body, level + 2],
-              other_ :> indent[other, level + 1]
-            }, {1}],
-          indent[lastRand, level + 2],
-          indent[#, level + 1]& /@ comments3,
-          indent[closer, level]
-        }]
-        ]
-        ,
-        data
-      ]
-      ,
-      (*
-      Redo newlines
-      *)
-      CallNode[
-        Flatten[{
-          indent[tag, level + 1],
-          surround[indent[#, level + 1]& /@ comments1, {line[level + 1]}]
-        }]
-        ,
-        Block[{$Toplevel = False},
-        Flatten[{
-          indent[opener, level + 1],
-          surround[indent[#, level + 1]& /@ comments2, {line[level + 1]}],
-          Replace[graphs, {
-              rator : ratorsPat :> indent[rator, level + 1],
-              test:testsPat :> {line[level + 1], indent[test, level + 1]},
-              body:bodiesPat :> {line[level + 2], indent[body, level + 2], line[level + 1]},
-              other_ :> {line[level + 1], indent[other, level + 1]}
-            }, {1}],
-          line[level + 2],
-          indent[lastRand, level + 2],
-          {line[level + 1], indent[#, level + 1]}& /@ comments3,
-          line[level],
-          indent[closer, level]
-        }]
-        ]
-        ,
-        data
-      ]
-    ]
-  ]
-
-
-(*
-special casing If
-
-completely redo newlines
-*)
-indent[CallNode[{tag : LeafNode[Symbol, "If" | {FragmentNode[Symbol, "If", _], ___}, _], trivia1 : trivia...}, {
-      GroupNode[_, {
-          opener_, 
-          trivia2 : trivia..., 
-          InfixNode[
-            Comma, {
-              firstRand_, 
-              trivia3 : trivia..., 
-              firstRator:Except[trivia], 
-              rest___
-            }, _
-          ], 
-          trivia4 : trivia..., 
-          closer_
-        }, _]
-    }, data_], level_] :=
-  Module[{graphs, comments1, comments2, comments3, comments4, aggs, rators, 
-    rands, ratorsPat, condition},
-
-    comments1 = Cases[{trivia1}, comment];
-    comments2 = Cases[{trivia2}, comment];
-
-    aggs = DeleteCases[{rest}, trivia];
-    graphs = DeleteCases[{rest}, ws | nl];
-    comments3 = Cases[{trivia3}, comment];
-    rands = aggs[[1 ;; All ;; 2]];
-    rators = aggs[[2 ;; All ;; 2]];
-    comments4 = Cases[{trivia4}, comment];
-    ratorsPat = Alternatives @@ rators;
-
-    Which[
-      $CurrentStyle["NewlinesInControl"] === Delete,
-        condition = SingleLine
-      ,
-      !empty[comments2],
-        condition = RedoNewlines
-      ,
-      (*
-      If[anything, symbol, symbol] => single line
-      *)
-      MatchQ[aggs, {PatternSequence[LeafNode[Symbol, _, _], LeafNode[Token`Comma, _, _]]..., LeafNode[Symbol, _, _]}],
-        condition = SingleLine
-      ,
-      True,
-        condition = RedoNewlines
+    indentedHead = indent[head];
+    indentedHeadSeq = indent /@ {headSeq};
+    Block[{$Toplevel = False},
+      indentedOpener = indent[opener];
+      indentedOpenerSeq = indent /@ {openerSeq};
+      indentedCommaChildren = indent /@ commaChildren;
+      indentedCloserSeq = indent /@ {closerSeq};
+      indentedCloser = indent[closer];
     ];
 
-    Switch[condition,
-      SingleLine,
+    definitelyDelete = $CurrentStyle["NewlinesInControl"] === Delete;
+    definitelyInsert = $CurrentStyle["NewlinesInControl"] === Insert;
+
+    If[!TrueQ[(definitelyDelete || definitelyInsert)],
+      definitelyAutomatic = True
+    ];
+
+    Which[
+      TrueQ[definitelyDelete],
+        commonCallNodeIndent[node]
+      ,
+      TrueQ[definitelyInsert],
+        commonCallNodeIndent[node]
+      ,
+      TrueQ[definitelyAutomatic],
         CallNode[
           Flatten[{
-            indent[tag, level + 1], 
-            indent[#, level + 1]& /@ comments1
+            indentedHead,
+            indentedHeadSeq
           }]
           ,
           Block[{$Toplevel = False},
           Flatten[{
-            indent[opener, level + 1], 
-            indent[#, level + 1]& /@ comments2, 
-            indent[firstRand, level + 1], 
-            indent[#, level + 1]& /@ comments3, 
-            indent[firstRator, level + 1],
-            space[],
-            Replace[graphs, {
-                rator : ratorsPat :> {indent[rator, level + 1], space[]},
-                other_ :> indent[other, level + 1]
-              }, {1}], 
-            indent[#, level]& /@ comments4,
-            indent[closer, level]
+            indentedOpener,
+            indentedOpenerSeq,
+            {incrementIndent[line[]], incrementIndent[#]}& /@ indentedCommaChildren,
+            incrementIndent /@ indentedCloserSeq,
+            line[],
+            indentedCloser
           }]
           ]
           ,
-          data
-        ]
-      ,
-      RedoNewlines,
-        CallNode[
-            Flatten[{
-              indent[tag, level + 1], 
-              surround[indent[#, level + 1]& /@ comments1, {line[level + 1]}]
-            }]
-            ,
-            Block[{$Toplevel = False},
-            Flatten[{
-              indent[opener, level + 1],
-              surround[indent[#, level + 1]& /@ comments2, {line[level + 1]}],
-              indent[firstRand, level + 1],
-              surround[indent[#, level + 1]& /@ comments3, {line[level + 1]}],
-              indent[firstRator, level + 1],
-              Replace[graphs, {
-                  rator : ratorsPat :> {line[level + 1], indent[rator, level + 1]}, 
-                  other_ :> {line[level + 1], indent[other, level + 1]}
-                }, {1}], 
-              surround[indent[#, level + 1]& /@ comments4, {line[level + 1]}],
-              line[level],
-              indent[closer, level]
-            }]
-            ]
-            ,
-            data
+          <|data, "Multiline" -> True|>
         ]
     ]
   ]
+
 
 (*
 special casing For
 
+For[start, test, inc,
+  body
+]
+
 completely redo newlines
 *)
-indent[CallNode[{tag : LeafNode[Symbol, "For" | {FragmentNode[Symbol, "For", _], ___}, _], trivia1 : trivia...}, {
+indent[node:CallNode[{head:LeafNode[Symbol, "For" | {FragmentNode[Symbol, "For", _], ___}, _], headSeq___}, {
       GroupNode[_, {
           opener_, 
-          trivia2 : trivia..., 
+          openerSeq___,
           InfixNode[
             Comma, {
-              rand1_,
-              trivia3 : trivia...,
-              rator1:Except[trivia],
-              trivia4:trivia...,
-              rand2:Except[trivia],
-              trivia5:trivia...,
-              rator2:Except[trivia],
-              trivia6:trivia...,
-              rand3:Except[trivia],
-              trivia7:trivia...,
-              rator3:Except[trivia],
-              trivia8:trivia...,
-              rand4_
+              start:Except[LeafNode[Token`Comma, _, _]],
+              startSeq:Except[LeafNode[Token`Comma, _, _]]...,
+              comma1:LeafNode[Token`Comma, _, _],
+              test:Except[LeafNode[Token`Comma, _, _]],
+              testSeq:Except[LeafNode[Token`Comma, _, _]]...,
+              comma2:LeafNode[Token`Comma, _, _],
+              inc:Except[LeafNode[Token`Comma, _, _]],
+              incSeq:Except[LeafNode[Token`Comma, _, _]]...,
+              comma3:LeafNode[Token`Comma, _, _],
+              body:Except[LeafNode[Token`Comma, _, _]],
+              bodySeq:Except[LeafNode[Token`Comma, _, _]]...
             }, _
           ], 
-          trivia9 : trivia..., 
+          closerSeq___,
           closer_
         }, _]
-    }, data_], level_] :=
-  Module[{comments1, comments2, comments3, comments4, comments5, comments6, comments7, comments8, comments9},
+    }, data_], OptionsPattern[]] :=
+  Module[{indentedHead, indentedHeadSeq, indentedOpener, indentedOpenerSeq, indentedStart, indentedStartSeq, indentedComma1,
+    indentedTest, indentedTestSeq, indentedComma2, indentedInc, indentedIncSeq, indentedComma3, indentedBody, indentedBodySeq, indentedCloserSeq, indentedCloser,
+    definitelyDelete, definitelyInsert, definitelyAutomatic},
 
-    comments1 = Cases[{trivia1}, comment];
-    comments2 = Cases[{trivia2}, comment];
-    comments3 = Cases[{trivia3}, comment];
-    comments4 = Cases[{trivia4}, comment];
-    comments5 = Cases[{trivia5}, comment];
-    comments6 = Cases[{trivia6}, comment];
-    comments7 = Cases[{trivia7}, comment];
-    comments8 = Cases[{trivia8}, comment];
-    comments9 = Cases[{trivia9}, comment];
-
-    If[$CurrentStyle["NewlinesInControl"] === Delete,
-      (*
-      no newlines
-      *)
-      CallNode[
-        Flatten[{
-          indent[tag, level],
-          betterRiffle[indent[#, level]& /@ comments1, {space[]}]
-        }]
-        ,
-        Block[{$Toplevel = False},
-        Flatten[{
-          indent[opener, level],
-          betterRiffle[indent[#, level]& /@ comments2, {space[]}],
-          indent[rand1, level],
-          betterRiffle[indent[#, level]& /@ comments3, {space[]}],
-          indent[rator1, level], space[],
-          betterRiffle[indent[#, level]& /@ comments4, {space[]}],
-          indent[rand2, level],
-          betterRiffle[indent[#, level]& /@ comments5, {space[]}],
-          indent[rator2, level], space[],
-          betterRiffle[indent[#, level]& /@ comments6, {space[]}],
-          indent[rand3, level],
-          betterRiffle[indent[#, level]& /@ comments7, {space[]}],
-          indent[rator3, level], space[],
-          betterRiffle[indent[#, level]& /@ comments8, {space[]}],
-          indent[rand4, level + 1],
-          betterRiffle[indent[#, level + 1]& /@ comments9, {space[]}],
-          indent[closer, level]
-        }]
-        ]
-        ,
-        data
-      ]
-      ,
-      (*
-      Redo newlines
-      *)
-      CallNode[
-        Flatten[{
-          indent[tag, level],
-          betterRiffle[indent[#, level]& /@ comments1, {space[]}]
-        }]
-        ,
-        Block[{$Toplevel = False},
-        Flatten[{
-          indent[opener, level],
-          betterRiffle[indent[#, level]& /@ comments2, {space[]}],
-          indent[rand1, level],
-          betterRiffle[indent[#, level]& /@ comments3, {space[]}],
-          indent[rator1, level], space[],
-          betterRiffle[indent[#, level]& /@ comments4, {space[]}],
-          indent[rand2, level],
-          betterRiffle[indent[#, level]& /@ comments5, {space[]}],
-          indent[rator2, level], space[],
-          betterRiffle[indent[#, level]& /@ comments6, {space[]}],
-          indent[rand3, level],
-          betterRiffle[indent[#, level]& /@ comments7, {space[]}],
-          indent[rator3, level], space[],
-          betterRiffle[indent[#, level]& /@ comments8, {space[]}],
-          line[level + 1],
-          indent[rand4, level + 1],
-          If[!empty[comments9], line[level + 1], nil[]],
-          betterRiffle[indent[#, level + 1]& /@ comments9, {space[]}],
-          line[level], 
-          indent[closer, level]
-        }]
-        ]
-        ,
-        data
-      ]
-    ]
-  ]
-
-indent[CallNode[{tag_, trivia...}, ts_, data_], level_] :=
-  CallNode[{indent[tag, level]}
-    ,
+    indentedHead = indent[head];
+    indentedHeadSeq = indent /@ {headSeq};
     Block[{$Toplevel = False},
-    indent[#, level]& /@ ts
+      indentedOpener = indent[opener];
+      indentedOpenerSeq = indent /@ {openerSeq};
+      indentedStart = indent[start];
+      indentedStartSeq = indent /@ {startSeq};
+      indentedComma1 = indent[comma1];
+      indentedTest = indent[test];
+      indentedTestSeq = indent /@ {testSeq};
+      indentedComma2 = indent[comma2];
+      indentedInc = indent[inc];
+      indentedIncSeq = indent /@ {incSeq};
+      indentedComma3 = indent[comma3];
+      indentedBody = indent[body];
+      indentedBodySeq = indent /@ {bodySeq};
+      indentedCloserSeq = indent /@ {closerSeq};
+      indentedCloser = indent[closer];
+    ];
+
+    definitelyDelete = $CurrentStyle["NewlinesInControl"] === Delete;
+    definitelyInsert = $CurrentStyle["NewlinesInControl"] === Insert;
+
+    If[!TrueQ[(definitelyDelete || definitelyInsert)],
+      definitelyAutomatic = True;
+    ];
+
+    Which[
+      TrueQ[definitelyDelete],
+        commonCallNodeIndent[node]
+      ,
+      TrueQ[definitelyInsert],
+        commonCallNodeIndent[node]
+      ,
+      TrueQ[definitelyAutomatic],
+        CallNode[
+          Flatten[{
+            indentedHead,
+            indentedHeadSeq
+          }]
+          ,
+          Block[{$Toplevel = False},
+          Flatten[{
+            indentedOpener,
+            indentedOpenerSeq,
+            incrementIndent[indentedStart],
+            incrementIndent /@ indentedStartSeq,
+            incrementIndent[indentedComma1],
+            incrementIndent[space[]],
+            incrementIndent[indentedTest],
+            incrementIndent /@ indentedTestSeq,
+            incrementIndent[indentedComma2],
+            incrementIndent[space[]],
+            incrementIndent[indentedInc],
+            incrementIndent /@ indentedIncSeq,
+            incrementIndent[indentedComma3],
+            incrementIndent[line[]],
+            incrementIndent[indentedBody],
+            incrementIndent /@ indentedBodySeq,
+            incrementIndent /@ indentedCloserSeq,
+            line[],
+            indentedCloser
+          }]
+          ]
+          ,
+          <|data, "Multiline" -> True|>
+        ]
     ]
-    ,
-    data
   ]
 
+indent[node:CallNode[head_, graphs_, data_], OptionsPattern[]] :=
+  commonCallNodeIndent[node]
 
-indent[SyntaxErrorNode[tag_, ts_, data_], level_] :=
-  SyntaxErrorNode[tag, indent[#, level]& /@ ts, data]
 
 
-indent[ContainerNode[tag_, ts_, data_], level_] :=
+(*
+g may be:
+
+GroupNode[GroupSquare, ...]
+GroupNode[GroupDoubleBracket, ...]
+
+UnterminatedGroupNode[GroupSquare, ...]
+UnterminatedGroupNode[GroupDoubleBracket, ...]
+
+*)
+commonCallNodeIndent[CallNode[{head_, headSeq___}, {g_}, data_]] :=
+Module[{indentedHead, indentedHeadSeq, indentedGroup, indentedGroupMultiline},
+
+  indentedHead = indent[head, "NewlinesInGroups" -> Delete];
+  indentedHeadSeq = indent /@ {headSeq};
+
+  indentedGroup = indent[g, "NewlinesInGroups" -> Delete];
+
+  indentedGroupMultiline = Lookup[indentedGroup[[3]], "Multiline", False];
+
+  If[indentedGroupMultiline,
+    CallNode[
+      Flatten[{
+        indentedHead,
+        indentedHeadSeq
+      }]
+      ,
+      {indentedGroup}
+      ,
+      <|data, "Multiline" -> True|>
+    ]
+    ,
+    CallNode[
+      Flatten[{
+        indentedHead,
+        indentedHeadSeq
+      }]
+      ,
+      {indentedGroup}
+      ,
+      data
+    ]
+  ]
+]
+
+
+
+
+indent[SyntaxErrorNode[tag_, ts_, data_], OptionsPattern[]] :=
+  SyntaxErrorNode[tag, indent /@ ts, data]
+
+
+indent[ContainerNode[tag_, graphs_, data_], OptionsPattern[]] :=
   Catch[
-  Module[{graphs, indented},
+  Module[{indented},
 
-    graphs = DeleteCases[ts, ws];
-
-    If[Length[graphs] >= 1 && !MatchQ[graphs[[-1]], nl],
-      AppendTo[graphs, LeafNode[Token`Newline, "", <||>]]
-    ];
-
-    indented = Flatten[
-      indent[#, level]& /@ graphs
-    ];
+    indented = indent /@ graphs;
 
     If[AnyTrue[indented, FailureQ],
       Throw[FirstCase[indented, _?FailureQ]]
+    ];
+
+    indented = Flatten[betterRiffle[indented, {{line[], line[]}}]];
+
+    If[Length[indented] >= 1 && !MatchQ[graphs[[-1]], nl],
+      AppendTo[indented, LeafNode[Token`Newline, $CurrentNewlineString, <||>]]
     ];
 
     ContainerNode[
@@ -1364,22 +1543,20 @@ indent[ContainerNode[tag_, ts_, data_], level_] :=
 
 
 
-indent[BoxNode[RowBox, {ts_}, data_], level_] :=
-  Module[{graphs},
-
-    graphs = DeleteCases[ts, ws];
+indent[BoxNode[RowBox, {graphs_}, data_], OptionsPattern[]] :=
+  Module[{},
 
     BoxNode[RowBox
       ,
       Flatten[
-        indent[#, level]& /@ graphs
+        indent /@ graphs
       ]
       ,
       data
     ]
   ]
 
-indent[node:BoxNode[_, _, _], level_] :=
+indent[node:BoxNode[_, _, _], OptionsPattern[]] :=
   node
 
 

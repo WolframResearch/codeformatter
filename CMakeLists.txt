@@ -54,10 +54,15 @@ message(STATUS "Optional tool CODEPARSER_EXE was not found; skipping")
 endif()
 
 set(STATIC_WL_PACLET_KERNEL_SOURCES
-	${PROJECT_SOURCE_DIR}/CodeFormatter/Kernel/BreakLines.wl
+	${PROJECT_SOURCE_DIR}/CodeFormatter/Kernel/Abstract.wl
+	${PROJECT_SOURCE_DIR}/CodeFormatter/Kernel/AnchoredComments.wl
+	${PROJECT_SOURCE_DIR}/CodeFormatter/Kernel/BreakLinesLegacy.wl
 	${PROJECT_SOURCE_DIR}/CodeFormatter/Kernel/CodeFormatter.wl
+	${PROJECT_SOURCE_DIR}/CodeFormatter/Kernel/Fragmentize.wl
 	${PROJECT_SOURCE_DIR}/CodeFormatter/Kernel/Indent.wl
 	${PROJECT_SOURCE_DIR}/CodeFormatter/Kernel/Notebooks.wl
+	${PROJECT_SOURCE_DIR}/CodeFormatter/Kernel/RemoveLineContinuations.wl
+	${PROJECT_SOURCE_DIR}/CodeFormatter/Kernel/Standardize.wl
 	${PROJECT_SOURCE_DIR}/CodeFormatter/Kernel/Utils.wl
 )
 

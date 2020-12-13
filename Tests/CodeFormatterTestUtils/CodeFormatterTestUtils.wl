@@ -19,12 +19,13 @@ Options[formatTest] = {
   "DryRun" -> False,
   "LineWidth" -> 120,
   "SafetyMargin" -> 10,
-  Airiness -> 0
+  Airiness -> 0,
+  PerformanceGoal -> "Speed"
 }
 
 formatTest[file_String, i_Integer, OptionsPattern[]] :=
   Catch[
- Module[{dryRun, prefix, res, lineWidth, airiness, margin},
+ Module[{dryRun, prefix, res, lineWidth, airiness, margin, performanceGoal},
    
    prefix = OptionValue["FileNamePrefixPattern"];
    limit = OptionValue["FileSizeLimit"];
@@ -32,6 +33,7 @@ formatTest[file_String, i_Integer, OptionsPattern[]] :=
    lineWidth = OptionValue["LineWidth"];
    margin = OptionValue["SafetyMargin"];
    airiness = OptionValue[Airiness];
+   performanceGoal = OptionValue[PerformanceGoal];
 
     If[$Debug, Print["file1: ", File[file]]];
     
@@ -73,7 +75,7 @@ formatTest[file_String, i_Integer, OptionsPattern[]] :=
   Check[
     Check[
     implicitTimesInserted = False;
-    res = CodeFormat[File[file], "LineWidth" -> lineWidth, "SafetyMargin" -> margin, Airiness -> airiness];
+    res = CodeFormat[File[file], "LineWidth" -> lineWidth, "SafetyMargin" -> margin, Airiness -> airiness, PerformanceGoal -> performanceGoal];
     ,
     implicitTimesInserted = True;
     ,
@@ -127,12 +129,13 @@ Options[formatPackageEditorTest] = {
   "DryRun" -> False,
   "LineWidth" -> 120,
   "SafetyMargin" -> 10,
-  Airiness -> 0
+  Airiness -> 0,
+  PerformanceGoal -> "Speed"
 }
 
 formatPackageEditorTest[file_String, i_Integer, OptionsPattern[]] :=
   Catch[
- Module[{dryRun, prefix, res, lineWidth, airiness, margin, nbObj, nb, cells, cell1},
+ Module[{dryRun, prefix, res, lineWidth, airiness, margin, nbObj, nb, cells, cell1, performaceGoal},
    
    prefix = OptionValue["FileNamePrefixPattern"];
    limit = OptionValue["FileSizeLimit"];
@@ -140,6 +143,7 @@ formatPackageEditorTest[file_String, i_Integer, OptionsPattern[]] :=
    lineWidth = OptionValue["LineWidth"];
    margin = OptionValue["SafetyMargin"];
    airiness = OptionValue[Airiness];
+   performaceGoal = OptionValue[PerformanceGoal];
 
     If[$Debug, Print["file1: ", File[file]]];
     

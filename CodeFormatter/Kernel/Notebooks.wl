@@ -11,12 +11,9 @@ formatSelectedNotebook
 Begin["`Private`"]
 
 Needs["CodeFormatter`"]
-
+Needs["CodeFormatter`Utils`"]
 Needs["CodeParser`"]
 Needs["CodeParser`Utils`"]
-
-
-
 
 
 formatSelectedCell[] :=
@@ -303,6 +300,10 @@ formatInputContents[contentsBox_] :=
             ];
             formattedBox
         ];
+
+        (*
+        Sanity Checking
+        *)
 
         agg = CodeParser`Abstract`Aggregate[cst];
         agg = expandMultiSingleQuote[agg];

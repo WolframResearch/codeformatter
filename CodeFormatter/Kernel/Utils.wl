@@ -9,6 +9,7 @@ matchCommentFragmentNewlineQ
 
 
 lexSort
+lexOrderingForLists
 
 
 firstToken
@@ -31,10 +32,14 @@ betterRiffle
 surround
 
 
+removeWhitespaceAndNewlines
+
+
 Begin["`Private`"]
 
 Needs["CodeFormatter`"]
 Needs["CodeParser`"]
+Needs["CodeParser`Utils`"]
 
 
 trivia = LeafNode[Whitespace | Token`Boxes`MultiWhitespace | Token`Comment | Token`Newline, _, _]
@@ -343,6 +348,7 @@ betterRiffle[a_, b_] := Riffle[a, b]
 
 
 (*
+surround[list, x] => surround the elements of list with x
 
 This is useful for surrounding comments with newlines
 But if there are no comments, then no newlines are injected
@@ -350,9 +356,26 @@ But if there are no comments, then no newlines are injected
 surround[{}, x] => {}
 surround[{c1, c2, c3}, x] => {x, c1, x, c2, x, c3, x}
 *)
-surround[{}, _] := {}
 
-surround[a_, b_] := Riffle[a, b, {1, -1, 2}]
+Options[surround] = {
+  "AlreadyPresent" -> {}
+}
+
+surround[{}, _, OptionsPattern[]] := {}
+
+surround[a_, b_, "AlreadyPresent" -> {Before, After}] := Riffle[a, b, {2, -2, 2}]
+
+surround[a_, b_, "AlreadyPresent" -> {Before}] := Riffle[a, b, {2, -1, 2}]
+
+surround[a_, b_, "AlreadyPresent" -> {After}] := Riffle[a, b, {1, -2, 2}]
+
+surround[a_, b_, OptionsPattern[]] := Riffle[a, b, {1, -1, 2}]
+
+
+
+removeWhitespaceAndNewlines[cst_] :=
+  DeleteCases[cst, LeafNode[Whitespace | Token`Boxes`MultiWhitespace | Token`Newline, _, _], Infinity]
+
 
 
 End[]

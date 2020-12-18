@@ -12,11 +12,13 @@ Needs["CodeFormatter`Generate`UIElements`"]
 
 
 generatePalette[] := 
-Module[{nb},
-  
-  UsingFrontEnd[
+Module[{nb, res},
+	
+	Print["UsingFrontEnd... \[WatchIcon]"];
 
-    nb = With[{AccentColor = RGBColor[0.27,0.69,0.96]},
+	UsingFrontEnd[
+
+	nb = With[{AccentColor = RGBColor[0.27,0.69,0.96]},
 		CreatePalette[
 			Highlighted[
 				DynamicModule[{},
@@ -99,27 +101,34 @@ Module[{nb},
 				],
 				Background -> BackgroundCol, RoundingRadius -> 0, FrameMargins -> {{15, 15}, {20, 10}}
 			]
-      ,
-      (*
-      WindowTitle->Dynamic[FEPrivate`FrontEndResource["CodeFormatterStrings", "PaletteTitle"]]
+		,
+		(*
+		WindowTitle->Dynamic[FEPrivate`FrontEndResource["CodeFormatterStrings", "PaletteTitle"]]
 
-      Cannot use FrontEndResource for WindowTitle because $Failed will appear in FE Palettes Menu
+		Cannot use FrontEndResource for WindowTitle because $Failed will appear in FE Palettes Menu
 
-      Related bugs: xxx
-      *)
-      WindowTitle->"Code Formatting", Background -> BackgroundCol
-    ]
+		Related bugs: xxx
+		*)
+		WindowTitle->"Code Formatting", Background -> BackgroundCol
+	]
 ];
 
-    NotebookSave[nb, FileNameJoin[{generatedWLDir, "CodeFormatter.nb"}]]
-  ]
+	Print["saving CodeFormatter.nb"];
+	res = NotebookSave[nb, FileNameJoin[{generatedWLDir, "CodeFormatter.nb"}]];
+
+	Print[res];
+
+	If[res =!= Null,
+		Quit[1]
+	];
+	];
+
+	Print["Done UsingFrontEnd"];
 ]
 
 generate[] := (
 
 Print["Generating Palette..."];
-
-Print["UsingFrontEnd... \[WatchIcon]"];
 
 generatePalette[];
 

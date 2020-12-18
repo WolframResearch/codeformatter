@@ -81,8 +81,9 @@ EndPackage[]
 Print["exporting AcceptableOperators.wl"];
 res = Export[FileNameJoin[{generatedWLDir, "AcceptableOperators.wl"}], Column[acceptableOperatorsWL], "String"];
 
+Print[res];
+
 If[FailureQ[res],
-  Print[res];
   Quit[1]
 ];
 

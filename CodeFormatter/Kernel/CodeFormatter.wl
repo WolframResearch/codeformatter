@@ -426,6 +426,10 @@ Module[{indentationString, cst, newline, tabWidth, indented, airiness, formatted
       Print["after AbstractFormatNodes: ", cst];
     ];
 
+    If[FailureQ[cst],
+      Throw[cst]
+    ];
+
     indented = indent[cst, 0];
 
     If[$Debug,
@@ -1316,7 +1320,11 @@ is a SetDelayed node, with a Set node on the RHS
 But this really should be formatted as if it were a single TernaryNode
 *)
 AbstractFormatNodes[cst_] :=
+Catch[
   abstractFormatNodes[cst]
+  ,
+  abstractFormatNodesTag
+]
 
 (*
 abstract
@@ -1372,7 +1380,13 @@ abstractFormatNodes[BoxNode[RowBox, {ts_}, data_]] := BoxNode[RowBox, {abstractF
 
 abstractFormatNodes[node:CodeNode[_, _, _]] := node
 
-abstractFormatNodes[head_[tag_, ts_, data_]] := head[tag, abstractFormatNodes /@ ts, data]
+(*
+Bad args such as List[1, 2, 3] used to match this, so changed data_ => data_Association to try to reduce bad hits
+*)
+abstractFormatNodes[head_[tag_, ts_, data_Association]] := head[tag, abstractFormatNodes /@ ts, data]
+
+abstractFormatNodes[args___] :=
+  Throw[Failure["InternalUnhandled", <| "Function" -> abstractFormatNodes, "Args" -> {args} |>], abstractFormatNodesTag]
 
 
 mergeLineContinuations[fs_] :=

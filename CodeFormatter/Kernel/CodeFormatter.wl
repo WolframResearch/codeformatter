@@ -417,6 +417,12 @@ Module[{indentationString, cst, newline, tabWidth, indented, airiness, formatted
       Print["after Fragmentize: ", cst];
     ];
 
+    cst = ConvertCompoundNodes[cst];
+
+    If[$Debug,
+      Print["after ConvertCompoundNodes: ", cst];
+    ];
+
     cst = IntroduceRowNodes[cst];
 
     If[$Debug,
@@ -1145,7 +1151,12 @@ Module[{origSpaces},
     Flatten[{
       FragmentNode[String, "\\" <> $CurrentNewline, <||>],
       Table[FragmentNode[String, " ", <||>], origSpaces],
-      FragmentNode[String, #, <||>]& /@ DeleteCases[StringSplit[s, x:$CurrentNewline :> x], ""]
+      Function[{cases}, {
+          FragmentNode[String, #, <| "LastFragmentInString" -> False |>]& /@ Most[cases],
+          FragmentNode[String, Last[cases], <| "LastFragmentInString" -> True |>]
+        }][
+        DeleteCases[StringSplit[s, x:$CurrentNewline :> x], ""]
+      ]
     }], <|data, "InsertedFragmentNodes" -> 1 + origSpaces|>]
 ]
 
@@ -1189,6 +1200,12 @@ fragmentizeAllOtherLeafs[LeafNode[Token`Comment, s_, data_]] :=
 fragmentizeAllOtherLeafs[l:LeafNode[_, _, _]] :=
   l
 
+
+(*
+Convert CompoundNode[tag, {child1, child2}] into LeafNode[tag, child1child2]
+*)
+ConvertCompoundNodes[cst_] :=
+  cst //. CompoundNode[tag_, children:{_LeafNode ...}, data_] :> LeafNode[tag, StringJoin[#[[2]]& /@ children], data]
 
 
 

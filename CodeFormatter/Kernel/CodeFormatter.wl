@@ -35,6 +35,9 @@ Messages
 CodeFormatter
 
 
+(*
+Dynamic variables
+*)
 $CurrentIndentationString
 
 $CurrentNewline
@@ -430,6 +433,9 @@ Module[{indentationString, cst, newline, tabWidth, indented, airiness, formatted
       Throw[cst]
     ];
 
+    (*
+    indented is a cst
+    *)
     indented = indent[cst, 0];
 
     If[$Debug,
@@ -440,6 +446,9 @@ Module[{indentationString, cst, newline, tabWidth, indented, airiness, formatted
       Throw[indented]
     ];
 
+    (*
+    linearized is a list of leafs
+    *)
     linearized = linearize[indented];
 
     If[$Debug,
@@ -450,18 +459,27 @@ Module[{indentationString, cst, newline, tabWidth, indented, airiness, formatted
       Throw[linearized]
     ];
 
+    (*
+    merged is a list of leafs
+    *)
     merged = mergeLineContinuations[linearized];
 
     If[$Debug,
       Print["after mergeLineContinuations: ", merged];
     ];
 
+    (*
+    spaced is a list of leafs
+    *)
     spaced = insertNecessarySpaces[merged];
 
     If[$Debug,
       Print["after insertNecessarySpaces: ", spaced];
     ];
 
+    (*
+    breaked is a list of leafs
+    *)
     breaked = breakLines[spaced, lineWidth1, lineWidth2];
 
     If[$Debug,

@@ -328,16 +328,13 @@ indentInfixRator[Pattern | Optional | PatternTest | MessageName | Power][rator_,
 (*
 No spaces before Comma
 *)
-indentInfixRator[Comma][rator_, level_] /; $CurrentStyle["NewlinesBetweenCommas"] === Insert :=
-  {line[level], indent[rator, level], line[level]}
-
-indentInfixRatorNoTrailingSpace[Comma][rator_, level_] /; $CurrentStyle["NewlinesBetweenCommas"] === Insert :=
-  {line[level], indent[rator, level], line[level]}
-
 indentInfixRator[Comma][rator_, level_] :=
   {indent[rator, level], space[]}
 
-indentInfixRatorNoTrailingSpace[Comma][rator_, level_] :=
+indentInfixRatorGrouped[Comma][rator_, level_] :=
+  {indent[rator, level], space[]}
+
+indentInfixRatorGroupedLast[Comma][rator_, level_] :=
   indent[rator, level]
 
 (*
@@ -346,15 +343,27 @@ special case implicit Times
 indentInfixRator[Times][l:LeafNode[Token`Fake`ImplicitTimes, _, _], level_] :=
   l
 
-indentInfixRatorNoTrailingSpace[Times][LeafNode[Token`Fake`ImplicitTimes, _, _], level_] :=
+indentInfixRatorGrouped[Times][l:LeafNode[Token`Fake`ImplicitTimes, _, _], level_] :=
+  l
+
+indentInfixRatorGroupedLast[Times][LeafNode[Token`Fake`ImplicitTimes, _, _], level_] :=
+  nil[]
+
+indentInfixRatorGroupedOnly[Times][LeafNode[Token`Fake`ImplicitTimes, _, _], level_] :=
   nil[]
 
 
 indentInfixRator[_][rator_, level_] :=
   {space[], indent[rator, level], space[]}
 
-indentInfixRatorNoTrailingSpace[_][rator_, level_] :=
+indentInfixRatorGrouped[_][rator_, level_] :=
+  {space[], indent[rator, level], space[]}
+
+indentInfixRatorGroupedLast[_][rator_, level_] :=
   {space[], indent[rator, level]}
+
+indentInfixRatorGroupedOnly[_][rator_, level_] :=
+  indent[rator, level]
 
 
 (*
@@ -365,7 +374,7 @@ indentIncrement[Comma, level_] := level
 indentIncrement[_, level_] := level + 1
 
 
-$AlwaysLineBreak = {
+$AlwaysLineBreakSpecial = {
 
   (*
   BinaryNode
@@ -393,18 +402,24 @@ The logic for all 3 is so similar, it should all be in a single function
 *)
 indent[(head:(BinaryNode|InfixNode|TernaryNode|QuaternaryNode))[tag_, ts_, data_], level_] :=
   Catch[
-  Module[{aggs, rators, graphs, ratorsPat, split, lastGraph},
+  Module[{aggs, rators, graphs, ratorsPat, split, lastGraph,
+    definitelyDelete, definitelyInsert},
 
     aggs = DeleteCases[ts, trivia];
 
     rators = aggs[[2 ;; All ;; 2]];
     ratorsPat = Alternatives @@ rators;
 
+    definitelyDelete = (tag === Comma && $CurrentStyle["NewlinesBetweenCommas"] === Delete) || $CurrentStyle["NewlinesBetweenOperators"] === Delete;
+    definitelyInsert = (tag === Comma && $CurrentStyle["NewlinesBetweenCommas"] === Insert) || $CurrentStyle["NewlinesBetweenOperators"] === Insert;
+
     Which[
       (*
+      heuristically simple thing to keep on single line
+
       foo := symbol  =>  single line
       *)
-      MatchQ[aggs, {_, _, LeafNode[Symbol, _, _]}],
+      MatchQ[aggs, {_, _, LeafNode[Symbol, _, _]}] && !definitelyInsert,
         (*
         Single line, so delete newlines
         *)
@@ -412,10 +427,12 @@ indent[(head:(BinaryNode|InfixNode|TernaryNode|QuaternaryNode))[tag_, ts_, data_
 
         split = {graphs}
       ,
-      MemberQ[$AlwaysLineBreak, tag],
-        (*
-        Always line break, so redo newlines
-        *)
+      (*
+      Special hard-coded
+
+      Always line break after last rator, so redo newlines
+      *)
+      MemberQ[$AlwaysLineBreakSpecial, tag] && !definitelyDelete,
         graphs = DeleteCases[ts, ws | nl];
 
         lastGraph = Last[graphs];
@@ -430,10 +447,28 @@ indent[(head:(BinaryNode|InfixNode|TernaryNode|QuaternaryNode))[tag_, ts_, data_
           split = {Most[graphs], {lastGraph}};
         ]
       ,
+      (*
+      definitely Insert, so redo newlines
+      *)
+      definitelyInsert,
+        graphs = DeleteCases[ts, ws | nl];
+
+        split = {#}& /@ graphs;
+      ,
+      (*
+      definitely Delete
+      *)
+      definitelyDelete,
+        graphs = DeleteCases[ts, ws | nl];
+
+        split = {graphs};
+      ,
+      (*
+      Preserve
+
+      split graphs around existing newline tokens 
+      *)
       True,
-        (*
-        split graphs around existing newline tokens 
-        *)
         graphs = DeleteCases[ts, ws];
 
         split = Split[graphs, (matchNewlineQ[#1] == matchNewlineQ[#2])&];
@@ -446,8 +481,8 @@ indent[(head:(BinaryNode|InfixNode|TernaryNode|QuaternaryNode))[tag_, ts_, data_
     If[$Debug,
       Print["split: ", split];
     ];
-
-    If[$CurrentStyle["NewlinesBetweenOperators"] === Delete || (Length[split] == 1 && $CurrentStyle["NewlinesBetweenOperators"] =!= Insert),
+    
+    If[Length[split] == 1,
       (*
       There were no newline tokens
       *)
@@ -479,18 +514,34 @@ indent[(head:(BinaryNode|InfixNode|TernaryNode|QuaternaryNode))[tag_, ts_, data_
             grouped is a list of tokens with no newline tokens
             *)
             Function[{grouped},
-              {
-                Replace[Most[grouped], {
-                  rator : ratorsPat :> indentInfixRator[tag][rator, newLevel], 
-                  randOrComment_ :> indent[randOrComment, newLevel]
-                }, {1}]
+              Which[
+                (*
+                Single token on a line
+                *)
+                Length[grouped] == 1,
+                  Replace[grouped, {
+                    (* do not insert space after rator if immediately followed by newline *)
+                    rator : ratorsPat :> indentInfixRatorGroupedOnly[tag][rator, newLevel], 
+                    randOrComment_ :> indent[randOrComment, newLevel]
+                  }, {1}]
                 ,
-                Replace[{Last[grouped]}, {
-                  (* do not insert space after rator if immediately followed by newline *)
-                  rator : ratorsPat :> indentInfixRatorNoTrailingSpace[tag][rator, newLevel], 
-                  randOrComment_ :> indent[randOrComment, newLevel]
-                }, {1}]
-              }
+                (*
+                Multiple tokens on a line
+                *)
+                True,
+                  {
+                    Replace[Most[grouped], {
+                      rator : ratorsPat :> indentInfixRatorGrouped[tag][rator, newLevel], 
+                      randOrComment_ :> indent[randOrComment, newLevel]
+                    }, {1}]
+                    ,
+                    Replace[{Last[grouped]}, {
+                      (* do not insert space after rator if immediately followed by newline *)
+                      rator : ratorsPat :> indentInfixRatorGroupedLast[tag][rator, newLevel], 
+                      randOrComment_ :> indent[randOrComment, newLevel]
+                    }, {1}]
+                  }
+              ]
             ]
             ,
             split

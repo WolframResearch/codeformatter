@@ -214,10 +214,7 @@ formatProgramCellContents[contents_String] :=
         tabWidth = massageTabWidth[CodeFormatter`$InteractiveTabWidth];
         indentationString = massageIndentationString[CodeFormatter`$InteractiveIndentationCharacter, tabWidth];
 
-        (*
-        FIXME: "LineWidth" -> Infinity will be revisited when line continuations in boxes are properly supported
-        *)
-        formatted = CodeFormat[contents, Airiness -> airiness, "LineWidth" -> Infinity, "IndentationString" -> indentationString, "TabWidth" -> tabWidth];
+        formatted = CodeFormat[contents, Airiness -> airiness, "IndentationString" -> indentationString, "TabWidth" -> tabWidth];
         If[FailureQ[formatted],
             Throw[formatted]
         ];
@@ -243,10 +240,7 @@ formatInputContents[contentsBox_] :=
             Throw[cst]
         ];
 
-        (*
-        FIXME: "LineWidth" -> Infinity will be revisited when line continuations in boxes are properly supported
-        *)
-        formatted = CodeFormatCST[cst, Airiness -> airiness, "LineWidth" -> Infinity, "IndentationString" -> indentationString, "TabWidth" -> tabWidth];
+        formatted = CodeFormatCST[cst, Airiness -> airiness, "IndentationString" -> indentationString, "TabWidth" -> tabWidth];
         If[FailureQ[formatted],
             Throw[formatted]
         ];

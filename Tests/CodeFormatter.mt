@@ -326,6 +326,10 @@ TestMatch[
 
 
 
-
-
-
+Test[
+	CodeFormat["a_ .."]
+	,
+	"a_ .."
+	,
+	TestID->"CodeFormatter-20210113-C2T7E8"
+]

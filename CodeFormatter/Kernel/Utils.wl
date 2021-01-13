@@ -234,15 +234,19 @@ insertNecessarySpaces[tokensIn_] :=
     This used to also check for UnderDot, as in:  a_. .b
 
     But this behavior was fixed in 12.2 and a_. .b may now be minified to a_..b
+
+    FIXME:  a_b..  is formatted as  a_b ..  because both  a_  and  a_b  are converted to LeafNode[PatternBlank]
+    but we really only care about inserting a space after  a_
+    Maybe convert  a_b  to something different than LeafNode[PatternBlank] ?
     *)
-    poss = Position[tokens, LeafNode[Token`Under, _, _]];
+    poss = Position[tokens, LeafNode[Token`Under | PatternBlank, _, _]];
     poss = Select[poss, (#[[1]] < Length[tokens] && MatchQ[tokens[[#[[1]]+1]], LeafNode[Token`Dot | Token`DotDot | Token`DotDotDot, _, _]])&];
     Scan[(AppendTo[toInsert, #+1])&, poss];
 
     (*
     Insert space for a_..b
     *)
-    poss = Position[tokens, LeafNode[Token`UnderDot, _, _]];
+    poss = Position[tokens, LeafNode[Token`UnderDot | PatternOptionalDefault, _, _]];
     poss = Select[poss, (#[[1]] < Length[tokens] && MatchQ[tokens[[#[[1]]+1]], LeafNode[Token`Dot | Token`DotDot | Token`DotDotDot, _, _]])&];
     Scan[(AppendTo[toInsert, #+1])&, poss];
 

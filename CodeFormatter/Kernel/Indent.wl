@@ -183,41 +183,6 @@ indent[PostfixNode[tag_, {rand_, trivia..., rator_}, data_], level_] :=
 
 
 (*
-Special case CompoundExpression at top-level
-
-Completely preserve newlines for CompoundExpression at top-level
-
-Breaking up lines or gluing lines together may change the actual CompoundExpressions and
-how expressions are parsed
-*)
-indent[InfixNode[CompoundExpression, ts_, data_], level_] /; TrueQ[$Toplevel] :=
-Catch[
-Module[{aggs, rands, rators, graphs, lastRator, lastRand, 
-  ratorsPat, randsPat},
-  aggs = DeleteCases[ts, trivia];
-  graphs = DeleteCases[ts, ws];
-  rands = aggs[[1 ;; All ;; 2]];
-  rators = aggs[[2 ;; All ;; 2]];
-  lastRator = Last[rators];
-  lastRand = Last[rands];
-  ratorsPat = Alternatives @@ rators;
-  randsPat = Alternatives @@ rands;
-
-  InfixNode[CompoundExpression
-    ,
-    Flatten[
-    Replace[graphs, {
-      lastRator /; MatchQ[lastRand, LeafNode[Token`Fake`ImplicitNull, _, _]] :> indent[lastRator, level], 
-      rator : ratorsPat :> {indent[rator, level], space[]},
-      rand : randsPat :> indent[rand, level], 
-      other_ :> indent[other, level]
-    }, {1}]]
-    ,
-    data
-  ]
-]]
-
-(*
 special casing CompoundExpression:
 
 shouldStayOnSingleLine =
@@ -233,12 +198,13 @@ else:
   do not insert space before or after semi
   completely redo newlines
 *)
-indent[InfixNode[CompoundExpression, ts_, data_], level_] /; !TrueQ[$Toplevel] :=
+indent[InfixNode[CompoundExpression, ts_, data_], level_] :=
 Catch[
 Module[{aggs, rands, rators, graphs, lastRator, lastRand, 
-  ratorsPat, randsPat, shouldStayOnSingleLine},
+  ratorsPat, randsPat,
+  definitelyPreserve, definitelyDelete, definitelyInsert},
+
   aggs = DeleteCases[ts, trivia];
-  graphs = DeleteCases[ts, ws | nl];
   rands = aggs[[1 ;; All ;; 2]];
   rators = aggs[[2 ;; All ;; 2]];
   lastRator = Last[rators];
@@ -246,56 +212,81 @@ Module[{aggs, rands, rators, graphs, lastRator, lastRand,
   ratorsPat = Alternatives @@ rators;
   randsPat = Alternatives @@ rands;
 
-  Which[
-    $CurrentStyle["NewlinesBetweenCompoundExpressions"] === Delete,
-      shouldStayOnSingleLine = True
-    ,
-    !FreeQ[ts, LeafNode[Token`Newline, _, _]],
-      (*
-      CompoundExpression is on multiple lines
-      *)
-      shouldStayOnSingleLine = False
-    ,
-    Length[rands] <= 2,
-      shouldStayOnSingleLine = True
-    ,
-    True,
-      shouldStayOnSingleLine = False
-  ];
+  (*
+  Completely preserve newlines for CompoundExpression at top-level
 
-  InfixNode[CompoundExpression
-    ,
-    Flatten[
+  Breaking up lines or gluing lines together may change the actual CompoundExpressions and
+  how expressions are parsed
+  *)
+  definitelyPreserve = TrueQ[$Toplevel];
+  definitelyDelete = $CurrentStyle["NewlinesBetweenCompoundExpressions"] === Delete;
+  definitelyInsert = $CurrentStyle["NewlinesBetweenCompoundExpressions"] === Insert;
+
+  If[!(definitelyPreserve || definitelyDelete || definitelyInsert),
     Which[
-      $CurrentStyle["NewlinesBetweenCompoundExpressions"] === Insert,
-        Replace[graphs, {
-            lastRator /; MatchQ[lastRand, LeafNode[Token`Fake`ImplicitNull, _, _]] :> indent[lastRator, level], 
-            rator : ratorsPat :> {indent[rator, level], line[level], line[level]}, 
-            rand : randsPat :> indent[rand, level], 
-            comm_ :> {indent[comm, level], line[level], line[level]}
-          }, {1}
-        ]
+      !FreeQ[ts, LeafNode[Token`Newline, _, _]],
+        (*
+        CompoundExpression is already on multiple lines, so preserve
+        *)
+        definitelyPreserve = True
+      (*
+      This heuristic is confusing
       ,
-      shouldStayOnSingleLine,
-        Replace[graphs, {
-            lastRator /; MatchQ[lastRand, LeafNode[Token`Fake`ImplicitNull, _, _]] :> indent[lastRator, level], 
-            rator : ratorsPat :> {indent[rator, level], space[]},
-            rand : randsPat :> indent[rand, level], 
-            comm_ :> indent[comm, level]
-          }, {1}
-        ]
+      Length[rands] <= 2,
+        (*
+        Hueristic for small CompoundExpressions to stay on single line
+        *)
+        definitelyDelete = True
+      *)
       ,
       True,
-        Replace[graphs, {
-            lastRator /; MatchQ[lastRand, LeafNode[Token`Fake`ImplicitNull, _, _]] :> indent[lastRator, level], 
-            rator : ratorsPat :> {indent[rator, level], line[level]}, 
-            rand : randsPat :> indent[rand, level], 
-            comm_ :> {indent[comm, level], line[level]}
-          }, {1}
-        ]
-    ]]
+        (*
+        Redo
+        *)
+        definitelyInsert = True
+    ]
+  ];
+
+  If[definitelyPreserve,
+    graphs = DeleteCases[ts, ws];
     ,
-    data
+    graphs = DeleteCases[ts, ws | nl];
+  ];
+
+  If[$Debug,
+    Print["definitelyPreserve: ", definitelyPreserve];
+    Print["definitelyDelete: ", definitelyDelete];
+    Print["definitelyInsert: ", definitelyInsert];
+  ];
+
+  Which[
+    definitelyPreserve || definitelyDelete,
+      InfixNode[CompoundExpression
+        ,
+        Flatten[
+        Replace[graphs, {
+          lastRator /; MatchQ[lastRand, LeafNode[Token`Fake`ImplicitNull, _, _]] :> indent[lastRator, level], 
+          rator : ratorsPat :> {indent[rator, level], space[]},
+          rand : randsPat :> indent[rand, level], 
+          other_ :> indent[other, level]
+        }, {1}]]
+        ,
+        data
+      ]
+    ,
+    definitelyInsert,
+      InfixNode[CompoundExpression
+        ,
+        Flatten[
+        Replace[graphs, {
+          lastRator /; MatchQ[lastRand, LeafNode[Token`Fake`ImplicitNull, _, _]] :> indent[lastRator, level], 
+          rator : ratorsPat :> {indent[rator, level], line[level]}, 
+          rand : randsPat :> indent[rand, level], 
+          other_ :> {indent[other, level], line[level]}
+        }, {1}]]
+        ,
+        data
+      ]
   ]
 ]]
 

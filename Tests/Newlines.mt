@@ -30,3 +30,20 @@ Test[
 	TestID->"Newlines-20201211-C2J3H1"
 ]
 
+
+
+
+Test[
+	CodeFormat["f[If[a, b[]]; g[]]"]
+	,
+"f[If[a,
+    b[]
+];
+g[]]"
+	,
+	TestID->"Newlines-20210113-O4V3Q0"
+]
+
+
+
+

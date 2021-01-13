@@ -158,9 +158,10 @@ TestMatch[
 		CodeFormat[str, "LineWidth" -> 120]
 	]
 	,
-	"(aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\\\n*b)"
+"(aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+     b)"
 	,
-	{Message[CodeFormat::implicittimesaftercontinuation]}
+	{}
 	,
 	TestID->"LineBreaking-20200805-S9F1H1"
 ]

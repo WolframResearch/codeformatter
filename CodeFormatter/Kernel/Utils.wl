@@ -298,6 +298,10 @@ insertNecessarySpaces[tokensIn_] :=
 
     toInsert = ReverseSort[toInsert];
 
+    If[$Debug,
+        Print["toInsert: ", toInsert];
+    ];
+
     tokens = Fold[Function[{toks, pos}, Insert[toks, LeafNode[Whitespace, " ", <||>], pos]], tokens, toInsert];
 
 

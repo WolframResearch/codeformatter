@@ -30,7 +30,19 @@ breakLines[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
       Print["lines: ", lines];
     ];
 
-    lines = breakLine[#, lineWidth1, lineWidth2]& /@ lines;
+    (*
+    Dynamic variable $groupDepth
+    *)
+    Block[{$groupDepth},
+
+      $groupDepth = 0;
+
+      lines =
+        Function[{line},
+          breakLine[line, lineWidth1, lineWidth2]
+        ] /@ lines;
+    ];
+
 
     If[$Debug,
       Print["lines: ", lines];
@@ -45,7 +57,8 @@ breakLines[tokensIn_, Infinity, Infinity] :=
   tokensIn
 
 breakLine[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
-  Module[{tokens, width, tok, toSplit, takeSpecs, kTmp, toInsertAfter, firstNonWhitespaceIndex, leadingWhitespace},
+  Module[{tokens, width, tok, toSplit, takeSpecs, kTmp, toInsertAfter, firstNonWhitespaceIndex, leadingWhitespace,
+    toplevel},
 
     tokens = tokensIn;
 
@@ -71,6 +84,7 @@ breakLine[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
       Print["leadingWhitespace: ", leadingWhitespace //InputForm];
     ];
 
+
     width = StringLength[leadingWhitespace];
     toSplit = <||>;
     toInsertAfter = {};
@@ -80,6 +94,44 @@ breakLine[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
         Print["width is: ", width];
       ];
       tok = tokens[[i]];
+
+      (*
+      Manage group depth here to decide when line breaking is acceptable
+      At top-level: we need to ask isAcceptableOperator[] for the token
+      At not top-level: it is always ok to break after
+      *)
+      Switch[tok,
+        (*
+        Openers
+        *)
+        LeafNode[Token`OpenParen | Token`OpenSquare | Token`OpenCurly | Token`LessBar | Token`LongName`LeftCeiling | Token`LongName`LeftFloor |
+          Token`LongName`LeftAngleBracket | Token`LongName`LeftDoubleBracket | Token`LongName`LeftBracketingBar | Token`LongName`LeftDoubleBracketingBar |
+          Token`LongName`LeftAssociation | Token`LongName`OpenCurlyQuote | Token`LongName`OpenCurlyDoubleQuote, _, _] |
+        FragmentNode[Token`OpenParen | Token`OpenSquare | Token`OpenCurly | Token`LessBar | Token`LongName`LeftCeiling | Token`LongName`LeftFloor |
+          Token`LongName`LeftAngleBracket | Token`LongName`LeftDoubleBracket | Token`LongName`LeftBracketingBar | Token`LongName`LeftDoubleBracketingBar |
+          Token`LongName`LeftAssociation | Token`LongName`OpenCurlyQuote | Token`LongName`OpenCurlyDoubleQuote, _, _],
+          $groupDepth++;
+          If[$Debug,
+            Print["tok: ", tok];
+            Print["$groupDepth is now: ", $groupDepth];
+          ];
+        ,
+        (*
+        Closers
+        *)
+        LeafNode[Token`CloseParen | Token`CloseSquare | Token`CloseCurly | Token`BarGreater | Token`LongName`RightCeiling | Token`LongName`RightFloor |
+          Token`LongName`RightAngleBracket | Token`LongName`RightDoubleBracket | Token`LongName`RightBracketingBar | Token`LongName`RightDoubleBracketingBar |
+          Token`LongName`RightAssociation | Token`LongName`CloseCurlyQuote | Token`LongName`CloseCurlyDoubleQuote, _, _] |
+        FragmentNode[Token`CloseParen | Token`CloseSquare | Token`CloseCurly | Token`BarGreater | Token`LongName`RightCeiling | Token`LongName`RightFloor |
+          Token`LongName`RightAngleBracket | Token`LongName`RightDoubleBracket | Token`LongName`RightBracketingBar | Token`LongName`RightDoubleBracketingBar |
+          Token`LongName`RightAssociation | Token`LongName`CloseCurlyQuote | Token`LongName`CloseCurlyDoubleQuote, _, _],
+          $groupDepth--;
+          If[$Debug,
+            Print["tok: ", tok];
+            Print["$groupDepth is now: ", $groupDepth];
+          ];
+      ];
+      toplevel = ($groupDepth == 0);
 
       width += StringLength[tok[[2]]];
       If[$Debug,
@@ -106,9 +158,13 @@ breakLine[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
         *)
         If[width <= lineWidth2,
           
-          If[isAcceptableOperator[tok[[1]]],
+          If[isPossiblyAcceptable[tok] && (!toplevel || isAcceptableOperator[tok[[1]]]),
             AppendTo[toInsertAfter, {i, leadingWhitespace <> $CurrentIndentationString}];
             width = 0;
+            ,
+            If[$Debug,
+              Print["NOT acceptable operator; not breaking: ", tok[[1]]];
+            ]
           ];
 
           Break[]
@@ -133,14 +189,21 @@ breakLine[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
           (*
           if not adding to toSplit, then we still want to try to break after an acceptable operator
           *)
-          If[isAcceptableOperator[tok[[1]]],
+          If[isPossiblyAcceptable[tok] && (!toplevel || isAcceptableOperator[tok[[1]]]),
+            If[$Debug,
+              Print["ACCEPTABLE operator; breaking: ", tok[[1]]];
+            ];
             AppendTo[toInsertAfter, {i, leadingWhitespace <> $CurrentIndentationString}];
             width = 0;
+            ,
+            If[$Debug,
+              Print["NOT acceptable operator; not breaking: ", tok[[1]]];
+            ]
           ];
 
           Break[]
         ]
-      ]
+      ] (* While[True] *)
       ,
       {i, firstNonWhitespaceIndex, Length[tokens]}
     ];
@@ -369,11 +432,23 @@ breakLine[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
     ];
 
     If[$Debug,
+      Print["returning from breakLine:"];
       Print["tokens: ", tokens];
+      Print["$groupDepth: ", $groupDepth];
     ];
 
     Flatten[tokens]
   ]
+
+
+(*
+Not acceptable to break in the middle of a fragmented string
+*)
+isPossiblyAcceptable[FragmentNode[String, _, KeyValuePattern["LastFragmentInString" -> False]]] := False
+isPossiblyAcceptable[LeafNode[Token`ColonColon, _, _]] := False
+isPossiblyAcceptable[_] := True
+
+
 
 End[]
 

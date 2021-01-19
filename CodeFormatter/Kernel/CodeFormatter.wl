@@ -179,7 +179,7 @@ Module[{cst, tabWidth, formattedStr, agg, cst2, agg2, aggToCompare, agg2ToCompar
 
 CodeFormat[str_String, opts:OptionsPattern[]] :=
 Catch[
-Module[{cst, tabWidth, formattedStr, agg, cst2, agg2, aggToCompare, agg2ToCompare},
+Module[{cst, tabWidth, newline, formattedStr, agg, cst2, agg2, aggToCompare, agg2ToCompare},
 
   tabWidth = OptionValue["TabWidth"];
   newline = OptionValue["Newline"];
@@ -520,7 +520,7 @@ Flatten comment groups
 StandardizeCommentGroups::usage = "StandardizeCommentGroups[cst] standardizes comment groups."
 
 StandardizeCommentGroups[cstIn_] :=
-  Module[{cst},
+  Module[{cst, poss},
 
     cst = cstIn;
 
@@ -1060,7 +1060,7 @@ others?
 *)
 Fragmentize[cstIn_] :=
   Catch[
-  Module[{poss, cst, tokStartLocs, grouped, data, embeddedNewlines, mapSpecs, tuples, allOtherPoss, childData},
+  Module[{poss, cst, tokStartLocs, grouped, data, embeddedNewlines, mapSpecs, embeddedNewlinePoss, tuples, allOtherPoss, childData},
 
     cst = cstIn;
     

@@ -198,7 +198,7 @@ Used by CodeMinifier also
 *)
 
 insertNecessarySpaces[tokensIn_] :=
-  Module[{poss, tokens, toInsert, poss1},
+  Module[{poss, tokens, toInsert, poss1, poss2},
 
     If[$Debug,
       Print["insertNecessarySpaces: ", tokensIn];

@@ -903,7 +903,7 @@ indent[CallNode[{tag:LeafNode[Symbol, "Switch" | {FragmentNode[Symbol, "Switch",
           closer_
         }, _]
     }, data_], level_] :=
-  Module[{aggs, rands, rators, tests, bodies, testsPat, bodiesPat, comments1, comments2, comments3, comments4, comments5, comments6},
+  Module[{aggs, graphs, rands, rators, tests, bodies, ratorsPat, testsPat, bodiesPat, comments1, comments2, comments3, comments4, comments5, comments6},
 
     comments1 = Cases[{trivia1}, comment];
     comments2 = Cases[{trivia2}, comment];
@@ -1015,7 +1015,7 @@ indent[CallNode[{tag:LeafNode[Symbol, "Which" | {FragmentNode[Symbol, "Which", _
           closer_
         }, _]
     }, data_], level_] :=
-  Module[{aggs, rands, rators, tests, bodies, testsPat, bodiesPat,
+  Module[{aggs, graphs, rands, rators, tests, bodies, ratorsPat, testsPat, bodiesPat,
     comments1, comments2, comments3},
 
     comments1 = Cases[{trivia1}, comment];

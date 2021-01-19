@@ -136,6 +136,37 @@ formatSelectedCell[] :=
             Cell[BoxData[formatted], Sequence @@ cell[[2;;]]]
           ,
           (*
+          Also support Code cells that have been evaluated and have Output grouped with them
+          *)
+          Cell[CellGroupData[{Cell[BoxData[b_], "Input" | "Code", ___] /; Union[Cases[b, _Symbol, Infinity, Heads -> True]] === {List, RowBox}, Cell[_, "Output", ___]}, _]],
+
+            shouldWrite = True;
+
+            (*
+            The Input cell
+            *)
+            formatted = cell[[1, 1, 1]];
+
+            If[CodeFormatter`$InteractiveReparse,
+                formatted = FrontEndExecute[FrontEnd`ReparseBoxStructurePacket[formatted]]
+            ];
+
+            formatted = formatInputContents[formatted[[1, 1]]];
+
+            If[FailureQ[formatted],
+
+                failure = True;
+
+                CurrentValue[nb, WindowStatusArea] = "";
+
+                Message[CodeFormat::cellfailure];
+
+                Throw[formatted]
+            ];
+
+            Cell[CellGroupData[{Cell[BoxData[formatted], Sequence @@ cell[[1, 1, 1, 2;;]]], cell[[1, 1, 2]]}, cell[[1, 2]]]]
+          ,
+          (*
           Some other box
           *)
           _,

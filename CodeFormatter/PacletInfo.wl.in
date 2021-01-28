@@ -3,13 +3,15 @@ Paclet[
   Name -> "CodeFormatter",
   Version -> "1.2",
   WolframVersion -> "11.0+",
-  Description -> "Provide functionality for formatting Wolfram Language code.",
+  Description -> "Format Wolfram Language code.",
   Creator -> "Brenton Bostick <brenton@wolfram.com>",
   Extensions -> {
     {"Kernel", Root -> "Kernel", Context -> "CodeFormatter`"},
     (*
     It's my understanding that adding Prepend -> True to the FE extension causes the PacletManager to insert those paths before the ParentList in the default setting.
     That's exactly the right thing to do if your paclet might be both in the layout and in other paclet locations.
+
+    Related threads: https://mail-archive.wolfram.com/archive/l-frontend/2020/Sep00/0133.html
     *)
     {"FrontEnd", Root -> "FrontEnd", Prepend -> True, WolframVersion -> "12.2+"},
     {"Documentation", Language -> "English", MainPage -> "Guides/CodeFormatter"}

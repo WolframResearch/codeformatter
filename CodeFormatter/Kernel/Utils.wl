@@ -47,7 +47,7 @@ comment = LeafNode[Token`Comment, _, _]
 
 matchNewlineQ = MatchQ[nl]
 
-matchCommentFragmentNewlineQ := MatchQ[FragmentNode[Token`Comment, $CurrentNewline, _]]
+matchCommentFragmentNewlineQ := MatchQ[FragmentNode[Token`Comment, $CurrentNewlineString, _]]
 
 
 

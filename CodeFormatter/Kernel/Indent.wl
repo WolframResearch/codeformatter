@@ -11,7 +11,7 @@ Needs["CodeParser`Utils`"] (* for empty *)
 
 
 line[level_] :=
-  {LeafNode[Token`Newline, $CurrentNewline, <||>]} ~Join~
+  {LeafNode[Token`Newline, $CurrentNewlineString, <||>]} ~Join~
     Table[LeafNode[Whitespace, #, <||>]& /@ Characters[$CurrentIndentationString], level]
 
 space[] = LeafNode[Whitespace, " ", <||>]
@@ -31,7 +31,7 @@ Special case multiline comments
 It is ok to change the internal indentation of comments, as long as everything is still aligned
 *)
 indent[LeafNode[Token`Comment, fs:{
-  FragmentNode[Token`Comment, s_ /; s == "\\" <> $CurrentNewline, _],
+  FragmentNode[Token`Comment, s_ /; s == "\\" <> $CurrentNewlineString, _],
   ___,
   FragmentNode[Token`Comment, "(*", _],
   ___,
@@ -219,8 +219,8 @@ Module[{aggs, rands, rators, graphs, lastRator, lastRand,
   how expressions are parsed
   *)
   definitelyPreserve = TrueQ[$Toplevel];
-  definitelyDelete = $CurrentStyle["NewlinesBetweenCompoundExpressions"] === Delete;
-  definitelyInsert = $CurrentStyle["NewlinesBetweenCompoundExpressions"] === Insert;
+  definitelyDelete = $CurrentStyle["NewlinesBetweenSemicolons"] === Delete;
+  definitelyInsert = $CurrentStyle["NewlinesBetweenSemicolons"] === Insert;
 
   If[!(definitelyPreserve || definitelyDelete || definitelyInsert),
     Which[
@@ -556,9 +556,9 @@ redoGroupNewlines[GroupNode[tag_, {
   }, data_]] :=
   GroupNode[tag, {
     opener,
-    LeafNode[Token`Newline, $CurrentNewline, <||>],
+    LeafNode[Token`Newline, $CurrentNewlineString, <||>],
     ts,
-    LeafNode[Token`Newline, $CurrentNewline, <||>],
+    LeafNode[Token`Newline, $CurrentNewlineString, <||>],
     closer
   }, data]
 

@@ -24,7 +24,7 @@ breakLines[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
 
     tokens = tokensIn;
 
-    lines = Most /@ Split[tokens, !MatchQ[#1, LeafNode[Token`Newline, _, _] | FragmentNode[Token`Comment, $CurrentNewline, _]]&];
+    lines = Most /@ Split[tokens, !MatchQ[#1, LeafNode[Token`Newline, _, _] | FragmentNode[Token`Comment, $CurrentNewlineString, _]]&];
 
     If[$Debug,
       Print["lines: ", lines];
@@ -48,7 +48,7 @@ breakLines[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
       Print["lines: ", lines];
     ];
 
-    tokens = Flatten[{#, {LeafNode[Token`Newline, $CurrentNewline, <||>]}}& /@ lines];
+    tokens = Flatten[{#, {LeafNode[Token`Newline, $CurrentNewlineString, <||>]}}& /@ lines];
 
     tokens
   ]
@@ -342,10 +342,10 @@ breakLine[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
         *)
         Switch[tok,
           FragmentNode[Token`Comment, "(*", _],
-            tokens[[key]] = {FragmentNode[Token`Comment, "\\" <> $CurrentNewline, tok[[3]]], tok}
+            tokens[[key]] = {FragmentNode[Token`Comment, "\\" <> $CurrentNewlineString, tok[[3]]], tok}
           ,
           FragmentNode[Token`Comment, "*)", _],
-            tokens[[key]] = {FragmentNode[Token`Comment, $CurrentNewline, tok[[3]]], tok}
+            tokens[[key]] = {FragmentNode[Token`Comment, $CurrentNewlineString, tok[[3]]], tok}
           ,
           LeafNode[String, s_ /; !StringStartsQ[s, "\""], _],
             (*
@@ -360,13 +360,13 @@ breakLine[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
             insert a star to work-around design issues of line continuations and implicit Times interfering with each other
             *)
             Message[CodeFormat::implicittimesaftercontinuation];
-            tokens[[key]] = {FragmentNode[Token`Fake`ImplicitTimes, "\\" <> $CurrentNewline, tok[[3]]], FragmentNode[Token`Star, "*", <||>]}
+            tokens[[key]] = {FragmentNode[Token`Fake`ImplicitTimes, "\\" <> $CurrentNewlineString, tok[[3]]], FragmentNode[Token`Star, "*", <||>]}
           ,
           LeafNode[Token`LinearSyntaxBlob, _, _],
             (*
             Never split LinearSyntaxBlobs
             *)
-            tokens[[key]] = {FragmentNode[Token`LinearSyntaxBlob, "\\" <> $CurrentNewline, tok[[3]]], tok}
+            tokens[[key]] = {FragmentNode[Token`LinearSyntaxBlob, "\\" <> $CurrentNewlineString, tok[[3]]], tok}
           ,
           (*
           OK to split
@@ -390,7 +390,7 @@ breakLine[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
             ];
 
             If[$LineBreakWithinComments,
-              tokens[[key]] = FragmentNode[tok[[1]], #, tok[[3]]]& /@ betterRiffle[StringTake[tok[[2]], takeSpecs], $CurrentNewline]
+              tokens[[key]] = FragmentNode[tok[[1]], #, tok[[3]]]& /@ betterRiffle[StringTake[tok[[2]], takeSpecs], $CurrentNewlineString]
             ]
           ,
           (*
@@ -414,7 +414,7 @@ breakLine[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
               Print["takeSpecs 2: ", takeSpecs];
             ];
 
-            tokens[[key]] = FragmentNode[tok[[1]], #, tok[[3]]]& /@ betterRiffle[StringTake[tok[[2]], takeSpecs], "\\" <> $CurrentNewline]
+            tokens[[key]] = FragmentNode[tok[[1]], #, tok[[3]]]& /@ betterRiffle[StringTake[tok[[2]], takeSpecs], "\\" <> $CurrentNewlineString]
         ];
       ]
       ,
@@ -425,7 +425,7 @@ breakLine[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
     Now insert newlines
     *)
     Do[
-      tokens[[i[[1]]]] = {tokens[[i[[1]]]], LeafNode[Token`Newline, $CurrentNewline, <||>]} ~Join~
+      tokens[[i[[1]]]] = {tokens[[i[[1]]]], LeafNode[Token`Newline, $CurrentNewlineString, <||>]} ~Join~
         (LeafNode[Whitespace, #, <||>]& /@ Characters[i[[2]]])
       ,
       {i, toInsertAfter}

@@ -40,7 +40,7 @@ Dynamic variables
 *)
 $CurrentIndentationString
 
-$CurrentNewline
+$CurrentNewlineString
 
 $CurrentStyle
 
@@ -79,7 +79,7 @@ $DefaultAiriness = 0
 
 $DefaultIndentationString := StringRepeat[" ", $DefaultTabWidth]
 
-$DefaultNewline = "\n"
+$DefaultNewlineString = "\n"
 
 $DefaultTabWidth = 4
 
@@ -118,13 +118,13 @@ code can be a string, a file, or a list of bytes."
 Options[CodeFormat] = {
   Airiness :> $DefaultAiriness,
   "IndentationString" :> $DefaultIndentationString,
-  "Newline" :> $DefaultNewline,
+  "NewlineString" :> $DefaultNewlineString,
   "TabWidth" :> $DefaultTabWidth,
   "LineWidth" :> $DefaultLineWidth,
   "SafetyMargin" :> $DefaultSafetyMargin,
 
   "NewlinesBetweenCommas" -> Automatic,
-  "NewlinesBetweenCompoundExpressions" -> Automatic,
+  "NewlinesBetweenSemicolons" -> Automatic,
   "NewlinesBetweenOperators" -> Automatic,
   "NewlinesInComments" -> Automatic,
   "NewlinesInControl" -> Automatic,
@@ -138,7 +138,7 @@ Catch[
 Module[{cst, tabWidth, formattedStr, agg, cst2, agg2, aggToCompare, agg2ToCompare, newline},
 
   tabWidth = OptionValue["TabWidth"];
-  newline = OptionValue["Newline"];
+  newline = OptionValue["NewlineString"];
 
   cst = CodeConcreteParse[file, "TabWidth" -> tabWidth];
 
@@ -153,7 +153,7 @@ Module[{cst, tabWidth, formattedStr, agg, cst2, agg2, aggToCompare, agg2ToCompar
   ];
 
   agg = CodeParser`Abstract`Aggregate[cst];
-  agg = normalizeTokens[agg, "FormatOnly" -> True, "Newline" -> newline, "TabWidth" -> tabWidth];
+  agg = normalizeTokens[agg, "FormatOnly" -> True, "NewlineString" -> newline, "TabWidth" -> tabWidth];
 
   cst2 = CodeConcreteParse[formattedStr];
 
@@ -162,7 +162,7 @@ Module[{cst, tabWidth, formattedStr, agg, cst2, agg2, aggToCompare, agg2ToCompar
   ];
 
   agg2 = CodeParser`Abstract`Aggregate[cst2];
-  agg2 = normalizeTokens[agg2, "FormatOnly" -> True, "Newline" -> newline, "TabWidth" -> tabWidth];
+  agg2 = normalizeTokens[agg2, "FormatOnly" -> True, "NewlineString" -> newline, "TabWidth" -> tabWidth];
 
   agg2[[1]] = File;
 
@@ -182,7 +182,7 @@ Catch[
 Module[{cst, tabWidth, newline, formattedStr, agg, cst2, agg2, aggToCompare, agg2ToCompare},
 
   tabWidth = OptionValue["TabWidth"];
-  newline = OptionValue["Newline"];
+  newline = OptionValue["NewlineString"];
 
   cst = CodeConcreteParse[str, "TabWidth" -> tabWidth];
 
@@ -203,7 +203,7 @@ Module[{cst, tabWidth, newline, formattedStr, agg, cst2, agg2, aggToCompare, agg
   ];
 
   agg = CodeParser`Abstract`Aggregate[cst];
-  agg = normalizeTokens[agg, "FormatOnly" -> True, "Newline" -> newline, "TabWidth" -> tabWidth];
+  agg = normalizeTokens[agg, "FormatOnly" -> True, "NewlineString" -> newline, "TabWidth" -> tabWidth];
 
   cst2 = CodeConcreteParse[formattedStr];
 
@@ -212,7 +212,7 @@ Module[{cst, tabWidth, newline, formattedStr, agg, cst2, agg2, aggToCompare, agg
   ];
 
   agg2 = CodeParser`Abstract`Aggregate[cst2];
-  agg2 = normalizeTokens[agg2, "FormatOnly" -> True, "Newline" -> newline, "TabWidth" -> tabWidth];
+  agg2 = normalizeTokens[agg2, "FormatOnly" -> True, "NewlineString" -> newline, "TabWidth" -> tabWidth];
 
   aggToCompare = agg /. _Association -> <||>;
   agg2ToCompare = agg2 /. _Association -> <||>;
@@ -234,7 +234,7 @@ Catch[
 Module[{cst, tabWidth, formattedStr, agg, cst2, agg2, aggToCompare, agg2ToCompare, newline},
 
   tabWidth = OptionValue["TabWidth"];
-  newline = OptionValue["Newline"];
+  newline = OptionValue["NewlineString"];
 
   If[bytes == {},
     Throw[""]
@@ -259,7 +259,7 @@ Module[{cst, tabWidth, formattedStr, agg, cst2, agg2, aggToCompare, agg2ToCompar
   ];
 
   agg = CodeParser`Abstract`Aggregate[cst];
-  agg = normalizeTokens[agg, "FormatOnly" -> True, "Newline" -> newline, "TabWidth" -> tabWidth];
+  agg = normalizeTokens[agg, "FormatOnly" -> True, "NewlineString" -> newline, "TabWidth" -> tabWidth];
 
   cst2 = CodeConcreteParse[formattedStr];
 
@@ -268,7 +268,7 @@ Module[{cst, tabWidth, formattedStr, agg, cst2, agg2, aggToCompare, agg2ToCompar
   ];
   
   agg2 = CodeParser`Abstract`Aggregate[cst2];
-  agg2 = normalizeTokens[agg2, "FormatOnly" -> True, "Newline" -> newline, "TabWidth" -> tabWidth];
+  agg2 = normalizeTokens[agg2, "FormatOnly" -> True, "NewlineString" -> newline, "TabWidth" -> tabWidth];
 
   agg2[[1]] = Byte;
 
@@ -293,13 +293,13 @@ Module[{indentationString, cst, newline, tabWidth, indented, airiness, formatted
   style},
 
   indentationString = OptionValue["IndentationString"];
-  newline = OptionValue["Newline"];
+  newline = OptionValue["NewlineString"];
   tabWidth = OptionValue["TabWidth"];
 
   style = <||>;
 
   style["NewlinesBetweenCommas"] = OptionValue["NewlinesBetweenCommas"];
-  style["NewlinesBetweenCompoundExpressions"] = OptionValue["NewlinesBetweenCompoundExpressions"];
+  style["NewlinesBetweenSemicolons"] = OptionValue["NewlinesBetweenSemicolons"];
   style["NewlinesBetweenOperators"] = OptionValue["NewlinesBetweenOperators"];
   style["NewlinesInComments"] = OptionValue["NewlinesInComments"];
   style["NewlinesInControl"] = OptionValue["NewlinesInControl"];
@@ -323,10 +323,10 @@ Module[{indentationString, cst, newline, tabWidth, indented, airiness, formatted
     style["NewlinesBetweenOperators"] = Delete
   ];
   If[airiness <= -0.25,
-    style["NewlinesBetweenCompoundExpressions"] = Delete
+    style["NewlinesBetweenSemicolons"] = Delete
   ];
   If[airiness >= 0.25,
-    style["NewlinesBetweenCompoundExpressions"] = Insert
+    style["NewlinesBetweenSemicolons"] = Insert
   ];
   If[airiness >= 0.5,
     style["NewlinesBetweenOperators"] = Insert
@@ -358,11 +358,11 @@ Module[{indentationString, cst, newline, tabWidth, indented, airiness, formatted
     Print["CodeFormatCST: ", cst];
   ];
 
-  Block[{$CurrentIndentationString, $CurrentNewline, $CurrentStyle, $Toplevel},
+  Block[{$CurrentIndentationString, $CurrentNewlineString, $CurrentStyle, $Toplevel},
 
     $CurrentIndentationString = indentationString;
 
-    $CurrentNewline = newline;
+    $CurrentNewlineString = newline;
 
     $CurrentStyle = style;
 
@@ -557,7 +557,7 @@ convertCommentGroups[c:GroupNode[Comment, boxs_, data_]] :=
       ];
 
       LeafNode[Token`Comment,
-        {FragmentNode[Token`Comment, "\\" <> $CurrentNewline, <||>]} ~Join~
+        {FragmentNode[Token`Comment, "\\" <> $CurrentNewlineString, <||>]} ~Join~
         Table[FragmentNode[String, " ", <||>], origSpaces] ~Join~
         (FragmentNode[Token`Comment, #[[2]], <||>]& /@ leafs), <|data, "InsertedFragmentNodes" -> 1 + origSpaces|>
       ]
@@ -934,7 +934,7 @@ StandardizeEmbeddedNewlines[cstIn_, newline_String] :=
 
       mapSpecs = Flatten[mapSpecs, 1];
 
-      cst = MapAt[convertEmbeddedNewlines[#, "FormatOnly" -> True, "Newline" -> newline]&, cst, mapSpecs[[All, 2]]];
+      cst = MapAt[convertEmbeddedNewlines[#, "FormatOnly" -> True, "NewlineString" -> newline]&, cst, mapSpecs[[All, 2]]];
 
       (*
 
@@ -1017,7 +1017,7 @@ StandardizeEmbeddedTabs[cstIn_, newline_String, tabWidth_Integer] :=
 
       mapSpecs = Flatten[mapSpecs, 1];
 
-      cst = MapAt[convertEmbeddedTabs[#, "FormatOnly" -> True, "Newline" -> newline, "TabWidth" -> tabWidth]&, cst, mapSpecs[[All, 2]]];
+      cst = MapAt[convertEmbeddedTabs[#, "FormatOnly" -> True, "NewlineString" -> newline, "TabWidth" -> tabWidth]&, cst, mapSpecs[[All, 2]]];
 
       (*
       
@@ -1149,13 +1149,13 @@ Module[{origSpaces},
   origSpaces = data[[Key[Source], 1, 2]]-1;
   LeafNode[String,
     Flatten[{
-      FragmentNode[String, "\\" <> $CurrentNewline, <||>],
+      FragmentNode[String, "\\" <> $CurrentNewlineString, <||>],
       Table[FragmentNode[String, " ", <||>], origSpaces],
       Function[{cases}, {
           FragmentNode[String, #, <| "LastFragmentInString" -> False |>]& /@ Most[cases],
           FragmentNode[String, Last[cases], <| "LastFragmentInString" -> True |>]
         }][
-        DeleteCases[StringSplit[s, x:$CurrentNewline :> x], ""]
+        DeleteCases[StringSplit[s, x:$CurrentNewlineString :> x], ""]
       ]
     }], <|data, "InsertedFragmentNodes" -> 1 + origSpaces|>]
 ]
@@ -1170,9 +1170,9 @@ Module[{origSpaces},
   origSpaces = data[[Key[Source], 1, 2]]-1;
   LeafNode[Token`Comment,
     Flatten[{
-      FragmentNode[Token`Comment, "\\" <> $CurrentNewline, <||>],
+      FragmentNode[Token`Comment, "\\" <> $CurrentNewlineString, <||>],
       Table[FragmentNode[Token`Comment, " ", <||>], origSpaces],
-      FragmentNode[Token`Comment, #, <||>]& /@ DeleteCases[StringSplit[s, x:"(*"|"*)"|$CurrentNewline :> x], ""]
+      FragmentNode[Token`Comment, #, <||>]& /@ DeleteCases[StringSplit[s, x:"(*"|"*)"|$CurrentNewlineString :> x], ""]
     }], <|data, "InsertedFragmentNodes" -> 1 + origSpaces|>]
 ]
 
@@ -1432,7 +1432,7 @@ mergeLineContinuations[fs_] :=
       Print["fs: ", fs];
     ];
 
-    lc = FragmentNode[_, "\\" <> $CurrentNewline, _];
+    lc = FragmentNode[_, "\\" <> $CurrentNewlineString, _];
 
     poss = Position[fs, lc];
 
@@ -1460,7 +1460,7 @@ mergeLineContinuations[fs_] :=
       (*
       Count how many characters before the line continuation (but after any previous newline)
       *)
-      onePast = NestWhile[# - 1 &, pos[[1]] - 1, # >= 1 && !MatchQ[fs[[#]], (LeafNode|FragmentNode)[_, $CurrentNewline, _]] &];
+      onePast = NestWhile[# - 1 &, pos[[1]] - 1, # >= 1 && !MatchQ[fs[[#]], (LeafNode|FragmentNode)[_, $CurrentNewlineString, _]] &];
 
       takeSpec = {onePast + 1, pos[[1]] - 1};
 
@@ -1584,7 +1584,7 @@ mergeLineContinuations[fs_] :=
           ];
           AppendTo[dropSpecs, {Max[pos[[1]] - (numberOfBeforeChars - numberOfOriginalSpaces), 1], pos[[1]] + numberOfOriginalSpaces}]
         ,
-        MatchQ[fs[[pos[[1]]]], FragmentNode[Token`Comment, "\\" <> $CurrentNewline, _]],
+        MatchQ[fs[[pos[[1]]]], FragmentNode[Token`Comment, "\\" <> $CurrentNewlineString, _]],
           (*
           Always ok to remove line continuation from a comment
           But make sure to leave a newline
@@ -1594,7 +1594,7 @@ mergeLineContinuations[fs_] :=
           *)
           Null
         ,
-        MatchQ[fs[[pos[[1]]]], FragmentNode[Token`String, "\\" <> $CurrentNewline, _]],
+        MatchQ[fs[[pos[[1]]]], FragmentNode[Token`String, "\\" <> $CurrentNewlineString, _]],
           (*
 
           Something like:
@@ -1627,7 +1627,7 @@ mergeLineContinuations[fs_] :=
     ];
 
     newFs = fs;
-    newFs = ReplacePart[newFs, commentReplaceSpecs -> FragmentNode[Token`Comment, $CurrentNewline, <||>]];
+    newFs = ReplacePart[newFs, commentReplaceSpecs -> FragmentNode[Token`Comment, $CurrentNewlineString, <||>]];
     newFs = Fold[Drop, newFs, dropSpecs // Reverse];
 
     If[$Debug,

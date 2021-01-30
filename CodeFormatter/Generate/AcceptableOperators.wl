@@ -79,7 +79,7 @@ EndPackage[]
 "};
 
 Print["exporting AcceptableOperators.wl"];
-res = Export[FileNameJoin[{generatedWLDir, "AcceptableOperators.wl"}], Column[acceptableOperatorsWL], "String"];
+res = Export[FileNameJoin[{generatedWLDir, "Kernel", "AcceptableOperators.wl"}], Column[acceptableOperatorsWL], "String"];
 
 Print[res];
 

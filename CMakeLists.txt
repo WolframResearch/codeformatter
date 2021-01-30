@@ -55,7 +55,7 @@ set(STATIC_WL_PACLET_KERNEL_SOURCES
 	${PROJECT_SOURCE_DIR}/CodeFormatter/Kernel/Utils.wl
 )
 
-set(STATIC_WL_PACLET_FRONTEND_TEXTRESOURCES_SOURCES
+set(STATIC_WL_PACLET_FRONTEND_SOURCES
 	${PROJECT_SOURCE_DIR}/CodeFormatter/FrontEnd/TextResources/CodeFormatter.tr
 )
 
@@ -63,12 +63,12 @@ set(PACLETINFO_SOURCE
 	${PROJECT_SOURCE_DIR}/${PACLET}/PacletInfo.wl.in
 )
 
-set(GENERATED_WL_PACLET_PALETTE_SOURCES
-	${PROJECT_BINARY_DIR}/generated/wl/CodeFormatter.nb
+set(GENERATED_WL_PACLET_KERNEL_SOURCES
+	${PROJECT_BINARY_DIR}/generated/wl/Kernel/AcceptableOperators.wl
 )
 
-set(GENERATED_WL_PACLET_KERNEL_SOURCES
-	${PROJECT_BINARY_DIR}/generated/wl/AcceptableOperators.wl
+set(GENERATED_WL_PACLET_FRONTEND_SOURCES
+	${PROJECT_BINARY_DIR}/generated/wl/FrontEnd/Palettes/CodeFormatter.nb
 )
 
 
@@ -82,7 +82,8 @@ CheckPacletInfo()
 
 file(MAKE_DIRECTORY
 	${PROJECT_BINARY_DIR}/paclet/${PACLET}
-	${PROJECT_BINARY_DIR}/generated/wl/
+	${PROJECT_BINARY_DIR}/generated/wl/Kernel/
+	${PROJECT_BINARY_DIR}/generated/wl/FrontEnd/Palettes/
 )
 
 
@@ -108,68 +109,74 @@ add_custom_command(
 )
 list(APPEND COPIED_WL_PACLET_SOURCES ${COPIED_PACLETINFO})
 
+#
+# static Kernel sources
+#
 foreach(SRC ${STATIC_WL_PACLET_KERNEL_SOURCES})
-	get_filename_component(BARE_SRC ${SRC} NAME)
+	file(RELATIVE_PATH REL ${PROJECT_SOURCE_DIR}/${PACLET}/Kernel/ ${SRC})
 	add_custom_command(
 		OUTPUT
-			${PROJECT_BINARY_DIR}/paclet/${PACLET}/Kernel/${BARE_SRC}
+			${PROJECT_BINARY_DIR}/paclet/${PACLET}/Kernel/${REL}
 		COMMAND
 			${CMAKE_COMMAND} -DSRC=${SRC} -DCODEPARSER_EXE=${CODEPARSER_EXE} -DWOLFRAMKERNEL=${WOLFRAMKERNEL} -DBUG349779_TIMEOUT=${BUG349779_TIMEOUT} -P ${PROJECT_SOURCE_DIR}/cmake/InspectFile.cmake
 		COMMAND
-			${CMAKE_COMMAND} -E copy ${SRC} ${PROJECT_BINARY_DIR}/paclet/${PACLET}/Kernel/${BARE_SRC}
+			${CMAKE_COMMAND} -E copy ${SRC} ${PROJECT_BINARY_DIR}/paclet/${PACLET}/Kernel/${REL}
 		DEPENDS
 			${SRC}
 			${PROJECT_SOURCE_DIR}/cmake/InspectFile.cmake
 	)
-	list(APPEND COPIED_WL_PACLET_SOURCES ${PROJECT_BINARY_DIR}/paclet/${PACLET}/Kernel/${BARE_SRC})
+	list(APPEND COPIED_WL_PACLET_SOURCES ${PROJECT_BINARY_DIR}/paclet/${PACLET}/Kernel/${REL})
 endforeach()
 
-foreach(SRC ${STATIC_WL_PACLET_FRONTEND_TEXTRESOURCES_SOURCES})
-	get_filename_component(BARE_SRC ${SRC} NAME)
+#
+# static FrontEnd sources
+#
+foreach(SRC ${STATIC_WL_PACLET_FRONTEND_SOURCES})
+	file(RELATIVE_PATH REL ${PROJECT_SOURCE_DIR}/${PACLET}/FrontEnd/ ${SRC})
 	add_custom_command(
 		OUTPUT
-			${PROJECT_BINARY_DIR}/paclet/${PACLET}/FrontEnd/TextResources/${BARE_SRC}
+			${PROJECT_BINARY_DIR}/paclet/${PACLET}/FrontEnd/${REL}
 		#
-		# Do not inspect text resources
+		# Do not inspect FrontEnd sources
 		#
 		COMMAND
-			${CMAKE_COMMAND} -E copy ${SRC} ${PROJECT_BINARY_DIR}/paclet/${PACLET}/FrontEnd/TextResources/${BARE_SRC}
+			${CMAKE_COMMAND} -E copy ${SRC} ${PROJECT_BINARY_DIR}/paclet/${PACLET}/FrontEnd/${REL}
 		DEPENDS
 			${SRC}
 	)
-	list(APPEND COPIED_WL_PACLET_SOURCES ${PROJECT_BINARY_DIR}/paclet/${PACLET}/FrontEnd/TextResources/${BARE_SRC})
+	list(APPEND COPIED_WL_PACLET_SOURCES ${PROJECT_BINARY_DIR}/paclet/${PACLET}/FrontEnd/${REL})
 endforeach()
 
+#
+# generated Kernel sources
+#
 foreach(SRC ${GENERATED_WL_PACLET_KERNEL_SOURCES})
-	get_filename_component(BARE_SRC ${SRC} NAME)
+	file(RELATIVE_PATH REL ${PROJECT_BINARY_DIR}/generated/wl/Kernel/ ${SRC})
 	add_custom_command(
 		OUTPUT
-			${PROJECT_BINARY_DIR}/paclet/${PACLET}/Kernel/${BARE_SRC}
+			${PROJECT_BINARY_DIR}/paclet/${PACLET}/Kernel/${REL}
 		COMMAND
-			${CMAKE_COMMAND} -DSRC=${SRC} -DCODEPARSER_EXE=${CODEPARSER_EXE} -DWOLFRAMKERNEL=${WOLFRAMKERNEL} -DBUG349779_TIMEOUT=${BUG349779_TIMEOUT} -P ${PROJECT_SOURCE_DIR}/cmake/InspectFile.cmake
-		COMMAND
-			${CMAKE_COMMAND} -E copy ${SRC} ${PROJECT_BINARY_DIR}/paclet/${PACLET}/Kernel/${BARE_SRC}
+			${CMAKE_COMMAND} -E copy ${SRC} ${PROJECT_BINARY_DIR}/paclet/${PACLET}/Kernel/${REL}
 		DEPENDS
 			${SRC}
-			${PROJECT_SOURCE_DIR}/cmake/InspectFile.cmake
 	)
-	list(APPEND COPIED_WL_PACLET_SOURCES ${PROJECT_BINARY_DIR}/paclet/${PACLET}/Kernel/${BARE_SRC})
+	list(APPEND COPIED_WL_PACLET_SOURCES ${PROJECT_BINARY_DIR}/paclet/${PACLET}/Kernel/${REL})
 endforeach()
 
-foreach(SRC ${GENERATED_WL_PACLET_PALETTE_SOURCES})
-	get_filename_component(BARE_SRC ${SRC} NAME)
+#
+# generated FrontEnd sources
+#
+foreach(SRC ${GENERATED_WL_PACLET_FRONTEND_SOURCES})
+	file(RELATIVE_PATH REL ${PROJECT_BINARY_DIR}/generated/wl/FrontEnd/ ${SRC})
 	add_custom_command(
 		OUTPUT
-			${PROJECT_BINARY_DIR}/paclet/${PACLET}/FrontEnd/Palettes/${BARE_SRC}
+			${PROJECT_BINARY_DIR}/paclet/${PACLET}/FrontEnd/${REL}
 		COMMAND
-			${CMAKE_COMMAND} -DSRC=${SRC} -DCODEPARSER_EXE=${CODEPARSER_EXE} -DWOLFRAMKERNEL=${WOLFRAMKERNEL} -DBUG349779_TIMEOUT=${BUG349779_TIMEOUT} -P ${PROJECT_SOURCE_DIR}/cmake/InspectFile.cmake
-		COMMAND
-			${CMAKE_COMMAND} -E copy ${SRC} ${PROJECT_BINARY_DIR}/paclet/${PACLET}/FrontEnd/Palettes/${BARE_SRC}
+			${CMAKE_COMMAND} -E copy ${SRC} ${PROJECT_BINARY_DIR}/paclet/${PACLET}/FrontEnd/${REL}
 		DEPENDS
 			${SRC}
-			${PROJECT_SOURCE_DIR}/cmake/InspectFile.cmake
 	)
-	list(APPEND COPIED_WL_PACLET_SOURCES ${PROJECT_BINARY_DIR}/paclet/${PACLET}/FrontEnd/Palettes/${BARE_SRC})
+	list(APPEND COPIED_WL_PACLET_SOURCES ${PROJECT_BINARY_DIR}/paclet/${PACLET}/FrontEnd/${REL})
 endforeach()
 
 
@@ -180,15 +187,18 @@ endforeach()
 
 add_custom_command(
 	OUTPUT
-		${PROJECT_BINARY_DIR}/generated/wl/AcceptableOperators.wl
+		${PROJECT_BINARY_DIR}/generated/wl/Kernel/AcceptableOperators.wl
+	COMMAND
+		${CMAKE_COMMAND} -DSCRIPT=${PROJECT_SOURCE_DIR}/CodeFormatter/Generate/AcceptableOperators.wl -DSRCDIR=${PROJECT_SOURCE_DIR} -DBUILDDIR=${PROJECT_BINARY_DIR} -DWOLFRAMKERNEL=${WOLFRAMKERNEL} -DBUG349779_TIMEOUT=${BUG349779_TIMEOUT} -P ${PROJECT_SOURCE_DIR}/cmake/WolframScript.cmake
+	COMMAND
+		${CMAKE_COMMAND} -DSRC=${PROJECT_BINARY_DIR}/generated/wl/Kernel/AcceptableOperators.wl -DCODEPARSER_EXE=${CODEPARSER_EXE} -DWOLFRAMKERNEL=${WOLFRAMKERNEL} -DBUG349779_TIMEOUT=${BUG349779_TIMEOUT} -P ${PROJECT_SOURCE_DIR}/cmake/InspectFile.cmake
 	DEPENDS
 		${PROJECT_SOURCE_DIR}/CodeParser/Data/InfixParselets.wl
 		${PROJECT_SOURCE_DIR}/CodeParser/Data/PrefixParselets.wl
 		${PROJECT_SOURCE_DIR}/CodeFormatter/Generate/AcceptableOperators.wl
 		${PROJECT_SOURCE_DIR}/CodeTools/Generate/GenerateSources.wl
 		${PROJECT_SOURCE_DIR}/cmake/WolframScript.cmake
-	COMMAND
-		${CMAKE_COMMAND} -DSCRIPT=${PROJECT_SOURCE_DIR}/CodeFormatter/Generate/AcceptableOperators.wl -DSRCDIR=${PROJECT_SOURCE_DIR} -DBUILDDIR=${PROJECT_BINARY_DIR} -DWOLFRAMKERNEL=${WOLFRAMKERNEL} -DBUG349779_TIMEOUT=${BUG349779_TIMEOUT} -P ${PROJECT_SOURCE_DIR}/cmake/WolframScript.cmake
+		${PROJECT_SOURCE_DIR}/cmake/InspectFile.cmake
 	VERBATIM
 	WORKING_DIRECTORY
 		${PROJECT_SOURCE_DIR}
@@ -196,14 +206,14 @@ add_custom_command(
 
 add_custom_command(
 	OUTPUT
-		${PROJECT_BINARY_DIR}/generated/wl/CodeFormatter.nb
+		${PROJECT_BINARY_DIR}/generated/wl/FrontEnd/Palettes/CodeFormatter.nb
+	COMMAND
+		${CMAKE_COMMAND} -DSCRIPT=${PROJECT_SOURCE_DIR}/CodeFormatter/Generate/Palette.wl -DSRCDIR=${PROJECT_SOURCE_DIR} -DBUILDDIR=${PROJECT_BINARY_DIR} -DWOLFRAMKERNEL=${WOLFRAMKERNEL} -DBUG349779_TIMEOUT=${BUG349779_TIMEOUT} -P ${PROJECT_SOURCE_DIR}/cmake/WolframScript.cmake
 	DEPENDS
 		${PROJECT_SOURCE_DIR}/CodeFormatter/Generate/Palette.wl
 		${PROJECT_SOURCE_DIR}/CodeFormatter/Generate/UIElements.wl
 		${PROJECT_SOURCE_DIR}/CodeTools/Generate/GenerateSources.wl
 		${PROJECT_SOURCE_DIR}/cmake/WolframScript.cmake
-	COMMAND
-		${CMAKE_COMMAND} -DSCRIPT=${PROJECT_SOURCE_DIR}/CodeFormatter/Generate/Palette.wl -DSRCDIR=${PROJECT_SOURCE_DIR} -DBUILDDIR=${PROJECT_BINARY_DIR} -DWOLFRAMKERNEL=${WOLFRAMKERNEL} -DBUG349779_TIMEOUT=${BUG349779_TIMEOUT} -P ${PROJECT_SOURCE_DIR}/cmake/WolframScript.cmake
 	VERBATIM
 	WORKING_DIRECTORY
 		${PROJECT_SOURCE_DIR}
@@ -236,13 +246,13 @@ add_custom_target(paclet
 add_custom_command(
 	OUTPUT
 		${PACLET_OUTPUT}
+	COMMAND
+		${CMAKE_COMMAND} -DSCRIPT=${PROJECT_SOURCE_DIR}/CodeTools/Generate/CreatePacletArchive.wl -DSRCDIR=${PROJECT_SOURCE_DIR} -DBUILDDIR=${PROJECT_BINARY_DIR} -DPACLET=${PACLET} -DWOLFRAMKERNEL=${WOLFRAMKERNEL} -DBUG349779_TIMEOUT=${BUG349779_TIMEOUT} -P ${PROJECT_SOURCE_DIR}/cmake/WolframScript.cmake
 	DEPENDS
 		${PACLET_SOURCES}
 		${PROJECT_SOURCE_DIR}/CodeTools/Generate/CreatePacletArchive.wl
 		${PROJECT_SOURCE_DIR}/CodeTools/Generate/GenerateSources.wl
 		${PROJECT_SOURCE_DIR}/cmake/WolframScript.cmake
-	COMMAND
-		${CMAKE_COMMAND} -DSCRIPT=${PROJECT_SOURCE_DIR}/CodeTools/Generate/CreatePacletArchive.wl -DSRCDIR=${PROJECT_SOURCE_DIR} -DBUILDDIR=${PROJECT_BINARY_DIR} -DPACLET=${PACLET} -DWOLFRAMKERNEL=${WOLFRAMKERNEL} -DBUG349779_TIMEOUT=${BUG349779_TIMEOUT} -P ${PROJECT_SOURCE_DIR}/cmake/WolframScript.cmake
 	VERBATIM
 	WORKING_DIRECTORY
 		${PROJECT_SOURCE_DIR}

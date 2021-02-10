@@ -236,7 +236,9 @@ formatSelectedNotebook[] :=
 *)
 
 
-
+(*
+Return string
+*)
 formatProgramCellContents[contents_String] :=
     Catch[
     Module[{formatted, airiness, indentationString, tabWidth},
@@ -253,6 +255,9 @@ formatProgramCellContents[contents_String] :=
         formatted
     ]]
 
+(*
+Return boxes
+*)
 formatInputContents[contentsBox_] :=
     Catch[
     Module[{cst, formatted, formattedBox, airiness, indentationString, tabWidth, agg, cst2, agg2, aggToCompare, agg2ToCompare, newline,
@@ -283,7 +288,20 @@ formatInputContents[contentsBox_] :=
         CodeFormatCST does not do sanity checking, so must do it here
         *)
         If[CodeFormatter`Private`$DisableSanityChecking,
-            Throw[formatted]
+
+            cst = CodeConcreteParse[formatted];
+            If[FailureQ[cst],
+                Throw[cst]
+            ];
+            (*
+            trick ToStandardFormBoxes into thinking that cst came from boxes
+            *)
+            cst[[1]] = Box;
+            formattedBox = ToStandardFormBoxes[cst];
+            If[FailureQ[formattedBox],
+                Throw[formattedBox]
+            ];
+            formattedBox
         ];
 
         agg = CodeParser`Abstract`Aggregate[cst];
@@ -291,6 +309,7 @@ formatInputContents[contentsBox_] :=
         agg = expandTernaryOptionalPattern[agg];
         agg = expandEqualDot[agg];
         agg = coalesceLineContinuation[agg];
+        agg = flattenGroupMissingCloserNode[agg];
 
         cst2 = CodeConcreteParse[formatted];
 
@@ -308,6 +327,7 @@ formatInputContents[contentsBox_] :=
 
         agg2 = CodeParser`Abstract`Aggregate[cst2];
         agg2 = reduceSpan[agg2];
+        agg2 = preferGroupMissingCloserNode[agg2];
 
         agg2[[1]] = Box;
 
@@ -415,6 +435,41 @@ lcReplace2[l_] :=
                 PrefixNode[tag, {LeafNode[tag1, lc <> str, <||>], rest}, data]
         }
     ]
+
+(*
+Parsing:
+
+f[
+
+as a string gives UnterminatedGroupNode
+
+But parsing RowBox[{"f", "["}] gives GroupMissingCloserNode
+
+Convert all UnterminatedGroupNode to GroupMissingCloserNode
+
+*)
+preferGroupMissingCloserNode[agg_] :=
+    agg /. UnterminatedGroupNode -> GroupMissingCloserNode
+
+(*
+Parsing:
+
+f[
+
+as a string leaves all of the subsequent content unparsed
+
+so try to reproduce that behavior with boxes
+
+*)
+flattenGroupMissingCloserNode[agg_] :=
+    agg /. GroupMissingCloserNode[tag_, children_, data_] :> GroupMissingCloserNode[tag, Flatten[flatten /@ children], data]
+
+flatten[n:LeafNode[_, _, _]] := n
+
+flatten[_[_, children_List, _]] := flatten /@ children
+
+
+
 
 
 (*

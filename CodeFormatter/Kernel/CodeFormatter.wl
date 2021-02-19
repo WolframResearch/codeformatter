@@ -53,6 +53,7 @@ Needs["CodeFormatter`BreakLines`"]
 Needs["CodeFormatter`Indent`"]
 Needs["CodeFormatter`Utils`"]
 Needs["CodeParser`"]
+Needs["CodeParser`Definitions`"] (* for DefinitionSymbols *)
 Needs["CodeParser`Folds`"] (* for linearize *)
 Needs["CodeParser`Utils`"] (* for empty *)
 Needs["PacletManager`"] (* for PacletInformation *)
@@ -1379,7 +1380,7 @@ abstractFormatNodes[
       trivia3:trivia...,
       op2:LeafNode[Token`Equal, _, _],
       trivia4:trivia...,
-      rhs_}, _]}, data_]] /; DeclarationName[lhs1] === DeclarationName[lhs2] :=
+      rhs_}, _]}, data_]] /; DefinitionSymbols[lhs1][[1, 2]] === DefinitionSymbols[lhs2][[1, 2]] :=
   TernaryNode[MemoizedSetDelayed, abstractFormatNodes /@ {lhs1, trivia1, op1, trivia2, lhs2, trivia3, op2, trivia4, rhs}, data]
 
 (*
@@ -1404,7 +1405,7 @@ abstractFormatNodes[
       trivia5:trivia...,
       op3:LeafNode[Token`Equal, _, _],
       trivia6:trivia...,
-      rhs_}, _]}, data_]] /; DeclarationName[lhs2] === DeclarationName[lhs3] :=
+      rhs_}, _]}, data_]] /; DefinitionSymbols[lhs2][[1, 2]] === DefinitionSymbols[lhs3][[1, 2]] :=
   QuaternaryNode[MemoizedTagSetDelayed, abstractFormatNodes /@ {lhs1, trivia1, op1, trivia2, lhs2, trivia3, op2, trivia4, lhs3, trivia5, op3, trivia6, rhs}, data]
 
 abstractFormatNodes[node_LeafNode] := node

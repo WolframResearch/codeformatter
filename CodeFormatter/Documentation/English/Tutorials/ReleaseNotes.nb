@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[     14561,        372]
-NotebookOptionsPosition[      9264,        268]
-NotebookOutlinePosition[      9736,        285]
-CellTagsIndexPosition[      9693,        282]
+NotebookDataLength[     18454,        481]
+NotebookOptionsPosition[     11721,        349]
+NotebookOutlinePosition[     12191,        366]
+CellTagsIndexPosition[     12148,        363]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -263,12 +263,93 @@ Provide a message for when a cell cannot currently be formatted\
 \>", "Text",
  CellID->2032722861,ExpressionUUID->"60d6088b-1267-4703-b8be-a2a76d9f7b30"]
 }, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["1.2", "Section",
+ CellChangeTimes->{{3.822824221714437*^9, 3.822824223655924*^9}},
+ CellID->1563112065,ExpressionUUID->"3fec56df-1515-4052-a500-ae02973db15a"],
+
+Cell["March 25, 2021", "Text",
+ CellChangeTimes->{{3.822824233793511*^9, 3.822824249038164*^9}, {
+  3.825677249810317*^9, 3.8256772534210787`*^9}},
+ CellID->1652935849,ExpressionUUID->"f39783a5-14ca-4da2-9ea8-f7d4a0742848"],
+
+Cell["\<\
+Give slightly saner error message when CodeFormat is given bad arguments\
+\>", "Text",
+ CellChangeTimes->{{3.8228242562586*^9, 3.822824256805437*^9}, 
+   3.825679358678781*^9},
+ CellID->373638291,ExpressionUUID->"01476a00-6977-4929-b590-b032a167f54a"],
+
+Cell["\<\
+Renaming various \"Newline\" things to \"NewlineString\" and \
+\"CompoundExpressions\" things to \"Semicolons\"\
+\>", "Text",
+ CellID->969885716,ExpressionUUID->"f75743b8-1c54-45b9-883a-09c4bc0e6c31"],
+
+Cell["Allow f[ to be formatted in FE", "Text",
+ CellID->1791626497,ExpressionUUID->"db979377-4b4e-4f18-9807-0e79237ce57c"],
+
+Cell["\<\
+Massive refactoring effort for 12.3
+
+Refactor different \"passes\" into their own files
+
+Canonicalize what the formatter outputs as not caring about newlines and \
+whitespace that it is given (except in some cases with comments where we care)\
+\>", "Text",
+ CellID->826405794,ExpressionUUID->"df7fb464-d656-4b6d-82be-57142508dec2"],
+
+Cell[CellGroupData[{
+
+Cell["Fixes", "Subsection",
+ CellChangeTimes->{{3.825679382359002*^9, 3.825679383134197*^9}},
+ CellID->1866517005,ExpressionUUID->"10981d30-8dac-443e-8ffb-b783fb439fd2"],
+
+Cell["Fix formatting a_b ..", "Text",
+ CellID->277514304,ExpressionUUID->"278d66d9-44d9-43a6-a583-3e0fed964a0a"],
+
+Cell["\<\
+Fix bug that resulted in multiple newlines being inserted
+
+Demonstrate bug by doing:
+
+CodeFormat[\"
+f[
+1
+,
+2
+]
+\", \"NewlinesBetweenCommas\" -> Insert]
+
+and see that there are multiple newlines inserted.\
+\>", "Text",
+ CellID->1995909691,ExpressionUUID->"65bbadc7-0f40-4c58-a9b8-5d3314f521e7"],
+
+Cell["Fix 404196, bad formatting of CompoundExpression in places", "Text",
+ CellID->1722160496,ExpressionUUID->"d2267886-5c88-4ebe-a1e4-7654959a7b99"],
+
+Cell["Fix 399281, formatter was not handling grouped cells", "Text",
+ CellID->1012276750,ExpressionUUID->"0a41d515-fd30-47c6-8811-4c403903f7f6"],
+
+Cell["\<\
+Fix 406342, line breaking and having:
+{
+f
+[]
+}
+is weird\
+\>", "Text",
+ CellID->847680035,ExpressionUUID->"4bf66039-9a8f-445f-bd7e-c4915fa27886"]
+}, Open  ]]
 }, Open  ]]
 }, Open  ]]
 },
-WindowSize->{700, 770},
+WindowSize->{869, 895},
 WindowMargins->{{32, Automatic}, {Automatic, 35}},
-FrontEndVersion->"12.2 for Mac OS X x86 (64-bit) (December 3, 2020)",
+FrontEndVersion->"12.3 for Mac OS X x86 (64-bit) (March 21, 2021)",
 StyleDefinitions->FrontEnd`FileName[{"Wolfram"}, "TutorialPageStyles.nb", 
   CharacterEncoding -> "UTF-8"],
 ExpressionUUID->"63fe6859-1ba0-456a-80d1-f2ea25380992"
@@ -371,6 +452,34 @@ Cell[8644, 249, 414, 9, 156, "Text",ExpressionUUID->"bb3e032d-c923-447b-9617-434
  CellID->543795778],
 Cell[9061, 260, 163, 3, 23, "Text",ExpressionUUID->"60d6088b-1267-4703-b8be-a2a76d9f7b30",
  CellID->2032722861]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[9273, 269, 164, 2, 43, "Section",ExpressionUUID->"3fec56df-1515-4052-a500-ae02973db15a",
+ CellID->1563112065],
+Cell[9440, 273, 223, 3, 23, "Text",ExpressionUUID->"f39783a5-14ca-4da2-9ea8-f7d4a0742848",
+ CellID->1652935849],
+Cell[9666, 278, 261, 5, 23, "Text",ExpressionUUID->"01476a00-6977-4929-b590-b032a167f54a",
+ CellID->373638291],
+Cell[9930, 285, 210, 4, 23, "Text",ExpressionUUID->"f75743b8-1c54-45b9-883a-09c4bc0e6c31",
+ CellID->969885716],
+Cell[10143, 291, 122, 1, 23, "Text",ExpressionUUID->"db979377-4b4e-4f18-9807-0e79237ce57c",
+ CellID->1791626497],
+Cell[10268, 294, 341, 8, 156, "Text",ExpressionUUID->"df7fb464-d656-4b6d-82be-57142508dec2",
+ CellID->826405794],
+Cell[CellGroupData[{
+Cell[10634, 306, 169, 2, 39, "Subsection",ExpressionUUID->"10981d30-8dac-443e-8ffb-b783fb439fd2",
+ CellID->1866517005],
+Cell[10806, 310, 112, 1, 23, "Text",ExpressionUUID->"278d66d9-44d9-43a6-a583-3e0fed964a0a",
+ CellID->277514304],
+Cell[10921, 313, 303, 15, 371, "Text",ExpressionUUID->"65bbadc7-0f40-4c58-a9b8-5d3314f521e7",
+ CellID->1995909691],
+Cell[11227, 330, 150, 1, 23, "Text",ExpressionUUID->"d2267886-5c88-4ebe-a1e4-7654959a7b99",
+ CellID->1722160496],
+Cell[11380, 333, 144, 1, 23, "Text",ExpressionUUID->"0a41d515-fd30-47c6-8811-4c403903f7f6",
+ CellID->1012276750],
+Cell[11527, 336, 154, 8, 168, "Text",ExpressionUUID->"4bf66039-9a8f-445f-bd7e-c4915fa27886",
+ CellID->847680035]
 }, Open  ]]
 }, Open  ]]
 }, Open  ]]

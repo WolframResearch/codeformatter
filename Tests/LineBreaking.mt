@@ -202,3 +202,42 @@ TestMatch[
 
 
 
+
+(*
+bug 406342
+
+was breaking as:
+
+resourcePublisherNameSpaceFreeQ[name_String] :=
+    With[{ns = DeleteMissing[publisherResourceNameSpace /@ allPublisherInfo
+        [][\"Publishers\"]]},
+        !MatchQ[name, Alternatives @@ ns]
+    ]
+
+*)
+Test[
+	CodeFormat["\
+resourcePublisherNameSpaceFreeQ[name_String] :=
+	With[{ns = DeleteMissing[publisherResourceNameSpace /@ allPublisherInfo[][\"Publishers\"]]},
+		!MatchQ[name, Alternatives @@ ns]
+	]"]
+	,
+	"\
+resourcePublisherNameSpaceFreeQ[name_String] :=
+    With[{ns = DeleteMissing[publisherResourceNameSpace /@ allPublisherInfo[
+        ][\"Publishers\"]]},
+        !MatchQ[name, Alternatives @@ ns]
+    ]"
+	,
+	TestID->"LineBreaking-20210304-N7V4P5"
+]
+
+
+
+
+
+
+
+
+
+

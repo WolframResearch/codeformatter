@@ -58,7 +58,7 @@ breakLines[tokensIn_, Infinity, Infinity] :=
 
 breakLine[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
   Module[{tokens, width, tok, toSplit, takeSpecs, kTmp, toInsertAfter, firstNonWhitespaceIndex, leadingWhitespace,
-    toplevel},
+    toplevel, nextTok},
 
     tokens = tokensIn;
 
@@ -94,6 +94,7 @@ breakLine[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
         Print["width is: ", width];
       ];
       tok = tokens[[i]];
+      nextTok = If[i < Length[tokens], tokens[[i+1]], Null];
 
       (*
       Manage group depth here to decide when line breaking is acceptable
@@ -157,8 +158,21 @@ breakLine[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
           unambiguous ternary
         *)
         If[width <= lineWidth2,
-          
-          If[isPossiblyAcceptable[tok] && (!toplevel || isAcceptableOperator[tok[[1]]]),
+
+          If[isPossiblyAcceptable[tok] &&
+              (!toplevel || isAcceptableOperator[tok[[1]]]) &&
+              (*
+              if the next tok is [
+              then do not break
+              having
+              {
+                f
+                []
+              }
+              is weird
+              *)
+              !MatchQ[nextTok, LeafNode[Token`OpenSquare, _, _]]
+            ,
             AppendTo[toInsertAfter, {i, leadingWhitespace <> $CurrentIndentationString}];
             width = 0;
             ,

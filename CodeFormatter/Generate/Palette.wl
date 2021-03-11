@@ -107,12 +107,17 @@ Module[{nb, res},
 
 		Cannot use FrontEndResource for WindowTitle because $Failed will appear in FE Palettes Menu
 
-		Related bugs: xxx
+		Related bugs: 401490
 		*)
 		WindowTitle->"Code Formatting", Background -> BackgroundCol
 	]
 ];
 
+	If[!MatchQ[nb, _NotebookObject],
+		Print["CreatePalette failed: ", nb];
+		Quit[1]
+	];
+	
 	Print["saving CodeFormatter.nb"];
 	res = NotebookSave[nb, FileNameJoin[{generatedWLDir, "FrontEnd", "Palettes", "CodeFormatter.nb"}]];
 

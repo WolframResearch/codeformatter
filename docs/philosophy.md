@@ -10,11 +10,9 @@ Using a pattern-based approach
 Questions like "is this expression too long?" are answered with pattern matching as much as possible
 
 
-All whitespace is discarded.
+All whitespace and newlines are discarded[\*].
 
-Newlines are used to inform decisions.
-
-Categories: just use existing line breaks, always reformat line breaks, some mix of both approaches
+\* except when there is a canonicalization issue
 
 
 
@@ -27,12 +25,15 @@ Nothing to do with adding comments, adding parens, changing to FullForm, etc.
 
 Inserting (*Else*) into If statements is not formatting, it is something else.
 
-Converting And[a, b] into a && b (or other way) now involves output and precedence and parentheses.
+Converting And[a, b] into a && b (or vice versa) now involves output and precedence and parentheses.
 
 Using CodeFormatter to insert \[LeftDoubleBracket] \[RightDoubleBracket] characters or \[Rule] character is not formatting, it is something else.
 
 Breaking up CompoundExpression[] at top-level is not formatting, it is something else, changes semantics.
 
+
+Formatting is a function concrete -> concrete
+PrettyPrinting is a function expr -> concrete
 
 
 

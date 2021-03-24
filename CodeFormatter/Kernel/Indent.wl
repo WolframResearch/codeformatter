@@ -17,47 +17,242 @@ Would like to use symbol Indent, but Indent is an undocumented System` symbol
 *)
 
 IndentCST[gst_] :=
-  indent[gst]
+Module[{indented},
+
+  If[$Debug,
+    Print["Inside IndentCST"];
+  ];
+
+  (*
+  indented has symbolic expressions:
+  IndentationNode[]
+  line[]
+  *)
+  indented = indent[gst];
+
+  If[$Debug,
+    Print["before symbolic render: ", indented];
+  ];
+  
+  (*
+  Now render the symbolic values down to actual values
+  *)
+  Block[{IndentationNode, line},
+
+    (*
+    Make IndentationNode HoldAll so that we can achieve top-down evaluation
+    *)
+    Attributes[IndentationNode] = {HoldAll};
+
+    IndentationNode[Block, childrenIn_, data_] :=
+    Module[{children, blocked, len},
+
+      Internal`InheritedBlock[{$CurrentIndentationLevelNodeList = $CurrentIndentationLevelNodeList ~Join~ $CurrentIndentationNodeList},
+
+        children = childrenIn;
+
+        (*
+        There may be leading whitespace from breaking after an operator such as :=, so make sure to remove
+        *)
+        len = LengthWhile[children, MatchQ[#, ws]&];
+        children = Drop[children, len];
+
+        blocked =
+          {line[]} ~Join~
+          children
+      ];
+      
+      If[Lookup[data, "Toplevel", False],
+        (*
+        do not add trailing newline if top-level
+        *)
+        Sequence @@ blocked
+        ,
+        Sequence @@ (
+          blocked ~Join~
+          {line[]}
+        )
+      ]
+    ];
+    
+    IndentationNode[Increment, children_, _] :=
+    Module[{blocked},
+
+      Internal`InheritedBlock[{$CurrentIndentationLevelNodeList = $CurrentIndentationLevelNodeList ~Join~ $CurrentIndentationNodeList},
+        blocked = children
+      ];
+
+      Sequence @@ blocked
+    ];
+    
+    line[] :=
+      Sequence @@ ({LeafNode[Token`Newline, $CurrentNewlineString, <||>]} ~Join~ $CurrentIndentationLevelNodeList);
+    
+    (* :!CodeAnalysis::BeginBlock:: *)
+    (* :!CodeAnalysis::Disable::SelfAssignment:: *)
+    indented = indented;
+    (* :!CodeAnalysis::EndBlock:: *)
+
+    Null
+  ];
+
+  If[$Debug,
+    Print["after symbolic render: ", indented];
+  ];
+
+  indented
+]
 
 
-
-line[] :=
-  LeafNode[Token`Newline, $CurrentNewlineString, <||>]
+(* line[] :=
+  {LeafNode[Token`Newline, $CurrentNewlineString, <||>], $CurrentIndentationLevelNodeList}
+*)
 
 space[] =
   LeafNode[Whitespace, " ", <||>]
 
-tab[] =
-  LeafNode[Whitespace, "\t", <||>]
-
 
 (*
 Replace all newline leafs with the sequence: newline + indentation
+*)
+(*
+needs to be s_ /; ... because we do not want to use the value of $CurrentNewlineString at definition time
+*)
+(* increment[nl:LeafNode[Token`Newline, s_ /; s == $CurrentNewlineString, _]] :=
+  Sequence @@ ({nl} ~Join~ $CurrentIndentationNodeList) *)
 
+(*
 Make sure to handle the cases of newlines inside of multiline comments
 *)
-incrementIndent[n_] :=
+(*
+needs to be s_ /; ... because we do not want to use the value of $CurrentNewlineString at definition time
+*)
+(* increment[c:FragmentNode[Token`Comment, s_ /; s == "\\" <> $CurrentNewlineString, _]] :=
+  Sequence @@ ({c} ~Join~ $CurrentIndentationCommentFragmentNodeList) *)
+
+(*
+needs to be s_ /; ... because we do not want to use the value of $CurrentNewlineString at definition time
+*)
+(* increment[nl:FragmentNode[Token`Comment, s_ /; s == $CurrentNewlineString, _]] :=
+  Sequence @@ ({nl} ~Join~ $CurrentIndentationCommentFragmentNodeList) *)
+
+(* increment[CallNode[headIn_, childrenIn_, data_]] :=
+Module[{head, children},
+
+  If[$Debug,
+    Print["calling increment: ", {CallNode, headIn}];
+  ];
+
+  head = headIn;
+
+  children = childrenIn;
+
+  head = Flatten[{increment /@ head}];
+
+  children = Flatten[{increment /@ children}];
+
+  CallNode[head, children, <| data |>]
+] *)
+
+(* increment[n:LeafNode[_, _, _]] :=
+Module[{},
+  n
+] *)
+
+(* increment[type_[tag_, childrenIn_, data_]] :=
+Module[{children},
+
+  If[$Debug,
+    Print["calling increment: ", {type, tag}];
+  ];
+
+  children = childrenIn;
+
+  children = Flatten[{increment /@ children}];
+
+  type[tag, children, <| data |>]
+] *)
+
+
+(*
+short-hand for IndentationNode[Increment, ...]
+*)
+increment[n_] :=
+Catch[
+Module[{aggs, rators, firstRatorPos, first, rest, children},
+
+  If[$Debug,
+    Print["inside increment"];
+  ];
+
+  IndentationNode[Increment, {n}, <||>]
+]]
+
+
+(*
+short-hand for IndentationNode[Block, ...]
+*)
+block[children_List] :=
 Module[{},
 
   If[$Debug,
-    Print["calling incrementIndent: ", n];
+    Print["inside block"];
+    Print["children: ", children];
+    Print["$Toplevel: ", $Toplevel];
   ];
 
-  ReplaceAll[n,
-    {
-      nl:LeafNode[Token`Newline, $CurrentNewlineString, _] :>
-        Sequence @@ ({nl} ~Join~ $CurrentIndentationNodeList)
-      ,
-      continuation:FragmentNode[Token`Comment, "\\" <> $CurrentNewlineString, _] :>
-        Sequence @@ ({continuation} ~Join~ $CurrentIndentationCommentFragmentNodeList)
-      ,
-      nl:FragmentNode[Token`Comment, $CurrentNewlineString, _] :>
-        Sequence @@ ({nl} ~Join~ $CurrentIndentationCommentFragmentNodeList)
-    }
-  ]
+  IndentationNode[Block, children, <| "Toplevel" -> $Toplevel |>]
 ]
 
+blockAfterFirstRator[type_[tag_, graphs_, data_]] :=
+Catch[
+Module[{aggs, rators, firstRatorPos, first, rest, children},
 
+  If[$Debug,
+    Print["inside blockAfterFirstRator"];
+    Print["graphs: ", graphs]
+  ];
+
+  (*
+  blockAfterFirstRator is called after ws has been reintroduced, so must check for both comments AND ws
+  *)
+  aggs = DeleteCases[graphs, trivia];
+
+  rators = aggs[[2;;;;2]];
+
+  firstRatorPos = Position[graphs, rators[[1]]][[1]];
+
+  {first, rest} = TakeDrop[graphs, firstRatorPos[[1]]];
+
+  children = first ~Join~ {block[rest]};
+
+  type[tag, children, <| data |>]
+]]
+
+blockAfterLastRator[type_[tag_, graphs_, data_]] :=
+Catch[
+Module[{aggs, rators, lastRatorPos, first, rest, children},
+
+  If[$Debug,
+    Print["inside blockAfterLastRator"];
+    Print["graphs: ", graphs]
+  ];
+
+  (*
+  blockAfterLastRator is called after ws has been reintroduced, so must check for both comments AND ws
+  *)
+  aggs = DeleteCases[graphs, trivia];
+
+  rators = aggs[[2;;;;2]];
+
+  lastRatorPos = Position[graphs, rators[[-1]]][[1]];
+
+  {first, rest} = TakeDrop[graphs, lastRatorPos[[1]]];
+
+  children = first ~Join~ {block[rest]};
+
+  type[tag, children, <| data |>]
+]]
 
 
 
@@ -75,23 +270,28 @@ Special case multiline comments
 
 It is ok to change the internal indentation of comments, as long as everything is still aligned
 *)
-indent[LeafNode[Token`Comment, fs:{
+indent[LeafNode[Token`Comment, fsIn:{
   (*
   needs to be s_ /; ... because we do not want to use the value of $CurrentNewlineString at definition time
   *)
-  FragmentNode[Token`Comment, s_ /; s == "\\" <> $CurrentNewlineString, _],
+  FragmentNode[Token`Comment, s_ /; s == $CurrentLineContinuationString, _],
   ___,
   FragmentNode[Token`Comment, "(*", _],
   ___,
   FragmentNode[Token`Comment, "*)", _]}, data_], OptionsPattern[]] :=
-Module[{min, replaced, origSpaces, strs, minStr, indentStr, inserted, split, fragGroups, nlGroups, firstStrs, replacedStrs, replacedFirstStrs,
-  replacedOrigSpaces, level},
+Module[{fs, min, replaced, origSpaces, strs, minStr, indentStr, frags, inserted, split, fragGroups, nlGroups, firstStrs, replacedStrs, replacedFirstStrs,
+  replacedOrigSpaces, level,
+  children},
 
   If[$Debug,
     Print["calling indent multiline Comment"];
   ];
 
-  origSpaces = Count[fs, FragmentNode[Token`Comment, " ", <|"Temporary" -> True|>]];
+  fs = fsIn;
+
+  fs = indent /@ fs;
+
+  origSpaces = Count[fs, FragmentNode[Token`Comment, " ", KeyValuePattern["Temporary" -> True]]];
 
   If[$Debug,
     Print["origSpaces: ", origSpaces //InputForm];
@@ -160,7 +360,7 @@ Module[{min, replaced, origSpaces, strs, minStr, indentStr, inserted, split, fra
     Join[
       Drop[fs[[2;;inserted]], -min]
       ,
-      Flatten[Table[FragmentNode[Token`Comment, #, <||>], level]& /@ Characters[$CurrentIndentationString]]
+      Flatten[Table[indent[FragmentNode[Token`Comment, #, <||>]], level]& /@ Characters[$CurrentIndentationString]]
     ];
 
   If[$Debug,
@@ -171,36 +371,65 @@ Module[{min, replaced, origSpaces, strs, minStr, indentStr, inserted, split, fra
   ];
 
   If[$CurrentStyle["NewlinesInComments"] === Delete,
-    LeafNode[Token`Comment,
+
+    children =
       Flatten[
         replacedOrigSpaces ~Join~
-        {fragGroups[[1]]} ~Join~ (Function[{replacedStr}, FragmentNode[Token`Comment, #, <||>]& /@ replacedStr] /@ replacedStrs)
-      ]
+        {fragGroups[[1]]} ~Join~
+        (Function[{replacedStr}, indent[FragmentNode[Token`Comment, #, <||>]]& /@ replacedStr] /@ replacedStrs)
+      ];
+
+    LeafNode[
+      Token`Comment
       ,
-      data
+      children
+      ,
+      <| data |>
     ]
     ,
-    LeafNode[Token`Comment,
+
+    children =
       Flatten[
-        {fs[[1]]} ~Join~
+        {indent[fs[[1]]]} ~Join~
         replacedOrigSpaces ~Join~
-        betterRiffle[{fragGroups[[1]]} ~Join~ (Function[{replacedStr}, FragmentNode[Token`Comment, #, <||>]& /@ replacedStr] /@ replacedStrs), nlGroups]
-      ]
+        betterRiffle[{fragGroups[[1]]} ~Join~ (Function[{replacedStr}, indent[FragmentNode[Token`Comment, #, <||>]]& /@ replacedStr] /@ replacedStrs), nlGroups]
+      ];
+
+    LeafNode[
+      Token`Comment
       ,
-      <|data, "Multiline" -> True|>
+      children
+      ,
+      <| data, "Multiline" -> True |>
     ]
   ]
 ]
 
 
-indent[n:LeafNode[Token`Comment, _, _], OptionsPattern[]] :=
-Module[{},
+indent[LeafNode[Token`Comment, str_String, data_], OptionsPattern[]] :=
+With[{len = StringLength[str]},
 
   If[$Debug,
     Print["indent comment"];
   ];
 
-  n
+  LeafNode[Token`Comment, str, <| data |>]
+]
+
+(*
+newlines may be introduced and result in:
+
+f[args___] :=
+    $Failed /; (g[])
+;
+
+so keep track of top-level ; and absorb newlines later as needed
+
+*)
+indent[LeafNode[Token`Semi, str_String, data_], OptionsPattern[]] :=
+With[{len = StringLength[str]},
+
+  LeafNode[Token`Semi, str, <| data, "Toplevel" -> $Toplevel |>]
 ]
 
 (*
@@ -213,11 +442,39 @@ All other leafs:
   multiline string from FE,
   multiline comments from FE, etc.
 *)
-indent[n:LeafNode[_, _, _], OptionsPattern[]] :=
-  n
+indent[LeafNode[tag_, str_String, data_], OptionsPattern[]] :=
+With[{len = StringLength[str]},
+  LeafNode[tag, str, <| data |>]
+]
 
-indent[n:ErrorNode[_, _, _], OptionsPattern[]] :=
-  n
+indent[LeafNode[tag_, frags_, data_], OptionsPattern[]] :=
+With[
+  {children = indent /@ frags}
+  ,
+  LeafNode[tag, children, <| data |>]
+]
+
+(*
+Temporary line continuation
+*)
+(*
+needs to be s_ /; ... because we do not want to use the value of $CurrentNewlineString at definition time
+*)
+indent[FragmentNode[Token`Comment, s_ /; s == $CurrentLineContinuationString, data_]] :=
+  FragmentNode[Token`Comment, s, <| data |>]
+
+indent[FragmentNode[Token`Comment, s_ /; s == $CurrentNewlineString, data_]] :=
+  FragmentNode[Token`Comment, s, <| data |>]
+
+indent[FragmentNode[tag_, str_String, data_], OptionsPattern[]] :=
+With[{len = StringLength[str]},
+  FragmentNode[tag, str, <| data |>]
+]
+
+indent[ErrorNode[tag_, str_String, data_], OptionsPattern[]] :=
+With[{len = StringLength[str]},
+  ErrorNode[tag, str, <| data |>]
+]
 
 
 (*
@@ -230,7 +487,8 @@ indentPostfixRator[Function][rator_, level_] :=
   indent[rator, level] *)
 
 indent[PrefixNode[tag_, {rator_, randSeq:comment..., rand_}, data_], OptionsPattern[]] :=
-Module[{indentedRator, indentedRandSeq, indentedRand, indentedRandMultiline},
+Module[{indentedRator, indentedRandSeq, indentedRand, indentedRandMultiline,
+  children},
 
   indentedRator = indent[rator];
   indentedRandSeq = indent /@ {randSeq};
@@ -243,31 +501,23 @@ Module[{indentedRator, indentedRandSeq, indentedRand, indentedRandMultiline},
     Print["rand: ", indentedRand];
   ];
 
-  If[indentedRandMultiline,
-    PrefixNode[tag,
-      Flatten[{
-        indentedRator,
-        indentedRandSeq,
-        indentedRand
-      }]
-      ,
-      <|data, "Multiline" -> True|>
-    ]
+  children =
+    Flatten[{
+      indentedRator,
+      indentedRandSeq,
+      indentedRand
+    }];
+
+  PrefixNode[tag,
+    children
     ,
-    PrefixNode[tag,
-      Flatten[{
-        indentedRator,
-        indentedRandSeq,
-        indentedRand
-      }]
-      ,
-      data
-    ]
+    <| data, "Multiline" -> indentedRandMultiline |>
   ]
 ]
 
 indent[PostfixNode[tag_, {rand_, randSeq:comment..., rator_}, data_], OptionsPattern[]] :=
-Module[{indentedRand, indentedRandSeq, indentedRator, indentedRandMultiline},
+Module[{indentedRand, indentedRandSeq, indentedRator, indentedRandMultiline,
+  children},
 
   indentedRand = indent[rand];
   indentedRandSeq = indent /@ {randSeq};
@@ -280,32 +530,24 @@ Module[{indentedRand, indentedRandSeq, indentedRator, indentedRandMultiline},
     Print["rand: ", indentedRand];
   ];
 
-  If[indentedRandMultiline,
-    PostfixNode[tag,
-      Flatten[{
-        indentedRand,
-        indentedRandSeq,
-        indentedRator
-      }]
-      ,
-      <|data, "Multiline" -> True|>
-    ]
+  children =
+    Flatten[{
+      indentedRand,
+      indentedRandSeq,
+      indentedRator
+    }];
+
+  PostfixNode[tag,
+    children
     ,
-    PostfixNode[tag,
-      Flatten[{
-        indentedRand,
-        indentedRandSeq,
-        indentedRator
-      }]
-      ,
-      data
-    ]
+    <| data, "Multiline" -> indentedRandMultiline |>
   ]
 ]
 
 
 indent[PrefixBinaryNode[tag_, {rator_, rand1Seq:comment..., rand1_, rand2Seq:comment..., rand2_}, data_], OptionsPattern[]] :=
-Module[{indentedRator, indentedRand1Seq, indentedRand1, indentedRand2Seq, indentedRand2, indentedRandMultiline},
+Module[{indentedRator, indentedRand1Seq, indentedRand1, indentedRand2Seq, indentedRand2, indentedRandMultiline,
+  children},
 
   indentedRator = indent[rator];
   indentedRand1Seq = indent /@ {rand1Seq};
@@ -321,30 +563,19 @@ Module[{indentedRator, indentedRand1Seq, indentedRand1, indentedRand2Seq, indent
     Print["rand2: ", indentedRand2];
   ];
 
-  If[indentedRandMultiline,
-    PrefixBinaryNode[tag,
-      Flatten[{
-        indentedRator,
-        indentedRand1Seq,
-        indentedRand1,
-        indentedRand2Seq,
-        indentedRand2
-      }]
-      ,
-      <|data, "Multiline" -> True|>
-    ]
+  children =
+    Flatten[{
+      indentedRator,
+      indentedRand1Seq,
+      indentedRand1,
+      indentedRand2Seq,
+      indentedRand2
+    }];
+  
+  PrefixBinaryNode[tag,
+    children
     ,
-    PrefixBinaryNode[tag,
-      Flatten[{
-        indentedRator,
-        indentedRand1Seq,
-        indentedRand1,
-        indentedRand2Seq,
-        indentedRand2
-      }]
-      ,
-      data
-    ]
+    <| data, "Multiline" -> indentedRandMultiline |>
   ]
 ]
 
@@ -373,7 +604,7 @@ Module[{ratorsPat, definitelyDelete, definitelyInsert, split, indentedGraphs, an
     Print["indent CompoundExpression"];
   ];
 
-  indentedGraphs = Flatten[indent /@ graphs];
+  indentedGraphs = indent /@ graphs;
 
   anyIndentedGraphsMultiline = AnyTrue[indentedGraphs, Lookup[#[[3]], "Multiline", False]&];
 
@@ -451,7 +682,7 @@ indent[InfixNode[Comma, graphs_, data_], OptionsPattern[]] :=
 
     ratorsPat = LeafNode[Token`Comma, _, _];
 
-    indentedGraphs = Flatten[indent /@ graphs];
+    indentedGraphs = indent /@ graphs;
 
     aggs = DeleteCases[indentedGraphs, comment];
 
@@ -563,6 +794,13 @@ a =.
 indentInfixRator[Unset][rator_] :=
   {space[], rator}
 
+(*
+even with non-leafs on LHS, MessageName must always format with no spaces
+
+a[]::b  must format as  a[]::b
+*)
+indentInfixRator[MessageName][rator_] :=
+  rator
 
 indentInfixRator[_][rator_] :=
   {space[], rator, space[]}
@@ -616,7 +854,7 @@ indent[(type:BinaryNode|InfixNode|TernaryNode|QuaternaryNode)[tag_, graphs_, dat
       Print["inside indent operator"]
     ];
 
-    indentedGraphs = Flatten[indent /@ graphs];
+    indentedGraphs = indent /@ graphs;
 
     anyIndentedGraphsMultiline = AnyTrue[indentedGraphs, Lookup[#[[3]], "Multiline", False]&];
 
@@ -683,9 +921,10 @@ indent[(type:BinaryNode|InfixNode|TernaryNode|QuaternaryNode)[tag_, graphs_, dat
           Always line break after last rator, so redo newlines
           *)
           MemberQ[$SpecialBreakAfterLastRator, tag] && $Toplevel,
-            lastRator = rators[[-1]];
+            (* lastRator = rators[[-1]];
             lastRatorPos = Position[indentedGraphs, lastRator][[1]];
-            split = {Take[indentedGraphs, lastRatorPos[[1]]], Drop[indentedGraphs, lastRatorPos[[1]]]};
+            split = TakeDrop[indentedGraphs, lastRatorPos[[1]]]; *)
+            split = {indentedGraphs};
           ,
           True,
             split =
@@ -713,7 +952,7 @@ indent[(type:BinaryNode|InfixNode|TernaryNode|QuaternaryNode)[tag_, graphs_, dat
                       True
                     ,
                     True,
-                      False                    
+                      False
                   ]&
               ]
         ]
@@ -731,15 +970,22 @@ indent[(type:BinaryNode|InfixNode|TernaryNode|QuaternaryNode)[tag_, graphs_, dat
         baseOperatorNodeIndent[type, tag, data, split, ratorsPat, anyIndentedGraphsMultiline, infixRatorSurroundedByLeafs]
       ,
       TrueQ[definitelyAutomatic],
-        incrementIndentAfterFirstRator @
-          baseOperatorNodeIndent[type, tag, data, split, ratorsPat, anyIndentedGraphsMultiline, infixRatorSurroundedByLeafs]
+        Which[
+          MemberQ[$SpecialBreakAfterLastRator, tag] && $Toplevel,
+            blockAfterLastRator @
+              baseOperatorNodeIndent[type, tag, data, split, ratorsPat, anyIndentedGraphsMultiline, infixRatorSurroundedByLeafs]
+          ,
+          True,
+            increment @
+              baseOperatorNodeIndent[type, tag, data, split, ratorsPat, anyIndentedGraphsMultiline, infixRatorSurroundedByLeafs]
+        ]
     ]
   ]]
 
 
 baseOperatorNodeIndent[type_, tag_, data_, split_, ratorsPat_, anyIndentedGraphsMultiline_, infixRatorSurroundedByLeafs_] :=
 Catch[
-Module[{},
+Module[{children, grouped},
 
   If[$Debug,
     Print["inside baseOperatorNodeIndent"];
@@ -747,36 +993,38 @@ Module[{},
     Print["tag: ", tag];
     Print["split: ", split];
     Print["ratorsPat: ", ratorsPat];
+    Print["infixRatorSurroundedByLeafs: ", infixRatorSurroundedByLeafs];
   ];
 
   If[Length[split] == 1,
     (*
     There were no newline tokens
     *)
+
+    grouped = split[[1]];
+
+    children =
+      Flatten[
+        Replace[grouped, {
+          rator:ratorsPat :>
+            If[infixRatorSurroundedByLeafs,
+              indentInfixRatorSurroundedByLeafs[tag][rator]
+              ,
+              indentInfixRator[tag][rator]
+            ]
+        }, {1}]
+      ];
+
     Throw[
       type[tag,
-        Flatten[
-        Map[
-          Function[{grouped},
-            Replace[grouped, {
-              rator:ratorsPat :>
-                If[infixRatorSurroundedByLeafs,
-                  indentInfixRatorSurroundedByLeafs[tag][rator]
-                  ,
-                  indentInfixRator[tag][rator]
-                ]
-            }, {1}]
-          ]
-          ,
-          split
-        ]]
+        children
         ,
-        <|data, "Multiline" -> anyIndentedGraphsMultiline|>
+        <| data, "Multiline" -> anyIndentedGraphsMultiline |>
       ]
     ]
   ];
 
-  type[tag,
+  children =
     Flatten[
     betterRiffle[
       Map[
@@ -815,33 +1063,15 @@ Module[{},
         split
       ]
       ,
-      {line[]}
+      line[]
     ]
-    ]
+    ];
+
+  type[tag,
+    children
     ,
-    <|data, "Multiline" -> True|>
+    <| data, "Multiline" -> True |>
   ]
-]]
-
-
-incrementIndentAfterFirstRator[(type:BinaryNode|InfixNode|TernaryNode|QuaternaryNode)[tag_, graphs_, data_], OptionsPattern[]] :=
-Catch[
-Module[{aggs, rators, firstRatorPos, first, rest},
-
-  If[$Debug,
-    Print["inside incrementIndentAfterFirstRator"];
-    Print["graphs: ", graphs]
-  ];
-
-  aggs = DeleteCases[graphs, comment];
-
-  rators = aggs[[2;;;;2]];
-
-  firstRatorPos = Position[graphs, rators[[1]]][[1]];
-
-  {first, rest} = TakeDrop[graphs, firstRatorPos[[1]]];
-
-  type[tag, Flatten[{first, incrementIndent /@ rest}], data]
 ]]
 
 
@@ -852,35 +1082,38 @@ indent[GroupNode[tag_, {
       opener_,
       closer_
     }, data_], OptionsPattern[]] :=
-  Module[{},
+Module[{children},
+
+  children =
+    {
+      indent[opener],
+      indent[closer]
+    };
 
   Block[{$Toplevel = False},
     GroupNode[tag,
-      {
-        indent[opener],
-        indent[closer]
-      }
+      children
       ,
-      data
+      <| data |>
     ]
-  ]]
+  ]
+]
 
 indent[GroupNode[tag_, {
       opener_, 
       graphSeq___,
       closer_
     }, data_], OptionsPattern[]] :=
-  Module[{graphs, aggs,
+  Module[{graphs, aggs, x,
     definitelyDelete, definitelyInsert,
     indentedOpener, indentedGraphs, indentedCloser,
-    anyIndentedGraphsMultiline},
+    anyIndentedGraphsMultiline,
+    children},
   
   Block[{$Toplevel = False},
 
-    graphs = {graphSeq};
-
     indentedOpener = indent[opener];
-    indentedGraphs = Flatten[indent /@ graphs];
+    indentedGraphs = indent /@ {graphSeq};
     indentedCloser = indent[closer];
 
     If[$Debug,
@@ -893,8 +1126,6 @@ indent[GroupNode[tag_, {
     If[$Debug,
       Print["anyIndentedGraphsMultiline: ", anyIndentedGraphsMultiline];
     ];
-
-    aggs = DeleteCases[graphs, comment];
 
     If[anyIndentedGraphsMultiline,
       definitelyInsert = True;
@@ -931,34 +1162,39 @@ indent[GroupNode[tag_, {
 
     Which[
       TrueQ[definitelyInsert],
-        GroupNode[tag,
-          Flatten[
-          {
+
+        (* children =
+          betterRiffle[{indentedOpener} ~Join~ indentedGraphs ~Join~ {indentedCloser}, line[]]; *)
+        children =
+          Flatten[{
             indentedOpener,
-            incrementIndent /@ surround[indentedGraphs, {line[]}, "AlreadyPresent" -> {After}],
-            line[],
+            block @ indentedGraphs,
             indentedCloser
-          }
-          ]
+          }];
+
+        GroupNode[tag,
+          children
           ,
-          <|data, "Multiline" -> True|>
+          <| data, "Multiline" -> True |>
         ]
       ,
       TrueQ[definitelyDelete],
-        GroupNode[tag,
-          Flatten[
-          {
+
+        children =
+          Flatten[{
             indentedOpener,
-            indentedGraphs, 
+            indentedGraphs,
             indentedCloser
-          }
-          ]
+          }];
+
+        GroupNode[tag,
+          children
           ,
           (*
           may want to do:
-          <|data, "Multiline" -> anyIndentedGraphsMultiline|>
+          <| data, "Multiline" -> anyIndentedGraphsMultiline |>
           *)
-          data
+          <| data |>
         ]
     ]
   ]]
@@ -979,34 +1215,28 @@ Module[{x},
 ]
 
 *)
-indent[node:CallNode[{head:LeafNode[Symbol, "Module" | "Block" | "With" | "Function" | {FragmentNode[Symbol, "Module" | "Block" | "With" | "Function", _], ___}, _], headSeq:comment...}, {
+indent[node:CallNode[head:{LeafNode[Symbol, "Module" | "Block" | "With" | "Function" | {FragmentNode[Symbol, "Module" | "Block" | "With" | "Function", _], ___}, _], ___}, {
       GroupNode[GroupSquare, {
-          opener_, 
-          openerSeq:comment..., 
+          opener_,
+          openerSeq:comment...,
           InfixNode[Comma, {
               varsSeq:Except[LeafNode[Token`Comma, _, _]]...,
               comma1:LeafNode[Token`Comma, _, _],
               bodySeq:Except[LeafNode[Token`Comma, _, _]...]
             }
-            , _],
-          closerSeq:comment..., 
+            ,
+            data2_
+          ],
+          closerSeq:comment...,
           closer_
-        }, _]
+        }
+        ,
+        data1_
+      ]
     }, data_], OptionsPattern[]] :=
-  Module[{indentedHead, indentedHeadSeq, indentedOpener, indentedOpenerSeq, indentedVars, indentedComma1, indentedBody, indentedCloserSeq, indentedCloser,
-    definitelyDelete, definitelyInsert, definitelyAutomatic},
-
-    indentedHead = indent[head];
-    indentedHeadSeq = indent /@ {headSeq};
-    Block[{$Toplevel = False},
-      indentedOpener = indent[opener];
-      indentedOpenerSeq = indent /@ {openerSeq};
-      indentedVars = indent /@ {varsSeq};
-      indentedComma1 = indent[comma1];
-      indentedBody = indent /@ {bodySeq};
-      indentedCloserSeq = indent /@ {closerSeq};
-      indentedCloser = indent[closer];
-    ];
+  Module[{indentedHead,
+    definitelyDelete, definitelyInsert, definitelyAutomatic,
+    commaChildren, groupChildren, children},
 
     definitelyDelete = $CurrentStyle["NewlinesInScoping"] === Delete;
     definitelyInsert = $CurrentStyle["NewlinesInScoping"] === Insert;
@@ -1023,26 +1253,46 @@ indent[node:CallNode[{head:LeafNode[Symbol, "Module" | "Block" | "With" | "Funct
         commonCallNodeIndent[node]
       ,
       TrueQ[definitelyAutomatic],
+
+        indentedHead = indent /@ head;
+        Block[{$Toplevel = False},
+
+          commaChildren =
+            Flatten[{
+              indent /@ {varsSeq},
+              indent[comma1],
+              indent /@ {bodySeq}
+            }];
+
+          groupChildren =
+            Flatten[{
+              indent[opener],
+              indent /@ {openerSeq},
+              blockAfterFirstRator @
+                InfixNode[Comma,
+                  commaChildren
+                  ,
+                  <| data2 |>
+                ],
+              indent[Insert[#, StartOfLine -> True, {3, 1}]]& /@ {closerSeq},
+              indent[closer]
+            }];
+
+          children = {
+              GroupNode[GroupSquare,
+                groupChildren
+                ,
+                <| data1 |>
+              ]
+            };
+        ];
+
         CallNode[
-          Flatten[{
-            indentedHead,
-            indentedHeadSeq
-          }],
-          Block[{$Toplevel = False},
-          Flatten[{
-            indentedOpener,
-            incrementIndent /@ indentedOpenerSeq,
-            incrementIndent /@ indentedVars,
-            incrementIndent[indentedComma1],
-            incrementIndent[line[]],
-            incrementIndent /@ indentedBody,
-            incrementIndent /@ indentedCloserSeq,
-            line[],
-            indentedCloser
-          }]
-          ]
+          indentedHead
           ,
-          <|data, "Multiline" -> True|>
+          children
+          ,
+          <| data, "Multiline" -> True |>
         ]
     ]
   ]
@@ -1060,7 +1310,7 @@ With[
 ]
 
 *)
-indent[node:CallNode[{head:LeafNode[Symbol, "With" | {FragmentNode[Symbol, "With", _], ___}, _], headSeq:comment...}, {
+indent[node:CallNode[head:{LeafNode[Symbol, "With" | {FragmentNode[Symbol, "With", _], ___}, _], ___}, {
       GroupNode[GroupSquare, {
           opener_, 
           openerSeq:comment..., 
@@ -1071,29 +1321,20 @@ indent[node:CallNode[{head:LeafNode[Symbol, "With" | {FragmentNode[Symbol, "With
               comma2:LeafNode[Token`Comma, _, _],
               varsRestSeq:PatternSequence[Except[LeafNode[Token`Comma, _, _]]..., LeafNode[Token`Comma, _, _]]...,
               bodySeq:Except[LeafNode[Token`Comma, _, _]...]
-            }, _],
+            }
+            ,
+            data2_
+          ],
           closerSeq:comment..., 
           closer_
-        }, _]
+        }
+        ,
+        data1_
+      ]
     }, data_], OptionsPattern[]] :=
-  Module[{indentedHead, indentedHeadSeq, indentedOpener, indentedOpenerSeq, indentedVarsFirst, indentedComma1, indentedVarsSecond,
-    indentedComma2, indentedVarsRest, indentedBody, indentedCloserSeq, indentedCloser,
-    definitelyDelete, definitelyInsert, definitelyAutomatic},
-
-    indentedHead = indent[head];
-    indentedHeadSeq = indent /@ {headSeq};
-    Block[{$Toplevel = False},
-      indentedOpener = indent[opener];
-      indentedOpenerSeq = indent /@ {openerSeq};
-      indentedVarsFirst = indent /@ {varsFirstSeq};
-      indentedComma1 = indent[comma1];
-      indentedVarsSecond = indent /@ {varsSecondSeq};
-      indentedComma2 = indent[comma2];
-      indentedVarsRest = indent /@ {varsRestSeq};
-      indentedBody = indent /@ {bodySeq};
-      indentedCloserSeq = indent /@ {closerSeq};
-      indentedCloser = indent[closer];
-    ];
+  Module[{indentedHead,
+    definitelyDelete, definitelyInsert, definitelyAutomatic,
+    commaChildren, groupChildren, children},
 
     definitelyDelete = $CurrentStyle["NewlinesInScoping"] === Delete;
     definitelyInsert = $CurrentStyle["NewlinesInScoping"] === Insert;
@@ -1110,33 +1351,43 @@ indent[node:CallNode[{head:LeafNode[Symbol, "With" | {FragmentNode[Symbol, "With
         commonCallNodeIndent[node]
       ,
       TrueQ[definitelyAutomatic],
+
+        indentedHead = indent /@ head;
+        Block[{$Toplevel = False},
+
+          commaChildren =
+            Flatten[betterRiffle[indent /@ {varsFirstSeq, comma1, varsSecondSeq, comma2, varsRestSeq, bodySeq}, line[]]];
+
+          groupChildren =
+            Flatten[{
+              indent[opener],
+              indent[Insert[#, EndOfLine -> True, {3, 1}]]& /@ {openerSeq},
+              block @ {
+                InfixNode[Comma,
+                  commaChildren
+                  ,
+                  <| data2 |>
+                ]
+              },
+              indent[Insert[#, StartOfLine -> True, {3, 1}]]& /@ {closerSeq},
+              indent[closer]
+            }];
+
+          children = {
+              GroupNode[GroupSquare,
+                groupChildren
+                ,
+                <| data1 |>
+              ]
+            };
+        ];
+
         CallNode[
-          Flatten[{
-            indentedHead,
-            indentedHeadSeq
-          }],
-          Block[{$Toplevel = False},
-          Flatten[{
-            indentedOpener,
-            incrementIndent[line[]],
-            incrementIndent /@ indentedOpenerSeq,
-            incrementIndent /@ indentedVarsFirst,
-            incrementIndent[line[]],
-            incrementIndent[indentedComma1],
-            incrementIndent[line[]],
-            incrementIndent /@ indentedVarsSecond,
-            incrementIndent[line[]],
-            incrementIndent[indentedComma2],
-            surround[incrementIndent /@ indentedVarsRest, {incrementIndent[line[]]}, "AlreadyPresent" -> {Before, After}],
-            incrementIndent[line[]],
-            incrementIndent /@ indentedBody,
-            incrementIndent /@ indentedCloserSeq,
-            line[],
-            indentedCloser
-          }]
-          ]
+          indentedHead
           ,
-          <|data, "Multiline" -> True|>
+          children
+          ,
+          <| data, "Multiline" -> True |>
         ]
     ]
   ]
@@ -1160,39 +1411,29 @@ Switch[a,
 ]
 
 *)
-indent[node:CallNode[{head:LeafNode[Symbol, "If" | "Switch" | {FragmentNode[Symbol, "If" | "Switch", _], ___}, _], headSeq___}, {
+indent[node:CallNode[head:{LeafNode[Symbol, "If" | "Switch" | {FragmentNode[Symbol, "If" | "Switch", _], ___}, _], ___}, {
       GroupNode[GroupSquare, {
           opener_,
-          openerSeq___,
-          InfixNode[
-            Comma, {
+          openerSeq:comment...,
+          InfixNode[Comma, {
               expr:Except[LeafNode[Token`Comma, _, _]],
               exprSeq:Except[LeafNode[Token`Comma, _, _]]...,
               comma1:LeafNode[Token`Comma, _, _],
               rest___
-            },
-            _
+            }
+            ,
+            data2_
           ], 
-          closerSeq___,
+          closerSeq:comment...,
           closer_
-        }, _]
+        }
+        ,
+        data1_
+      ]
     }, data_], OptionsPattern[]] :=
-  Module[{indentedHead, indentedHeadSeq, indentedOpener, indentedOpenerSeq, indentedExpr, indentedExprSeq, indentedComma1, indentedRest,
-    indentedCloserSeq, indentedCloser,
-    definitelyDelete, definitelyInsert, definitelyAutomatic},
-
-    indentedHead = indent[head];
-    indentedHeadSeq = indent /@ {headSeq};
-    Block[{$Toplevel = False},
-      indentedOpener = indent[opener];
-      indentedOpenerSeq = indent /@ {openerSeq};
-      indentedExpr = indent[expr];
-      indentedExprSeq = indent /@ {exprSeq};
-      indentedComma1 = indent[comma1];
-      indentedRest = indent /@ {rest};
-      indentedCloserSeq = indent /@ {closerSeq};
-      indentedCloser = indent[closer];
-    ];
+  Module[{indentedHead,
+    definitelyDelete, definitelyInsert, definitelyAutomatic,
+    commaChildren, groupChildren, children},
 
     definitelyDelete = $CurrentStyle["NewlinesInControl"] === Delete;
     definitelyInsert = $CurrentStyle["NewlinesInControl"] === Insert;
@@ -1209,27 +1450,47 @@ indent[node:CallNode[{head:LeafNode[Symbol, "If" | "Switch" | {FragmentNode[Symb
         commonCallNodeIndent[node]
       ,
       TrueQ[definitelyAutomatic],
+
+        indentedHead = indent /@ head;
+        Block[{$Toplevel = False},
+
+          commaChildren =
+            Flatten[{
+              indent[expr],
+              indent /@ {exprSeq},
+              indent[comma1],
+              betterRiffle[indent /@ {rest}, line[]]
+            }];
+
+          groupChildren =
+            Flatten[{
+              indent[opener],
+              indent /@ {openerSeq},
+              blockAfterFirstRator @
+                InfixNode[Comma,
+                  commaChildren
+                  ,
+                  <| data2 |>
+                ],
+              indent[Insert[#, StartOfLine -> True, {3, 1}]]& /@ {closerSeq},
+              indent[closer]
+            }];
+
+          children = {
+              GroupNode[GroupSquare,
+                groupChildren
+                ,
+                <| data1 |>
+              ]
+            };
+        ];
+
         CallNode[
-          Flatten[{
-            indentedHead,
-            indentedHeadSeq
-          }]
+          indentedHead
           ,
-          Block[{$Toplevel = False},
-          Flatten[{
-            indentedOpener,
-            indentedOpenerSeq,
-            incrementIndent[indentedExpr],
-            incrementIndent /@ indentedExprSeq,
-            incrementIndent[indentedComma1],
-            {incrementIndent[line[]], incrementIndent[#]}& /@ indentedRest,
-            incrementIndent /@ indentedCloserSeq,
-            line[],
-            indentedCloser
-          }]
-          ]
+          children
           ,
-          <|data, "Multiline" -> True|>
+          <| data, "Multiline" -> True |>
         ]
     ]
   ]
@@ -1241,7 +1502,8 @@ indent[ClauseNode[tag_, {
     val:Except[LeafNode[Token`Comma, _, _]], valSeq:Except[LeafNode[Token`Comma, _, _]]...
   }, data_], OptionsPattern[]] :=
 Module[{indentedTest, indentedTestSeq, indentedComma1, indentedVal, indentedValSeq,
-    definitelyDelete, definitelyInsert, definitelyAutomatic},
+    definitelyDelete, definitelyInsert, definitelyAutomatic,
+    children},
 
   indentedTest = indent[test];
   indentedTestSeq = indent /@ {testSeq};
@@ -1257,48 +1519,53 @@ Module[{indentedTest, indentedTestSeq, indentedComma1, indentedVal, indentedValS
   ];
 
   Which[
+
     TrueQ[definitelyDelete],
-      ClauseNode[
-        tag
-        ,
+
+      children =
         Flatten[{
           indentedTest, indentedTestSeq,
           indentedComma1, space[],
           indentedVal, indentedValSeq
-        }]
+        }];
+
+      ClauseNode[
+        tag
         ,
-        data
+        children
+        ,
+        <| data |>
       ]
     ,
     TrueQ[definitelyInsert],
+
+      children =
+        Flatten[betterRiffle[{indentedTest, indentedTestSeq, indentedComma1, indentedVal,  indentedValSeq}, line[]]];
+
       ClauseNode[
         tag
         ,
-        Flatten[{
-          indentedTest,
-          {line[], #}& /@ indentedTestSeq,
-          line[],
-          indentedComma1,
-          line[],
-          indentedVal,
-          {line[], #}& /@ indentedValSeq
-        }]
+        children
         ,
-        <|data, "Multiline" -> True|>
+        <| data, "Multiline" -> True |>
       ]
     ,
     TrueQ[definitelyAutomatic],
-      ClauseNode[
-        tag
-        ,
+
+      children =
         Flatten[{
-          indentedTest, indentedTestSeq, indentedComma1,
-          incrementIndent[line[]],
-          incrementIndent[indentedVal], indentedValSeq
-        }]
-        ,
-        <|data, "Multiline" -> True|>
-      ]
+          indentedTest, indentedTestSeq, indentedComma1, line[],
+          indentedVal, indentedValSeq  
+        }];
+
+      increment @
+        ClauseNode[
+          tag
+          ,
+          children
+          ,
+          <| data, "Multiline" -> True |>
+        ]
   ]
 ]
 
@@ -1316,31 +1583,25 @@ Which[
 ]
 
 *)
-indent[node:CallNode[{head:LeafNode[Symbol, "Which" | {FragmentNode[Symbol, "Which", _], ___}, _], headSeq___}, {
+indent[node:CallNode[head:{LeafNode[Symbol, "Which" | {FragmentNode[Symbol, "Which", _], ___}, _], ___}, {
       GroupNode[GroupSquare, {
           opener_,
-          openerSeq___, 
-          InfixNode[
-            Comma,
-            commaChildren_,
-            _
-          ], 
-          closerSeq___, 
+          openerSeq:comment...,
+          InfixNode[Comma,
+            commaChildrenIn_
+            ,
+            data2_
+          ],
+          closerSeq:comment...,
           closer_
-        }, _]
+        }
+        ,
+        data1_
+      ]
     }, data_], OptionsPattern[]] :=
-  Module[{indentedHead, indentedHeadSeq, indentedOpener, indentedOpenerSeq, indentedCommaChildren, indentedCloserSeq, indentedCloser,
-    definitelyDelete, definitelyInsert, definitelyAutomatic},
-
-    indentedHead = indent[head];
-    indentedHeadSeq = indent /@ {headSeq};
-    Block[{$Toplevel = False},
-      indentedOpener = indent[opener];
-      indentedOpenerSeq = indent /@ {openerSeq};
-      indentedCommaChildren = indent /@ commaChildren;
-      indentedCloserSeq = indent /@ {closerSeq};
-      indentedCloser = indent[closer];
-    ];
+  Module[{indentedHead,
+    definitelyDelete, definitelyInsert, definitelyAutomatic,
+    commaChildren, groupChildren, children},
 
     definitelyDelete = $CurrentStyle["NewlinesInControl"] === Delete;
     definitelyInsert = $CurrentStyle["NewlinesInControl"] === Insert;
@@ -1357,24 +1618,43 @@ indent[node:CallNode[{head:LeafNode[Symbol, "Which" | {FragmentNode[Symbol, "Whi
         commonCallNodeIndent[node]
       ,
       TrueQ[definitelyAutomatic],
+
+        indentedHead = indent /@ head;
+        Block[{$Toplevel = False},
+
+          commaChildren =
+            Flatten[betterRiffle[indent /@ commaChildrenIn, line[]]];
+
+          groupChildren =
+            Flatten[{
+              indent[opener],
+              indent[Insert[#, EndOfLine -> True, {3, 1}]]& /@ {openerSeq},
+              block @ {
+                InfixNode[Comma,
+                  commaChildren
+                  ,
+                  <| data2 |>
+                ]
+              },
+              indent[Insert[#, StartOfLine -> True, {3, 1}]]& /@ {closerSeq},
+              indent[closer]
+            }];
+
+          children = {
+              GroupNode[GroupSquare,
+                groupChildren
+                ,
+                <| data1 |>
+              ]
+            };
+        ];
+
         CallNode[
-          Flatten[{
-            indentedHead,
-            indentedHeadSeq
-          }]
+          indentedHead
           ,
-          Block[{$Toplevel = False},
-          Flatten[{
-            indentedOpener,
-            indentedOpenerSeq,
-            {incrementIndent[line[]], incrementIndent[#]}& /@ indentedCommaChildren,
-            incrementIndent /@ indentedCloserSeq,
-            line[],
-            indentedCloser
-          }]
-          ]
+          children
           ,
-          <|data, "Multiline" -> True|>
+          <| data, "Multiline" -> True |>
         ]
     ]
   ]
@@ -1389,12 +1669,11 @@ For[start, test, inc,
 
 completely redo newlines
 *)
-indent[node:CallNode[{head:LeafNode[Symbol, "For" | {FragmentNode[Symbol, "For", _], ___}, _], headSeq___}, {
-      GroupNode[_, {
-          opener_, 
-          openerSeq___,
-          InfixNode[
-            Comma, {
+indent[node:CallNode[head:{LeafNode[Symbol, "For" | {FragmentNode[Symbol, "For", _], ___}, _], ___}, {
+      GroupNode[GroupSquare, {
+          opener_,
+          openerSeq:comment...,
+          InfixNode[Comma, {
               start:Except[LeafNode[Token`Comma, _, _]],
               startSeq:Except[LeafNode[Token`Comma, _, _]]...,
               comma1:LeafNode[Token`Comma, _, _],
@@ -1406,35 +1685,20 @@ indent[node:CallNode[{head:LeafNode[Symbol, "For" | {FragmentNode[Symbol, "For",
               comma3:LeafNode[Token`Comma, _, _],
               body:Except[LeafNode[Token`Comma, _, _]],
               bodySeq:Except[LeafNode[Token`Comma, _, _]]...
-            }, _
-          ], 
-          closerSeq___,
+            }
+            ,
+            data2_
+          ],
+          closerSeq:comment...,
           closer_
-        }, _]
+        }
+        ,
+        data1_
+      ]
     }, data_], OptionsPattern[]] :=
-  Module[{indentedHead, indentedHeadSeq, indentedOpener, indentedOpenerSeq, indentedStart, indentedStartSeq, indentedComma1,
-    indentedTest, indentedTestSeq, indentedComma2, indentedInc, indentedIncSeq, indentedComma3, indentedBody, indentedBodySeq, indentedCloserSeq, indentedCloser,
-    definitelyDelete, definitelyInsert, definitelyAutomatic},
-
-    indentedHead = indent[head];
-    indentedHeadSeq = indent /@ {headSeq};
-    Block[{$Toplevel = False},
-      indentedOpener = indent[opener];
-      indentedOpenerSeq = indent /@ {openerSeq};
-      indentedStart = indent[start];
-      indentedStartSeq = indent /@ {startSeq};
-      indentedComma1 = indent[comma1];
-      indentedTest = indent[test];
-      indentedTestSeq = indent /@ {testSeq};
-      indentedComma2 = indent[comma2];
-      indentedInc = indent[inc];
-      indentedIncSeq = indent /@ {incSeq};
-      indentedComma3 = indent[comma3];
-      indentedBody = indent[body];
-      indentedBodySeq = indent /@ {bodySeq};
-      indentedCloserSeq = indent /@ {closerSeq};
-      indentedCloser = indent[closer];
-    ];
+  Module[{indentedHead,
+    definitelyDelete, definitelyInsert, definitelyAutomatic,
+    commaChildren, groupChildren, children},
 
     definitelyDelete = $CurrentStyle["NewlinesInControl"] === Delete;
     definitelyInsert = $CurrentStyle["NewlinesInControl"] === Insert;
@@ -1451,37 +1715,56 @@ indent[node:CallNode[{head:LeafNode[Symbol, "For" | {FragmentNode[Symbol, "For",
         commonCallNodeIndent[node]
       ,
       TrueQ[definitelyAutomatic],
+
+        indentedHead = indent /@ head;
+        Block[{$Toplevel = False},
+
+          commaChildren =
+            Flatten[{
+              indent[start],
+              indent /@ {startSeq},
+              indent[comma1],
+              space[],
+              indent[test],
+              indent /@ {testSeq},
+              indent[comma2],
+              space[],
+              indent[inc],
+              indent /@ {incSeq},
+              indent[comma3],
+              indent[body],
+              indent /@ {bodySeq}
+            }];
+
+          groupChildren =
+            Flatten[{
+              indent[opener],
+              indent /@ {openerSeq},
+              blockAfterLastRator @
+                InfixNode[Comma,
+                  commaChildren
+                  ,
+                  <| data2 |>
+                ],
+              indent[Insert[#, StartOfLine -> True, {3, 1}]]& /@ {closerSeq},
+              indent[closer]
+            }];
+
+          children = {
+              GroupNode[GroupSquare,
+                groupChildren
+                ,
+                <| data1 |>
+              ]
+            };
+        ];
+
         CallNode[
-          Flatten[{
-            indentedHead,
-            indentedHeadSeq
-          }]
+          indentedHead
           ,
-          Block[{$Toplevel = False},
-          Flatten[{
-            indentedOpener,
-            indentedOpenerSeq,
-            incrementIndent[indentedStart],
-            incrementIndent /@ indentedStartSeq,
-            incrementIndent[indentedComma1],
-            incrementIndent[space[]],
-            incrementIndent[indentedTest],
-            incrementIndent /@ indentedTestSeq,
-            incrementIndent[indentedComma2],
-            incrementIndent[space[]],
-            incrementIndent[indentedInc],
-            incrementIndent /@ indentedIncSeq,
-            incrementIndent[indentedComma3],
-            incrementIndent[line[]],
-            incrementIndent[indentedBody],
-            incrementIndent /@ indentedBodySeq,
-            incrementIndent /@ indentedCloserSeq,
-            line[],
-            indentedCloser
-          }]
-          ]
+          children
           ,
-          <|data, "Multiline" -> True|>
+          <| data, "Multiline" -> True |>
         ]
     ]
   ]
@@ -1501,38 +1784,21 @@ UnterminatedGroupNode[GroupSquare, ...]
 UnterminatedGroupNode[GroupDoubleBracket, ...]
 
 *)
-commonCallNodeIndent[CallNode[{head_, headSeq___}, {g_}, data_]] :=
-Module[{indentedHead, indentedHeadSeq, indentedGroup, indentedGroupMultiline},
+commonCallNodeIndent[CallNode[head_, children_, data_]] :=
+Module[{indentedHead, indentedChildren, anyIndentedChildrenMultiline},
 
-  indentedHead = indent[head, "NewlinesInGroups" -> Delete];
-  indentedHeadSeq = indent /@ {headSeq};
+  indentedHead = indent[#,"NewlinesInGroups" -> Delete]& /@ head;
 
-  indentedGroup = indent[g, "NewlinesInGroups" -> Delete];
+  indentedChildren = indent[#, "NewlinesInGroups" -> Delete]& /@ children;
 
-  indentedGroupMultiline = Lookup[indentedGroup[[3]], "Multiline", False];
+  anyIndentedChildrenMultiline = AnyTrue[indentedChildren, Lookup[#[[3]], "Multiline", False]&];
 
-  If[indentedGroupMultiline,
-    CallNode[
-      Flatten[{
-        indentedHead,
-        indentedHeadSeq
-      }]
-      ,
-      {indentedGroup}
-      ,
-      <|data, "Multiline" -> True|>
-    ]
+  CallNode[
+    indentedHead
     ,
-    CallNode[
-      Flatten[{
-        indentedHead,
-        indentedHeadSeq
-      }]
-      ,
-      {indentedGroup}
-      ,
-      data
-    ]
+    indentedChildren
+    ,
+    <| data, "Multiline" -> anyIndentedChildrenMultiline |>
   ]
 ]
 
@@ -1540,12 +1806,18 @@ Module[{indentedHead, indentedHeadSeq, indentedGroup, indentedGroupMultiline},
 
 
 indent[SyntaxErrorNode[tag_, ts_, data_], OptionsPattern[]] :=
-  SyntaxErrorNode[tag, indent /@ ts, data]
+Module[{children},
+
+  children = indent /@ ts;
+
+  SyntaxErrorNode[tag, children, <| data |>]
+]
 
 
 indent[ContainerNode[tag_, graphs_, data_], OptionsPattern[]] :=
   Catch[
-  Module[{indented},
+  Module[{indented,
+    children},
 
     indented = indent /@ graphs;
 
@@ -1556,7 +1828,7 @@ indent[ContainerNode[tag_, graphs_, data_], OptionsPattern[]] :=
     indented = Flatten[betterRiffle[indented, {{line[], line[]}}]];
 
     If[Length[indented] >= 1 && !MatchQ[graphs[[-1]], nl],
-      AppendTo[indented, LeafNode[Token`Newline, $CurrentNewlineString, <||>]]
+      AppendTo[indented, line[]]
     ];
 
     ContainerNode[
@@ -1564,22 +1836,22 @@ indent[ContainerNode[tag_, graphs_, data_], OptionsPattern[]] :=
       ,
       indented
       ,
-      data
+      <| data |>
     ]
   ]]
 
 
 
 indent[BoxNode[RowBox, {graphs_}, data_], OptionsPattern[]] :=
-  Module[{},
+  Module[{children},
+
+    children = indent /@ graphs;
 
     BoxNode[RowBox
       ,
-      Flatten[
-        indent /@ graphs
-      ]
+      children
       ,
-      data
+      <| data |>
     ]
   ]
 
@@ -1588,6 +1860,7 @@ indent[node:BoxNode[_, _, _], OptionsPattern[]] :=
 
 
 indent[args___] := Failure["InternalUnhandled", <| "Function" -> indent, "Args" -> {args} |>]
+
 
 End[]
 

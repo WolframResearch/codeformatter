@@ -25,7 +25,7 @@ Options[formatTest] = {
 
 formatTest[file_String, i_Integer, OptionsPattern[]] :=
   Catch[
- Module[{dryRun, prefix, res, lineWidth, airiness, margin, performanceGoal},
+ Module[{dryRun, prefix, limit, res, lineWidth, airiness, margin, performanceGoal, actual, firstLine, implicitTimesInserted},
    
    prefix = OptionValue["FileNamePrefixPattern"];
    limit = OptionValue["FileSizeLimit"];
@@ -74,7 +74,9 @@ formatTest[file_String, i_Integer, OptionsPattern[]] :=
 
   Check[
     Check[
+    
     implicitTimesInserted = False;
+
     res = CodeFormat[File[file], "LineWidth" -> lineWidth, "SafetyMargin" -> margin, Airiness -> airiness, PerformanceGoal -> performanceGoal];
     ,
     implicitTimesInserted = True;
@@ -103,7 +105,8 @@ formatTest[file_String, i_Integer, OptionsPattern[]] :=
   
     If[dryRun === False,
       Export[file, res, "Text"]
-    ]
+    ];
+
     ,
     If[!implicitTimesInserted,
       (*
@@ -114,13 +117,9 @@ formatTest[file_String, i_Integer, OptionsPattern[]] :=
           Darker[Orange]]];
         Print[
          Style[$MessageList, Darker[Orange]]];
-    ]
+    ];
   ]
 ]]
-
-
-
-
 
 
 Options[formatPackageEditorTest] = {

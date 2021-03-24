@@ -58,6 +58,7 @@ message(STATUS "Optional tool CODEPARSER_EXE was not found; skipping")
 endif()
 
 set(STATIC_WL_PACLET_KERNEL_SOURCES
+	${PROJECT_SOURCE_DIR}/CodeFormatter/Kernel/Absorb.wl
 	${PROJECT_SOURCE_DIR}/CodeFormatter/Kernel/Abstract.wl
 	${PROJECT_SOURCE_DIR}/CodeFormatter/Kernel/AnchoredComments.wl
 	${PROJECT_SOURCE_DIR}/CodeFormatter/Kernel/CodeFormatter.wl

@@ -53,11 +53,19 @@ Dynamic variables
 *)
 $CurrentIndentationString
 
+$CurrentIndentationStringLength
+
+$CurrentTabWidth
+
 $CurrentIndentationNodeList
+
+$CurrentIndentationLevelNodeList
 
 $CurrentIndentationCommentFragmentNodeList
 
 $CurrentNewlineString
+
+$CurrentLineContinuationString
 
 $CurrentStyle
 
@@ -66,6 +74,7 @@ $Toplevel
 
 Begin["`Private`"]
 
+Needs["CodeFormatter`Absorb`"]
 Needs["CodeFormatter`Abstract`"]
 Needs["CodeFormatter`AnchoredComments`"]
 Needs["CodeFormatter`Fragmentize`"]
@@ -416,15 +425,24 @@ Module[{
     Print["CodeFormatCST: ", cst];
   ];
 
-  Block[{$CurrentIndentationString, $CurrentIndentationNodeList, $CurrentIndentationCommentFragmentNodeList, $CurrentNewlineString, $CurrentStyle, $Toplevel},
+  Block[{$CurrentIndentationString, $CurrentIndentationStringLength, $CurrentTabWidth, $CurrentIndentationNodeList, $CurrentIndentationLevelNodeList,
+    $CurrentIndentationCommentFragmentNodeList, $CurrentNewlineString, $CurrentLineContinuationString, $CurrentStyle, $Toplevel},
 
     $CurrentIndentationString = indentationString;
 
+    $CurrentIndentationStringLength = StringLength[$CurrentIndentationString];
+
+    $CurrentTabWidth = tabWidth;
+
     $CurrentIndentationNodeList = LeafNode[Whitespace, #, <||>]& /@ Characters[$CurrentIndentationString];
+
+    $CurrentIndentationLevelNodeList = {};
 
     $CurrentIndentationCommentFragmentNodeList = FragmentNode[Token`Comment, #, <||>]& /@ Characters[$CurrentIndentationString];
 
     $CurrentNewlineString = newline;
+
+    $CurrentLineContinuationString = "\\" <> $CurrentNewlineString;
 
     $CurrentStyle = style;
 
@@ -536,6 +554,12 @@ Module[{
 
     If[$Debug,
       Print["after absorbNewlinesIntoComments: ", absorbed];
+    ];
+
+    absorbed = absorbNewlinesIntoSemis[absorbed];
+
+    If[$Debug,
+      Print["after absorbNewlinesIntoSemis: ", absorbed];
     ];
 
     (*

@@ -52,7 +52,10 @@ comment = LeafNode[Token`Comment, _, _]
 
 matchNewlineQ = MatchQ[nl]
 
-matchCommentFragmentNewlineQ := MatchQ[FragmentNode[Token`Comment, $CurrentNewlineString, _]]
+(*
+FIXME: is it wrong that "\[IndentingNewLine]" can get through to here?
+*)
+matchCommentFragmentNewlineQ := MatchQ[FragmentNode[Token`Comment, $CurrentNewlineString | "\[IndentingNewLine]", _]]
 
 
 

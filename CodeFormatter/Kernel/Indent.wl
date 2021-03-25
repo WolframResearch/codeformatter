@@ -709,9 +709,17 @@ indent[(type:BinaryNode|InfixNode|TernaryNode|QuaternaryNode)[tag_, graphs_, dat
       Print["Operators split: ", split];
     ];
 
-    incrementIndentAfterFirstRator @
-      baseOperatorNodeIndent[type, tag, data, split, ratorsPat, anyIndentedGraphsMultiline]
-
+    Which[
+      TrueQ[definitelyInsert],
+        baseOperatorNodeIndent[type, tag, data, split, ratorsPat, anyIndentedGraphsMultiline]
+      ,
+      TrueQ[definitelyDelete],
+        baseOperatorNodeIndent[type, tag, data, split, ratorsPat, anyIndentedGraphsMultiline]
+      ,
+      TrueQ[definitelyAutomatic],
+        incrementIndentAfterFirstRator @
+          baseOperatorNodeIndent[type, tag, data, split, ratorsPat, anyIndentedGraphsMultiline]
+    ]
   ]]
 
 

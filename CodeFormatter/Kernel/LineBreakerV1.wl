@@ -1,6 +1,10 @@
-BeginPackage["CodeFormatter`BreakLinesLegacy`"]
+BeginPackage["CodeFormatter`LineBreakerV1`"]
 
-breakLinesLegacy
+breakLinesV1
+
+$LineBreakWithinComments
+
+$AllowSplittingTokens
 
 Begin["`Private`"]
 
@@ -21,7 +25,7 @@ $LineBreakWithinComments = False
 $AllowSplittingTokens = False
 
 
-breakLinesLegacy[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
+breakLinesV1[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
   Module[{tokens, lines},
 
     tokens = tokensIn;
@@ -55,7 +59,7 @@ breakLinesLegacy[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
     tokens
   ]
 
-breakLinesLegacy[tokensIn_, Infinity, Infinity] :=
+breakLinesV1[tokensIn_, Infinity, Infinity] :=
   tokensIn
 
 breakLine[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
@@ -136,10 +140,13 @@ breakLine[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
         Continue[]
       ];
 
+      (*
+      Only loops if $AllowSplittingTokens and need to split up a token
+      *)
       While[True,
 
         (*
-        Algorithm 1
+        Line Breaker Algorithm V1
         Follow a simple strategy for now:
         linebreak after the first acceptable operator
         if no breaking before reaching lineWidth2, then just insert a continuation marker
@@ -154,17 +161,7 @@ breakLine[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
 
           If[isPossiblyAcceptable[tok] &&
               (!toplevel || isAcceptableOperator[tok[[1]]]) &&
-              (*
-              if the next tok is [
-              then do not break
-              having
-              {
-                f
-                []
-              }
-              is weird
-              *)
-              !MatchQ[nextTok, LeafNode[Token`OpenSquare, _, _]]
+              isPossiblyAcceptableNext[nextTok]
             ,
             AppendTo[toInsertAfter, {i, leadingWhitespace <> $CurrentIndentationString}];
             width = 0;
@@ -196,7 +193,10 @@ breakLine[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
           (*
           if not adding to toSplit, then we still want to try to break after an acceptable operator
           *)
-          If[isPossiblyAcceptable[tok] && (!toplevel || isAcceptableOperator[tok[[1]]]),
+          If[isPossiblyAcceptable[tok] &&
+            (!toplevel || isAcceptableOperator[tok[[1]]]) &&
+            isPossiblyAcceptableNext[nextTok]
+            ,
             If[$Debug,
               Print["ACCEPTABLE operator; breaking: ", tok[[1]]];
             ];
@@ -473,6 +473,23 @@ isPossiblyAcceptable[FragmentNode[String, _, KeyValuePattern["LastFragmentInStri
 isPossiblyAcceptable[LeafNode[Token`ColonColon, _, _]] := False
 isPossiblyAcceptable[_] := True
 
+
+(*
+if the next tok is [
+then do not break
+
+having
+{
+  f
+  []
+}
+is weird
+
+This also takes care of issue of breaking up a[[]]
+*)
+isPossiblyAcceptableNext[LeafNode[Token`OpenSquare | Token`LongName`LeftDoubleBracket, _, _]] := False
+isPossiblyAcceptableNext[LeafNode[Token`Comma, _, _]] := False
+isPossiblyAcceptableNext[_] := True
 
 
 End[]

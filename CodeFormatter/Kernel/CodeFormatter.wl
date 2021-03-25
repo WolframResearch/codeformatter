@@ -25,6 +25,11 @@ $DefaultIndentationString
 $DefaultTabWidth
 
 
+$DefaultLineWidth
+
+$DefaultSafetyMargin
+
+
 (*
 Messages
 *)
@@ -51,9 +56,9 @@ Begin["`Private`"]
 
 Needs["CodeFormatter`Abstract`"]
 Needs["CodeFormatter`AnchoredComments`"]
-Needs["CodeFormatter`BreakLinesLegacy`"]
 Needs["CodeFormatter`Fragmentize`"]
 Needs["CodeFormatter`Indent`"]
+Needs["CodeFormatter`LineBreakerV1`"]
 (*
 Needs["CodeFormatter`Notebooks`"]
 
@@ -111,7 +116,7 @@ And SW thought it was a good idea to follow RFC 2822 for the default
 $DefaultLineWidth = 78
 
 (*
-legacy
+Line Breaker V1
 *)
 $DefaultSafetyMargin = 10
 
@@ -143,9 +148,12 @@ Options[CodeFormat] = {
   (*
   Undocumented options
   *)
+  
   "TabWidth" :> $DefaultTabWidth,
-  "BreakLinesMethod" -> Automatic,
+  "BreakLinesMethod" -> "LineBreakerV1",
+  (* Undocumented options for  LineBreakerV1 *)
   "SafetyMargin" :> $DefaultSafetyMargin,
+
   PerformanceGoal -> "Speed"
 }
 
@@ -332,7 +340,7 @@ Module[{
   indentationString, newline, tabWidth, style, airiness,
   lineWidth, safetyMargin, lineWidth1, lineWidth2, breakLinesMethod,
   cst, gst,
-  indented, linearized, merged, absorbed, spaced,
+  indented, linearized, merged, absorbed, spaced, breaked,
   strs, formattedStr},
 
   indentationString = OptionValue["IndentationString"];
@@ -385,11 +393,6 @@ Module[{
   If[airiness == 1,
     style["NewlinesInComments"] = Insert
   ];
-
-
-  lineWidth = OptionValue["LineWidth"];
-  breakLinesMethod = OptionValue["BreakLinesMethod"];
-
 
   cst = cstIn;
 
@@ -527,34 +530,43 @@ Module[{
     If[$Debug,
       Print["after insertNecessarySpaces: ", spaced];
     ];
+    
+    
+    breakLinesMethod = OptionValue["BreakLinesMethod"];
 
-    If[breakLinesMethod === "Legacy",
-
-      safetyMargin = OptionValue["SafetyMargin"];
-
-      lineWidth1 = lineWidth - safetyMargin;
-      lineWidth2 = lineWidth;
-
-      (*
-      spaced is a list of leafs
-      *)
-      spaced = breakLinesLegacy[spaced, lineWidth1, lineWidth2];
-
-      If[$Debug,
-        Print["after breakLinesLegacy: ", spaced];
-      ];
-
-      If[!ListQ[spaced],
-        Throw[spaced]
-      ]
+    If[breakLinesMethod =!= "LineBreakerV1",
+      Throw[Failure["NotImplemented", <| "BreakLinesMethod" -> breakLinesMethod |>]]
     ];
 
-    strs = collectStr /@ spaced;
+    (*
+    Line Breaker V1
+    *)
+
+    lineWidth = OptionValue["LineWidth"];
+    safetyMargin = OptionValue["SafetyMargin"];
+
+    lineWidth1 = lineWidth - safetyMargin;
+    lineWidth2 = lineWidth;
+
+    (*
+    breaked is a list of leafs
+    *)
+    breaked = breakLinesV1[spaced, lineWidth1, lineWidth2];
+
+    If[$Debug,
+      Print["after breakLinesV1: ", breaked];
+    ];
+
+    If[!ListQ[breaked],
+      Throw[breaked]
+    ]
+    ];
+
+    strs = collectStr /@ breaked;
 
     formattedStr = StringJoin[strs];
 
     formattedStr
-  ]
 ]]
 
 

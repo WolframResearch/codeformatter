@@ -153,7 +153,7 @@ Comments are not modified
 Test[
 	CodeFormat["(*a\\\nb*)c"]
 	,
-	"(*a\\\nb*)c"
+	"(*a\\\nb*) c"
 	,
 	TestID -> "CodeFormatter-20191112-S2I3Y2"
 ]
@@ -309,7 +309,11 @@ Test[
 Test[
 	CodeFormat["If[a, b, c]"]
 	,
-	"If[a, b, c]"
+"If[a,
+    b
+    ,
+    c
+]"
 	,
 	TestID->"CodeFormatter-20200805-Q8H6M7"
 ]

@@ -25,8 +25,8 @@ Test[
 	,
 "(
     f
-        /@
-        {}
+    /@
+    {}
 )"
 	,
 	TestID->"Newlines-20201211-C2J3H1"
@@ -52,6 +52,9 @@ Test[
 
 
 
+(*
+OPEN BUG: Airiness -> 1 and anchored comments that absorb newlines do not play well together
+*)
 Test[
 	CodeFormat["If(*1*)[(*2*)a(*3*),(*4*)b(*5*)]", Airiness -> 1]
 	,
@@ -81,7 +84,11 @@ stay single line at top-level
 Test[
 	CodeFormat["offset = 0;If[endptorder, a, b]"]
 	,
-	"offset = 0; If[endptorder, a, b]"
+"offset = 0; If[endptorder,
+    a
+    ,
+    b
+]"
 	,
 	TestID->"Newlines-20210114-Q2V0T8"
 ]

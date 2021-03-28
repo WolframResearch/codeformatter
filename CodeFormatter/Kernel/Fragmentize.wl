@@ -308,7 +308,7 @@ mergeTemporaryLineContinuations[fsIn_] :=
       (*
       Count how many spaces after the line continuation
       *)
-      onePast = NestWhile[(# + 1)&, pos[[1]] + 1, (# <= Length[fs] && MatchQ[fs[[#]], (LeafNode|FragmentNode)[_, " ", _]])&];
+      onePast = NestWhile[(# + 1)&, pos[[1]] + 1, (# <= Length[fs] && MatchQ[fs[[#]], (LeafNode|FragmentNode)[Whitespace, _, _]])&];
 
       originalSpacesSpec = {pos[[1]] + 1, onePast};
 
@@ -334,7 +334,7 @@ mergeTemporaryLineContinuations[fsIn_] :=
           (*
           Make sure to treat implicit Times as " "
           *)
-          StringLength /@ (Take[fs, takeSpec] /. LeafNode[Token`Fake`ImplicitTimes, _, _] -> LeafNode[Whitespace, " ", <||>])[[All, 2]]
+          StringLength /@ (Take[fs, takeSpec] /. LeafNode[Token`Fake`ImplicitTimes, _, _] -> LeafNode[Whitespace, _, <||>])[[All, 2]]
         ];
 
       If[$Debug,
@@ -425,7 +425,7 @@ mergeTemporaryLineContinuations[fsIn_] :=
           ];
           Scan[Internal`StuffBag[deleteSpecs, {#}]&,  Range[pos[[1]], originalSpacesSpec[[2]] - 1]];
         ,
-        MatchQ[Take[fs, {Max[pos[[1]] - (numberOfBeforeChars - numberOfOriginalSpaces), 1], pos[[1]] - 1}], {(LeafNode|FragmentNode)[_, " ", _]...}],
+        MatchQ[Take[fs, {Max[pos[[1]] - (numberOfBeforeChars - numberOfOriginalSpaces), 1], pos[[1]] - 1}], {(LeafNode|FragmentNode)[Whitespace, _, _]...}],
           (*
           
           If[  \

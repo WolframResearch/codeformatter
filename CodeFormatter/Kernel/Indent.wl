@@ -395,8 +395,12 @@ Module[{ratorsPat, definitelyDelete, definitelyInsert, split, indentedGraphs, an
   Breaking up lines or gluing lines together may change the actual CompoundExpressions and
   how expressions are parsed
   *)
-  If[TrueQ[$Toplevel],
-    definitelyDelete = True;
+  Which[
+    TrueQ[$Toplevel],
+      definitelyDelete = True;
+    ,
+    anyIndentedGraphsMultiline,
+      definitelyInsert = True;
   ];
 
   If[!TrueQ[(definitelyDelete || definitelyInsert)],

@@ -28,9 +28,6 @@ space[] =
 tab[] =
   LeafNode[Whitespace, "\t", <||>]
 
-nil[] =
-  {}
-
 
 (*
 Replace all newline leafs with the sequence: newline + indentation
@@ -85,7 +82,7 @@ indent[LeafNode[Token`Comment, fs:{
   FragmentNode[Token`Comment, "(*", _],
   ___,
   FragmentNode[Token`Comment, "*)", _]}, data_], OptionsPattern[]] :=
-Module[{min, replaced, origSpaces, strs, minStr, indentStr, frags, inserted, split, fragGroups, nlGroups, firstStrs, replacedStrs, replacedFirstStrs,
+Module[{min, replaced, origSpaces, strs, minStr, indentStr, inserted, split, fragGroups, nlGroups, firstStrs, replacedStrs, replacedFirstStrs,
   replacedOrigSpaces, level},
 
   If[$Debug,
@@ -135,7 +132,6 @@ Module[{min, replaced, origSpaces, strs, minStr, indentStr, frags, inserted, spl
 
 
   min = Min[
-    inserted - 1,
     (*
     do not count the first group that starts with ( *, this is already being counted by inserted
     *)
@@ -538,10 +534,10 @@ indentInfixRatorGrouped[Times][l:LeafNode[Token`Fake`ImplicitTimes, _, _]] :=
   l
 
 indentInfixRatorGroupedLast[Times][LeafNode[Token`Fake`ImplicitTimes, _, _]] :=
-  nil[]
+  {}
 
 indentInfixRatorGroupedOnly[Times][LeafNode[Token`Fake`ImplicitTimes, _, _]] :=
-  nil[]
+  {}
 
 
 (*
@@ -872,7 +868,7 @@ indent[GroupNode[tag_, {
       graphSeq___,
       closer_
     }, data_], OptionsPattern[]] :=
-  Module[{graphs, aggs, x,
+  Module[{graphs, aggs,
     definitelyDelete, definitelyInsert,
     indentedOpener, indentedGraphs, indentedCloser,
     anyIndentedGraphsMultiline},

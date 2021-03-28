@@ -25,6 +25,9 @@ $DefaultTabWidth
 
 $DefaultLineWidth
 
+(*
+Line Breaker V1
+*)
 $DefaultSafetyMargin
 
 

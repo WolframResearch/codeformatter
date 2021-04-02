@@ -18,7 +18,7 @@ Needs["CodeParser`Utils`"]
 
 formatSelectedCell[] :=
   Catch[
-  Module[{nb, read, formatted, toWrite, shouldWrite, failure},
+  Module[{nb, read, formatted, toWrite},
 
     nb = InputNotebook[];
 
@@ -64,17 +64,12 @@ formatSelectedCell[] :=
             read = {read}
     ];
 
-    shouldWrite = False;
-    failure = False;
-
     CurrentValue[nb, WindowStatusArea] = "Formatting selected cell...";
 
     toWrite = MapIndexed[Function[{cell, index},
         Function[val, CurrentValue[nb, WindowStatusArea] = "Formatting selected cell... " <> ToString[Floor[100 index[[1]]/Length[read]]] <> "%"; val]@
         Switch[cell,
           Cell[_, "Program", ___],
-
-            shouldWrite = True;
 
             formatted = cell;
 
@@ -84,23 +79,22 @@ formatSelectedCell[] :=
 
             formatted = formatProgramCellContents[formatted[[1]]];
 
-            If[FailureQ[formatted],
-
-                failure = True;
-
-                CurrentValue[nb, WindowStatusArea] = "";
-                
-                Throw[formatted]
-            ];
-
-            Cell[formatted, Sequence @@ cell[[2;;]]]
+            If[!FailureQ[formatted],
+                (*
+                return the successful formatted cell
+                *)
+                Cell[formatted, Sequence @@ cell[[2;;]]]
+                ,
+                (*
+                just return the bad input cell
+                *)
+                cell
+            ]
           ,
           (*
           only RowBoxes are supported for now
           *)
           Cell[BoxData[b_], "Input" | "Code", ___] /; Union[Cases[b, _Symbol, Infinity, Heads -> True]] === {List, RowBox},
-
-            shouldWrite = True;
 
             formatted = cell;
 
@@ -110,12 +104,12 @@ formatSelectedCell[] :=
 
             formatted = formatInputContents[formatted[[1, 1]]];
 
-            If[FailureQ[formatted],
-
-                failure = True;
-
-                CurrentValue[nb, WindowStatusArea] = "";
-
+            If[!FailureQ[formatted],
+                (*
+                return the successful formatted cell
+                *)
+                Cell[BoxData[formatted], Sequence @@ cell[[2;;]]]
+                ,
                 (*
                 Ideally, this would be a Beep[] and populate the Why the Beep? dialog
 
@@ -126,18 +120,16 @@ formatSelectedCell[] :=
                 Related threads: https://mail-archive.wolfram.com/archive/l-kernel/2020/Aug00/0035.html
                 *)
                 Message[CodeFormat::cellfailure];
-
-                Throw[formatted]
-            ];
-
-            Cell[BoxData[formatted], Sequence @@ cell[[2;;]]]
+                (*
+                just return the bad input cell
+                *)
+                cell
+            ]
           ,
           (*
           Also support Code cells that have been evaluated and have Output grouped with them
           *)
           Cell[CellGroupData[{Cell[BoxData[b_], "Input" | "Code", ___] /; Union[Cases[b, _Symbol, Infinity, Heads -> True]] === {List, RowBox}, Cell[_, "Output", ___]}, _]],
-
-            shouldWrite = True;
 
             (*
             The Input cell
@@ -150,18 +142,18 @@ formatSelectedCell[] :=
 
             formatted = formatInputContents[formatted[[1, 1]]];
 
-            If[FailureQ[formatted],
-
-                failure = True;
-
-                CurrentValue[nb, WindowStatusArea] = "";
-
+            If[!FailureQ[formatted],
+                (*
+                return the successful formatted cell
+                *)
+                Cell[CellGroupData[{Cell[BoxData[formatted], Sequence @@ cell[[1, 1, 1, 2;;]]], cell[[1, 1, 2]]}, cell[[1, 2]]]]
+                ,
                 Message[CodeFormat::cellfailure];
-
-                Throw[formatted]
-            ];
-
-            Cell[CellGroupData[{Cell[BoxData[formatted], Sequence @@ cell[[1, 1, 1, 2;;]]], cell[[1, 1, 2]]}, cell[[1, 2]]]]
+                (*
+                just return the bad input cell
+                *)
+                cell
+            ]
           ,
           (*
           Some other box
@@ -172,9 +164,7 @@ formatSelectedCell[] :=
         ]
     ], read];
 
-    If[shouldWrite && !failure,
-        NotebookWrite[nb, toWrite, All]
-    ];
+    NotebookWrite[nb, toWrite, All];
 
     CurrentValue[nb, WindowStatusArea] = "";
 

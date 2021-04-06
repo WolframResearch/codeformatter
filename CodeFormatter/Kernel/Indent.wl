@@ -553,6 +553,15 @@ indentInfixRatorGroupedLast[Comma | CompoundExpression][rator_] :=
   rator
 
 
+(*
+no space after = in Unset:
+
+a =.
+*)
+indentInfixRator[Unset][rator_] :=
+  {space[], rator}
+
+
 indentInfixRator[_][rator_] :=
   {space[], rator, space[]}
 

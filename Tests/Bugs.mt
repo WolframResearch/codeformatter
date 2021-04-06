@@ -121,7 +121,18 @@ Test[
 
 
 
-
+(*
+bug 407712
+*)
+Test[
+	CodeFormat["unSetMyGlobal:=(MyGlobal=.)"]
+	,
+	"\
+unSetMyGlobal :=
+    (MyGlobal =.)"
+	,
+	TestID->"Bugs-20210406-H6V8N9"
+]
 
 
 

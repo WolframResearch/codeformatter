@@ -21,7 +21,7 @@ Out[2]= If[a,
 
 ## Setup
 
-CodeFormatter and its dependencies are included in Mathematica 12.2.
+CodeFormatter and its dependencies are included in Mathematica 12.2 and above.
 
 For older versions, you can install from the paclet server.
 

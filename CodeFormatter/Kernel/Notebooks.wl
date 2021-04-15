@@ -16,6 +16,9 @@ Needs["CodeParser`"]
 Needs["CodeParser`Utils`"]
 
 
+$LintTextFontWeight = "Medium"
+
+
 formatSelectedCell[] :=
   Catch[
   Module[{nb, read, formatted, toWrite},
@@ -468,8 +471,8 @@ replace `` and ** markup
 *)
 boldify[s_String] :=
     StringReplace[s, {
-        RegularExpression["``(.*?)``"] :> ToString[Style["$1", Bold], StandardForm],
-        RegularExpression["\\*\\*(.*?)\\*\\*"] :> ToString[Style["$1", Bold], StandardForm],
+        RegularExpression["``(.*?)``"] :> ToString[Style["$1", "Program", FontWeight->$LintTextFontWeight], StandardForm],
+        RegularExpression["\\*\\*(.*?)\\*\\*"] :> ToString[Style["$1", "Program", FontWeight->$LintTextFontWeight], StandardForm],
         RegularExpression["\\?\\?(.*?)\\?\\?"] :> "$1"}
     ]
 

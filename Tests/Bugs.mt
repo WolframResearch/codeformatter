@@ -139,6 +139,26 @@ unSetMyGlobal :=
 
 
 
+(*
+bug 408992
+*)
+Test[
+	CodeFormat["a:b"]
+	,
+	"a:b"
+	,
+	TestID->"Bugs-20210426-L8Q5O5"
+]
+
+Test[
+	CodeFormat["a:b|c"]
+	,
+	"a : b | c"
+	,
+	TestID->"Bugs-20210426-P4B2D7"
+]
+
+
 
 
 

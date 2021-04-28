@@ -162,6 +162,15 @@ Test[
 
 
 
-
+(*
+bug 409143
+*)
+Test[
+	CodeFormat["foo::bars"]
+	,
+	"foo::bars"
+	,
+	TestID->"Bugs-20210428-I2Z4W1"
+]
 
 

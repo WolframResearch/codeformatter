@@ -517,10 +517,10 @@ no spaces around Power:
 a^b
 
 *)
-indentInfixRatorBinaryNodeSurroundedByLeafs[Pattern | Optional | PatternTest | MessageName | Power][rator_] :=
+indentInfixRatorSurroundedByLeafs[Pattern | Optional | PatternTest | MessageName | Power][rator_] :=
   rator
 
-indentInfixRatorBinaryNodeSurroundedByLeafs[tag_][rator_] :=
+indentInfixRatorSurroundedByLeafs[tag_][rator_] :=
   indentInfixRator[tag][rator]
 
 
@@ -608,7 +608,7 @@ indent[(type:BinaryNode|InfixNode|TernaryNode|QuaternaryNode)[tag_, graphs_, dat
   Catch[
   Module[{aggs, rators, ratorsPat, split,
     definitelyDelete, definitelyInsert, definitelyAutomatic, indentedGraphs, anyIndentedGraphsMultiline, lastRator, lastRatorPos,
-    binaryNodeSurroundedByLeafs},
+    infixRatorSurroundedByLeafs},
 
     If[$Debug,
       Print["inside indent operator"]
@@ -622,7 +622,7 @@ indent[(type:BinaryNode|InfixNode|TernaryNode|QuaternaryNode)[tag_, graphs_, dat
       Print["anyIndentedGraphsMultiline: ", anyIndentedGraphsMultiline]
     ];
 
-    binaryNodeSurroundedByLeafs = (type === BinaryNode) && MatchQ[graphs, {_LeafNode, _LeafNode, _LeafNode}];
+    infixRatorSurroundedByLeafs = MatchQ[type, BinaryNode | InfixNode] && MatchQ[graphs, {_LeafNode, _LeafNode, _LeafNode}];
 
     aggs = DeleteCases[indentedGraphs, comment];
 
@@ -723,19 +723,19 @@ indent[(type:BinaryNode|InfixNode|TernaryNode|QuaternaryNode)[tag_, graphs_, dat
 
     Which[
       TrueQ[definitelyInsert],
-        baseOperatorNodeIndent[type, tag, data, split, ratorsPat, anyIndentedGraphsMultiline, binaryNodeSurroundedByLeafs]
+        baseOperatorNodeIndent[type, tag, data, split, ratorsPat, anyIndentedGraphsMultiline, infixRatorSurroundedByLeafs]
       ,
       TrueQ[definitelyDelete],
-        baseOperatorNodeIndent[type, tag, data, split, ratorsPat, anyIndentedGraphsMultiline, binaryNodeSurroundedByLeafs]
+        baseOperatorNodeIndent[type, tag, data, split, ratorsPat, anyIndentedGraphsMultiline, infixRatorSurroundedByLeafs]
       ,
       TrueQ[definitelyAutomatic],
         incrementIndentAfterFirstRator @
-          baseOperatorNodeIndent[type, tag, data, split, ratorsPat, anyIndentedGraphsMultiline, binaryNodeSurroundedByLeafs]
+          baseOperatorNodeIndent[type, tag, data, split, ratorsPat, anyIndentedGraphsMultiline, infixRatorSurroundedByLeafs]
     ]
   ]]
 
 
-baseOperatorNodeIndent[type_, tag_, data_, split_, ratorsPat_, anyIndentedGraphsMultiline_, binaryNodeSurroundedByLeafs_] :=
+baseOperatorNodeIndent[type_, tag_, data_, split_, ratorsPat_, anyIndentedGraphsMultiline_, infixRatorSurroundedByLeafs_] :=
 Catch[
 Module[{},
 
@@ -758,8 +758,8 @@ Module[{},
           Function[{grouped},
             Replace[grouped, {
               rator:ratorsPat :>
-                If[binaryNodeSurroundedByLeafs,
-                  indentInfixRatorBinaryNodeSurroundedByLeafs[tag][rator]
+                If[infixRatorSurroundedByLeafs,
+                  indentInfixRatorSurroundedByLeafs[tag][rator]
                   ,
                   indentInfixRator[tag][rator]
                 ]

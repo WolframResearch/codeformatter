@@ -65,9 +65,9 @@ Define lexical ordering to use for lists
 The default Wolfram Language ordering is not the same as common lexical ordering
 *)
 lexOrderingForLists[{}, {}] := 0
-lexOrderingForLists[{}, b_] := 1
-lexOrderingForLists[a_, {}] := -1
-lexOrderingForLists[a_, b_] :=
+lexOrderingForLists[{}, b_List] := 1
+lexOrderingForLists[a_List, {}] := -1
+lexOrderingForLists[a_List, b_List] :=
   Order[Take[a, 1], Take[b, 1]] /. 
     0 :> lexOrderingForLists[Drop[a, 1], Drop[b, 1]]
 

@@ -122,7 +122,7 @@ Test[
 Test[
 	CodeFormat["a = ."]
 	,
-	"a = ."
+	"a =."
 	,
 	TestID -> "CodeFormatter-20191111-M7F5A1"
 ]

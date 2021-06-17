@@ -479,7 +479,7 @@ boldify[s_String] :=
 massageAiriness[a_Real] := a
 massageAiriness[a_Integer] := a
 
-massageAiriness[_] := $DefaultAiriness
+massageAiriness[_] := Automatic
 
 
 massageIndentationString[s_String, tabWidth_] :=

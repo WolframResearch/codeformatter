@@ -18,8 +18,6 @@ Undocumented functions
 CodeFormatCST
 
 
-$DefaultAiriness
-
 $DefaultIndentationString
 
 $DefaultTabWidth
@@ -90,8 +88,6 @@ If[StringSplit[codeParserVersion, "."][[1;;2]] != StringSplit[codeFormatterVersi
 
 
 
-$DefaultAiriness = 0
-
 $DefaultIndentationString := StringRepeat[" ", $DefaultTabWidth]
 
 $DefaultNewlineString = "\n"
@@ -136,7 +132,7 @@ Options[CodeFormat] = {
   "NewlineString" :> $DefaultNewlineString,
   "LineWidth" :> $DefaultLineWidth,
 
-  Airiness :> $DefaultAiriness,
+  Airiness -> Automatic,
   "NewlinesBetweenCommas" -> Automatic,
   "NewlinesBetweenSemicolons" -> Automatic,
   "NewlinesBetweenOperators" -> Automatic,
@@ -358,7 +354,10 @@ Module[{
   style["NewlinesInScoping"] = OptionValue["NewlinesInScoping"];
 
   airiness = OptionValue[Airiness];
-
+  If[airiness === Automatic,
+    airiness = 0.0
+  ];
+  
   If[airiness == -1,
     style["NewlinesInComments"] = Delete
   ];

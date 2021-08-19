@@ -19,16 +19,13 @@ Token`ToplevelNewline -> Parselet`InfixToplevelNewlineParselet[],
 
 
 Token`Error`ExpectedEqual -> Parselet`InfixAssertFalseParselet[],
-Token`Error`UnhandledDot -> Parselet`InfixAssertFalseParselet[],
+Token`Error`Number -> Parselet`InfixAssertFalseParselet[],
 Token`Error`UnhandledCharacter -> Parselet`InfixAssertFalseParselet[],
 Token`Error`ExpectedLetterlike -> Parselet`InfixAssertFalseParselet[],
-Token`Error`ExpectedAccuracy -> Parselet`InfixAssertFalseParselet[],
-Token`Error`ExpectedExponent -> Parselet`InfixAssertFalseParselet[],
 Token`Error`Aborted -> Parselet`InfixAssertFalseParselet[],
 Token`Error`ExpectedOperand -> Parselet`InfixAssertFalseParselet[],
-Token`Error`UnrecognizedDigit -> Parselet`InfixAssertFalseParselet[],
-Token`Error`ExpectedDigit -> Parselet`InfixAssertFalseParselet[],
-Token`Error`InvalidBase -> Parselet`InfixAssertFalseParselet[],
+Token`Error`ExpectedTag -> Parselet`InfixAssertFalseParselet[],
+Token`Error`ExpectedFile -> Parselet`InfixAssertFalseParselet[],
 Token`Error`UnterminatedComment -> Parselet`InfixAssertFalseParselet[],
 Token`Error`UnterminatedString -> Parselet`InfixAssertFalseParselet[],
 Token`Error`UnterminatedFileString -> Parselet`InfixAssertFalseParselet[],
@@ -222,6 +219,10 @@ Token`LongName`DoubleUpArrow -> Parselet`InfixOperatorParselet[Token`LongName`Do
 Token`LongName`DoubleDownArrow -> Parselet`InfixOperatorParselet[Token`LongName`DoubleDownArrow, Precedence`Class`VerticalArrowOperators, DoubleDownArrow],
 Token`LongName`DoubleUpDownArrow -> Parselet`InfixOperatorParselet[Token`LongName`DoubleUpDownArrow, Precedence`Class`VerticalArrowOperators, DoubleUpDownArrow],
 Token`LongName`DownArrowUpArrow -> Parselet`InfixOperatorParselet[Token`LongName`DownArrowUpArrow, Precedence`Class`VerticalArrowOperators, DownArrowUpArrow],
+(*
+itai asking about precedence of "long" arrows:
+https://mail-archive.wolfram.com/archive/l-typeset/2021/Jul00/0000.html
+*)
 Token`LongName`LongLeftArrow -> Parselet`InfixOperatorParselet[Token`LongName`LongLeftArrow, Precedence`Class`VerticalArrowOperators, LongLeftArrow],
 Token`LongName`LongRightArrow -> Parselet`InfixOperatorParselet[Token`LongName`LongRightArrow, Precedence`Class`VerticalArrowOperators, LongRightArrow],
 Token`LongName`LongLeftRightArrow -> Parselet`InfixOperatorParselet[Token`LongName`LongLeftRightArrow, Precedence`Class`VerticalArrowOperators, LongLeftRightArrow],

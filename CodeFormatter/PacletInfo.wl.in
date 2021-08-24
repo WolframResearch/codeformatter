@@ -17,6 +17,6 @@ Paclet[
     Related threads: https://mail-archive.wolfram.com/archive/l-frontend/2020/Sep00/0133.html
     *)
     {"FrontEnd", Root -> "FrontEnd", Prepend -> True, WolframVersion -> "12.2+"},
-    {"Documentation", Language -> "English", MainPage -> "Guides/CodeFormatter"}
+    {"Documentation", Language -> All, MainPage -> "Guides/CodeFormatter"}
   }
 ]

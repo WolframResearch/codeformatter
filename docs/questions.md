@@ -28,6 +28,7 @@ You can run arbitrary code in the command, so edit the command in your settings 
     "-noinit",
     "-noprompt",
     "-nopaclet",
+    "-nostartuppaclets",
     "-noicon",
     "-run",
     "Needs[\"LSPServer`\"];CodeFormatter`Private`$DefaultLineWidth=120;LSPServer`StartServer[]"

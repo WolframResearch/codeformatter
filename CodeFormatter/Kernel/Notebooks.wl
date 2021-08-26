@@ -231,15 +231,33 @@ formatSelectedNotebook[] :=
 (*
 Return string
 *)
+
+getNewlineRules[] :=
+Replace[
+    Normal[
+        KeyTake[
+            Replace[AbsoluteCurrentValue[$FrontEnd, {CodeAssistOptions, "CodeToolsOptions", "CodeFormat"}], Except[_Association] -> <||>],
+            {
+                "NewlinesBetweenSemicolons", "NewlinesBetweenOperators", "NewlinesInGroups",
+                "NewlinesBetweenCommas", "NewlinesInControl", "NewlinesInScoping",
+                "NewlinesInComments"}]],
+    {True -> Insert, False -> Delete},
+    {2}]
+
 formatProgramCellContents[contents_String] :=
     Catch[
-    Module[{formatted, airiness, indentationString, tabWidth},
+    Module[{formatted, airiness, indentationString, tabWidth, formatOptions, method},
 
         airiness = massageAiriness[CodeFormatter`$InteractiveAiriness];
         tabWidth = massageTabWidth[CodeFormatter`$InteractiveTabWidth];
         indentationString = massageIndentationString[CodeFormatter`$InteractiveIndentationCharacter, tabWidth];
+        method = CurrentValue[$FrontEnd, {CodeAssistOptions, "CodeToolsOptions", "CodeFormat", "FormatMethod"}];
+        formatOptions =
+            Join[
+                {"IndentationString" -> indentationString, "TabWidth" -> tabWidth},
+                Switch[method, "NewlineRules", getNewlineRules[], _, {Airiness -> airiness}]];
 
-        formatted = CodeFormat[contents, Airiness -> airiness, "IndentationString" -> indentationString, "TabWidth" -> tabWidth];
+        formatted = CodeFormat[contents, formatOptions];
         If[FailureQ[formatted],
             Throw[formatted]
         ];
@@ -253,12 +271,17 @@ Return boxes
 formatInputContents[contentsBox_] :=
     Catch[
     Module[{cst, formatted, formattedBox, airiness, indentationString, tabWidth, agg, cst2, agg2, aggToCompare, agg2ToCompare, newline,
-        issues},
+        issues, formatOptions, method},
 
         airiness = massageAiriness[CodeFormatter`$InteractiveAiriness];
         tabWidth = massageTabWidth[CodeFormatter`$InteractiveTabWidth];
         indentationString = massageIndentationString[CodeFormatter`$InteractiveIndentationCharacter, tabWidth];
         newline = "\n";
+        method = CurrentValue[$FrontEnd, {CodeAssistOptions, "CodeToolsOptions", "CodeFormat", "FormatMethod"}];
+        formatOptions =
+            Join[
+                {"IndentationString" -> indentationString, "TabWidth" -> tabWidth},
+                Switch[method, "NewlineRules", getNewlineRules[], _, {Airiness -> airiness}]];
 
         (*
         convert boxes to form that is understood by formatter
@@ -268,7 +291,7 @@ formatInputContents[contentsBox_] :=
             Throw[cst]
         ];
 
-        formatted = CodeFormatCST[cst, Airiness -> airiness, "IndentationString" -> indentationString, "TabWidth" -> tabWidth];
+        formatted = CodeFormatCST[cst, formatOptions];
         If[FailureQ[formatted],
             Throw[formatted]
         ];

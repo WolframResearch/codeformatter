@@ -18,69 +18,68 @@ If[!MemberQ[$ContextPath, "CodeFormatter`Generate`UIElements`"],
 ];
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*Code Formatter Docked Cell*)
-
-
-controlRow[{controls__}, opts___] := DynamicModule[{},
-	Grid[{Riffle[{controls}, delimiter]}, GridOpts],
-	opts
-]
 
 
 toCell[contents_] := Cell[BoxData @ ToBoxes[contents]]
 
 
-formatter = With[{BackgroundCol = BackgroundCol}, controlRow[
-	{
-		AirinessSlider[
-			Dynamic[CurrentValue[EvaluationNotebook[], {TaggingRules, "CodeFormatter", "ToolbarAccentColor"}, RGBColor["#2497b7"]]],
-			
-			Dynamic[
-				CodeFormatter`$InteractiveAiriness, 
-				{
-					Function[{val, expr},
-						expr = val;
-						If[$VersionNumber >= 12.2,
-							CurrentValue[$FrontEnd, {CodeAssistOptions, "CodeToolsOptions", "CodeFormatterInteractiveAiriness"}] = val
-						],
-						HoldAll
+formatter =
+DynamicModule[{},
+	Grid[
+		{{
+			Dynamic[FEPrivate`FrontEndResource["CodeFormatterStrings", "AirinessLabel"]],
+			Spacer[10],
+			DynamicModule[{semicolons, operators, groups, commas, ctrlStruct, scopingStruct, comments},
+				AirinessSlider[
+					Dynamic[
+						CodeFormatter`$InteractiveAiriness, 
+						{
+							Automatic,
+							(* this fires on slider mouse up but after internal side effect of setting "CodeFormat" CurrentValue key-values *)
+							Function[{val, expr},
+								expr = val;
+								If[$VersionNumber >= 12.2, CodeFormatter`Notebooks`formatSelectedCell[]],
+								HoldAll
+							]
+						}
 					],
-					Function[{val, expr}, expr = val;
-						If[$VersionNumber >= 12.2, CodeFormatter`Notebooks`formatSelectedCell[]],
-						HoldAll
-					]
-				}
-			],
-			{{-1, -0.85, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75, 0.85, 1}}
-		],
-					
-		IndentationMenu[
-			Dynamic[CurrentValue[EvaluationNotebook[], {TaggingRules, "CodeFormatter", "ToolbarAccentColor"}, RGBColor["#2497b7"]]],
-			
-			Dynamic[
-				CodeFormatter`$InteractiveIndentationCharacter,
-				Function[{val},
-					If[$VersionNumber >= 12.2,
-						CurrentValue[$FrontEnd, {CodeAssistOptions, "CodeToolsOptions", "CodeFormatterInteractiveIndentationCharacter"}] = val;
-					]
-				]
-			], 
-			
-			Dynamic[
-				CodeFormatter`$InteractiveTabWidth,
-				Function[{val},
-					If[$VersionNumber >= 12.2,
-						CurrentValue[$FrontEnd, {CodeAssistOptions, "CodeToolsOptions", "CodeFormatterInteractiveTabWidth"}] = val;
-					]
+					Dynamic[{semicolons, operators, groups, commas, ctrlStruct, scopingStruct, comments}]
 				],
-				Function[{val},
-					If[$VersionNumber >= 12.2, CodeFormatter`Notebooks`formatSelectedCell[]],
-					HoldAll
-				]
+				Initialization :> (
+					(* Populate the local option value variables. *)
+					With[{optVals = Replace[CurrentValue[$FrontEnd, {CodeAssistOptions, "CodeToolsOptions", "CodeFormat"}], Except[_Association] -> <||>]},
+						semicolons = Lookup[optVals, "NewlinesBetweenSemicolons", Automatic];
+						operators = Lookup[optVals, "NewlinesBetweenOperators", Automatic];
+						groups = Lookup[optVals, "NewlinesInGroups", Automatic];
+						commas = Lookup[optVals, "NewlinesBetweenCommas", Automatic];
+						ctrlStruct = Lookup[optVals, "NewlinesInControl", Automatic];
+						scopingStruct = Lookup[optVals, "NewlinesInScoping", Automatic];
+						comments = Lookup[optVals, "NewlinesInComments", Automatic]];
+				)
+			],
+
+			delimiter,
+			
+			Style[tr["IndentationLabel"], "CodeFormatterText"],
+			Spacer[10],
+			IndentationMenu[
+				Dynamic[
+					CodeFormatter`$InteractiveIndentationCharacter,
+					Function[{val},
+						If[$VersionNumber >= 12.2, CurrentValue[$FrontEnd, {CodeAssistOptions, "CodeToolsOptions", "CodeFormat", "InteractiveIndentationCharacter"}] = val]]], 
+				Dynamic[
+					CodeFormatter`$InteractiveTabWidth,
+					Function[{val},
+						If[$VersionNumber >= 12.2, CurrentValue[$FrontEnd, {CodeAssistOptions, "CodeToolsOptions", "CodeFormat", "InteractiveTabWidth"}] = val]],
+					Function[{val},
+						If[$VersionNumber >= 12.2, CodeFormatter`Notebooks`formatSelectedCell[]],
+						HoldAll]]
 			]
-		]
-	},
+		}},
+		Spacings -> {0, 0}, Alignment -> {Center, Center}, BaseStyle -> "CodeFormatterText"
+	],
 	
 	Initialization :> (
 		Module[{opts},
@@ -89,65 +88,35 @@ formatter = With[{BackgroundCol = BackgroundCol}, controlRow[
 
 			If[$VersionNumber >= 12.2,
 				
-				CurrentValue[$FrontEnd, {CodeAssistOptions, "CodeToolsOptions", "CodeFormatterInteractiveReparse"}] = True;
-				opts = CurrentValue[$FrontEnd, {CodeAssistOptions, "CodeToolsOptions"}];
+				CurrentValue[$FrontEnd, {CodeAssistOptions, "CodeToolsOptions", "CodeFormat", "InteractiveReparse"}] = True;
+				opts = Replace[CurrentValue[$FrontEnd, {CodeAssistOptions, "CodeToolsOptions", "CodeFormat"}], Except[_Association] -> <||>];
 
-				If[FailureQ[opts],
-					opts = <||>
-				];
-
-				CodeFormatter`$InteractiveAiriness = Lookup[opts, "CodeFormatterInteractiveAiriness", 0];
-				CodeFormatter`$InteractiveTabWidth = Lookup[opts, "CodeFormatterInteractiveTabWidth", "4"];
-				CodeFormatter`$InteractiveIndentationCharacter = Lookup[opts, "CodeFormatterInteractiveIndentationCharacter", "space"];
-				CodeFormatter`$InteractiveReparse = Lookup[opts, "CodeFormatterInteractiveReparse", True];
+				CodeFormatter`$InteractiveAiriness = Lookup[opts, "Airiness", 0];
+				CodeFormatter`$InteractiveTabWidth = Lookup[opts, "InteractiveTabWidth", "4"];
+				CodeFormatter`$InteractiveIndentationCharacter = Lookup[opts, "InteractiveIndentationCharacter", "space"];
+				CodeFormatter`$InteractiveReparse = Lookup[opts, "InteractiveReparse", True];
 			];
 		];
 		
 		(* Make sure the open/close button in the Toolbar package is displayed *)
 		CurrentValue[$FrontEnd, {PrivateFrontEndOptions, "InterfaceSettings", "CodeFormatter", "ShowDropDown"}] = True;
 		
-		(* Set options for the appearance of the parent cell *)
-		SetOptions[EvaluationCell[],
-			{
-				CellMargins->{{0, 0}, {0, 0}},
-				CellFrameMargins->{{15, 0}, {3, 4}},
-				CellFrame->Dynamic[If[
-					Dynamic[CurrentValue[EvaluationNotebook[], {TaggingRules, "CodeFormatter", "ToolbarState"}, False]],
-					{{0,0},{2,0}}, None, None
-				]],
-				CellFrameColor -> Dynamic[CurrentValue[EvaluationNotebook[], {TaggingRules, "CodeFormatter", "ToolbarAccentColor"}, RGBColor["#2497b7"]]],
-				Background -> BackgroundCol,
-				FontSize->13,
-				FontColor->Black, 
-				FontWeight->Plain,
-				Magnification -> 1, 
-				Deployed -> True,
-				Evaluator -> "System",
-				DynamicUpdating -> True,
-				DynamicEvaluationTimeout -> 12
-			}
-		]
-		)
-]];
+	)
+];
 
 
-(* ::Section:: *)
+(* ::Section::Closed:: *)
 (*Output*)
 
 
-copyCellExprs[cells_] := 
-	With[{nb = NotebookPut[Notebook[Flatten[{cells}]]]},
-		SelectionMove[nb, All, Notebook];
-		FrontEndExecute[{FrontEndToken[nb, "CopySpecial", "CellExpression"]}]
-	]
+codeFormatter = FileNameJoin[{ParentDirectory[NotebookDirectory[]], "FrontEnd", "TextResources", "CodeFormatter.tr"}];
 
 
-(* ::Text:: *)
-(*Evaluate the following to generate the cell and put the corresponding cell expression(s) on the clipboard. Paste the DynamicModuleBox wrapped in Cell[BoxData[XXXX]] into CodeFormatter.tr*)
+(* Ensure WIReS resources are visible *)
+ResourceFunction["AddResourceSystem", ResourceSystemBase -> "https://www.internalcloud.wolfram.com/obj/resourcesystem/api/1.0"]["WIReS"];
 
 
-(* ::Input:: *)
-(*toCell[formatter]//copyCellExprs*)
+ResourceFunction["WriteTextResource"][codeFormatter, "@@resource CodeFormatterLocalizedExpressions English", "PackageToolbarPreferencesCell" -> toCell[formatter]]
 
 
 (* ::Section::Closed:: *)

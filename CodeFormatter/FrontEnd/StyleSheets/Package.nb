@@ -1,0 +1,82 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 13.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[      2594,         74]
+NotebookOptionsPosition[      1616,         52]
+NotebookOutlinePosition[      2202,         73]
+CellTagsIndexPosition[      2159,         70]
+MenuPosition->0
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell[StyleData[StyleDefinitions -> "Package.nb"],ExpressionUUID->"3a9c5537-444a-4165-8f1b-2e0b98f11ea5"],
+
+Cell[StyleData["CodeFormatterHighlightColor"],
+ LineColor->RGBColor[
+  0.1411764705882353, 0.592156862745098, 0.7176470588235294],
+ LineOpacity->1.,
+ EdgeColor->RGBColor[
+  0.1411764705882353, 0.592156862745098, 0.7176470588235294],
+ FrontFaceOpacity->1.,
+ BackFaceOpacity->1.,
+ Opacity->1.,
+ FontColor->RGBColor[
+  0.1411764705882353, 0.592156862745098, 0.7176470588235294],
+ FontOpacity->1.,ExpressionUUID->"b0a1e796-3f9c-4259-9c1a-923a015c53ff"],
+
+Cell[StyleData["CodeFormatterTextBase"],
+ LineIndent->0,
+ LinebreakAdjustments->{1, 10, 1, 0, 1},
+ FontFamily->"Source Sans Pro",
+ FontSize->13,
+ FontWeight->Plain,
+ FontSlant->Plain,
+ PrivateFontOptions->{
+ "OperatorSubstitution"->
+  False},ExpressionUUID->"9e174ca1-131f-44eb-b060-37d687b1690b"],
+
+Cell[StyleData["CodeFormatterText", StyleDefinitions -> StyleData[
+ "CodeFormatterTextBase"]],
+ FontColor->GrayLevel[
+  0.2],ExpressionUUID->"21216e57-865f-488b-8e34-ed9cf05e9edd"]
+},
+WindowSize->{581.25, 654.},
+WindowMargins->{{Automatic, 25.5}, {33.75, Automatic}},
+WindowFrame->"Normal",
+DockedCells->FEPrivate`FrontEndResource[
+ "FEExpressions", "BuiltInStylesheetToolbar"],
+TrackCellChangeTimes->False,
+MenuSortingValue->None,
+FrontEndVersion->"13.0 for Microsoft Windows (64-bit) (October 6, 2021)",
+StyleDefinitions->"StylesheetFormatting.nb",
+ExpressionUUID->"851c6fc7-73a1-4086-8dae-15ef124443b2"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[574, 21, 104, 0, 30, 49, 0, "StyleData", "StyleDefinitions", "",ExpressionUUID->"3a9c5537-444a-4165-8f1b-2e0b98f11ea5"],
+Cell[681, 23, 448, 11, 40, 46, 0, "StyleData", "CodeFormatterHighlightColor", "All",ExpressionUUID->"b0a1e796-3f9c-4259-9c1a-923a015c53ff"],
+Cell[1132, 36, 297, 9, 43, 40, 0, "StyleData", "CodeFormatterTextBase", "All",ExpressionUUID->"9e174ca1-131f-44eb-b060-37d687b1690b"],
+Cell[1432, 47, 180, 3, 43, 94, 1, "StyleData", "CodeFormatterText", "All",ExpressionUUID->"21216e57-865f-488b-8e34-ed9cf05e9edd"]
+}
+]
+*)
+

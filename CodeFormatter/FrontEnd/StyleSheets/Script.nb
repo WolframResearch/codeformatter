@@ -1,0 +1,73 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 13.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[      2299,         65]
+NotebookOptionsPosition[      1488,         48]
+NotebookOutlinePosition[      1908,         64]
+CellTagsIndexPosition[      1865,         61]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell[StyleData[StyleDefinitions -> "Script.nb"],ExpressionUUID->"3a9c5537-444a-4165-8f1b-2e0b98f11ea5"],
+
+Cell[StyleData["CodeFormatterHighlightColor"],
+ LineColor->RGBColor[0.2588, 0.5098, 0.12155],
+ LineOpacity->1.,
+ EdgeColor->RGBColor[0.2588, 0.5098, 0.12155],
+ FrontFaceOpacity->1.,
+ BackFaceOpacity->1.,
+ Opacity->1.,
+ FontColor->RGBColor[0.2588, 0.5098, 0.12155],
+ FontOpacity->1.,ExpressionUUID->"b0a1e796-3f9c-4259-9c1a-923a015c53ff"],
+
+Cell[StyleData["CodeFormatterTextBase"],
+ LineIndent->0,
+ LinebreakAdjustments->{1, 10, 1, 0, 1},
+ FontFamily->"Source Sans Pro",
+ FontSize->13,
+ FontWeight->Plain,
+ FontSlant->Plain,
+ PrivateFontOptions->{
+ "OperatorSubstitution"->
+  False},ExpressionUUID->"0ce1378d-a9ae-478b-8e24-b77b81a8296f"],
+
+Cell[StyleData["CodeFormatterText", StyleDefinitions -> StyleData[
+ "CodeFormatterTextBase"]],
+ FontColor->GrayLevel[
+  0.2],ExpressionUUID->"4b65fc49-6de8-4570-8bd2-376f995c6986"]
+},
+WindowSize->{581.25, 654.},
+WindowMargins->{{Automatic, 63}, {30.75, Automatic}},
+FrontEndVersion->"13.0 for Microsoft Windows (64-bit) (October 6, 2021)",
+StyleDefinitions->"StylesheetFormatting.nb",
+ExpressionUUID->"7fa73f9a-c115-4504-88bf-a826105a8cc3"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[558, 20, 103, 0, 30, 48, 0, "StyleData", "StyleDefinitions", "",ExpressionUUID->"3a9c5537-444a-4165-8f1b-2e0b98f11ea5"],
+Cell[664, 22, 337, 8, 40, 46, 0, "StyleData", "CodeFormatterHighlightColor", "All",ExpressionUUID->"b0a1e796-3f9c-4259-9c1a-923a015c53ff"],
+Cell[1004, 32, 297, 9, 43, 40, 0, "StyleData", "CodeFormatterTextBase", "All",ExpressionUUID->"0ce1378d-a9ae-478b-8e24-b77b81a8296f"],
+Cell[1304, 43, 180, 3, 43, 94, 1, "StyleData", "CodeFormatterText", "All",ExpressionUUID->"4b65fc49-6de8-4570-8bd2-376f995c6986"]
+}
+]
+*)
+

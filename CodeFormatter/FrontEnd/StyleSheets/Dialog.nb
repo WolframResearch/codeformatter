@@ -1,0 +1,785 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 11.3' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[     33020,        777]
+NotebookOptionsPosition[     21147,        639]
+NotebookOutlinePosition[     21645,        658]
+CellTagsIndexPosition[     21602,        655]
+MenuPosition->0
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell[StyleData[StyleDefinitions -> "Default.nb"],ExpressionUUID->"8dcf90df-6dd6-46d8-9698-98f27dd5e0b3"],
+
+Cell[CellGroupData[{
+
+Cell[StyleData["Notebook"],
+ ClosingAutoSave->False,
+ Editable->False,
+ Saveable->False,
+ WindowToolbars->{},
+ Selectable->False,
+ WindowSize->All,
+ WindowMargins->Automatic,
+ WindowFrame->"ModelessDialog",
+ WindowElements->{},
+ WindowFrameElements->{"CloseBox"},
+ WindowFloating->False,
+ WindowTitle->None,
+ ScrollingOptions->{"VerticalScrollRange"->Fit},
+ PrivateNotebookOptions->{"ExcludeFromShutdown"->True},
+ ShowCellBracket->False,
+ WholeCellGroupOpener->False,
+ CellMargins->8,
+ PrivateCellOptions->{"EvaluationUnmatchedStyle"->{}},
+ Deployed->True,
+ DynamicEvaluationTimeout->30.,
+ ShowCellLabel->False,
+ ShowCellTags->False,
+ ContextMenu->None,
+ ComponentwiseContextMenu->{},
+ ShowAutoSpellCheck->False,
+ TranslationOptions->{"Language"->None},
+ ImageMargins->0,
+ Magnification->1,ExpressionUUID->"6b81a65b-4d44-4680-b1ef-3571a7d7c709"],
+
+Cell[StyleData[All, "Working"],
+ CellInsertionPointCell->
+  None,ExpressionUUID->"9717c4d9-b089-4abe-ad14-49bd001c6182"]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell["Main Text Dialog Styles", "Section",
+ CellChangeTimes->{{3.714220232144557*^9, 3.714220237160486*^9}, {
+  3.7154464010483437`*^9, 3.7154464016151533`*^9}, {3.715447258389803*^9, 
+  3.715447262852957*^9}},ExpressionUUID->"cd4fec6c-0791-4ace-9979-\
+bfcb0c8a18e2"],
+
+Cell[CellGroupData[{
+
+Cell["Basic text styles", "Subsection",ExpressionUUID->"2b771ef4-65b9-43c7-897a-e15718c2e9d0"],
+
+Cell[StyleData["CodeFormatterTextBase"],
+ LineIndent->0,
+ LinebreakAdjustments->{1, 10, 1, 0, 1},
+ FontFamily->"Source Sans Pro",
+ FontSize->13,
+ FontWeight->Plain,
+ FontSlant->Plain,
+ PrivateFontOptions->{
+ "OperatorSubstitution"->
+  False},ExpressionUUID->"8700ceea-ef28-46eb-ac23-eb5c5a24efca"],
+
+Cell[StyleData["DialogTextBasic"],
+ FontFamily->"Source Sans Pro",
+ FontSize->13,
+ PrivateFontOptions->{
+ "OperatorSubstitution"->
+  False},ExpressionUUID->"6a3b5061-da2f-45b5-9c9d-851c6636a051"],
+
+Cell[StyleData["DialogTextCommon", StyleDefinitions -> StyleData[
+ "DialogTextBasic"]],
+ CellHorizontalScrolling->False,
+ PageBreakAbove->True,
+ PageBreakWithin->False,
+ ShowAutoStyles->True,
+ LineSpacing->{1.25, 0},
+ AutoItalicWords->{},
+ ScriptMinSize->9,
+ ShowStringCharacters->False,
+ LineIndent->0,
+ LinebreakAdjustments->{1., 10, 1, 0, 1},
+ FontColor->GrayLevel[
+  0.39215686274509803`],ExpressionUUID->"994b15a8-948f-4c9a-ae1a-\
+848a42b4bc81"],
+
+Cell[StyleData["DialogSubtext", StyleDefinitions -> StyleData[
+ "DialogTextCommon"]],
+ FontSize->10,ExpressionUUID->"4fd96e8d-67e8-44d2-bcbf-82b7ca6cd786"],
+
+Cell[StyleData["DialogSubtextAlternate", StyleDefinitions -> StyleData[
+ "DialogSubtext"]],
+ FontColor->GrayLevel[
+  0.2],ExpressionUUID->"143fa03e-441f-44f2-8b3e-0469a6a08a60"],
+
+Cell[StyleData["DialogSubtextSubtle", StyleDefinitions -> StyleData[
+ "DialogSubtext"]],
+ FontColor->GrayLevel[
+  0.65098],ExpressionUUID->"c6cd631e-3b26-434e-9dbc-81fb934f0160"],
+
+Cell[StyleData["DialogLink", StyleDefinitions -> StyleData["DialogTextCommon"]
+ ],
+ FontColor->RGBColor[
+  0.23921568627450981`, 0.796078431372549, 
+   1.],ExpressionUUID->"23f36ec8-5747-43ae-bb6b-bb40279b1864"]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell["Dialog organization", "Subsection",ExpressionUUID->"3a7e7fea-938d-4477-9c81-12f38855cad8"],
+
+Cell[StyleData["DialogHeader", StyleDefinitions -> StyleData[
+ "DialogTextCommon"]],
+ CellMargins->{{30, 30}, {13, 11}},
+ FontSize->22,
+ FontColor->GrayLevel[
+  0.2],ExpressionUUID->"67e4366a-6b88-41dc-a95e-47713aa5ce0a"],
+
+Cell[StyleData["DialogHeaderAlternate", StyleDefinitions -> StyleData[
+ "DialogHeader"]],
+ FontColor->GrayLevel[
+  0.39215],ExpressionUUID->"b978187f-92ac-44c8-a54d-057b8039b6d5"],
+
+Cell[StyleData["DialogHeaderSubtle", StyleDefinitions -> StyleData[
+ "DialogHeader"]],
+ FontColor->GrayLevel[
+  0.65098],ExpressionUUID->"c69a446c-5ed9-415c-a38c-9ab41d8e7b71"],
+
+Cell[StyleData["DialogTitle", StyleDefinitions -> StyleData[
+ "DialogTextCommon"]],
+ CellMargins->{{30, 30}, {0, 28}},
+ CellHorizontalScrolling->False,
+ LineBreakWithin->False,
+ FontSize->22,
+ FontColor->GrayLevel[
+  0.2],ExpressionUUID->"8c3c787d-9845-4f22-9fba-7a52d4d02b60"],
+
+Cell[StyleData["DialogTitleSubtitle", StyleDefinitions -> StyleData[
+ "DialogTitle"]],
+ CellMargins->{{30, 30}, {0, 
+  20}},ExpressionUUID->"27a80a40-5103-4397-a038-2099f37a643b"],
+
+Cell[StyleData["DialogSubtitle", StyleDefinitions -> StyleData[
+ "DialogTextCommon"]],
+ CellMargins->{{30, 30}, {0, 5}},
+ FontSize->14,
+ FontColor->GrayLevel[
+  0.537254],ExpressionUUID->"f90c06f2-4ba3-47f9-b4a9-c055b4f1a6f8"],
+
+Cell[StyleData["DialogDelimiter"],
+ Editable->False,
+ CellFrame->{{0, 0}, {1, 0}},
+ CellMargins->0,
+ CellBracketOptions->{"OverlapContent"->True},
+ CellElementSpacings->{"CellMinHeight"->0},
+ CellFrameMargins->0,
+ CellFrameColor->GrayLevel[0.898039],
+ CellSize->{Automatic, 1},
+ Background->None,ExpressionUUID->"71f9e3c2-aec1-49db-8555-4328cfbb289f"],
+
+Cell[StyleData["DialogBody", StyleDefinitions -> StyleData["DialogTextCommon"]
+ ],
+ CellMargins->{{30, 30}, {24, 
+  24}},ExpressionUUID->"3085a681-a9c4-4cc3-bb2f-074b92f11c07"],
+
+Cell[StyleData["DialogBodyAlternate", StyleDefinitions -> StyleData[
+ "DialogBody"]],
+ FontColor->GrayLevel[
+  0.2],ExpressionUUID->"b0d26588-8430-4075-85c0-983061f90c42"],
+
+Cell[StyleData["DialogBodySubtle", StyleDefinitions -> StyleData["DialogBody"]
+ ],
+ FontColor->GrayLevel[
+  0.65098],ExpressionUUID->"bd2569ef-0dfc-4ad4-a164-64a55a49b88b"],
+
+Cell[StyleData["DialogFooter", StyleDefinitions -> StyleData[
+ "DialogTextCommon"]],
+ CellMargins->{{30, 30}, {15, 
+  15}},ExpressionUUID->"89c6daa5-c5d9-4c5c-a399-68912de67317"]
+}, Closed]]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell["Dialog Inputs", "Section",ExpressionUUID->"771ef523-fa0c-4ff0-bfda-4665382d0e44"],
+
+Cell[StyleData["InputTextPlaceholder", StyleDefinitions -> StyleData[
+ "DialogTextCommon"]],
+ FontSlant->"Italic",
+ FontColor->GrayLevel[0.651],
+ FontOpacity->1,ExpressionUUID->"fa66fb21-5923-4f0e-a351-049f86b3ec5b"],
+
+Cell[StyleData["InputTextActive", StyleDefinitions -> StyleData[
+ "DialogTextCommon"]],
+ FontSize->14,
+ FontColor->GrayLevel[
+  0.2],ExpressionUUID->"7bccd9d9-2cbd-4299-8b7a-c1fff6e9f358"],
+
+Cell[StyleData["InputLabels", StyleDefinitions -> StyleData[
+ "DialogTextCommon"]],
+ FontSize->12,
+ FontColor->GrayLevel[
+  0.65098],ExpressionUUID->"0a9a1dd2-37e7-44ae-b195-289bc781df64"],
+
+Cell[StyleData["InputSubLabel", StyleDefinitions -> StyleData[
+ "DialogTextCommon"]],
+ FontSize->10,
+ FontColor->GrayLevel[
+  0.65098],ExpressionUUID->"02b67c7f-2eb4-4ec7-9d5f-cf49df9c382e"],
+
+Cell[StyleData["InputError", StyleDefinitions -> StyleData["DialogTextCommon"]
+ ],
+ FontSize->10,
+ FontColor->RGBColor[
+  0.866666, 0.066666, 
+   0.],ExpressionUUID->"bd2f5fec-815f-42e0-a4b3-3823078924e6"]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell["Buttons", "Section",ExpressionUUID->"021ca7b8-5627-4bbd-baa6-b65c5fed3d8e"],
+
+Cell[StyleData["ButtonCommonOptions"],
+ FrameBoxOptions->{Alignment->Center,
+ FrameMargins->4,
+ FrameStyle->None,
+ ImageSize->{{38, Full}, {19.5, Full}},
+ RoundingRadius->3},ExpressionUUID->"5cd4919a-dc61-4a55-b218-3d6a9eeed628"],
+
+Cell[CellGroupData[{
+
+Cell["Red1 (WD)", "Subsection",ExpressionUUID->"ad10d9b3-726c-4e3e-ad0a-0479e17dfb9e"],
+
+Cell[StyleData["ButtonRed1Normal", StyleDefinitions -> StyleData[
+ "ButtonCommonOptions"]],
+ FontColor->GrayLevel[1],
+ Background->RGBColor[
+  13/15, 1/15, 0],ExpressionUUID->"d7af7694-6e12-49b3-bcf3-257bf531de3d"],
+
+Cell[StyleData["ButtonRed1Hover", StyleDefinitions -> StyleData[
+ "ButtonCommonOptions"]],
+ FontColor->GrayLevel[1],
+ Background->RGBColor[
+  254/255, 0, 0],ExpressionUUID->"429b2fd6-b93e-4f1b-a1c3-0acb3b279fb0"],
+
+Cell[StyleData["ButtonRed1Pressed", StyleDefinitions -> StyleData[
+ "ButtonCommonOptions"]],
+ FontColor->GrayLevel[1],
+ Background->RGBColor[
+  176/255, 1/17, 0],ExpressionUUID->"3f7208e8-8fa9-4f17-a1b6-5a6bde53ded2"],
+
+Cell[StyleData["ButtonRed1Disabled", StyleDefinitions -> StyleData[
+ "ButtonCommonOptions"]],
+ FontColor->GrayLevel[1, 0.5],
+ Background->RGBColor[
+  13/15, 1/15, 0, 0.5],ExpressionUUID->"6576727e-2b00-4ad8-a3f4-3441082ace7b"]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell["Red2 (WD)", "Subsection",ExpressionUUID->"ec2eaa00-134c-44aa-943b-69bbd1c7e979"],
+
+Cell[StyleData["ButtonRed2Normal", StyleDefinitions -> StyleData[
+ "ButtonCommonOptions"]],
+ FontColor->RGBColor[13/15, 1/15, 0],
+ Background->GrayLevel[1],
+ FrameBoxOptions->{
+ FrameStyle->RGBColor[
+  13/15, 1/15, 0]},ExpressionUUID->"6343b1da-efbb-4afe-8c88-33e2ddca5966"],
+
+Cell[StyleData["ButtonRed2Hover", StyleDefinitions -> StyleData[
+ "ButtonCommonOptions"]],
+ FontColor->GrayLevel[1],
+ Background->RGBColor[
+  254/255, 0, 0],ExpressionUUID->"47bf1440-1225-4ff9-b25c-a0a680d6ca7b"],
+
+Cell[StyleData["ButtonRed2Pressed", StyleDefinitions -> StyleData[
+ "ButtonCommonOptions"]],
+ FontColor->GrayLevel[1],
+ Background->RGBColor[
+  176/255, 1/17, 0],ExpressionUUID->"90e201ed-056e-4ad5-a797-5d00286566eb"],
+
+Cell[StyleData["ButtonRed2Disabled", StyleDefinitions -> StyleData[
+ "ButtonCommonOptions"]],
+ FontColor->RGBColor[13/15, 1/15, 0, 0.5],
+ Background->GrayLevel[1, 0.5],
+ FrameBoxOptions->{
+ FrameStyle->RGBColor[
+  13/15, 1/15, 0, 
+   0.5]},ExpressionUUID->"6c0b370d-084a-4821-93c0-3feda581a203"]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell["Gray1", "Subsection",ExpressionUUID->"d3ef4094-fb30-4755-82c1-036173ba3dfb"],
+
+Cell[StyleData["ButtonGray1Normal", StyleDefinitions -> StyleData[
+ "ButtonCommonOptions"]],
+ FontColor->GrayLevel[20/51],
+ Background->GrayLevel[
+  229/255],ExpressionUUID->"27f615f7-4ebb-4513-ab59-159457ab7d1f"],
+
+Cell[StyleData["ButtonGray1Hover", StyleDefinitions -> StyleData[
+ "ButtonCommonOptions"]],
+ FontColor->GrayLevel[20/51],
+ Background->GrayLevel[49/51],
+ FrameBoxOptions->{FrameStyle->{
+   GrayLevel[
+   229/255]}},ExpressionUUID->"89329681-8590-4d6c-8d4b-f090df795b8c"],
+
+Cell[StyleData["ButtonGray1Pressed", StyleDefinitions -> StyleData[
+ "ButtonCommonOptions"]],
+ FontColor->GrayLevel[1],
+ Background->GrayLevel[
+  166/255],ExpressionUUID->"8f475de5-caa9-488f-a6fd-6a51328ede3f"],
+
+Cell[StyleData["ButtonGray1Disabled", StyleDefinitions -> StyleData[
+ "ButtonCommonOptions"]],
+ FontColor->GrayLevel[20/51, 0.5],
+ Background->GrayLevel[
+  229/255, 0.5],ExpressionUUID->"b1c7ce4c-8320-4c9f-97da-4f84dc6be322"]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell["Gray2", "Subsection",ExpressionUUID->"4ae0f02f-3a2f-4e3f-9dde-5b2fe3756073"],
+
+Cell[StyleData["ButtonGray2Normal", StyleDefinitions -> StyleData[
+ "ButtonCommonOptions"]],
+ FontColor->GrayLevel[137/255],
+ Background->GrayLevel[1],
+ FrameBoxOptions->{FrameStyle->{
+   GrayLevel[
+   166/255]}},ExpressionUUID->"cfd15806-4098-4e08-bb0d-b1bde6ee89bd"],
+
+Cell[StyleData["ButtonGray2Hover", StyleDefinitions -> StyleData[
+ "ButtonCommonOptions"]],
+ FontColor->GrayLevel[20/51],
+ Background->GrayLevel[49/51],
+ FrameBoxOptions->{FrameStyle->{
+   GrayLevel[
+   166/255]}},ExpressionUUID->"e1b3a57e-80e4-4e2d-8019-b0f7b7419a07"],
+
+Cell[StyleData["ButtonGray2Pressed", StyleDefinitions -> StyleData[
+ "ButtonCommonOptions"]],
+ FontColor->GrayLevel[1],
+ Background->GrayLevel[
+  166/255],ExpressionUUID->"5ca0b38f-1ece-40af-90f8-0a666a0e543a"],
+
+Cell[StyleData["ButtonGray2Disabled", StyleDefinitions -> StyleData[
+ "ButtonCommonOptions"]],
+ FontColor->GrayLevel[137/255, 0.5],
+ Background->GrayLevel[1, 0.5],
+ FrameBoxOptions->{FrameStyle->{
+   GrayLevel[
+   166/255, 0.5]}},ExpressionUUID->"ea7b983e-4506-441f-95f8-a862c0e5a470"]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell["Gray3", "Subsection",ExpressionUUID->"15b6a24b-4d6b-48bd-aeca-87d308eb4985"],
+
+Cell[StyleData["ButtonGray3Normal", StyleDefinitions -> StyleData[
+ "ButtonCommonOptions"]],
+ FontColor->GrayLevel[
+  1/5],ExpressionUUID->"39c5e9da-3c70-4ae3-bb2b-3420361c879b"],
+
+Cell[StyleData["ButtonGray3Hover", StyleDefinitions -> StyleData[
+ "ButtonCommonOptions"]],
+ FontColor->GrayLevel[1/5],
+ Background->GrayLevel[1],
+ FrameBoxOptions->{FrameStyle->{
+   GrayLevel[
+   166/255]}},ExpressionUUID->"f193edae-9597-471a-b3af-fd7e39dc2784"],
+
+Cell[StyleData["ButtonGray3Pressed", StyleDefinitions -> StyleData[
+ "ButtonCommonOptions"]],
+ FontColor->GrayLevel[1/5],
+ Background->GrayLevel[229/255],
+ FrameBoxOptions->{FrameStyle->{
+   GrayLevel[
+   166/255]}},ExpressionUUID->"b796f87e-105d-4044-b257-077048090b23"],
+
+Cell[StyleData["ButtonGray3Disabled", StyleDefinitions -> StyleData[
+ "ButtonCommonOptions"]],
+ FontColor->GrayLevel[1/5, 0.5],
+ Background->GrayLevel[229/255, 0.5],
+ FrameBoxOptions->{FrameStyle->{
+   GrayLevel[
+   166/255, 0.5]}},ExpressionUUID->"7a44d754-a358-4083-8130-1b136829b7c6"]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell["Orange1 (WANE)", "Subsection",ExpressionUUID->"ace97dbf-11a1-4778-8316-a2c7127db5d0"],
+
+Cell[StyleData["ButtonOrange1Normal", StyleDefinitions -> StyleData[
+ "ButtonCommonOptions"]],
+ FontColor->GrayLevel[1],
+ Background->RGBColor[
+  0.9568627450980391, 0.36470588235294116`, 
+   0.1568627450980392],ExpressionUUID->"e67c8449-d0c2-4fce-bf5e-c66f50a1b8f9"],
+
+Cell[StyleData["ButtonOrange1Hover", StyleDefinitions -> StyleData[
+ "ButtonCommonOptions"]],
+ FontColor->GrayLevel[1],
+ Background->RGBColor[
+  0.9450980392156862, 0.4784313725490196, 
+   0.21568627450980393`],ExpressionUUID->"f573e281-9367-47df-b46c-\
+dcc0f763e54c"],
+
+Cell[StyleData["ButtonOrange1Pressed", StyleDefinitions -> StyleData[
+ "ButtonCommonOptions"]],
+ FontColor->GrayLevel[1],
+ Background->RGBColor[
+  0.7725490196078432, 0.0392156862745098, 
+   0.],ExpressionUUID->"ac9997c6-9839-491c-83c6-1cb2db3a46ca"],
+
+Cell[StyleData["ButtonOrange1Disabled", StyleDefinitions -> StyleData[
+ "ButtonCommonOptions"]],
+ FontColor->GrayLevel[1, 0.5],
+ Background->RGBColor[
+  0.9568627450980391, 0.36470588235294116`, 0.1568627450980392, 
+   0.5],ExpressionUUID->"3f08c1bb-5a9b-47f0-aa9f-53790879b9d0"]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell["Orange2 (WANE)", "Subsection",ExpressionUUID->"7298227e-2e3a-4d4c-93c1-cb61604d4cb1"],
+
+Cell[StyleData["ButtonOrange2Normal", StyleDefinitions -> StyleData[
+ "ButtonCommonOptions"]],
+ FontColor->RGBColor[
+  0.9568627450980391, 0.36470588235294116`, 0.1568627450980392],
+ Background->GrayLevel[1],
+ FrameBoxOptions->{
+ FrameStyle->RGBColor[
+  0.9568627450980391, 0.36470588235294116`, 
+   0.1568627450980392]},ExpressionUUID->"87a48f8c-e7f7-4ccd-a27d-\
+af2248ca596e"],
+
+Cell[StyleData["ButtonOrange2Hover", StyleDefinitions -> StyleData[
+ "ButtonCommonOptions"]],
+ FontColor->GrayLevel[1],
+ Background->RGBColor[
+  0.9450980392156862, 0.4784313725490196, 
+   0.21568627450980393`],ExpressionUUID->"b520fc9b-c89d-438a-ac41-\
+4a00162c3a86"],
+
+Cell[StyleData["ButtonOrange2Pressed", StyleDefinitions -> StyleData[
+ "ButtonCommonOptions"]],
+ FontColor->GrayLevel[1],
+ Background->RGBColor[
+  0.7725490196078432, 0.0392156862745098, 
+   0.],ExpressionUUID->"cba9d1a2-a85b-4150-9453-8c71b68b5dd4"],
+
+Cell[StyleData["ButtonOrange2Disabled", StyleDefinitions -> StyleData[
+ "ButtonCommonOptions"]],
+ FontColor->RGBColor[
+  0.9568627450980391, 0.36470588235294116`, 0.1568627450980392, 0.5],
+ Background->GrayLevel[1, 0.5],
+ FrameBoxOptions->{
+ FrameStyle->RGBColor[
+  0.9568627450980391, 0.36470588235294116`, 0.1568627450980392, 
+   0.5]},ExpressionUUID->"0c50140d-20db-4926-9d52-6b8ce2011a81"]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell["Orange3 (WPL)", "Subsection",ExpressionUUID->"463e8e41-fef6-4b1d-9c7b-4020d2f85d24"],
+
+Cell[StyleData["ButtonOrange3Normal", StyleDefinitions -> StyleData[
+ "ButtonCommonOptions"]],
+ FontColor->GrayLevel[1],
+ Background->RGBColor[
+  0.9490196078431372, 0.39215686274509803`, 
+   0.027450980392156862`],ExpressionUUID->"c7adebf4-3691-447a-8767-\
+c28336428e8f"],
+
+Cell[StyleData["ButtonOrange3Hover", StyleDefinitions -> StyleData[
+ "ButtonCommonOptions"]],
+ FontColor->GrayLevel[1],
+ Background->RGBColor[
+  0.9568627450980391, 0.6588235294117647, 
+   0.09803921568627451],ExpressionUUID->"043e0ec0-9198-4ec3-8c89-\
+ab7d399212ac"],
+
+Cell[StyleData["ButtonOrange3Pressed", StyleDefinitions -> StyleData[
+ "ButtonCommonOptions"]],
+ FontColor->GrayLevel[1],
+ Background->RGBColor[
+  0.9490196078431372, 0.5411764705882353, 
+   0.06666666666666667],ExpressionUUID->"a372525f-6ec8-4aeb-a9e7-\
+8aa36b3e536c"],
+
+Cell[StyleData["ButtonOrange3Disabled", StyleDefinitions -> StyleData[
+ "ButtonCommonOptions"]],
+ FontColor->GrayLevel[1, 0.5],
+ Background->RGBColor[
+  0.9490196078431372, 0.39215686274509803`, 0.027450980392156862`, 
+   0.5],ExpressionUUID->"9ba7d69d-1454-4237-8330-af4478dbc31c"]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell["Orange4 (WPL)", "Subsection",ExpressionUUID->"ba557c0e-a816-4539-88a0-68d7198046e9"],
+
+Cell[StyleData["ButtonOrange4Normal", StyleDefinitions -> StyleData[
+ "ButtonCommonOptions"]],
+ FontColor->RGBColor[
+  0.9490196078431372, 0.39215686274509803`, 0.027450980392156862`],
+ Background->GrayLevel[1],
+ FrameBoxOptions->{
+ FrameStyle->RGBColor[
+  0.9490196078431372, 0.39215686274509803`, 
+   0.027450980392156862`]},ExpressionUUID->"bd319ed4-2a30-4157-9421-\
+90402ef9d6bd"],
+
+Cell[StyleData["ButtonOrange4Hover", StyleDefinitions -> StyleData[
+ "ButtonCommonOptions"]],
+ FontColor->GrayLevel[1],
+ Background->RGBColor[
+  0.9568627450980391, 0.6588235294117647, 
+   0.09803921568627451],ExpressionUUID->"545719d9-e0e3-4b19-bc7d-\
+73aab89222a1"],
+
+Cell[StyleData["ButtonOrange4Pressed", StyleDefinitions -> StyleData[
+ "ButtonCommonOptions"]],
+ FontColor->GrayLevel[1],
+ Background->RGBColor[
+  0.9490196078431372, 0.5411764705882353, 
+   0.06666666666666667],ExpressionUUID->"19984a28-3b3c-4bf4-849c-\
+6aab2bd8ed86"],
+
+Cell[StyleData["ButtonOrange4Disabled", StyleDefinitions -> StyleData[
+ "ButtonCommonOptions"]],
+ FontColor->RGBColor[
+  0.9490196078431372, 0.39215686274509803`, 0.027450980392156862`, 0.5],
+ Background->GrayLevel[1, 0.5],
+ FrameBoxOptions->{
+ FrameStyle->RGBColor[
+  0.9490196078431372, 0.39215686274509803`, 0.027450980392156862`, 
+   0.5]},ExpressionUUID->"73159c18-e4b0-4bbc-83ac-5f676a4138bc"]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell["Blue1 (WFP)", "Subsection",ExpressionUUID->"8296c02e-7954-4697-b4c7-a2703b41b29a"],
+
+Cell[StyleData["ButtonBlue1Normal", StyleDefinitions -> StyleData[
+ "ButtonCommonOptions"]],
+ FontColor->GrayLevel[1],
+ Background->RGBColor[
+  0.1764705882352941, 0.4588235294117647, 
+   0.7294117647058823],ExpressionUUID->"6fb47a98-5fff-4f88-88e4-5d7dcdfc93a3"],
+
+Cell[StyleData["ButtonBlue1Hover", StyleDefinitions -> StyleData[
+ "ButtonCommonOptions"]],
+ FontColor->GrayLevel[1],
+ Background->RGBColor[
+  0.24313725490196078`, 0.6, 
+   0.9372549019607843],ExpressionUUID->"acb0a1db-9c5b-4742-8afb-56b5c4a0962c"],
+
+Cell[StyleData["ButtonBlue1Pressed", StyleDefinitions -> StyleData[
+ "ButtonCommonOptions"]],
+ FontColor->GrayLevel[1],
+ Background->RGBColor[
+  0.1411764705882353, 0.403921568627451, 
+   0.6392156862745098],ExpressionUUID->"7a83efb1-283f-4c9e-9a6c-5e9fe7c8c9c4"],
+
+Cell[StyleData["ButtonBlue1Disabled", StyleDefinitions -> StyleData[
+ "ButtonCommonOptions"]],
+ FontColor->GrayLevel[1, 0.5],
+ Background->RGBColor[
+  0.1764705882352941, 0.4588235294117647, 0.7294117647058823, 
+   0.5],ExpressionUUID->"c851e27e-ed12-441f-9e09-f0d30c2a7358"]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell["Blue2 (WFP)", "Subsection",ExpressionUUID->"5bdfbb8e-8d7e-4fe3-bb46-5b097e98389c"],
+
+Cell[StyleData["ButtonBlue2Normal", StyleDefinitions -> StyleData[
+ "ButtonCommonOptions"]],
+ FontColor->RGBColor[
+  0.1764705882352941, 0.4588235294117647, 0.7294117647058823],
+ Background->GrayLevel[1],
+ FrameBoxOptions->{
+ FrameStyle->RGBColor[
+  0.1764705882352941, 0.4588235294117647, 
+   0.7294117647058823]},ExpressionUUID->"572ec6ff-fbeb-4f77-926a-\
+4854120f08e0"],
+
+Cell[StyleData["ButtonBlue2Hover", StyleDefinitions -> StyleData[
+ "ButtonCommonOptions"]],
+ FontColor->GrayLevel[1],
+ Background->RGBColor[
+  0.24313725490196078`, 0.6, 
+   0.9372549019607843],ExpressionUUID->"9d21b129-df60-488d-862b-9414cd07213c"],
+
+Cell[StyleData["ButtonBlue2Pressed", StyleDefinitions -> StyleData[
+ "ButtonCommonOptions"]],
+ FontColor->GrayLevel[1],
+ Background->RGBColor[
+  0.1411764705882353, 0.403921568627451, 
+   0.6392156862745098],ExpressionUUID->"09360da9-7449-4bb6-86be-2634bba504b9"],
+
+Cell[StyleData["ButtonBlue2Disabled", StyleDefinitions -> StyleData[
+ "ButtonCommonOptions"]],
+ FontColor->RGBColor[
+  0.1764705882352941, 0.4588235294117647, 0.7294117647058823, 0.5],
+ Background->GrayLevel[1, 0.5],
+ FrameBoxOptions->{
+ FrameStyle->RGBColor[
+  0.1764705882352941, 0.4588235294117647, 0.7294117647058823, 
+   0.5]},ExpressionUUID->"c8648a90-1a8d-4c64-9183-f409872357f0"]
+}, Closed]]
+}, Closed]]
+},
+AutoGeneratedPackage->None,
+WindowSize->{744, 606},
+WindowMargins->{{Automatic, 31.5}, {Automatic, 64.5}},
+TrackCellChangeTimes->False,
+MenuSortingValue->None,
+FrontEndVersion->"13.0 for Microsoft Windows (64-bit) (October 6, 2021)",
+StyleDefinitions->"StylesheetFormatting.nb",
+ExpressionUUID->"07804495-8e76-4625-b801-79b88f901116"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[574, 21, 104, 0, 30, 49, 0, "StyleData", "StyleDefinitions", "",ExpressionUUID->"8dcf90df-6dd6-46d8-9698-98f27dd5e0b3"],
+Cell[CellGroupData[{
+Cell[703, 25, 845, 28, 48, 27, 0, "StyleData", "Notebook", "All",ExpressionUUID->"6b81a65b-4d44-4680-b1ef-3571a7d7c709",
+ Magnification->1],
+Cell[1551, 55, 120, 2, 38, 31, 0, "StyleData", "All", "Working",ExpressionUUID->"9717c4d9-b089-4abe-ad14-49bd001c6182"]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[1708, 62, 267, 4, 36, "Section",ExpressionUUID->"cd4fec6c-0791-4ace-9979-bfcb0c8a18e2"],
+Cell[CellGroupData[{
+Cell[2000, 70, 94, 0, 33, "Subsection",ExpressionUUID->"2b771ef4-65b9-43c7-897a-e15718c2e9d0"],
+Cell[2097, 72, 297, 9, 43, 40, 0, "StyleData", "CodeFormatterTextBase", "All",ExpressionUUID->"8700ceea-ef28-46eb-ac23-eb5c5a24efca"],
+Cell[2397, 83, 195, 5, 43, 34, 0, "StyleData", "DialogTextBasic", "All",ExpressionUUID->"6a3b5061-da2f-45b5-9c9d-851c6636a051"],
+Cell[2595, 90, 450, 14, 43, 87, 1, "StyleData", "DialogTextCommon", "All",ExpressionUUID->"994b15a8-948f-4c9a-ae1a-848a42b4bc81"],
+Cell[3048, 106, 155, 2, 39, 85, 1, "StyleData", "DialogSubtext", "All",ExpressionUUID->"4fd96e8d-67e8-44d2-bcbf-82b7ca6cd786"],
+Cell[3206, 110, 177, 3, 39, 91, 1, "StyleData", "DialogSubtextAlternate", "All",ExpressionUUID->"143fa03e-441f-44f2-8b3e-0469a6a08a60"],
+Cell[3386, 115, 178, 3, 39, 88, 1, "StyleData", "DialogSubtextSubtle", "All",ExpressionUUID->"c6cd631e-3b26-434e-9dbc-81fb934f0160"],
+Cell[3567, 120, 211, 4, 43, 82, 1, "StyleData", "DialogLink", "All",ExpressionUUID->"23f36ec8-5747-43ae-bb6b-bb40279b1864"]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[3815, 129, 96, 0, 33, "Subsection",ExpressionUUID->"3a7e7fea-938d-4477-9c81-12f38855cad8"],
+Cell[3914, 131, 221, 5, 71, 84, 1, "StyleData", "DialogHeader", "All",ExpressionUUID->"67e4366a-6b88-41dc-a95e-47713aa5ce0a"],
+Cell[4138, 138, 179, 3, 71, 89, 1, "StyleData", "DialogHeaderAlternate", "All",ExpressionUUID->"b978187f-92ac-44c8-a54d-057b8039b6d5"],
+Cell[4320, 143, 176, 3, 71, 86, 1, "StyleData", "DialogHeaderSubtle", "All",ExpressionUUID->"c69a446c-5ed9-415c-a38c-9ab41d8e7b71"],
+Cell[4499, 148, 277, 7, 75, 83, 1, "StyleData", "DialogTitle", "All",ExpressionUUID->"8c3c787d-9845-4f22-9fba-7a52d4d02b60"],
+Cell[4779, 157, 179, 3, 67, 86, 1, "StyleData", "DialogTitleSubtitle", "All",ExpressionUUID->"27a80a40-5103-4397-a038-2099f37a643b"],
+Cell[4961, 162, 226, 5, 41, 86, 1, "StyleData", "DialogSubtitle", "All",ExpressionUUID->"f90c06f2-4ba3-47f9-b4a9-c055b4f1a6f8"],
+Cell[5190, 169, 351, 9, 2, 34, 0, "StyleData", "DialogDelimiter", "All",ExpressionUUID->"71f9e3c2-aec1-49db-8555-4328cfbb289f"],
+Cell[5544, 180, 176, 3, 83, 82, 1, "StyleData", "DialogBody", "All",ExpressionUUID->"3085a681-a9c4-4cc3-bb2f-074b92f11c07"],
+Cell[5723, 185, 171, 3, 81, 85, 1, "StyleData", "DialogBodyAlternate", "All",ExpressionUUID->"b0d26588-8430-4075-85c0-983061f90c42"],
+Cell[5897, 190, 172, 3, 81, 82, 1, "StyleData", "DialogBodySubtle", "All",ExpressionUUID->"bd2569ef-0dfc-4ad4-a164-64a55a49b88b"],
+Cell[6072, 195, 178, 3, 63, 84, 1, "StyleData", "DialogFooter", "All",ExpressionUUID->"89c6daa5-c5d9-4c5c-a399-68912de67317"]
+}, Closed]]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[6299, 204, 87, 0, 36, "Section",ExpressionUUID->"771ef523-fa0c-4ff0-bfda-4665382d0e44"],
+Cell[6389, 206, 216, 4, 43, 92, 1, "StyleData", "InputTextPlaceholder", "All",ExpressionUUID->"fa66fb21-5923-4f0e-a351-049f86b3ec5b"],
+Cell[6608, 212, 188, 4, 44, 87, 1, "StyleData", "InputTextActive", "All",ExpressionUUID->"7bccd9d9-2cbd-4299-8b7a-c1fff6e9f358"],
+Cell[6799, 218, 188, 4, 42, 83, 1, "StyleData", "InputLabels", "All",ExpressionUUID->"0a9a1dd2-37e7-44ae-b195-289bc781df64"],
+Cell[6990, 224, 190, 4, 39, 85, 1, "StyleData", "InputSubLabel", "All",ExpressionUUID->"02b67c7f-2eb4-4ec7-9d5f-cf49df9c382e"],
+Cell[7183, 230, 205, 5, 39, 82, 1, "StyleData", "InputError", "All",ExpressionUUID->"bd2f5fec-815f-42e0-a4b3-3823078924e6"]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[7425, 240, 81, 0, 36, "Section",ExpressionUUID->"021ca7b8-5627-4bbd-baa6-b65c5fed3d8e"],
+Cell[7509, 242, 229, 5, 40, 38, 0, "StyleData", "ButtonCommonOptions", "All",ExpressionUUID->"5cd4919a-dc61-4a55-b218-3d6a9eeed628"],
+Cell[CellGroupData[{
+Cell[7763, 251, 86, 0, 33, "Subsection",ExpressionUUID->"ad10d9b3-726c-4e3e-ad0a-0479e17dfb9e"],
+Cell[7852, 253, 214, 4, 56, 91, 1, "StyleData", "ButtonRed1Normal", "All",ExpressionUUID->"d7af7694-6e12-49b3-bcf3-257bf531de3d"],
+Cell[8069, 259, 212, 4, 56, 90, 1, "StyleData", "ButtonRed1Hover", "All",ExpressionUUID->"429b2fd6-b93e-4f1b-a1c3-0acb3b279fb0"],
+Cell[8284, 265, 217, 4, 56, 92, 1, "StyleData", "ButtonRed1Pressed", "All",ExpressionUUID->"3f7208e8-8fa9-4f17-a1b6-5a6bde53ded2"],
+Cell[8504, 271, 226, 4, 56, 93, 1, "StyleData", "ButtonRed1Disabled", "All",ExpressionUUID->"6576727e-2b00-4ad8-a3f4-3441082ace7b"]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[8767, 280, 86, 0, 33, "Subsection",ExpressionUUID->"ec2eaa00-134c-44aa-943b-69bbd1c7e979"],
+Cell[8856, 282, 274, 6, 38, 91, 1, "StyleData", "ButtonRed2Normal", "All",ExpressionUUID->"6343b1da-efbb-4afe-8c88-33e2ddca5966"],
+Cell[9133, 290, 212, 4, 54, 90, 1, "StyleData", "ButtonRed2Hover", "All",ExpressionUUID->"47bf1440-1225-4ff9-b25c-a0a680d6ca7b"],
+Cell[9348, 296, 217, 4, 54, 92, 1, "StyleData", "ButtonRed2Pressed", "All",ExpressionUUID->"90e201ed-056e-4ad5-a797-5d00286566eb"],
+Cell[9568, 302, 295, 7, 38, 93, 1, "StyleData", "ButtonRed2Disabled", "All",ExpressionUUID->"6c0b370d-084a-4821-93c0-3feda581a203"]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[9900, 314, 82, 0, 33, "Subsection",ExpressionUUID->"d3ef4094-fb30-4755-82c1-036173ba3dfb"],
+Cell[9985, 316, 213, 4, 54, 92, 1, "StyleData", "ButtonGray1Normal", "All",ExpressionUUID->"27f615f7-4ebb-4513-ab59-159457ab7d1f"],
+Cell[10201, 322, 269, 6, 54, 91, 1, "StyleData", "ButtonGray1Hover", "All",ExpressionUUID->"89329681-8590-4d6c-8d4b-f090df795b8c"],
+Cell[10473, 330, 210, 4, 54, 93, 1, "StyleData", "ButtonGray1Pressed", "All",ExpressionUUID->"8f475de5-caa9-488f-a6fd-6a51328ede3f"],
+Cell[10686, 336, 225, 4, 54, 94, 1, "StyleData", "ButtonGray1Disabled", "All",ExpressionUUID->"b1c7ce4c-8320-4c9f-97da-4f84dc6be322"]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[10948, 345, 82, 0, 33, "Subsection",ExpressionUUID->"4ae0f02f-3a2f-4e3f-9dde-5b2fe3756073"],
+Cell[11033, 347, 268, 6, 38, 92, 1, "StyleData", "ButtonGray2Normal", "All",ExpressionUUID->"cfd15806-4098-4e08-bb0d-b1bde6ee89bd"],
+Cell[11304, 355, 269, 6, 54, 91, 1, "StyleData", "ButtonGray2Hover", "All",ExpressionUUID->"e1b3a57e-80e4-4e2d-8019-b0f7b7419a07"],
+Cell[11576, 363, 210, 4, 54, 93, 1, "StyleData", "ButtonGray2Pressed", "All",ExpressionUUID->"5ca0b38f-1ece-40af-90f8-0a666a0e543a"],
+Cell[11789, 369, 285, 6, 38, 94, 1, "StyleData", "ButtonGray2Disabled", "All",ExpressionUUID->"ea7b983e-4506-441f-95f8-a862c0e5a470"]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[12111, 380, 82, 0, 33, "Subsection",ExpressionUUID->"15b6a24b-4d6b-48bd-aeca-87d308eb4985"],
+Cell[12196, 382, 178, 3, 38, 92, 1, "StyleData", "ButtonGray3Normal", "All",ExpressionUUID->"39c5e9da-3c70-4ae3-bb2b-3420361c879b"],
+Cell[12377, 387, 263, 6, 38, 91, 1, "StyleData", "ButtonGray3Hover", "All",ExpressionUUID->"f193edae-9597-471a-b3af-fd7e39dc2784"],
+Cell[12643, 395, 271, 6, 54, 93, 1, "StyleData", "ButtonGray3Pressed", "All",ExpressionUUID->"b796f87e-105d-4044-b257-077048090b23"],
+Cell[12917, 403, 287, 6, 54, 94, 1, "StyleData", "ButtonGray3Disabled", "All",ExpressionUUID->"7a44d754-a358-4083-8130-1b136829b7c6"]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[13241, 414, 91, 0, 33, "Subsection",ExpressionUUID->"ace97dbf-11a1-4778-8316-a2c7127db5d0"],
+Cell[13335, 416, 267, 5, 54, 94, 1, "StyleData", "ButtonOrange1Normal", "All",ExpressionUUID->"e67c8449-d0c2-4fce-bf5e-c66f50a1b8f9"],
+Cell[13605, 423, 268, 6, 54, 93, 1, "StyleData", "ButtonOrange1Hover", "All",ExpressionUUID->"f573e281-9367-47df-b46c-dcc0f763e54c"],
+Cell[13876, 431, 250, 5, 54, 95, 1, "StyleData", "ButtonOrange1Pressed", "All",ExpressionUUID->"ac9997c6-9839-491c-83c6-1cb2db3a46ca"],
+Cell[14129, 438, 279, 5, 54, 96, 1, "StyleData", "ButtonOrange1Disabled", "All",ExpressionUUID->"3f08c1bb-5a9b-47f0-aa9f-53790879b9d0"]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[14445, 448, 91, 0, 33, "Subsection",ExpressionUUID->"7298227e-2e3a-4d4c-93c1-cb61604d4cb1"],
+Cell[14539, 450, 378, 9, 38, 94, 1, "StyleData", "ButtonOrange2Normal", "All",ExpressionUUID->"87a48f8c-e7f7-4ccd-a27d-af2248ca596e"],
+Cell[14920, 461, 268, 6, 54, 93, 1, "StyleData", "ButtonOrange2Hover", "All",ExpressionUUID->"b520fc9b-c89d-438a-ac41-4a00162c3a86"],
+Cell[15191, 469, 250, 5, 54, 95, 1, "StyleData", "ButtonOrange2Pressed", "All",ExpressionUUID->"cba9d1a2-a85b-4150-9453-8c71b68b5dd4"],
+Cell[15444, 476, 393, 8, 38, 96, 1, "StyleData", "ButtonOrange2Disabled", "All",ExpressionUUID->"0c50140d-20db-4926-9d52-6b8ce2011a81"]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[15874, 489, 90, 0, 33, "Subsection",ExpressionUUID->"463e8e41-fef6-4b1d-9c7b-4020d2f85d24"],
+Cell[15967, 491, 272, 6, 54, 94, 1, "StyleData", "ButtonOrange3Normal", "All",ExpressionUUID->"c7adebf4-3691-447a-8767-c28336428e8f"],
+Cell[16242, 499, 267, 6, 54, 93, 1, "StyleData", "ButtonOrange3Hover", "All",ExpressionUUID->"043e0ec0-9198-4ec3-8c89-ab7d399212ac"],
+Cell[16512, 507, 269, 6, 54, 95, 1, "StyleData", "ButtonOrange3Pressed", "All",ExpressionUUID->"a372525f-6ec8-4aeb-a9e7-8aa36b3e536c"],
+Cell[16784, 515, 282, 5, 54, 96, 1, "StyleData", "ButtonOrange3Disabled", "All",ExpressionUUID->"9ba7d69d-1454-4237-8330-af4478dbc31c"]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[17103, 525, 90, 0, 33, "Subsection",ExpressionUUID->"ba557c0e-a816-4539-88a0-68d7198046e9"],
+Cell[17196, 527, 384, 9, 38, 94, 1, "StyleData", "ButtonOrange4Normal", "All",ExpressionUUID->"bd319ed4-2a30-4157-9421-90402ef9d6bd"],
+Cell[17583, 538, 267, 6, 54, 93, 1, "StyleData", "ButtonOrange4Hover", "All",ExpressionUUID->"545719d9-e0e3-4b19-bc7d-73aab89222a1"],
+Cell[17853, 546, 269, 6, 54, 95, 1, "StyleData", "ButtonOrange4Pressed", "All",ExpressionUUID->"19984a28-3b3c-4bf4-849c-6aab2bd8ed86"],
+Cell[18125, 554, 399, 8, 38, 96, 1, "StyleData", "ButtonOrange4Disabled", "All",ExpressionUUID->"73159c18-e4b0-4bbc-83ac-5f676a4138bc"]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[18561, 567, 88, 0, 33, "Subsection",ExpressionUUID->"8296c02e-7954-4697-b4c7-a2703b41b29a"],
+Cell[18652, 569, 263, 5, 54, 92, 1, "StyleData", "ButtonBlue1Normal", "All",ExpressionUUID->"6fb47a98-5fff-4f88-88e4-5d7dcdfc93a3"],
+Cell[18918, 576, 249, 5, 54, 91, 1, "StyleData", "ButtonBlue1Hover", "All",ExpressionUUID->"acb0a1db-9c5b-4742-8afb-56b5c4a0962c"],
+Cell[19170, 583, 263, 5, 54, 93, 1, "StyleData", "ButtonBlue1Pressed", "All",ExpressionUUID->"7a83efb1-283f-4c9e-9a6c-5e9fe7c8c9c4"],
+Cell[19436, 590, 275, 5, 54, 94, 1, "StyleData", "ButtonBlue1Disabled", "All",ExpressionUUID->"c851e27e-ed12-441f-9e09-f0d30c2a7358"]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[19748, 600, 88, 0, 33, "Subsection",ExpressionUUID->"5bdfbb8e-8d7e-4fe3-bb46-5b097e98389c"],
+Cell[19839, 602, 372, 9, 38, 92, 1, "StyleData", "ButtonBlue2Normal", "All",ExpressionUUID->"572ec6ff-fbeb-4f77-926a-4854120f08e0"],
+Cell[20214, 613, 249, 5, 54, 91, 1, "StyleData", "ButtonBlue2Hover", "All",ExpressionUUID->"9d21b129-df60-488d-862b-9414cd07213c"],
+Cell[20466, 620, 263, 5, 54, 93, 1, "StyleData", "ButtonBlue2Pressed", "All",ExpressionUUID->"09360da9-7449-4bb6-86be-2634bba504b9"],
+Cell[20732, 627, 387, 8, 38, 94, 1, "StyleData", "ButtonBlue2Disabled", "All",ExpressionUUID->"c8648a90-1a8d-4c64-9183-f409872357f0"]
+}, Closed]]
+}, Closed]]
+}
+]
+*)
+

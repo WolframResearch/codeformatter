@@ -2,13 +2,69 @@
 {
 "PaletteTitle" -> "Code Formatting",
 "FormatButton" -> "Format Cell",
+"PresetsSaveAs" -> "Save as Preset",
+"PresetsUpdate" -> "Update",
+"PresetsNameTaken" -> "This name is already taken.",
+"PresetsPopupLabel" -> "Presets\[Ellipsis]",
+"PresetsNameHint" -> "Preset name\[Ellipsis]",
+"PresetsSave" -> "Save",
+"PresetsEmpty" -> "No presets",
+"PresetsEdit" -> "Edit preset",
+"PresetsRemove" -> "Remove preset",
 "TabMenuItem" -> "Tabs",
 "Space2MenuItem" -> "2 Spaces",
 "Space4MenuItem" -> "4 Spaces",
 "Space6MenuItem" -> "6 Spaces",
 "Space8MenuItem" -> "8 Spaces",
 "AirinessLabel" -> "Airiness",
-"IndentationLabel" -> "Indentation"
+"PresetsLabel" -> "Presets",
+"LinebreakLabel" -> "Custom Linebreaking Rules",
+"IndentationLabel" -> "Indentation",
+"ToggleNever" -> "Never",
+"ToggleAutomatic" -> "Automatic",
+"ToggleAlways" -> "Always",
+"BreakSemicolonsUnstyled" -> "Break after semicolons",
+"BreakOperatorsUnstyled" -> "Break around operators",
+"BreakListsAssociationsUnstyled" -> "Break around sequences",
+"BreakCommasUnstyled" -> "Break at commas",
+"BreakControlStructuresUnstyled" -> "Break in control structures",
+"BreakScopingStructuresUnstyled" -> "Break in scoping structures",
+"BreakCommentsUnstyled" -> "Break in comments",
+"BreakSemicolons" -> "Break after \!\(\*StyleBox[\"semicolons\", \"CodeFormatterNewlineColor\"]\)",
+"BreakOperators" -> "Break around \!\(\*StyleBox[\"operators\", \"CodeFormatterNewlineColor\"]\)",
+"BreakListsAssociations" -> "Break around \!\(\*StyleBox[\"sequences\", \"CodeFormatterNewlineColor\"]\)",
+"BreakCommas" -> "Break at \!\(\*StyleBox[\"commas\", \"CodeFormatterNewlineColor\"]\)",
+"BreakControlStructures" -> "Break in \!\(\*StyleBox[\"control structures\", \"CodeFormatterNewlineColor\"]\)",
+"BreakScopingStructures" -> "Break in \!\(\*StyleBox[\"scoping structures\", \"CodeFormatterNewlineColor\"]\)",
+"BreakComments" -> "Break in \!\(\*StyleBox[\"comments\", \"CodeFormatterNewlineColor\"]\)",
+"InfoTooltipSemicolonsTextIntro" -> "When to insert newlines after \!\(\*StyleBox[\";\", \"Program\"]\)",
+"InfoTooltipSemicolonsTextAlways" -> "Always insert newlines after \!\(\*StyleBox[\";\", \"Program\"]\)",
+"InfoTooltipSemicolonsTextNever" -> "Never insert newlines after \!\(\*StyleBox[\";\", \"Program\"]\)",
+"InfoTooltipSemicolonsTextAutomatic" -> "Always insert newlines after \!\(\*StyleBox[\";\", \"Program\"]\) (same as Always)",
+"InfoTooltipOperatorsTextIntro" -> "When to insert newlines around operators such as \!\(\*StyleBox[\"+\", \"Program\"]\) and \!\(\*StyleBox[\"*\", \"Program\"]\)",
+"InfoTooltipOperatorsTextAlways" -> "Always insert newlines around operators",
+"InfoTooltipOperatorsTextNever" -> "Never insert newlines around operators",
+"InfoTooltipOperatorsTextAutomatic" -> "Never insert newlines around operators (same as Never)",
+"InfoTooltipListsAssociationsTextIntro" -> "When to insert newlines inside delimiters such as \!\(\*StyleBox[\"{}\", \"Program\"]\), \!\(\*StyleBox[\"()\", \"Program\"]\), and \!\(\*StyleBox[\"<||>\", \"Program\"]\)",
+"InfoTooltipListsAssociationsTextAlways" -> "Always insert newlines inside delimiters",
+"InfoTooltipListsAssociationsTextNever" -> "Never insert newlines inside delimiters",
+"InfoTooltipListsAssociationsTextAutomatic" -> "Never insert newlines inside delimiters (same as Never)",
+"InfoTooltipCommasTextIntro" -> "When to insert newlines around \!\(\*StyleBox[\",\", \"Program\"]\)",
+"InfoTooltipCommasTextAlways" -> "Always insert newlines around \!\(\*StyleBox[\",\", \"Program\"]\)",
+"InfoTooltipCommasTextNever" -> "Never insert newlines around \!\(\*StyleBox[\",\", \"Program\"]\)",
+"InfoTooltipCommasTextAutomatic" -> "Never insert newlines around \!\(\*StyleBox[\",\", \"Program\"]\) (same as Never)",
+"InfoTooltipControlStructuresTextIntro" -> "When to insert newlines in control structures such as \!\(\*StyleBox[\"If\", \"Program\"]\), \!\(\*StyleBox[\"Which\", \"Program\"]\), and \!\(\*StyleBox[\"Switch\", \"Program\"]\)",
+"InfoTooltipControlStructuresTextAlways" -> "Always insert newlines between each argument and between each \!\(\*StyleBox[\",\", \"Program\"]\)",
+"InfoTooltipControlStructuresTextNever" -> "Never insert newlines in control structures",
+"InfoTooltipControlStructuresTextAutomatic" -> "Insert newlines in an aesthetically pleasing way",
+"InfoTooltipScopingStructuresTextIntro" -> "When to insert newlines in scoping structures such as \!\(\*StyleBox[\"Module\", \"Program\"]\), \!\(\*StyleBox[\"Block\", \"Program\"]\), and \!\(\*StyleBox[\"With\", \"Program\"]\)",
+"InfoTooltipScopingStructuresTextAlways" -> "Insert newlines in an aesthetically pleasing way (same as Automatic)",
+"InfoTooltipScopingStructuresTextNever" -> "Never insert newlines in scoping structures",
+"InfoTooltipScopingStructuresTextAutomatic" -> "Insert newlines in an aesthetically pleasing way",
+"InfoTooltipCommentsTextIntro" -> "When to insert newlines inside of comments",
+"InfoTooltipCommentsTextAlways" -> "Preserve original newlines in comments (same as Automatic)",
+"InfoTooltipCommentsTextNever" -> "Never insert newlines in comments",
+"InfoTooltipCommentsTextAutomatic" -> "Preserve original newlines in comments"
 }
 @|
 
@@ -16,13 +72,69 @@
 {
 "PaletteTitle" -> "\:30b3\:30fc\:30c9\:30d5\:30a9\:30fc\:30de\:30c3\:30c8",
 "FormatButton" -> "\:30bb\:30eb\:3092\:30d5\:30a9\:30fc\:30de\:30c3\:30c8",
+"PresetsSaveAs" -> "Save as Preset",
+"PresetsUpdate" -> "Update",
+"PresetsNameTaken" -> "This name is already taken.",
+"PresetsPopupLabel" -> "Presets\[Ellipsis]",
+"PresetsNameHint" -> "Preset name\[Ellipsis]",
+"PresetsSave" -> "Save",
+"PresetsEmpty" -> "No presets",
+"PresetsEdit" -> "Edit preset",
+"PresetsRemove" -> "Remove preset",
 "TabMenuItem" -> "\:30bf\:30d6",
 "Space2MenuItem" -> "\:30b9\:30da\:30fc\:30b9 2\:500b",
 "Space4MenuItem" -> "\:30b9\:30da\:30fc\:30b9 4\:500b",
 "Space6MenuItem" -> "\:30b9\:30da\:30fc\:30b9 6\:500b",
 "Space8MenuItem" -> "\:30b9\:30da\:30fc\:30b9 8\:500b",
 "AirinessLabel" -> "\:7a7a\:767d\:306e\:53d6\:308a\:65b9",
-"IndentationLabel" -> "\:30a4\:30f3\:30c7\:30f3\:30c8"
+"PresetsLabel" -> "Presets",
+"LinebreakLabel" -> "Custom Linebreaking Rules",
+"IndentationLabel" -> "\:30a4\:30f3\:30c7\:30f3\:30c8",
+"ToggleNever" -> "Never",
+"ToggleAutomatic" -> "Automatic",
+"ToggleAlways" -> "Always",
+"BreakSemicolonsUnstyled" -> "Break after semicolons",
+"BreakOperatorsUnstyled" -> "Break around operators",
+"BreakListsAssociationsUnstyled" -> "Break around sequences",
+"BreakCommasUnstyled" -> "Break at commas",
+"BreakControlStructuresUnstyled" -> "Break in control structures",
+"BreakScopingStructuresUnstyled" -> "Break in scoping structures",
+"BreakCommentsUnstyled" -> "Break in comments",
+"BreakSemicolons" -> "Break after \!\(\*StyleBox[\"semicolons\", \"CodeFormatterNewlineColor\"]\)",
+"BreakOperators" -> "Break around \!\(\*StyleBox[\"operators\", \"CodeFormatterNewlineColor\"]\)",
+"BreakListsAssociations" -> "Break around \!\(\*StyleBox[\"sequences\", \"CodeFormatterNewlineColor\"]\)",
+"BreakCommas" -> "Break at \!\(\*StyleBox[\"commas\", \"CodeFormatterNewlineColor\"]\)",
+"BreakControlStructures" -> "Break in \!\(\*StyleBox[\"control structures\", \"CodeFormatterNewlineColor\"]\)",
+"BreakScopingStructures" -> "Break in \!\(\*StyleBox[\"scoping structures\", \"CodeFormatterNewlineColor\"]\)",
+"BreakComments" -> "Break in \!\(\*StyleBox[\"comments\", \"CodeFormatterNewlineColor\"]\)",
+"InfoTooltipSemicolonsTextIntro" -> "When to insert newlines after \!\(\*StyleBox[\";\", \"Program\"]\)",
+"InfoTooltipSemicolonsTextAlways" -> "Always insert newlines after \!\(\*StyleBox[\";\", \"Program\"]\)",
+"InfoTooltipSemicolonsTextNever" -> "Never insert newlines after \!\(\*StyleBox[\";\", \"Program\"]\)",
+"InfoTooltipSemicolonsTextAutomatic" -> "Always insert newlines after \!\(\*StyleBox[\";\", \"Program\"]\) (same as Always)",
+"InfoTooltipOperatorsTextIntro" -> "When to insert newlines around operators such as \!\(\*StyleBox[\"+\", \"Program\"]\) and \!\(\*StyleBox[\"*\", \"Program\"]\)",
+"InfoTooltipOperatorsTextAlways" -> "Always insert newlines around operators",
+"InfoTooltipOperatorsTextNever" -> "Never insert newlines around operators",
+"InfoTooltipOperatorsTextAutomatic" -> "Never insert newlines around operators (same as Never)",
+"InfoTooltipListsAssociationsTextIntro" -> "When to insert newlines inside delimiters such as \!\(\*StyleBox[\"{}\", \"Program\"]\), \!\(\*StyleBox[\"()\", \"Program\"]\), and \!\(\*StyleBox[\"<||>\", \"Program\"]\)",
+"InfoTooltipListsAssociationsTextAlways" -> "Always insert newlines inside delimiters",
+"InfoTooltipListsAssociationsTextNever" -> "Never insert newlines inside delimiters",
+"InfoTooltipListsAssociationsTextAutomatic" -> "Never insert newlines inside delimiters (same as Never)",
+"InfoTooltipCommasTextIntro" -> "When to insert newlines around \!\(\*StyleBox[\",\", \"Program\"]\)",
+"InfoTooltipCommasTextAlways" -> "Always insert newlines around \!\(\*StyleBox[\",\", \"Program\"]\)",
+"InfoTooltipCommasTextNever" -> "Never insert newlines around \!\(\*StyleBox[\",\", \"Program\"]\)",
+"InfoTooltipCommasTextAutomatic" -> "Never insert newlines around \!\(\*StyleBox[\",\", \"Program\"]\) (same as Never)",
+"InfoTooltipControlStructuresTextIntro" -> "When to insert newlines in control structures such as \!\(\*StyleBox[\"If\", \"Program\"]\), \!\(\*StyleBox[\"Which\", \"Program\"]\), and \!\(\*StyleBox[\"Switch\", \"Program\"]\)",
+"InfoTooltipControlStructuresTextAlways" -> "Always insert newlines between each argument and between each \!\(\*StyleBox[\",\", \"Program\"]\)",
+"InfoTooltipControlStructuresTextNever" -> "Never insert newlines in control structures",
+"InfoTooltipControlStructuresTextAutomatic" -> "Insert newlines in an aesthetically pleasing way",
+"InfoTooltipScopingStructuresTextIntro" -> "When to insert newlines in scoping structures such as \!\(\*StyleBox[\"Module\", \"Program\"]\), \!\(\*StyleBox[\"Block\", \"Program\"]\), and \!\(\*StyleBox[\"With\", \"Program\"]\)",
+"InfoTooltipScopingStructuresTextAlways" -> "Insert newlines in an aesthetically pleasing way (same as Automatic)",
+"InfoTooltipScopingStructuresTextNever" -> "Never insert newlines in scoping structures",
+"InfoTooltipScopingStructuresTextAutomatic" -> "Insert newlines in an aesthetically pleasing way",
+"InfoTooltipCommentsTextIntro" -> "When to insert newlines inside of comments",
+"InfoTooltipCommentsTextAlways" -> "Preserve original newlines in comments (same as Automatic)",
+"InfoTooltipCommentsTextNever" -> "Never insert newlines in comments",
+"InfoTooltipCommentsTextAutomatic" -> "Preserve original newlines in comments"
 }
 @|
 
@@ -30,13 +142,69 @@
 {
 "PaletteTitle" -> "Mise en forme du code",
 "FormatButton" -> "Mise en forme de la cellule",
+"PresetsSaveAs" -> "Save as Preset",
+"PresetsUpdate" -> "Update",
+"PresetsNameTaken" -> "This name is already taken.",
+"PresetsPopupLabel" -> "Presets\[Ellipsis]",
+"PresetsNameHint" -> "Preset name\[Ellipsis]",
+"PresetsSave" -> "Save",
+"PresetsEmpty" -> "No presets",
+"PresetsEdit" -> "Edit preset",
+"PresetsRemove" -> "Remove preset",
 "TabMenuItem" -> "Onglets",
 "Space2MenuItem" -> "2 espaces",
 "Space4MenuItem" -> "4 espaces",
 "Space6MenuItem" -> "6 espaces",
 "Space8MenuItem" -> "8 espaces",
 "AirinessLabel" -> "A\[EAcute]ration",
-"IndentationLabel" -> "Retrait"
+"PresetsLabel" -> "Presets",
+"LinebreakLabel" -> "Custom Linebreaking Rules",
+"IndentationLabel" -> "Retrait",
+"ToggleNever" -> "Never",
+"ToggleAutomatic" -> "Automatic",
+"ToggleAlways" -> "Always",
+"BreakSemicolonsUnstyled" -> "Break after semicolons",
+"BreakOperatorsUnstyled" -> "Break around operators",
+"BreakListsAssociationsUnstyled" -> "Break around sequences",
+"BreakCommasUnstyled" -> "Break at commas",
+"BreakControlStructuresUnstyled" -> "Break in control structures",
+"BreakScopingStructuresUnstyled" -> "Break in scoping structures",
+"BreakCommentsUnstyled" -> "Break in comments",
+"BreakSemicolons" -> "Break after \!\(\*StyleBox[\"semicolons\", \"CodeFormatterNewlineColor\"]\)",
+"BreakOperators" -> "Break around \!\(\*StyleBox[\"operators\", \"CodeFormatterNewlineColor\"]\)",
+"BreakListsAssociations" -> "Break around \!\(\*StyleBox[\"sequences\", \"CodeFormatterNewlineColor\"]\)",
+"BreakCommas" -> "Break at \!\(\*StyleBox[\"commas\", \"CodeFormatterNewlineColor\"]\)",
+"BreakControlStructures" -> "Break in \!\(\*StyleBox[\"control structures\", \"CodeFormatterNewlineColor\"]\)",
+"BreakScopingStructures" -> "Break in \!\(\*StyleBox[\"scoping structures\", \"CodeFormatterNewlineColor\"]\)",
+"BreakComments" -> "Break in \!\(\*StyleBox[\"comments\", \"CodeFormatterNewlineColor\"]\)",
+"InfoTooltipSemicolonsTextIntro" -> "When to insert newlines after \!\(\*StyleBox[\";\", \"Program\"]\)",
+"InfoTooltipSemicolonsTextAlways" -> "Always insert newlines after \!\(\*StyleBox[\";\", \"Program\"]\)",
+"InfoTooltipSemicolonsTextNever" -> "Never insert newlines after \!\(\*StyleBox[\";\", \"Program\"]\)",
+"InfoTooltipSemicolonsTextAutomatic" -> "Always insert newlines after \!\(\*StyleBox[\";\", \"Program\"]\) (same as Always)",
+"InfoTooltipOperatorsTextIntro" -> "When to insert newlines around operators such as \!\(\*StyleBox[\"+\", \"Program\"]\) and \!\(\*StyleBox[\"*\", \"Program\"]\)",
+"InfoTooltipOperatorsTextAlways" -> "Always insert newlines around operators",
+"InfoTooltipOperatorsTextNever" -> "Never insert newlines around operators",
+"InfoTooltipOperatorsTextAutomatic" -> "Never insert newlines around operators (same as Never)",
+"InfoTooltipListsAssociationsTextIntro" -> "When to insert newlines inside delimiters such as \!\(\*StyleBox[\"{}\", \"Program\"]\), \!\(\*StyleBox[\"()\", \"Program\"]\), and \!\(\*StyleBox[\"<||>\", \"Program\"]\)",
+"InfoTooltipListsAssociationsTextAlways" -> "Always insert newlines inside delimiters",
+"InfoTooltipListsAssociationsTextNever" -> "Never insert newlines inside delimiters",
+"InfoTooltipListsAssociationsTextAutomatic" -> "Never insert newlines inside delimiters (same as Never)",
+"InfoTooltipCommasTextIntro" -> "When to insert newlines around \!\(\*StyleBox[\",\", \"Program\"]\)",
+"InfoTooltipCommasTextAlways" -> "Always insert newlines around \!\(\*StyleBox[\",\", \"Program\"]\)",
+"InfoTooltipCommasTextNever" -> "Never insert newlines around \!\(\*StyleBox[\",\", \"Program\"]\)",
+"InfoTooltipCommasTextAutomatic" -> "Never insert newlines around \!\(\*StyleBox[\",\", \"Program\"]\) (same as Never)",
+"InfoTooltipControlStructuresTextIntro" -> "When to insert newlines in control structures such as \!\(\*StyleBox[\"If\", \"Program\"]\), \!\(\*StyleBox[\"Which\", \"Program\"]\), and \!\(\*StyleBox[\"Switch\", \"Program\"]\)",
+"InfoTooltipControlStructuresTextAlways" -> "Always insert newlines between each argument and between each \!\(\*StyleBox[\",\", \"Program\"]\)",
+"InfoTooltipControlStructuresTextNever" -> "Never insert newlines in control structures",
+"InfoTooltipControlStructuresTextAutomatic" -> "Insert newlines in an aesthetically pleasing way",
+"InfoTooltipScopingStructuresTextIntro" -> "When to insert newlines in scoping structures such as \!\(\*StyleBox[\"Module\", \"Program\"]\), \!\(\*StyleBox[\"Block\", \"Program\"]\), and \!\(\*StyleBox[\"With\", \"Program\"]\)",
+"InfoTooltipScopingStructuresTextAlways" -> "Insert newlines in an aesthetically pleasing way (same as Automatic)",
+"InfoTooltipScopingStructuresTextNever" -> "Never insert newlines in scoping structures",
+"InfoTooltipScopingStructuresTextAutomatic" -> "Insert newlines in an aesthetically pleasing way",
+"InfoTooltipCommentsTextIntro" -> "When to insert newlines inside of comments",
+"InfoTooltipCommentsTextAlways" -> "Preserve original newlines in comments (same as Automatic)",
+"InfoTooltipCommentsTextNever" -> "Never insert newlines in comments",
+"InfoTooltipCommentsTextAutomatic" -> "Preserve original newlines in comments"
 }
 @|
 
@@ -44,13 +212,69 @@
 {
 "PaletteTitle" -> "Formato de c\[OAcute]digo",
 "FormatButton" -> "Formatear celda",
+"PresetsSaveAs" -> "Save as Preset",
+"PresetsUpdate" -> "Update",
+"PresetsNameTaken" -> "This name is already taken.",
+"PresetsPopupLabel" -> "Presets\[Ellipsis]",
+"PresetsNameHint" -> "Preset name\[Ellipsis]",
+"PresetsSave" -> "Save",
+"PresetsEmpty" -> "No presets",
+"PresetsEdit" -> "Edit preset",
+"PresetsRemove" -> "Remove preset",
 "TabMenuItem" -> "Tabulaciones",
 "Space2MenuItem" -> "2 espacios",
 "Space4MenuItem" -> "4 espacios",
 "Space6MenuItem" -> "6 espacios",
 "Space8MenuItem" -> "8 espacios",
 "AirinessLabel" -> "Proximidad",
-"IndentationLabel" -> "Sangr\[IAcute]a"
+"PresetsLabel" -> "Presets",
+"LinebreakLabel" -> "Custom Linebreaking Rules",
+"IndentationLabel" -> "Sangr\[IAcute]a",
+"ToggleNever" -> "Never",
+"ToggleAutomatic" -> "Automatic",
+"ToggleAlways" -> "Always",
+"BreakSemicolonsUnstyled" -> "Break after semicolons",
+"BreakOperatorsUnstyled" -> "Break around operators",
+"BreakListsAssociationsUnstyled" -> "Break around sequences",
+"BreakCommasUnstyled" -> "Break at commas",
+"BreakControlStructuresUnstyled" -> "Break in control structures",
+"BreakScopingStructuresUnstyled" -> "Break in scoping structures",
+"BreakCommentsUnstyled" -> "Break in comments",
+"BreakSemicolons" -> "Break after \!\(\*StyleBox[\"semicolons\", \"CodeFormatterNewlineColor\"]\)",
+"BreakOperators" -> "Break around \!\(\*StyleBox[\"operators\", \"CodeFormatterNewlineColor\"]\)",
+"BreakListsAssociations" -> "Break around \!\(\*StyleBox[\"sequences\", \"CodeFormatterNewlineColor\"]\)",
+"BreakCommas" -> "Break at \!\(\*StyleBox[\"commas\", \"CodeFormatterNewlineColor\"]\)",
+"BreakControlStructures" -> "Break in \!\(\*StyleBox[\"control structures\", \"CodeFormatterNewlineColor\"]\)",
+"BreakScopingStructures" -> "Break in \!\(\*StyleBox[\"scoping structures\", \"CodeFormatterNewlineColor\"]\)",
+"BreakComments" -> "Break in \!\(\*StyleBox[\"comments\", \"CodeFormatterNewlineColor\"]\)",
+"InfoTooltipSemicolonsTextIntro" -> "When to insert newlines after \!\(\*StyleBox[\";\", \"Program\"]\)",
+"InfoTooltipSemicolonsTextAlways" -> "Always insert newlines after \!\(\*StyleBox[\";\", \"Program\"]\)",
+"InfoTooltipSemicolonsTextNever" -> "Never insert newlines after \!\(\*StyleBox[\";\", \"Program\"]\)",
+"InfoTooltipSemicolonsTextAutomatic" -> "Always insert newlines after \!\(\*StyleBox[\";\", \"Program\"]\) (same as Always)",
+"InfoTooltipOperatorsTextIntro" -> "When to insert newlines around operators such as \!\(\*StyleBox[\"+\", \"Program\"]\) and \!\(\*StyleBox[\"*\", \"Program\"]\)",
+"InfoTooltipOperatorsTextAlways" -> "Always insert newlines around operators",
+"InfoTooltipOperatorsTextNever" -> "Never insert newlines around operators",
+"InfoTooltipOperatorsTextAutomatic" -> "Never insert newlines around operators (same as Never)",
+"InfoTooltipListsAssociationsTextIntro" -> "When to insert newlines inside delimiters such as \!\(\*StyleBox[\"{}\", \"Program\"]\), \!\(\*StyleBox[\"()\", \"Program\"]\), and \!\(\*StyleBox[\"<||>\", \"Program\"]\)",
+"InfoTooltipListsAssociationsTextAlways" -> "Always insert newlines inside delimiters",
+"InfoTooltipListsAssociationsTextNever" -> "Never insert newlines inside delimiters",
+"InfoTooltipListsAssociationsTextAutomatic" -> "Never insert newlines inside delimiters (same as Never)",
+"InfoTooltipCommasTextIntro" -> "When to insert newlines around \!\(\*StyleBox[\",\", \"Program\"]\)",
+"InfoTooltipCommasTextAlways" -> "Always insert newlines around \!\(\*StyleBox[\",\", \"Program\"]\)",
+"InfoTooltipCommasTextNever" -> "Never insert newlines around \!\(\*StyleBox[\",\", \"Program\"]\)",
+"InfoTooltipCommasTextAutomatic" -> "Never insert newlines around \!\(\*StyleBox[\",\", \"Program\"]\) (same as Never)",
+"InfoTooltipControlStructuresTextIntro" -> "When to insert newlines in control structures such as \!\(\*StyleBox[\"If\", \"Program\"]\), \!\(\*StyleBox[\"Which\", \"Program\"]\), and \!\(\*StyleBox[\"Switch\", \"Program\"]\)",
+"InfoTooltipControlStructuresTextAlways" -> "Always insert newlines between each argument and between each \!\(\*StyleBox[\",\", \"Program\"]\)",
+"InfoTooltipControlStructuresTextNever" -> "Never insert newlines in control structures",
+"InfoTooltipControlStructuresTextAutomatic" -> "Insert newlines in an aesthetically pleasing way",
+"InfoTooltipScopingStructuresTextIntro" -> "When to insert newlines in scoping structures such as \!\(\*StyleBox[\"Module\", \"Program\"]\), \!\(\*StyleBox[\"Block\", \"Program\"]\), and \!\(\*StyleBox[\"With\", \"Program\"]\)",
+"InfoTooltipScopingStructuresTextAlways" -> "Insert newlines in an aesthetically pleasing way (same as Automatic)",
+"InfoTooltipScopingStructuresTextNever" -> "Never insert newlines in scoping structures",
+"InfoTooltipScopingStructuresTextAutomatic" -> "Insert newlines in an aesthetically pleasing way",
+"InfoTooltipCommentsTextIntro" -> "When to insert newlines inside of comments",
+"InfoTooltipCommentsTextAlways" -> "Preserve original newlines in comments (same as Automatic)",
+"InfoTooltipCommentsTextNever" -> "Never insert newlines in comments",
+"InfoTooltipCommentsTextAutomatic" -> "Preserve original newlines in comments"
 }
 @|
 
@@ -58,13 +282,69 @@
 {
 "PaletteTitle" -> "\:7de8\:78bc\:683c\:5f0f\:5316",
 "FormatButton" -> "\:683c\:5f0f\:5316\:5132\:5b58\:683c",
+"PresetsSaveAs" -> "Save as Preset",
+"PresetsUpdate" -> "Update",
+"PresetsNameTaken" -> "This name is already taken.",
+"PresetsPopupLabel" -> "Presets\[Ellipsis]",
+"PresetsNameHint" -> "Preset name\[Ellipsis]",
+"PresetsSave" -> "Save",
+"PresetsEmpty" -> "No presets",
+"PresetsEdit" -> "Edit preset",
+"PresetsRemove" -> "Remove preset",
 "TabMenuItem" -> "\:88fd\:8868\:9375",
 "Space2MenuItem" -> "2 \:7a7a\:683c",
 "Space4MenuItem" -> "4 \:7a7a\:683c",
 "Space6MenuItem" -> "6 \:7a7a\:683c",
 "Space8MenuItem" -> "8 \:7a7a\:683c",
 "AirinessLabel" -> "\:6e05\:65b0",
-"IndentationLabel" -> "\:7e2e\:9032"
+"PresetsLabel" -> "Presets",
+"LinebreakLabel" -> "Custom Linebreaking Rules",
+"IndentationLabel" -> "\:7e2e\:9032",
+"ToggleNever" -> "Never",
+"ToggleAutomatic" -> "Automatic",
+"ToggleAlways" -> "Always",
+"BreakSemicolonsUnstyled" -> "Break after semicolons",
+"BreakOperatorsUnstyled" -> "Break around operators",
+"BreakListsAssociationsUnstyled" -> "Break around sequences",
+"BreakCommasUnstyled" -> "Break at commas",
+"BreakControlStructuresUnstyled" -> "Break in control structures",
+"BreakScopingStructuresUnstyled" -> "Break in scoping structures",
+"BreakCommentsUnstyled" -> "Break in comments",
+"BreakSemicolons" -> "Break after \!\(\*StyleBox[\"semicolons\", \"CodeFormatterNewlineColor\"]\)",
+"BreakOperators" -> "Break around \!\(\*StyleBox[\"operators\", \"CodeFormatterNewlineColor\"]\)",
+"BreakListsAssociations" -> "Break around \!\(\*StyleBox[\"sequences\", \"CodeFormatterNewlineColor\"]\)",
+"BreakCommas" -> "Break at \!\(\*StyleBox[\"commas\", \"CodeFormatterNewlineColor\"]\)",
+"BreakControlStructures" -> "Break in \!\(\*StyleBox[\"control structures\", \"CodeFormatterNewlineColor\"]\)",
+"BreakScopingStructures" -> "Break in \!\(\*StyleBox[\"scoping structures\", \"CodeFormatterNewlineColor\"]\)",
+"BreakComments" -> "Break in \!\(\*StyleBox[\"comments\", \"CodeFormatterNewlineColor\"]\)",
+"InfoTooltipSemicolonsTextIntro" -> "When to insert newlines after \!\(\*StyleBox[\";\", \"Program\"]\)",
+"InfoTooltipSemicolonsTextAlways" -> "Always insert newlines after \!\(\*StyleBox[\";\", \"Program\"]\)",
+"InfoTooltipSemicolonsTextNever" -> "Never insert newlines after \!\(\*StyleBox[\";\", \"Program\"]\)",
+"InfoTooltipSemicolonsTextAutomatic" -> "Always insert newlines after \!\(\*StyleBox[\";\", \"Program\"]\) (same as Always)",
+"InfoTooltipOperatorsTextIntro" -> "When to insert newlines around operators such as \!\(\*StyleBox[\"+\", \"Program\"]\) and \!\(\*StyleBox[\"*\", \"Program\"]\)",
+"InfoTooltipOperatorsTextAlways" -> "Always insert newlines around operators",
+"InfoTooltipOperatorsTextNever" -> "Never insert newlines around operators",
+"InfoTooltipOperatorsTextAutomatic" -> "Never insert newlines around operators (same as Never)",
+"InfoTooltipListsAssociationsTextIntro" -> "When to insert newlines inside delimiters such as \!\(\*StyleBox[\"{}\", \"Program\"]\), \!\(\*StyleBox[\"()\", \"Program\"]\), and \!\(\*StyleBox[\"<||>\", \"Program\"]\)",
+"InfoTooltipListsAssociationsTextAlways" -> "Always insert newlines inside delimiters",
+"InfoTooltipListsAssociationsTextNever" -> "Never insert newlines inside delimiters",
+"InfoTooltipListsAssociationsTextAutomatic" -> "Never insert newlines inside delimiters (same as Never)",
+"InfoTooltipCommasTextIntro" -> "When to insert newlines around \!\(\*StyleBox[\",\", \"Program\"]\)",
+"InfoTooltipCommasTextAlways" -> "Always insert newlines around \!\(\*StyleBox[\",\", \"Program\"]\)",
+"InfoTooltipCommasTextNever" -> "Never insert newlines around \!\(\*StyleBox[\",\", \"Program\"]\)",
+"InfoTooltipCommasTextAutomatic" -> "Never insert newlines around \!\(\*StyleBox[\",\", \"Program\"]\) (same as Never)",
+"InfoTooltipControlStructuresTextIntro" -> "When to insert newlines in control structures such as \!\(\*StyleBox[\"If\", \"Program\"]\), \!\(\*StyleBox[\"Which\", \"Program\"]\), and \!\(\*StyleBox[\"Switch\", \"Program\"]\)",
+"InfoTooltipControlStructuresTextAlways" -> "Always insert newlines between each argument and between each \!\(\*StyleBox[\",\", \"Program\"]\)",
+"InfoTooltipControlStructuresTextNever" -> "Never insert newlines in control structures",
+"InfoTooltipControlStructuresTextAutomatic" -> "Insert newlines in an aesthetically pleasing way",
+"InfoTooltipScopingStructuresTextIntro" -> "When to insert newlines in scoping structures such as \!\(\*StyleBox[\"Module\", \"Program\"]\), \!\(\*StyleBox[\"Block\", \"Program\"]\), and \!\(\*StyleBox[\"With\", \"Program\"]\)",
+"InfoTooltipScopingStructuresTextAlways" -> "Insert newlines in an aesthetically pleasing way (same as Automatic)",
+"InfoTooltipScopingStructuresTextNever" -> "Never insert newlines in scoping structures",
+"InfoTooltipScopingStructuresTextAutomatic" -> "Insert newlines in an aesthetically pleasing way",
+"InfoTooltipCommentsTextIntro" -> "When to insert newlines inside of comments",
+"InfoTooltipCommentsTextAlways" -> "Preserve original newlines in comments (same as Automatic)",
+"InfoTooltipCommentsTextNever" -> "Never insert newlines in comments",
+"InfoTooltipCommentsTextAutomatic" -> "Preserve original newlines in comments"
 }
 @|
 
@@ -72,518 +352,645 @@
 {
 "PaletteTitle" -> "\:683c\:5f0f\:5316\:4ee3\:7801",
 "FormatButton" -> "\:683c\:5f0f\:5316\:5355\:5143",
+"PresetsSaveAs" -> "Save as Preset",
+"PresetsUpdate" -> "Update",
+"PresetsNameTaken" -> "This name is already taken.",
+"PresetsPopupLabel" -> "Presets\[Ellipsis]",
+"PresetsNameHint" -> "Preset name\[Ellipsis]",
+"PresetsSave" -> "Save",
+"PresetsEmpty" -> "No presets",
+"PresetsEdit" -> "Edit preset",
+"PresetsRemove" -> "Remove preset",
 "TabMenuItem" -> "\:5236\:8868\:7b26",
 "Space2MenuItem" -> "2 \:4e2a\:7a7a\:683c",
 "Space4MenuItem" -> "4 \:4e2a\:7a7a\:683c",
 "Space6MenuItem" -> "6 \:4e2a\:7a7a\:683c",
 "Space8MenuItem" -> "8 \:4e2a\:7a7a\:683c",
 "AirinessLabel" -> "\:7d27\:5bc6\:5ea6",
-"IndentationLabel" -> "\:7f29\:8fdb"
+"PresetsLabel" -> "Presets",
+"LinebreakLabel" -> "Custom Linebreaking Rules",
+"IndentationLabel" -> "\:7f29\:8fdb",
+"ToggleNever" -> "Never",
+"ToggleAutomatic" -> "Automatic",
+"ToggleAlways" -> "Always",
+"BreakSemicolonsUnstyled" -> "Break after semicolons",
+"BreakOperatorsUnstyled" -> "Break around operators",
+"BreakListsAssociationsUnstyled" -> "Break around sequences",
+"BreakCommasUnstyled" -> "Break at commas",
+"BreakControlStructuresUnstyled" -> "Break in control structures",
+"BreakScopingStructuresUnstyled" -> "Break in scoping structures",
+"BreakCommentsUnstyled" -> "Break in comments",
+"BreakSemicolons" -> "Break after \!\(\*StyleBox[\"semicolons\", \"CodeFormatterNewlineColor\"]\)",
+"BreakOperators" -> "Break around \!\(\*StyleBox[\"operators\", \"CodeFormatterNewlineColor\"]\)",
+"BreakListsAssociations" -> "Break around \!\(\*StyleBox[\"sequences\", \"CodeFormatterNewlineColor\"]\)",
+"BreakCommas" -> "Break at \!\(\*StyleBox[\"commas\", \"CodeFormatterNewlineColor\"]\)",
+"BreakControlStructures" -> "Break in \!\(\*StyleBox[\"control structures\", \"CodeFormatterNewlineColor\"]\)",
+"BreakScopingStructures" -> "Break in \!\(\*StyleBox[\"scoping structures\", \"CodeFormatterNewlineColor\"]\)",
+"BreakComments" -> "Break in \!\(\*StyleBox[\"comments\", \"CodeFormatterNewlineColor\"]\)",
+"InfoTooltipSemicolonsTextIntro" -> "When to insert newlines after \!\(\*StyleBox[\";\", \"Program\"]\)",
+"InfoTooltipSemicolonsTextAlways" -> "Always insert newlines after \!\(\*StyleBox[\";\", \"Program\"]\)",
+"InfoTooltipSemicolonsTextNever" -> "Never insert newlines after \!\(\*StyleBox[\";\", \"Program\"]\)",
+"InfoTooltipSemicolonsTextAutomatic" -> "Always insert newlines after \!\(\*StyleBox[\";\", \"Program\"]\) (same as Always)",
+"InfoTooltipOperatorsTextIntro" -> "When to insert newlines around operators such as \!\(\*StyleBox[\"+\", \"Program\"]\) and \!\(\*StyleBox[\"*\", \"Program\"]\)",
+"InfoTooltipOperatorsTextAlways" -> "Always insert newlines around operators",
+"InfoTooltipOperatorsTextNever" -> "Never insert newlines around operators",
+"InfoTooltipOperatorsTextAutomatic" -> "Never insert newlines around operators (same as Never)",
+"InfoTooltipListsAssociationsTextIntro" -> "When to insert newlines inside delimiters such as \!\(\*StyleBox[\"{}\", \"Program\"]\), \!\(\*StyleBox[\"()\", \"Program\"]\), and \!\(\*StyleBox[\"<||>\", \"Program\"]\)",
+"InfoTooltipListsAssociationsTextAlways" -> "Always insert newlines inside delimiters",
+"InfoTooltipListsAssociationsTextNever" -> "Never insert newlines inside delimiters",
+"InfoTooltipListsAssociationsTextAutomatic" -> "Never insert newlines inside delimiters (same as Never)",
+"InfoTooltipCommasTextIntro" -> "When to insert newlines around \!\(\*StyleBox[\",\", \"Program\"]\)",
+"InfoTooltipCommasTextAlways" -> "Always insert newlines around \!\(\*StyleBox[\",\", \"Program\"]\)",
+"InfoTooltipCommasTextNever" -> "Never insert newlines around \!\(\*StyleBox[\",\", \"Program\"]\)",
+"InfoTooltipCommasTextAutomatic" -> "Never insert newlines around \!\(\*StyleBox[\",\", \"Program\"]\) (same as Never)",
+"InfoTooltipControlStructuresTextIntro" -> "When to insert newlines in control structures such as \!\(\*StyleBox[\"If\", \"Program\"]\), \!\(\*StyleBox[\"Which\", \"Program\"]\), and \!\(\*StyleBox[\"Switch\", \"Program\"]\)",
+"InfoTooltipControlStructuresTextAlways" -> "Always insert newlines between each argument and between each \!\(\*StyleBox[\",\", \"Program\"]\)",
+"InfoTooltipControlStructuresTextNever" -> "Never insert newlines in control structures",
+"InfoTooltipControlStructuresTextAutomatic" -> "Insert newlines in an aesthetically pleasing way",
+"InfoTooltipScopingStructuresTextIntro" -> "When to insert newlines in scoping structures such as \!\(\*StyleBox[\"Module\", \"Program\"]\), \!\(\*StyleBox[\"Block\", \"Program\"]\), and \!\(\*StyleBox[\"With\", \"Program\"]\)",
+"InfoTooltipScopingStructuresTextAlways" -> "Insert newlines in an aesthetically pleasing way (same as Automatic)",
+"InfoTooltipScopingStructuresTextNever" -> "Never insert newlines in scoping structures",
+"InfoTooltipScopingStructuresTextAutomatic" -> "Insert newlines in an aesthetically pleasing way",
+"InfoTooltipCommentsTextIntro" -> "When to insert newlines inside of comments",
+"InfoTooltipCommentsTextAlways" -> "Preserve original newlines in comments (same as Automatic)",
+"InfoTooltipCommentsTextNever" -> "Never insert newlines in comments",
+"InfoTooltipCommentsTextAutomatic" -> "Preserve original newlines in comments"
 }
 @|
 
 @@resource CodeFormatterExpressions
 {
-"PackageToolbarPreferencesCellOpen" -> Dynamic[CurrentValue[EvaluationNotebook[], {TaggingRules, "CodeFormatter", "ToolbarState"}, False]]
+"PackageToolbarPreferencesCellOpen" -> Dynamic[CurrentValue[EvaluationNotebook[], {TaggingRules, "CodeFormatter", "ToolbarState"}, False]],
+"SuppressMouseDownNinePatchAppearance" -> {
+  "Default" -> FrontEnd`FileName[{"Misc"}, "TransparentBG.9.png"],
+  "Hover"   -> FrontEnd`FileName[{"Misc"}, "TransparentBG.9.png"],
+  "Pressed" -> FrontEnd`FileName[{"Misc"}, "TransparentBG.9.png"]},
+"DefaultSuppressMouseDownNinePatchAppearance" -> {
+  "ButtonType" -> "Default",
+  "Default"    -> FrontEnd`FileName[{"Misc"}, "TransparentBG.9.png"],
+  "Hover"      -> FrontEnd`FileName[{"Misc"}, "TransparentBG.9.png"],
+  "Pressed"    -> FrontEnd`FileName[{"Misc"}, "TransparentBG.9.png"]},
+"CancelSuppressMouseDownNinePatchAppearance" -> {
+  "ButtonType" -> "Cancel",
+  "Default"    -> FrontEnd`FileName[{"Misc"}, "TransparentBG.9.png"],
+  "Hover"      -> FrontEnd`FileName[{"Misc"}, "TransparentBG.9.png"],
+  "Pressed"    -> FrontEnd`FileName[{"Misc"}, "TransparentBG.9.png"]},
+"InfoTooltipSemicolonsCodeIntro" -> RowBox[{"foo", "[", RowBox[{"a", ";", "b"}], "]"}],
+"InfoTooltipSemicolonsCodeAlways" -> RowBox[{"foo", "[", "\n", "    ", RowBox[{"a", ";", "\n", "    ", "b"}], "\n", "]"}],
+"InfoTooltipSemicolonsCodeNever" -> RowBox[{"foo", "[", RowBox[{"a", ";", " ", "b"}], "]"}],
+"InfoTooltipSemicolonsCodeAutomatic" -> RowBox[{"foo", "[", "\n", "    ", RowBox[{"a", ";", "\n", "    ", "b"}], "\n", "]"}],
+"InfoTooltipOperatorsCodeIntro" -> RowBox[{"foo", "[", RowBox[{"a", "+", "b"}], "]"}],
+"InfoTooltipOperatorsCodeAlways" -> RowBox[{"foo", "[", "\n", "    ", RowBox[{"a", "\n", "    ", "+", "\n", "    ", "b"}], "\n", "]"}],
+"InfoTooltipOperatorsCodeNever" -> RowBox[{"foo", "[", RowBox[{"a", " ", "+", " ", "b"}], "]"}],
+"InfoTooltipOperatorsCodeAutomatic" -> RowBox[{"foo", "[", RowBox[{"a", " ", "+", " ", "b"}], "]"}],
+"InfoTooltipListsAssociationsCodeIntro" -> RowBox[{"{", "a", "}"}],
+"InfoTooltipListsAssociationsCodeAlways" -> RowBox[{"{", "\n", "    ", "a", "\n", "}"}],
+"InfoTooltipListsAssociationsCodeNever" -> RowBox[{"{", "a", "}"}],
+"InfoTooltipListsAssociationsCodeAutomatic" -> RowBox[{"{", "a", "}"}],
+"InfoTooltipCommasCodeIntro" -> RowBox[{"foo", "[", RowBox[{"a", ",", "b"}], "]"}],
+"InfoTooltipCommasCodeAlways" -> RowBox[{"foo", "[", "\n", "    ", RowBox[{"a", "\n", "    ", ",", "\n", "    ", "b"}], "\n", "]"}],
+"InfoTooltipCommasCodeNever" -> RowBox[{"foo", "[", RowBox[{"a", ",", " ", "b"}], "]"}],
+"InfoTooltipCommasCodeAutomatic" -> RowBox[{"foo", "[", RowBox[{"a", ",", " ", "b"}], "]"}],
+"InfoTooltipControlStructuresCodeIntro" -> RowBox[{"Which", "[", RowBox[{"a", ",", "b", ",", "c", ",", "d"}], "]"}],
+"InfoTooltipControlStructuresCodeAlways" -> RowBox[{"Which", "[", "\n", "    ", RowBox[{"a", "\n", "    ", ",", "\n", "    ", "b", "\n", "    ", ",", "\n", "    ", "c", "\n", "    ", ",", "\n", "    ", "d"}], "\n", "]"}],
+"InfoTooltipControlStructuresCodeNever" -> RowBox[{"Which", "[", RowBox[{"a", ",", " ", "b", ",", " ", "c", ",", " ", "d"}], "]"}],
+"InfoTooltipControlStructuresCodeAutomatic" -> RowBox[{"Which", "[", "\n", "    ", RowBox[{"a", ",", "\n", "        ", "b", "\n", "    ", ",", "\n", "    ", "c", ",", "\n", "        ", "d"}], "\n", "]"}],
+"InfoTooltipScopingStructuresCodeIntro" -> RowBox[{"Module", "[", RowBox[{RowBox[{"{", "a", "}"}], ",", RowBox[{"a", "+", "1"}]}], "]"}],
+"InfoTooltipScopingStructuresCodeAlways" -> RowBox[{"Module", "[", RowBox[{RowBox[{"{", "a", "}"}], ",", "\n", "    ", RowBox[{"a", " ", "+", " ", "1"}]}], "\n", "]"}],
+"InfoTooltipScopingStructuresCodeNever" -> RowBox[{"Module", "[", RowBox[{RowBox[{"{", "a", "}"}], ",", " ", RowBox[{"a", " ", "+", " ", "1"}]}], "]"}],
+"InfoTooltipScopingStructuresCodeAutomatic" -> RowBox[{"Module", "[", RowBox[{RowBox[{"{", "a", "}"}], ",", "\n", "    ", RowBox[{"a", " ", "+", " ", "1"}]}], "\n", "]"}],
+"InfoTooltipCommentsCodeIntro" -> RowBox[{"foo", "[", "\n", RowBox[{"(*", "\n", "comment", "\n", "*)"}], "\n", RowBox[{"1", "+", "1"}], "\n", "]"}],
+"InfoTooltipCommentsCodeAlways" -> RowBox[{"foo", "[", "\n", RowBox[{"(*", "\n", "comment", "\n", "*)"}], "\n", RowBox[{"1", "+", "1"}], "\n", "]"}],
+"InfoTooltipCommentsCodeNever" -> RowBox[{"foo", "[", "\n", "    ", RowBox[{"(*", "comment", "*)"}], "\n", "    ", RowBox[{"1", " ", "+", " ", "1"}], "\n", "]"}],
+"InfoTooltipCommentsCodeAutomatic" -> RowBox[{"foo", "[", "\n", RowBox[{"(*", "\n", "comment", "\n", "*)"}], "\n", RowBox[{"1", "+", "1"}], "\n", "]"}]
 }
 @|
 
 @@resource CodeFormatterLocalizedExpressions English
 {
-
-
-"PackageToolbarPreferencesCell" -> DynamicModuleBox[{}, 
+"PackageToolbarPreferencesCell" -> Cell[BoxData[
+ DynamicModuleBox[{}, 
   TagBox[GridBox[{
      {
-      DynamicModuleBox[{CodeFormatter`Generate`UIElements`hoverQ$$ = 
-       False}, 
-       TagBox[GridBox[{
-          {
-           TemplateBox[{
-             DynamicBox[
-              ToBoxes[
-               FEPrivate`FrontEndResource[
-               "CodeFormatterStrings", "AirinessLabel"], 
-               StandardForm]], 
-             TemplateBox[{10}, "Spacer1"]},
-            "Row",
-            DisplayFunction->(PaneBox[
-              RowBox[{
-                TemplateSlotSequence[1, " "]}], 
-              BaselinePosition -> (Baseline -> Baseline)]& ),
-            InterpretationFunction->(RowBox[{"Row", "[", 
-               RowBox[{
-                 RowBox[{"{", 
-                   TemplateSlotSequence[1, ","], "}"}], ",", 
-                 RowBox[{"BaselinePosition", "->", 
-                   RowBox[{"Baseline", "->", "Baseline"}]}]}], 
-               "]"}]& )], 
-           TagBox[GridBox[{
-              {
-               GraphicsBox[
-                {RGBColor[0.525, 0.525, 0.525], AbsoluteThickness[
-                 1.5], CapForm["Butt"], 
-                 LineBox[{{
-                   Offset[{0, 4.949999999999999}, {0, 0}], 
-                    Offset[{8.6, 4.949999999999999}, {0, 0}]}, {
-                   Offset[{10.6, 4.949999999999999}, {0, 0}], 
-                    Offset[{17.2, 4.949999999999999}, {0, 0}]}, {
-                   Offset[{0, 1.65}, {0, 0}], 
-                    Offset[{4.3, 1.65}, {0, 0}]}, {
-                   Offset[{6.3, 1.65}, {0, 0}], 
-                    Offset[{12.899999999999999`, 1.65}, {0, 0}]}, {
-                   Offset[{14.899999999999999`, 1.65}, {0, 0}], 
-                    Offset[{19.349999999999998`, 1.65}, {0, 0}]}, {
-                   Offset[{0, -1.65}, {0, 0}], 
-                    Offset[{6.449999999999999, -1.65}, {0, 0}]}, {
-                   Offset[{8.45, -1.65}, {0, 0}], 
-                    Offset[{16.34, -1.65}, {0, 0}]}, {
-                   Offset[{0, -4.949999999999999}, {0, 0}], 
-                    Offset[{10.75, -4.949999999999999}, {0, 0}]}, {
-                   Offset[{12.75, -4.949999999999999}, {0, 0}], 
-                    Offset[{17.2, -4.949999999999999}, {0, 0}]}}]},
-                ImagePadding->All,
-                ImageSize->{22, 15}], 
-               TemplateBox[{5},
-                "Spacer1"], 
-               DynamicWrapperBox[
-                OverlayBox[{
-                 StyleBox[
-                  
-                  SliderBox[Dynamic[
-                   CodeFormatter`$InteractiveAiriness, {
-                    
-                    Function[{
-                    CodeFormatterCell`val, CodeFormatterCell`expr}, 
-                    CodeFormatterCell`expr = CodeFormatterCell`val; 
-                    If[$VersionNumber >= 12.2, 
-                    CurrentValue[$FrontEnd, {
-                    CodeAssistOptions, "CodeToolsOptions", 
-                    "CodeFormatterInteractiveAiriness"}] = 
-                    CodeFormatterCell`val], HoldAll], 
-                    
-                    Function[{
-                    CodeFormatterCell`val, CodeFormatterCell`expr}, 
-                    CodeFormatterCell`expr = CodeFormatterCell`val; 
-                    If[$VersionNumber >= 12.2, 
-                    CodeFormatter`Notebooks`formatSelectedCell[]], 
-                    HoldAll]}], {{-1, -0.85, -0.75, -0.5, -0.25, 0, 
-                    0.25, 0.5, 0.75, 0.85, 1}},
-                   ContinuousAction->True,
-                   ImageSize->{126, 15}],
-                  ControlsRendering->"Generic",
-                  StripOnInput->False], 
-                 GraphicsBox[{
-                   {GrayLevel[0.75], AbsoluteThickness[2], CapForm[
-                    "Round"], LineBox[{{-1, 0}, {1, 0}}]}, 
-                   {EdgeForm[None], FaceForm[GrayLevel[
-                    0.75]], {
-                    DiskBox[NCache[{Rational[-9, 10], 0}, {-0.9, 0}], 
-                    Offset[2.5]], 
-                    DiskBox[
-                    NCache[{Rational[-18, 25], 0}, {-0.72, 0}], 
-                    Offset[2.5]], 
-                    DiskBox[
-                    NCache[{Rational[-27, 50], 0}, {-0.54, 0}], 
-                    Offset[2.5]], 
-                    DiskBox[NCache[{Rational[-9, 25], 0}, {-0.36, 0}],
-                     Offset[2.5]], 
-                    DiskBox[NCache[{Rational[-9, 50], 0}, {-0.18, 0}],
-                     Offset[2.5]], DiskBox[{0, 0}, Offset[2.5]], 
-                    DiskBox[NCache[{Rational[9, 50], 0}, {0.18, 0}], 
-                    Offset[2.5]], 
-                    DiskBox[NCache[{Rational[9, 25], 0}, {0.36, 0}], 
-                    Offset[2.5]], 
-                    DiskBox[NCache[{Rational[27, 50], 0}, {0.54, 0}], 
-                    Offset[2.5]], 
-                    DiskBox[NCache[{Rational[18, 25], 0}, {0.72, 0}], 
-                    Offset[2.5]], 
-                    DiskBox[NCache[{Rational[9, 10], 0}, {0.9, 0}], 
-                    Offset[2.5]], DiskBox[{0, 0}, Offset[2.5]]}, 
-                    {FaceForm[GrayLevel[1]], 
-                    DynamicBox[Typeset`ToBoxes[
-                    If[CodeFormatter`Generate`UIElements`hoverQ$$, 
-                    EdgeForm[{
-                    AbsoluteThickness[1], 
-                    CurrentValue[
-                    EvaluationNotebook[], {
-                    TaggingRules, "CodeFormatter", 
-                    "ToolbarAccentColor"}, 
-                    RGBColor["#2497b7"]]}], 
-                    EdgeForm[{
-                    AbsoluteThickness[0.5], 
-                    GrayLevel[0.6]}]], StandardForm, Graphics],
-                    
-                    ImageSizeCache->{{
-                    4.503599627370496*^15, -4.503599627370496*^15}, {
-                    4.503599627370496*^15, -4.503599627370496*^15}}], 
-                    DiskBox[{
-                    Dynamic[
+      DynamicBox[ToBoxes[
+        FEPrivate`FrontEndResource["CodeFormatterStrings", "AirinessLabel"], 
+        StandardForm],
+       ImageSizeCache->{65.9765625, {0., 9.}}], 
+      TemplateBox[{10},
+       "Spacer1"], 
+      DynamicModuleBox[{CodeFormatter`Generate`UIElements`semicolons$$ = 
+       Automatic, CodeFormatter`Generate`UIElements`operators$$ = Automatic, 
+       CodeFormatter`Generate`UIElements`groups$$ = Automatic, 
+       CodeFormatter`Generate`UIElements`commas$$ = Automatic, 
+       CodeFormatter`Generate`UIElements`ctrlStruct$$ = Automatic, 
+       CodeFormatter`Generate`UIElements`scopingStruct$$ = Automatic, 
+       CodeFormatter`Generate`UIElements`comments$$ = Automatic}, 
+       TemplateBox[{
+         GraphicsBox[{
+           AbsoluteThickness[1.5], 
+           GrayLevel[0.4], 
+           CapForm["Butt"], 
+           LineBox[{{
+              Offset[{0, 4.949999999999999}, {0, 0}], 
+              Offset[{8.6, 4.949999999999999}, {0, 0}]}, {
+              Offset[{10.6, 4.949999999999999}, {0, 0}], 
+              Offset[{17.2, 4.949999999999999}, {0, 0}]}, {
+              Offset[{0, 1.65}, {0, 0}], 
+              Offset[{4.3, 1.65}, {0, 0}]}, {
+              Offset[{6.3, 1.65}, {0, 0}], 
+              Offset[{12.899999999999999`, 1.65}, {0, 0}]}, {
+              Offset[{14.899999999999999`, 1.65}, {0, 0}], 
+              Offset[{19.349999999999998`, 1.65}, {0, 0}]}, {
+              Offset[{0, -1.65}, {0, 0}], 
+              Offset[{6.449999999999999, -1.65}, {0, 0}]}, {
+              Offset[{8.45, -1.65}, {0, 0}], 
+              Offset[{16.34, -1.65}, {0, 0}]}, {
+              Offset[{0, -4.949999999999999}, {0, 0}], 
+              Offset[{10.75, -4.949999999999999}, {0, 0}]}, {
+              Offset[{12.75, -4.949999999999999}, {0, 0}], 
+              Offset[{17.2, -4.949999999999999}, {0, 0}]}}]}, 
+          ImageSize -> {22, 15}, ImagePadding -> All], 
+         DynamicModuleBox[{
+          CodeFormatter`Generate`UIElements`highlightQ$$ = False, 
+           CodeFormatter`Generate`UIElements`pressedQ$$ = False}, 
+          DynamicWrapperBox[
+           TagBox[
+            LocatorPaneBox[
+             Dynamic[{
+               Replace[CodeFormatter`$InteractiveAiriness, Except[
+                  PatternTest[
+                   Blank[], NumericQ]] -> 0.], 0}, {(Null& )[
+                First[#], CodeFormatter`$InteractiveAiriness]& , 
+               Composition[
+               Function[{
+                 CodeFormatter`Generate`UIElements`val, 
+                  CodeFormatter`Generate`UIElements`expr}, 
+                 CodeFormatter`Generate`UIElements`expr = 
+                 CodeFormatter`Generate`UIElements`val, HoldRest][#, 
+                 CodeFormatter`$InteractiveAiriness]& , ({
+                  CodeFormatter`Generate`UIElements`semicolons$$, 
+                   CodeFormatter`Generate`UIElements`operators$$, 
+                   CodeFormatter`Generate`UIElements`groups$$, 
+                   CodeFormatter`Generate`UIElements`commas$$, 
+                   CodeFormatter`Generate`UIElements`ctrlStruct$$, 
+                   CodeFormatter`Generate`UIElements`scopingStruct$$, 
+                   CodeFormatter`Generate`UIElements`comments$$} = <|-1. -> {
+                    False, False, False, False, False, False, 
+                    False}, -0.8 -> {
+                    False, False, False, False, False, False, 
+                    Automatic}, -0.6 -> {
+                    False, False, False, Automatic, Automatic, Automatic, 
+                    Automatic}, -0.4 -> {
+                    False, False, Automatic, Automatic, Automatic, Automatic, 
+                    Automatic}, -0.2 -> {
+                    False, Automatic, Automatic, Automatic, Automatic, 
+                    Automatic, Automatic}, 
+                   0. -> {Automatic, Automatic, Automatic, Automatic, 
+                    Automatic, Automatic, Automatic}, 
+                   0.2 -> {
+                    True, Automatic, Automatic, Automatic, Automatic, 
+                    Automatic, Automatic}, 
+                   0.4 -> {
+                    True, True, Automatic, Automatic, Automatic, Automatic, 
+                    Automatic}, 
+                   0.6 -> {
+                    True, True, True, Automatic, Automatic, Automatic, 
+                    Automatic}, 
+                   0.8 -> {True, True, True, True, True, True, Automatic}, 
+                   1. -> {True, True, True, True, True, True, True}|>[
+                   Round[
                     Replace[
-                    CodeFormatter`$InteractiveAiriness, {-1 -> 
-                    Rational[-9, 10], -0.85 -> 
-                    Rational[-18, 25], -0.75 -> 
-                    Rational[-27, 50], -0.5 -> 
-                    Rational[-9, 25], -0.25 -> Rational[-9, 50], 0 -> 
-                    0, 0.25 -> Rational[9, 50], 0.5 -> 
-                    Rational[9, 25], 0.75 -> Rational[27, 50], 0.85 -> 
-                    Rational[18, 25], 1 -> Rational[9, 10], Blank[] -> 
-                    0}]], 0}, Offset[6]]}}},
-                  AspectRatio->Full,
-                  Background->GrayLevel[0.95],
-                  ImagePadding->{{2, 2}, {0, 0}},
-                  ImageSize->{130, 15},
-                  PlotRange->{{-1, 1}, {-1, 1}}]}, {1, 2}, 1,
-                 Alignment->Center,
-                 ImageSize->{130, 15}], 
-                CodeFormatter`Generate`UIElements`hoverQ$$ = 
-                CurrentValue["MouseOver"],
-                ImageSizeCache->{130., {4., 11.}}], 
-               TemplateBox[{5},
-                "Spacer1"], 
-               GraphicsBox[
-                {RGBColor[0.525, 0.525, 0.525], AbsoluteThickness[
-                 1.5], CapForm["Butt"], 
-                 LineBox[{{
-                   Offset[{0, 4.949999999999999}, {0, 0}], 
-                    Offset[{7.74, 4.949999999999999}, {0, 0}]}, {
-                   Offset[{4.3, 1.65}, {0, 0}], 
-                    Offset[{10.75, 1.65}, {0, 0}]}, {
-                   Offset[{8.6, -1.65}, {0, 0}], 
-                    Offset[{15.049999999999999`, -1.65}, {0, 0}]}, {
-                   Offset[{4.3, -4.949999999999999}, {0, 0}], 
-                    Offset[{8.6, -4.949999999999999}, {0, 0}]}}]},
-                ImagePadding->All,
-                ImageSize->{17, 15}]}
-             },
-             AutoDelete->False,
+                    First[#], Except[
+                    PatternTest[
+                    Blank[], NumericQ]] -> 0.], 0.2]]; First[#])& ], 
+               Composition[
+               Function[{
+                 CodeFormatter`Generate`UIElements`val, 
+                  CodeFormatter`Generate`UIElements`expr}, 
+                 CodeFormatter`Generate`UIElements`expr = 
+                  CodeFormatter`Generate`UIElements`val; 
+                 If[$VersionNumber >= 12.2, 
+                   CodeFormatter`Notebooks`formatSelectedCell[]], HoldAll][#, 
+                 CodeFormatter`$InteractiveAiriness]& , (
+                CurrentValue[$FrontEnd, {
+                    
+                    Splice[{
+                    CodeAssistOptions, "CodeToolsOptions", 
+                    "CodeFormat"}]}] = <|
+                   CurrentValue[$FrontEnd, {
+                    
+                    Splice[{
+                    CodeAssistOptions, "CodeToolsOptions", 
+                    "CodeFormat"}]}, <||>], "Airiness" -> First[#], 
+                   "FormatMethod" -> "AirinessSlider", 
+                   
+                   AssociationThread[{
+                    "NewlinesBetweenSemicolons", "NewlinesBetweenOperators", 
+                    "NewlinesInGroups", "NewlinesBetweenCommas", 
+                    "NewlinesInControl", "NewlinesInScoping", 
+                    "NewlinesInComments"} -> {
+                    CodeFormatter`Generate`UIElements`semicolons$$, 
+                    CodeFormatter`Generate`UIElements`operators$$, 
+                    CodeFormatter`Generate`UIElements`groups$$, 
+                    CodeFormatter`Generate`UIElements`commas$$, 
+                    CodeFormatter`Generate`UIElements`ctrlStruct$$, 
+                    CodeFormatter`Generate`UIElements`scopingStruct$$, 
+                    CodeFormatter`Generate`UIElements`comments$$}]|>; 
+                First[#])& ]}], 
+             GraphicsBox[{
+               AbsoluteThickness[2.5], 
+               GrayLevel[0.75], 
+               CapForm["Round"], 
+               LineBox[{
+                 Offset[{-8, 0}, {-1, 0}], 
+                 Offset[{8, 0}, {1, 0}]}], {
+                DiskBox[{-1., 0}, 
+                 Offset[2.5]], 
+                DiskBox[{-0.8, 0}, 
+                 Offset[2.5]], 
+                DiskBox[{-0.6, 0}, 
+                 Offset[2.5]], 
+                DiskBox[{-0.3999999999999999, 0}, 
+                 Offset[2.5]], 
+                DiskBox[{-0.19999999999999996`, 0}, 
+                 Offset[2.5]], 
+                DiskBox[{0., 0}, 
+                 Offset[2.5]], 
+                DiskBox[{0.20000000000000018`, 0}, 
+                 Offset[2.5]], 
+                DiskBox[{0.40000000000000013`, 0}, 
+                 Offset[2.5]], 
+                DiskBox[{0.6000000000000001, 0}, 
+                 Offset[2.5]], 
+                DiskBox[{0.8, 0}, 
+                 Offset[2.5]], 
+                DiskBox[{1., 0}, 
+                 Offset[2.5]]}, 
+               FaceForm[
+                GrayLevel[1]], 
+               DynamicBox[
+                Typeset`ToBoxes[
+                 EdgeForm[
+                  Directive[
+                   AbsoluteThickness[1], 
+                   If[
+                    TrueQ[Replace[
+                    
+                    FirstPosition[<|-1. -> {
+                    False, False, False, False, False, False, 
+                    False}, -0.8 -> {
+                    False, False, False, False, False, False, 
+                    Automatic}, -0.6 -> {
+                    False, False, False, Automatic, Automatic, Automatic, 
+                    Automatic}, -0.4 -> {
+                    False, False, Automatic, Automatic, Automatic, Automatic, 
+                    Automatic}, -0.2 -> {
+                    False, Automatic, Automatic, Automatic, Automatic, 
+                    Automatic, Automatic}, 
+                    0. -> {Automatic, Automatic, Automatic, Automatic, 
+                    Automatic, Automatic, Automatic}, 
+                    0.2 -> {
+                    True, Automatic, Automatic, Automatic, Automatic, 
+                    Automatic, Automatic}, 
+                    0.4 -> {
+                    True, True, Automatic, Automatic, Automatic, Automatic, 
+                    Automatic}, 
+                    0.6 -> {
+                    True, True, True, Automatic, Automatic, Automatic, 
+                    Automatic}, 
+                    0.8 -> {True, True, True, True, True, True, Automatic}, 
+                    1. -> {True, True, True, True, True, True, True}|>, {
+                    CodeFormatter`Generate`UIElements`semicolons$$, 
+                    CodeFormatter`Generate`UIElements`operators$$, 
+                    CodeFormatter`Generate`UIElements`groups$$, 
+                    CodeFormatter`Generate`UIElements`commas$$, 
+                    CodeFormatter`Generate`UIElements`ctrlStruct$$, 
+                    CodeFormatter`Generate`UIElements`scopingStruct$$, 
+                    CodeFormatter`Generate`UIElements`comments$$}, {
+                    Key[None]}], {
+                    Key[
+                    Pattern[CodeFormatter`Generate`UIElements`n, 
+                    Blank[]]]} :> CodeFormatter`Generate`UIElements`n] == 
+                    CodeFormatter`$InteractiveAiriness], 
+                    Dashing[{}], 
+                    AbsoluteDashing[{3, 3}]]]], StandardForm, Graphics]], 
+               DynamicBox[
+                Typeset`ToBoxes[
+                 Style[
+                  Disk[
+                   Dynamic[{
+                    Replace[CodeFormatter`$InteractiveAiriness, Except[
+                    PatternTest[
+                    Blank[], NumericQ]] -> 0.], 0}], 
+                   Offset[7]], 
+                  If[
+                  CodeFormatter`Generate`UIElements`highlightQ$$, 
+                   "CodeFormatterHighlightColor", EdgeColor -> 
+                   GrayLevel[0.6]]], StandardForm, Graphics], 
+                TrackedSymbols :> {
+                 CodeFormatter`Generate`UIElements`highlightQ$$}]}, 
+              PlotRange -> {{-1, 1}, {-1, 1}}, 
+              ImagePadding -> {{10, 10}, {0, 0}}, AspectRatio -> Full, 
+              ImageSize -> {150, 20}], {{-1, 0}, {1, 0}, {0.2, 1}}, 
+             Appearance -> None], 
+            
+            EventHandlerTag[{
+             "MouseDown" :> 
+              FEPrivate`Set[
+               CodeFormatter`Generate`UIElements`pressedQ$$, True], "MouseUp" :> 
+              FEPrivate`Set[
+               CodeFormatter`Generate`UIElements`pressedQ$$, False], 
+              PassEventsDown -> True, Method -> "Preemptive", PassEventsUp -> 
+              True}]], CodeFormatter`Generate`UIElements`highlightQ$$ = Or[
+             CurrentValue["MouseOver"], 
+             CodeFormatter`Generate`UIElements`pressedQ$$]], 
+          DynamicModuleValues :> {}], 
+         GraphicsBox[{
+           AbsoluteThickness[1.5], 
+           GrayLevel[0.4], 
+           CapForm["Butt"], 
+           LineBox[{{
+              Offset[{0, 4.949999999999999}, {0, 0}], 
+              Offset[{7.74, 4.949999999999999}, {0, 0}]}, {
+              Offset[{4.3, 1.65}, {0, 0}], 
+              Offset[{10.75, 1.65}, {0, 0}]}, {
+              Offset[{8.6, -1.65}, {0, 0}], 
+              Offset[{15.049999999999999`, -1.65}, {0, 0}]}, {
+              Offset[{4.3, -4.949999999999999}, {0, 0}], 
+              Offset[{8.6, -4.949999999999999}, {0, 0}]}}]}, 
+          ImageSize -> {17, 15}, ImagePadding -> All]},
+        "RowDefault"],
+       DynamicModuleValues:>{},
+       Initialization:>(
+        With[{CodeFormatter`Generate`UIElements`optVals$ = Replace[
              
-             BaseStyle->{
-              FontFamily -> "SourceSansPro", FontSize -> 13, 
-               FontWeight -> Plain, FontSlant -> Plain, FontColor -> 
-               GrayLevel[0], Background -> None},
-             BaselinePosition->(Center -> Center),
-             GridBoxAlignment->{"Columns" -> {{Center}}},
-             GridBoxItemSize->{"Columns" -> {{0}}, "Rows" -> {{0}}},
-             GridBoxSpacings->{"Columns" -> {{0}}}],
-            "Grid"]}
-         },
-         AutoDelete->False,
-         
-         BaseStyle->{
-          FontFamily -> "SourceSansPro", FontSize -> 13, FontWeight -> 
-           Plain, FontSlant -> Plain, FontColor -> GrayLevel[0], 
-           Background -> None},
-         GridBoxAlignment->{"Columns" -> {{Center}}},
-         GridBoxItemSize->{"Columns" -> {{0}}, "Rows" -> {{0}}},
-         GridBoxSpacings->{"Columns" -> {{0}}}],
-        "Grid"],
-       DynamicModuleValues:>{}], 
+             CurrentValue[$FrontEnd, {
+              CodeAssistOptions, "CodeToolsOptions", "CodeFormat"}], Except[
+               Blank[Association]] -> <||>]}, 
+          CodeFormatter`Generate`UIElements`semicolons$$ = 
+           Lookup[CodeFormatter`Generate`UIElements`optVals$, 
+             "NewlinesBetweenSemicolons", Automatic]; 
+          CodeFormatter`Generate`UIElements`operators$$ = 
+           Lookup[CodeFormatter`Generate`UIElements`optVals$, 
+             "NewlinesBetweenOperators", Automatic]; 
+          CodeFormatter`Generate`UIElements`groups$$ = 
+           Lookup[CodeFormatter`Generate`UIElements`optVals$, 
+             "NewlinesInGroups", Automatic]; 
+          CodeFormatter`Generate`UIElements`commas$$ = 
+           Lookup[CodeFormatter`Generate`UIElements`optVals$, 
+             "NewlinesBetweenCommas", Automatic]; 
+          CodeFormatter`Generate`UIElements`ctrlStruct$$ = 
+           Lookup[CodeFormatter`Generate`UIElements`optVals$, 
+             "NewlinesInControl", Automatic]; 
+          CodeFormatter`Generate`UIElements`scopingStruct$$ = 
+           Lookup[CodeFormatter`Generate`UIElements`optVals$, 
+             "NewlinesInScoping", Automatic]; 
+          CodeFormatter`Generate`UIElements`comments$$ = 
+           Lookup[CodeFormatter`Generate`UIElements`optVals$, 
+             "NewlinesInComments", Automatic]]; Null)], 
       GraphicsBox[
        {GrayLevel[0.6], AbsoluteThickness[1], CapForm["Round"], 
         LineBox[{{0, 0}, {0, 1}}]},
        AspectRatio->Full,
        ImageSize->{32, 18}], 
-      TagBox[GridBox[{
-         {
-          TemplateBox[{
-            DynamicBox[
-             ToBoxes[
-              FEPrivate`FrontEndResource[
-              "CodeFormatterStrings", "IndentationLabel"], 
-              StandardForm]], 
-            TemplateBox[{10}, "Spacer1"]},
-           "Row",
-           DisplayFunction->(PaneBox[
-             RowBox[{
-               TemplateSlotSequence[1, " "]}], 
-             BaselinePosition -> (Baseline -> Baseline)]& ),
-           InterpretationFunction->(RowBox[{"Row", "[", 
-              RowBox[{
-                RowBox[{"{", 
-                  TemplateSlotSequence[1, ","], "}"}], ",", 
-                RowBox[{"BaselinePosition", "->", 
-                  RowBox[{"Baseline", "->", "Baseline"}]}]}], 
-              "]"}]& )], 
-          ActionMenuBox[
-           TemplateBox[{
-             TagBox[
-              GridBox[{{
-                 TemplateBox[{
-                   DynamicBox[
-                    ToBoxes[
-                    Which[
-                    CodeFormatter`$InteractiveIndentationCharacter === 
-                    "tab", 
-                    Dynamic[
-                    FEPrivate`FrontEndResource[
-                    "CodeFormatterStrings", "TabMenuItem"]], 
-                    CodeFormatter`$InteractiveTabWidth === "2", 
-                    Dynamic[
-                    FEPrivate`FrontEndResource[
-                    "CodeFormatterStrings", "Space2MenuItem"]], 
-                    CodeFormatter`$InteractiveTabWidth === "4", 
-                    Dynamic[
-                    FEPrivate`FrontEndResource[
-                    "CodeFormatterStrings", "Space4MenuItem"]], 
-                    CodeFormatter`$InteractiveTabWidth === "6", 
-                    Dynamic[
-                    FEPrivate`FrontEndResource[
-                    "CodeFormatterStrings", "Space6MenuItem"]], 
-                    CodeFormatter`$InteractiveTabWidth === "8", 
-                    Dynamic[
-                    FEPrivate`FrontEndResource[
-                    "CodeFormatterStrings", "Space8MenuItem"]], True, 
-                    ""], StandardForm]], FrameStyle -> None, 
-                   Background -> None, ImageSize -> {80, 17}, 
-                   FrameMargins -> None}, "Highlighted"], 
-                 GraphicsBox[{
-                   AbsoluteThickness[2], 
-                   JoinForm["Round"], 
-                   CapForm["Round"], 
-                   DynamicBox[
-                    Typeset`ToBoxes[
-                    CurrentValue[
-                    EvaluationNotebook[], {
-                    TaggingRules, "CodeFormatter", 
-                    "ToolbarAccentColor"}, 
-                    RGBColor["#2497b7"]], StandardForm, Graphics]], 
-                   DynamicBox[
-                    Typeset`ToBoxes[
-                    Line[
-                    Switch[
-                    Down, Left, {{0.5, -1}, {-0.5, 0}, {0.5, 1}}, 
-                    Right, {{-0.5, -1}, {0.5, 0}, {-0.5, 1}}, 
-                    Up, {{-1, -0.5}, {0, 0.5}, {1, -0.5}}, 
-                    Blank[], {{-1, 0.5}, {0, -0.5}, {1, 0.5}}]], 
-                    StandardForm, Graphics]]}, ImageSize -> {10, 10}, 
-                  BaselinePosition -> Bottom]}}, 
-               GridBoxAlignment -> {"Rows" -> {{Baseline}}}, 
-               AutoDelete -> False, 
-               GridBoxItemSize -> {"Columns" -> {{0}}}, 
-               GridBoxSpacings -> {"Columns" -> {{0}}}, 
-               BaseStyle -> {
-                FontFamily -> "SourceSansPro", FontSize -> 12, 
-                 FontWeight -> Plain, FontSlant -> Plain, FontColor -> 
-                 GrayLevel[0], Background -> None}], "Grid"], 
-             Background -> GrayLevel[1], 
-             FrameMargins -> {{5, 5}, {1, 1}}, RoundingRadius -> 3, 
-             FrameStyle -> Dynamic[
-               If[
-                CurrentValue["MouseOver"], 
-                Directive[
-                 CurrentValue[
-                  EvaluationNotebook[], {
-                  TaggingRules, "CodeFormatter", 
-                   "ToolbarAccentColor"}, 
-                  RGBColor["#2497b7"]], 
-                 AbsoluteThickness[1]], 
-                Directive[
-                 GrayLevel[0.7], 
-                 AbsoluteThickness[1]]]]},
-            "Highlighted"], {
-           DynamicBox[ToBoxes[
-             FEPrivate`FrontEndResource[
-             "CodeFormatterStrings", "TabMenuItem"], StandardForm]]:>(
-           CodeFormatter`$InteractiveIndentationCharacter = "tab"; 
-           Through[
-             Flatten[{
-               Function[{CodeFormatterCell`val}, 
+      StyleBox[
+       DynamicBox[ToBoxes[
+         FEPrivate`FrontEndResource[
+         "CodeFormatterStrings", "IndentationLabel"], StandardForm],
+        ImageSizeCache->{85.76953125, {0., 9.}}], "CodeFormatterText",
+       StripOnInput->False], 
+      TemplateBox[{10},
+       "Spacer1"], 
+      ActionMenuBox[
+       FrameBox[
+        TagBox[GridBox[{
+           {
+            DynamicBox[ToBoxes[
+              Which[
+              CodeFormatter`$InteractiveIndentationCharacter === "tab", 
+               Dynamic[
+                FEPrivate`FrontEndResource[
+                "CodeFormatterStrings", "TabMenuItem"]], 
+               CodeFormatter`$InteractiveTabWidth === "2", 
+               Dynamic[
+                FEPrivate`FrontEndResource[
+                "CodeFormatterStrings", "Space2MenuItem"]], 
+               CodeFormatter`$InteractiveTabWidth === "4", 
+               Dynamic[
+                FEPrivate`FrontEndResource[
+                "CodeFormatterStrings", "Space4MenuItem"]], 
+               CodeFormatter`$InteractiveTabWidth === "6", 
+               Dynamic[
+                FEPrivate`FrontEndResource[
+                "CodeFormatterStrings", "Space6MenuItem"]], 
+               CodeFormatter`$InteractiveTabWidth === "8", 
+               Dynamic[
+                FEPrivate`FrontEndResource[
+                "CodeFormatterStrings", "Space8MenuItem"]], True, ""], 
+              StandardForm],
+             ImageSizeCache->{34.65087890625, {2., 7.}}], "\<\"\"\>", 
+            GraphicsBox[
+             {AbsoluteThickness[2], CapForm["Round"], JoinForm["Round"], 
+              StyleBox[
+               DynamicBox[Typeset`ToBoxes[
+                 Line[
+                  Switch[
+                  Down, Left, {{0.5, -1}, {-0.5, 0}, {0.5, 1}}, 
+                   Right, {{-0.5, -1}, {0.5, 0}, {-0.5, 1}}, 
+                   Up, {{-1, -0.5}, {0, 0.5}, {1, -0.5}}, 
+                   Blank[], {{-1, 0.5}, {0, -0.5}, {1, 0.5}}]], StandardForm, 
+                 Graphics],
                 
-                If[$VersionNumber >= 12.2, 
-                 CurrentValue[$FrontEnd, {
-                    CodeAssistOptions, "CodeToolsOptions", 
-                    "CodeFormatterInteractiveIndentationCharacter"}] = 
-                  CodeFormatterCell`val; Null]]}][
-             CodeFormatter`$InteractiveIndentationCharacter]]; Through[
-             Flatten[{
-               Function[{CodeFormatterCell`val}, 
-                
-                If[$VersionNumber >= 12.2, 
-                 CurrentValue[$FrontEnd, {
-                    CodeAssistOptions, "CodeToolsOptions", 
-                    "CodeFormatterInteractiveTabWidth"}] = 
-                  CodeFormatterCell`val; Null]], 
-               Function[{CodeFormatterCell`val}, 
-                If[$VersionNumber >= 12.2, 
-                 CodeFormatter`Notebooks`formatSelectedCell[]], 
-                HoldAll]}][CodeFormatter`$InteractiveTabWidth]]), 
-           Delimiter, 
-           DynamicBox[ToBoxes[
-             FEPrivate`FrontEndResource[
-             "CodeFormatterStrings", "Space2MenuItem"], 
-             StandardForm]]:>(
-           CodeFormatter`$InteractiveIndentationCharacter = "space"; 
-           CodeFormatter`$InteractiveTabWidth = "2"; Through[
-             Flatten[{
-               Function[{CodeFormatterCell`val}, 
-                
-                If[$VersionNumber >= 12.2, 
-                 CurrentValue[$FrontEnd, {
-                    CodeAssistOptions, "CodeToolsOptions", 
-                    "CodeFormatterInteractiveIndentationCharacter"}] = 
-                  CodeFormatterCell`val; Null]]}][
-             CodeFormatter`$InteractiveIndentationCharacter]]; Through[
-             Flatten[{
-               Function[{CodeFormatterCell`val}, 
-                
-                If[$VersionNumber >= 12.2, 
-                 CurrentValue[$FrontEnd, {
-                    CodeAssistOptions, "CodeToolsOptions", 
-                    "CodeFormatterInteractiveTabWidth"}] = 
-                  CodeFormatterCell`val; Null]], 
-               Function[{CodeFormatterCell`val}, 
-                If[$VersionNumber >= 12.2, 
-                 CodeFormatter`Notebooks`formatSelectedCell[]], 
-                HoldAll]}][CodeFormatter`$InteractiveTabWidth]]), 
-           DynamicBox[ToBoxes[
-             FEPrivate`FrontEndResource[
-             "CodeFormatterStrings", "Space4MenuItem"], 
-             StandardForm]]:>(
-           CodeFormatter`$InteractiveIndentationCharacter = "space"; 
-           CodeFormatter`$InteractiveTabWidth = "4"; Through[
-             Flatten[{
-               Function[{CodeFormatterCell`val}, 
-                
-                If[$VersionNumber >= 12.2, 
-                 CurrentValue[$FrontEnd, {
-                    CodeAssistOptions, "CodeToolsOptions", 
-                    "CodeFormatterInteractiveIndentationCharacter"}] = 
-                  CodeFormatterCell`val; Null]]}][
-             CodeFormatter`$InteractiveIndentationCharacter]]; Through[
-             Flatten[{
-               Function[{CodeFormatterCell`val}, 
-                
-                If[$VersionNumber >= 12.2, 
-                 CurrentValue[$FrontEnd, {
-                    CodeAssistOptions, "CodeToolsOptions", 
-                    "CodeFormatterInteractiveTabWidth"}] = 
-                  CodeFormatterCell`val; Null]], 
-               Function[{CodeFormatterCell`val}, 
-                If[$VersionNumber >= 12.2, 
-                 CodeFormatter`Notebooks`formatSelectedCell[]], 
-                HoldAll]}][CodeFormatter`$InteractiveTabWidth]]), 
-           DynamicBox[ToBoxes[
-             FEPrivate`FrontEndResource[
-             "CodeFormatterStrings", "Space6MenuItem"], 
-             StandardForm]]:>(
-           CodeFormatter`$InteractiveIndentationCharacter = "space"; 
-           CodeFormatter`$InteractiveTabWidth = "6"; Through[
-             Flatten[{
-               Function[{CodeFormatterCell`val}, 
-                
-                If[$VersionNumber >= 12.2, 
-                 CurrentValue[$FrontEnd, {
-                    CodeAssistOptions, "CodeToolsOptions", 
-                    "CodeFormatterInteractiveIndentationCharacter"}] = 
-                  CodeFormatterCell`val; Null]]}][
-             CodeFormatter`$InteractiveIndentationCharacter]]; Through[
-             Flatten[{
-               Function[{CodeFormatterCell`val}, 
-                
-                If[$VersionNumber >= 12.2, 
-                 CurrentValue[$FrontEnd, {
-                    CodeAssistOptions, "CodeToolsOptions", 
-                    "CodeFormatterInteractiveTabWidth"}] = 
-                  CodeFormatterCell`val; Null]], 
-               Function[{CodeFormatterCell`val}, 
-                If[$VersionNumber >= 12.2, 
-                 CodeFormatter`Notebooks`formatSelectedCell[]], 
-                HoldAll]}][CodeFormatter`$InteractiveTabWidth]]), 
-           DynamicBox[ToBoxes[
-             FEPrivate`FrontEndResource[
-             "CodeFormatterStrings", "Space8MenuItem"], 
-             StandardForm]]:>(
-           CodeFormatter`$InteractiveIndentationCharacter = "space"; 
-           CodeFormatter`$InteractiveTabWidth = "8"; Through[
-             Flatten[{
-               Function[{CodeFormatterCell`val}, 
-                
-                If[$VersionNumber >= 12.2, 
-                 CurrentValue[$FrontEnd, {
-                    CodeAssistOptions, "CodeToolsOptions", 
-                    "CodeFormatterInteractiveIndentationCharacter"}] = 
-                  CodeFormatterCell`val; Null]]}][
-             CodeFormatter`$InteractiveIndentationCharacter]]; Through[
-             Flatten[{
-               Function[{CodeFormatterCell`val}, 
-                
-                If[$VersionNumber >= 12.2, 
-                 CurrentValue[$FrontEnd, {
-                    CodeAssistOptions, "CodeToolsOptions", 
-                    "CodeFormatterInteractiveTabWidth"}] = 
-                  CodeFormatterCell`val; Null]], 
-               Function[{CodeFormatterCell`val}, 
-                If[$VersionNumber >= 12.2, 
-                 CodeFormatter`Notebooks`formatSelectedCell[]], 
-                HoldAll]}][CodeFormatter`$InteractiveTabWidth]])},
-           Appearance->None,
-           BaselinePosition->(Center -> Center),
-           ImageMargins->{{0, 0}, {0, 1}}]}
-        },
-        AutoDelete->False,
-        BaseStyle->{
-         FontFamily -> "SourceSansPro", FontSize -> 13, FontWeight -> 
-          Plain, FontSlant -> Plain, FontColor -> GrayLevel[0], 
-          Background -> None},
-        GridBoxAlignment->{"Columns" -> {{Center}}},
-        GridBoxItemSize->{"Columns" -> {{0}}, "Rows" -> {{0}}},
-        GridBoxSpacings->{"Columns" -> {{0}}}],
-       "Grid"]}
+                ImageSizeCache->{{-2.2393066909899018`, 
+                 12.239306690989903`}, {-11.239306690989903`, \
+-0.7606933090100982}}], "CodeFormatterHighlightColor",
+               StripOnInput->False]},
+             BaselinePosition->Bottom,
+             ImageMargins->{{0, 1}, {1, 0}},
+             ImageSize->{10, 10}]}
+          },
+          AutoDelete->False,
+          BaseStyle->"CodeFormatterText",
+          
+          GridBoxAlignment->{
+           "Columns" -> {Left, Center, Right}, "Rows" -> {{Baseline}}},
+          GridBoxItemSize->{"Columns" -> {Automatic, Fit, Automatic}},
+          GridBoxSpacings->{"Columns" -> {{0}}}],
+         "Grid"],
+        Background->GrayLevel[1],
+        FrameMargins->{{5, 5}, {4, 4}},
+        FrameStyle->Dynamic[
+          If[
+           CurrentValue["MouseOver"], 
+           Directive["CodeFormatterHighlightColor", 
+            AbsoluteThickness[1]], 
+           Directive[
+            GrayLevel[0.7], 
+            AbsoluteThickness[1]]]],
+        ImageSize->{119, Automatic},
+        RoundingRadius->3,
+        StripOnInput->False], {
+       DynamicBox[ToBoxes[
+         FEPrivate`FrontEndResource["CodeFormatterStrings", "TabMenuItem"], 
+         StandardForm]]:>(
+       CodeFormatter`$InteractiveIndentationCharacter = "tab"; Through[
+         Flatten[{
+           Function[{CodeFormatter`Generate`UIElements`val}, 
+            
+            If[$VersionNumber >= 12.2, 
+             CurrentValue[$FrontEnd, {
+               CodeAssistOptions, "CodeToolsOptions", "CodeFormat", 
+                "InteractiveIndentationCharacter"}] = 
+             CodeFormatter`Generate`UIElements`val]]}][
+         CodeFormatter`$InteractiveIndentationCharacter]]; Through[
+         Flatten[{
+           Function[{CodeFormatter`Generate`UIElements`val}, 
+            
+            If[$VersionNumber >= 12.2, 
+             CurrentValue[$FrontEnd, {
+               CodeAssistOptions, "CodeToolsOptions", "CodeFormat", 
+                "InteractiveTabWidth"}] = 
+             CodeFormatter`Generate`UIElements`val]], 
+           Function[{CodeFormatter`Generate`UIElements`val}, 
+            If[$VersionNumber >= 12.2, 
+             CodeFormatter`Notebooks`formatSelectedCell[]], HoldAll]}][
+         CodeFormatter`$InteractiveTabWidth]]), Delimiter, 
+       DynamicBox[ToBoxes[
+         FEPrivate`FrontEndResource["CodeFormatterStrings", "Space2MenuItem"],
+          StandardForm]]:>(
+       CodeFormatter`$InteractiveIndentationCharacter = "space"; 
+       CodeFormatter`$InteractiveTabWidth = "2"; Through[
+         Flatten[{
+           Function[{CodeFormatter`Generate`UIElements`val}, 
+            
+            If[$VersionNumber >= 12.2, 
+             CurrentValue[$FrontEnd, {
+               CodeAssistOptions, "CodeToolsOptions", "CodeFormat", 
+                "InteractiveIndentationCharacter"}] = 
+             CodeFormatter`Generate`UIElements`val]]}][
+         CodeFormatter`$InteractiveIndentationCharacter]]; Through[
+         Flatten[{
+           Function[{CodeFormatter`Generate`UIElements`val}, 
+            
+            If[$VersionNumber >= 12.2, 
+             CurrentValue[$FrontEnd, {
+               CodeAssistOptions, "CodeToolsOptions", "CodeFormat", 
+                "InteractiveTabWidth"}] = 
+             CodeFormatter`Generate`UIElements`val]], 
+           Function[{CodeFormatter`Generate`UIElements`val}, 
+            If[$VersionNumber >= 12.2, 
+             CodeFormatter`Notebooks`formatSelectedCell[]], HoldAll]}][
+         CodeFormatter`$InteractiveTabWidth]]), 
+       DynamicBox[ToBoxes[
+         FEPrivate`FrontEndResource["CodeFormatterStrings", "Space4MenuItem"],
+          StandardForm]]:>(
+       CodeFormatter`$InteractiveIndentationCharacter = "space"; 
+       CodeFormatter`$InteractiveTabWidth = "4"; Through[
+         Flatten[{
+           Function[{CodeFormatter`Generate`UIElements`val}, 
+            
+            If[$VersionNumber >= 12.2, 
+             CurrentValue[$FrontEnd, {
+               CodeAssistOptions, "CodeToolsOptions", "CodeFormat", 
+                "InteractiveIndentationCharacter"}] = 
+             CodeFormatter`Generate`UIElements`val]]}][
+         CodeFormatter`$InteractiveIndentationCharacter]]; Through[
+         Flatten[{
+           Function[{CodeFormatter`Generate`UIElements`val}, 
+            
+            If[$VersionNumber >= 12.2, 
+             CurrentValue[$FrontEnd, {
+               CodeAssistOptions, "CodeToolsOptions", "CodeFormat", 
+                "InteractiveTabWidth"}] = 
+             CodeFormatter`Generate`UIElements`val]], 
+           Function[{CodeFormatter`Generate`UIElements`val}, 
+            If[$VersionNumber >= 12.2, 
+             CodeFormatter`Notebooks`formatSelectedCell[]], HoldAll]}][
+         CodeFormatter`$InteractiveTabWidth]]), 
+       DynamicBox[ToBoxes[
+         FEPrivate`FrontEndResource["CodeFormatterStrings", "Space6MenuItem"],
+          StandardForm]]:>(
+       CodeFormatter`$InteractiveIndentationCharacter = "space"; 
+       CodeFormatter`$InteractiveTabWidth = "6"; Through[
+         Flatten[{
+           Function[{CodeFormatter`Generate`UIElements`val}, 
+            
+            If[$VersionNumber >= 12.2, 
+             CurrentValue[$FrontEnd, {
+               CodeAssistOptions, "CodeToolsOptions", "CodeFormat", 
+                "InteractiveIndentationCharacter"}] = 
+             CodeFormatter`Generate`UIElements`val]]}][
+         CodeFormatter`$InteractiveIndentationCharacter]]; Through[
+         Flatten[{
+           Function[{CodeFormatter`Generate`UIElements`val}, 
+            
+            If[$VersionNumber >= 12.2, 
+             CurrentValue[$FrontEnd, {
+               CodeAssistOptions, "CodeToolsOptions", "CodeFormat", 
+                "InteractiveTabWidth"}] = 
+             CodeFormatter`Generate`UIElements`val]], 
+           Function[{CodeFormatter`Generate`UIElements`val}, 
+            If[$VersionNumber >= 12.2, 
+             CodeFormatter`Notebooks`formatSelectedCell[]], HoldAll]}][
+         CodeFormatter`$InteractiveTabWidth]]), 
+       DynamicBox[ToBoxes[
+         FEPrivate`FrontEndResource["CodeFormatterStrings", "Space8MenuItem"],
+          StandardForm]]:>(
+       CodeFormatter`$InteractiveIndentationCharacter = "space"; 
+       CodeFormatter`$InteractiveTabWidth = "8"; Through[
+         Flatten[{
+           Function[{CodeFormatter`Generate`UIElements`val}, 
+            
+            If[$VersionNumber >= 12.2, 
+             CurrentValue[$FrontEnd, {
+               CodeAssistOptions, "CodeToolsOptions", "CodeFormat", 
+                "InteractiveIndentationCharacter"}] = 
+             CodeFormatter`Generate`UIElements`val]]}][
+         CodeFormatter`$InteractiveIndentationCharacter]]; Through[
+         Flatten[{
+           Function[{CodeFormatter`Generate`UIElements`val}, 
+            
+            If[$VersionNumber >= 12.2, 
+             CurrentValue[$FrontEnd, {
+               CodeAssistOptions, "CodeToolsOptions", "CodeFormat", 
+                "InteractiveTabWidth"}] = 
+             CodeFormatter`Generate`UIElements`val]], 
+           Function[{CodeFormatter`Generate`UIElements`val}, 
+            If[$VersionNumber >= 12.2, 
+             CodeFormatter`Notebooks`formatSelectedCell[]], HoldAll]}][
+         CodeFormatter`$InteractiveTabWidth]])},
+       Appearance->None]}
     },
     AutoDelete->False,
-    BaseStyle->{
-     FontFamily -> "SourceSansPro", FontSize -> 13, FontWeight -> 
-      Plain, FontSlant -> Plain, FontColor -> GrayLevel[0], 
-      Background -> None},
-    GridBoxAlignment->{"Columns" -> {{Center}}},
-    GridBoxItemSize->{"Columns" -> {{0}}, "Rows" -> {{0}}},
-    GridBoxSpacings->{"Columns" -> {{0}}}],
+    BaseStyle->"CodeFormatterText",
+    GridBoxAlignment->{"Columns" -> {{Center}}, "Rows" -> {{Center}}},
+    GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
+    GridBoxSpacings->{"Columns" -> {{0}}, "Rows" -> {{0}}}],
    "Grid"],
   DynamicModuleValues:>{},
   Initialization:>(
-   Module[{CodeFormatterCell`opts}, Needs["CodeFormatter`Notebooks`"]; 
+   Module[{CodeFormatter`Generate`UIElements`opts}, 
+     Needs["CodeFormatter`Notebooks`"]; 
      If[$VersionNumber >= 12.2, 
        CurrentValue[$FrontEnd, {
-          CodeAssistOptions, "CodeToolsOptions", 
-           "CodeFormatterInteractiveReparse"}] = True; 
-       CodeFormatterCell`opts = 
-        CurrentValue[$FrontEnd, {
-          CodeAssistOptions, "CodeToolsOptions"}]; If[
-         FailureQ[CodeFormatterCell`opts], CodeFormatterCell`opts = 
-         Association[]]; 
+          CodeAssistOptions, "CodeToolsOptions", "CodeFormat", 
+           "InteractiveReparse"}] = True; 
+       CodeFormatter`Generate`UIElements`opts = Replace[
+          
+          CurrentValue[$FrontEnd, {
+           CodeAssistOptions, "CodeToolsOptions", "CodeFormat"}], Except[
+            Blank[Association]] -> <||>]; 
        CodeFormatter`$InteractiveAiriness = 
-        Lookup[CodeFormatterCell`opts, 
-          "CodeFormatterInteractiveAiriness", 0]; 
+        Lookup[CodeFormatter`Generate`UIElements`opts, "Airiness", 0]; 
        CodeFormatter`$InteractiveTabWidth = 
-        Lookup[CodeFormatterCell`opts, 
-          "CodeFormatterInteractiveTabWidth", "4"]; 
-       CodeFormatter`$InteractiveIndentationCharacter = 
-        Lookup[CodeFormatterCell`opts, 
-          "CodeFormatterInteractiveIndentationCharacter", "space"]; 
+        Lookup[CodeFormatter`Generate`UIElements`opts, "InteractiveTabWidth", 
+          "4"]; CodeFormatter`$InteractiveIndentationCharacter = 
+        Lookup[CodeFormatter`Generate`UIElements`opts, 
+          "InteractiveIndentationCharacter", "space"]; 
        CodeFormatter`$InteractiveReparse = 
-        Lookup[CodeFormatterCell`opts, 
-          "CodeFormatterInteractiveReparse", True]; Null]; Null]; 
+        Lookup[CodeFormatter`Generate`UIElements`opts, "InteractiveReparse", 
+          True]; Null]; Null]; 
    CurrentValue[$FrontEnd, {
       PrivateFrontEndOptions, "InterfaceSettings", "CodeFormatter", 
-       "ShowDropDown"}] = True; SetOptions[
-     EvaluationCell[], {
-     CellMargins -> {{0, 0}, {0, 0}}, 
-      CellFrameMargins -> {{15, 0}, {3, 4}}, CellFrame -> Dynamic[
-        If[
-         Dynamic[
-          CurrentValue[
-           EvaluationNotebook[], {
-           TaggingRules, "CodeFormatter", "ToolbarState"}, False]], {{
-         0, 0}, {2, 0}}, None, None]], CellFrameColor -> Dynamic[
-        CurrentValue[
-         EvaluationNotebook[], {
-         TaggingRules, "CodeFormatter", "ToolbarAccentColor"}, 
-         RGBColor["#2497b7"]]], Background -> GrayLevel[0.95], 
-      FontSize -> 13, FontColor -> Black, FontWeight -> Plain, 
-      Magnification -> 1, Deployed -> True, Evaluator -> "System", 
-      DynamicUpdating -> True, DynamicEvaluationTimeout -> 12}])]
-
-
-}
+       "ShowDropDown"}] = True; Null)]]]}
 @|

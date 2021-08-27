@@ -21,24 +21,17 @@ Out[2]= If[a,
 
 ## Setup
 
-CodeFormatter and its dependencies are included in Mathematica 12.2 and above.
-
-For older versions, you can install from the paclet server.
-
-The minimum version for CodeFormatter is Mathematica 11.0.
-
 CodeFormatter depends on [CodeParser](https://github.com/WolframResearch/codeparser).
 
-Install CodeFormatter and dependencies from the paclet server:
+CodeFormatter and its dependencies are included in Mathematica 12.2 and above.
+
+For older versions, install CodeFormatter paclet and dependencies from the public paclet server:
 ```
 PacletInstall["CodeParser"]
 PacletInstall["CodeFormatter"]
 ```
 
-Make sure that the paclets can be found on your system:
-```
-Needs["CodeFormatter`"]
-```
+[Build and install the CodeFormatter paclet locally](HowToBuild.md)
 
 
 ## Using CodeFormatter
@@ -60,3 +53,11 @@ Out[2]= If[a,
 ```
 
 The input to `CodeFormat` may be a string, a `File`, or a list of bytes.
+
+
+## Troubleshooting
+
+Make sure that the paclets can be found on your system:
+```
+Needs["CodeFormatter`"]
+```

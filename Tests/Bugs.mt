@@ -174,3 +174,41 @@ Test[
 ]
 
 
+
+(*
+bug 414042
+
+it is ok if this changes format
+
+just need to make sure that & is not on a new line
+*)
+Test[
+	CodeFormat[
+ "f[] := Block[{}, Block[{},
+	If[validationQ,
+		datasetValidation[[\"BoundingBox\"]] = MapThread[PadCorner[#] /@ #2&,
+		{datasetValidation[[\"Size\"]], datasetValidation[[\"BoundingBox\"]]}];
+	];
+]]", "IndentationString" -> "\t"]
+	,
+"f[] :=
+	Block[{},
+		Block[{},
+			If[validationQ,
+				datasetValidation[[\"BoundingBox\"]] = MapThread[PadCorner[#] /@ #2&,
+					 {datasetValidation[[\"Size\"]], datasetValidation[[\"BoundingBox\"]]}];
+				
+			];
+			
+		]
+	]"
+	,
+	TestID->"Bugs-20210903-D6C3Y9"
+]
+
+
+
+
+
+
+

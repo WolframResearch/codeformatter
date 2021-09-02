@@ -489,6 +489,11 @@ This also takes care of issue of breaking up a[[]]
 *)
 isPossiblyAcceptableNext[LeafNode[Token`OpenSquare | Token`LongName`LeftDoubleBracket, _, _]] := False
 isPossiblyAcceptableNext[LeafNode[Token`Comma, _, _]] := False
+(*
+prevent PostfixDifferentLine lints
+related bugs: 414042
+*)
+isPossiblyAcceptableNext[LeafNode[Token`Amp, _, _]] := False
 isPossiblyAcceptableNext[_] := True
 
 

@@ -331,6 +331,9 @@ Module[{cst, tabWidth, formattedStr, agg, cst2, agg2, aggToCompare, agg2ToCompar
 ]]
 
 
+CodeFormat[{}, opts:OptionsPattern[]] := ""
+
+
 Options[CodeFormatCST] = Options[CodeFormat]
 
 CodeFormatCST[cstIn_, opts:OptionsPattern[]] :=

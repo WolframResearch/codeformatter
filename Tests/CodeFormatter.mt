@@ -337,3 +337,14 @@ Test[
 	,
 	TestID->"CodeFormatter-20210113-C2T7E8"
 ]
+
+
+
+
+Test[
+	CodeFormat[{}]
+	,
+	""
+	,
+	TestID->"CodeFormatter-20210902-R7Y1U6"
+]

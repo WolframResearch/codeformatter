@@ -6,9 +6,17 @@ BeginPackage["CodeFormatter`Generate`Palette`"]
 
 Begin["`Private`"]
 
-Needs["CodeTools`Generate`GenerateSources`"]
+(*
+Do not allow PacletManager to participate in finding `Generate` files
 
-Needs["CodeFormatter`Generate`UIElements`"]
+PacletManager will find e.g. CodeParser/Kernel/TokenEnum.wl when asked to find CodeParser`Generate`TokenEnum`
+
+related issues: PACMAN-54
+*)
+Block[{Internal`PacletFindFile = Null&},
+Needs["CodeFormatter`Generate`UIElements`"];
+Needs["CodeTools`Generate`GenerateSources`"];
+]
 
 
 generatePalette[] := 

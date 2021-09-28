@@ -21,7 +21,7 @@ Out[2]= If[a,
 
 ## Setup
 
-CodeFormatter depends on [CodeParser](https://github.com/WolframResearch/codeparser).
+CodeFormatter depends on [CodeParser paclet](https://github.com/WolframResearch/codeparser).
 
 CodeFormatter and its dependencies are included in Mathematica 12.2 and above.
 

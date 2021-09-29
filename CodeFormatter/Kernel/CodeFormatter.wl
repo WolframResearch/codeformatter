@@ -36,6 +36,8 @@ $DefaultTabWidth
 
 $DefaultLineWidth
 
+$DefaultBreakLinesMethod
+
 (*
 Line Breaker V1
 *)
@@ -134,6 +136,8 @@ And SW thought it was a good idea to follow RFC 2822 for the default
 *)
 $DefaultLineWidth = 78
 
+$DefaultBreakLinesMethod = "LineBreakerV2"
+
 (*
 Line Breaker V1
 *)
@@ -169,7 +173,7 @@ Options[CodeFormat] = {
   *)
   
   "TabWidth" :> $DefaultTabWidth,
-  "BreakLinesMethod" -> "LineBreakerV1",
+  "BreakLinesMethod" :> $DefaultBreakLinesMethod,
   (* Undocumented options for  LineBreakerV1 *)
   "SafetyMargin" :> $DefaultSafetyMargin,
 
@@ -359,17 +363,23 @@ Options[CodeFormatCST] = Options[CodeFormat]
 CodeFormatCST[cstIn_, opts:OptionsPattern[]] :=
 Catch[
 Module[{
-  indentationString, newline, tabWidth, style, airiness,
-  lineWidth, safetyMargin, lineWidth1, lineWidth2, breakLinesMethod,
+  indentationString, newline, tabWidth, breakLinesMethod, lineWidth, safetyMargin, style, airiness,
   cst, gst, changed,
-  indented, linearized, merged, absorbed, spaced, breaked,
+  tmp,
+  indented, linearized, merged, absorbed, spaced, lineWidth1, lineWidth2, breaked,
   strs, formattedStr},
 
   indentationString = OptionValue["IndentationString"];
   newline = OptionValue["NewlineString"];
   tabWidth = OptionValue["TabWidth"];
 
+  breakLinesMethod = OptionValue["BreakLinesMethod"];
+  lineWidth = OptionValue["LineWidth"];
+  safetyMargin = OptionValue["SafetyMargin"];
+
   style = <||>;
+
+  style["LineWidth"] = lineWidth;
 
   style["NewlinesBetweenCommas"] = OptionValue["NewlinesBetweenCommas"];
   style["NewlinesBetweenSemicolons"] = OptionValue["NewlinesBetweenSemicolons"];
@@ -520,7 +530,7 @@ Module[{
     (*
     indented is Graphical Syntax == Concrete Syntax - (whitespace + newlines) == Aggregate Syntax + Comments
     *)
-    indented = IndentCST[gst];
+    indented = IndentCST[gst, "LineWidth" -> lineWidth, "BreakLinesMethod" -> breakLinesMethod];
 
     If[$Debug,
       Print["after indent: ", indented];
@@ -583,42 +593,40 @@ Module[{
       $LastExtent = $OutOfDate
     ];
     
+
+    tmp = spaced;
     
-    breakLinesMethod = OptionValue["BreakLinesMethod"];
+    If[breakLinesMethod === "LineBreakerV1",
+      
+      (*
+      Line Breaker V1
+      *)
 
-    If[breakLinesMethod =!= "LineBreakerV1",
-      Throw[Failure["NotImplemented", <| "BreakLinesMethod" -> breakLinesMethod |>]]
-    ];
+      lineWidth1 = lineWidth - safetyMargin;
+      lineWidth2 = lineWidth;
 
-    (*
-    Line Breaker V1
-    *)
+      (*
+      breaked is a list of leafs
+      *)
+      breaked = breakLinesV1[tmp, lineWidth1, lineWidth2];
 
-    lineWidth = OptionValue["LineWidth"];
-    safetyMargin = OptionValue["SafetyMargin"];
+      If[$Debug,
+        Print["after breakLinesV1: ", breaked];
+      ];
 
-    lineWidth1 = lineWidth - safetyMargin;
-    lineWidth2 = lineWidth;
+      If[!ListQ[breaked],
+        Throw[breaked]
+      ];
 
-    (*
-    breaked is a list of leafs
-    *)
-    breaked = breakLinesV1[spaced, lineWidth1, lineWidth2];
-
-    If[$Debug,
-      Print["after breakLinesV1: ", breaked];
-    ];
-
-    If[!ListQ[breaked],
-      Throw[breaked]
+      tmp = breaked
     ]
-    ];
+  ]; (* Block *)
 
-    strs = collectStr /@ breaked;
+  strs = collectStr /@ tmp;
 
-    formattedStr = StringJoin[strs];
+  formattedStr = StringJoin[strs];
 
-    formattedStr
+  formattedStr
 ]]
 
 

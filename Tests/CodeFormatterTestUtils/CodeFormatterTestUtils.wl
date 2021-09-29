@@ -167,7 +167,7 @@ Options[formatPackageEditorTest] = {
 
 formatPackageEditorTest[file_String, i_Integer, OptionsPattern[]] :=
   Catch[
- Module[{dryRun, prefix, res, lineWidth, airiness, margin, nbObj, nb, cells, cell1, performaceGoal},
+ Module[{dryRun, prefix, limit, res, lineWidth, airiness, margin, nbObj, nb, cells, cell1, performaceGoal, firstLine, box},
    
    prefix = OptionValue["FileNamePrefixPattern"];
    limit = OptionValue["FileSizeLimit"];

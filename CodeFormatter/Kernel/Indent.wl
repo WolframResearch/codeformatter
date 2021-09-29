@@ -16,19 +16,39 @@ Needs["CodeParser`Utils`"]
 Would like to use symbol Indent, but Indent is an undocumented System` symbol
 *)
 
-IndentCST[gst_] :=
-Module[{indented},
+Options[IndentCST] = {
+  "LineWidth" :> $DefaultLineWidth,
+  "BreakLinesMethod" :> $DefaultBreakLinesMethod
+}
+
+IndentCST[gst_, OptionsPattern[]] :=
+Module[{indented, lineWidth, breakLinesMethod},
 
   If[$Debug,
     Print["Inside IndentCST"];
   ];
 
-  (*
-  indented has symbolic expressions:
-  IndentationNode[]
-  line[]
-  *)
-  indented = indent[gst];
+  lineWidth = OptionValue["LineWidth"];
+  breakLinesMethod = OptionValue["BreakLinesMethod"];
+
+  Internal`InheritedBlock[{$CurrentStyle},
+
+    (*
+    Only use provided lineWidth in indent[] if using LineBreakerV2
+    *)
+    If[breakLinesMethod == "LineBreakerV2",
+      $CurrentStyle["LineWidth"] = lineWidth
+      ,
+      $CurrentStyle["LineWidth"] = Infinity
+    ];
+
+    (*
+    indented has symbolic expressions:
+    IndentationNode[]
+    line[]
+    *)
+    indented = indent[gst];
+  ];
 
   If[$Debug,
     Print["before symbolic render: ", indented];
@@ -294,7 +314,12 @@ Module[{aggs, rators, lastRatorPos, first, rest, children, extent},
 
 
 Options[indent] = {
-  "NewlinesInGroups" -> Automatic
+  "NewlinesBetweenCommas" -> Automatic,
+  "NewlinesBetweenSemicolons" -> Automatic,
+  "NewlinesBetweenOperators" -> Automatic,
+  "NewlinesInControl" -> Automatic,
+  "NewlinesInGroups" -> Automatic,
+  "NewlinesInScoping" -> Automatic
 }
 
 
@@ -656,7 +681,7 @@ else:
 *)
 indent[InfixNode[CompoundExpression, graphs_, data_], OptionsPattern[]] :=
 Catch[
-Module[{ratorsPat, definitelyDelete, definitelyInsert, split, indentedGraphs, anyIndentedGraphsMultiline},
+Module[{ratorsPat, definitelyDelete, definitelyInsert, definitelyAutomatic, split, indentedGraphs, anyIndentedGraphsMultiline},
 
   If[$Debug,
     Print["indent CompoundExpression"];
@@ -691,16 +716,16 @@ Module[{ratorsPat, definitelyDelete, definitelyInsert, split, indentedGraphs, an
   ];
 
   If[!TrueQ[(definitelyDelete || definitelyInsert)],
-    definitelyDelete = $CurrentStyle["NewlinesBetweenSemicolons"] === Delete;
-    definitelyInsert = $CurrentStyle["NewlinesBetweenSemicolons"] === Insert;
+    definitelyDelete = OptionValue["NewlinesBetweenSemicolons"] === Delete || $CurrentStyle["NewlinesBetweenSemicolons"] === Delete;
+    definitelyInsert = OptionValue["NewlinesBetweenSemicolons"] === Insert || $CurrentStyle["NewlinesBetweenSemicolons"] === Insert;
   ];
 
   If[!TrueQ[(definitelyDelete || definitelyInsert)],
-    definitelyInsert = True
+    definitelyAutomatic = True
   ];
 
   If[$Debug,
-    Print["semi choice: ", {definitelyDelete, definitelyInsert}];
+    Print["NewlinesBetweenSemicolons choice: ", {definitelyDelete, definitelyInsert, definitelyAutomatic}];
   ];
 
   Which[
@@ -714,9 +739,31 @@ Module[{ratorsPat, definitelyDelete, definitelyInsert, split, indentedGraphs, an
     ,
     TrueQ[definitelyDelete],
       split = {indentedGraphs};
+    ,
+    TrueQ[definitelyAutomatic],
+      (*
+      special case the implicit Null at the end:
+      a;implicit Null
+      leave it on same line as ;
+      *)
+      split = Split[indentedGraphs, MatchQ[#2, LeafNode[Token`Semi | Token`Fake`SemiBeforeImplicitNull | Token`Fake`ImplicitNull, _, _]]&];
   ];
 
-  baseOperatorNodeIndent[InfixNode, CompoundExpression, data, split, ratorsPat, anyIndentedGraphsMultiline, False]
+  Which[
+    TrueQ[definitelyInsert],
+      baseOperatorNodeIndent[InfixNode, CompoundExpression, data, split, ratorsPat, anyIndentedGraphsMultiline, False]
+    ,
+    TrueQ[definitelyDelete],
+      baseOperatorNodeIndent[InfixNode, CompoundExpression, data, split, ratorsPat, anyIndentedGraphsMultiline, False]
+    ,
+    TrueQ[definitelyAutomatic],
+      (*
+      no special line-breaking behavior here
+
+      NewlinesBetweenSemicolons -> Automatic is same as NewlinesBetweenSemicolons -> Insert, so there is nothing to do
+      *)
+      baseOperatorNodeIndent[InfixNode, CompoundExpression, data, split, ratorsPat, anyIndentedGraphsMultiline, False]
+  ]
 ]]
 
 
@@ -738,10 +785,10 @@ e
 
 *)
 
-indent[InfixNode[Comma, graphs_, data_], OptionsPattern[]] :=
+indent[node:InfixNode[Comma, graphs_, data_], OptionsPattern[]] :=
   Catch[
   Module[{aggs, ratorsPat, split, definitelyDelete, definitelyInsert, definitelyAutomatic,
-    indentedGraphs, anyIndentedGraphsMultiline},
+    indentedGraphs, anyIndentedGraphsMultiline, res, extent},
 
     If[$Debug,
       Print["enter comma"];
@@ -764,19 +811,16 @@ indent[InfixNode[Comma, graphs_, data_], OptionsPattern[]] :=
     ];
 
     If[!TrueQ[(definitelyDelete || definitelyInsert)],
-      definitelyDelete = $CurrentStyle["NewlinesBetweenCommas"] === Delete;
-      definitelyInsert = $CurrentStyle["NewlinesBetweenCommas"] === Insert;
+      definitelyDelete = OptionValue["NewlinesBetweenCommas"] === Delete || $CurrentStyle["NewlinesBetweenCommas"] === Delete;
+      definitelyInsert = OptionValue["NewlinesBetweenCommas"] === Insert || $CurrentStyle["NewlinesBetweenCommas"] === Insert;
     ];
 
     If[!TrueQ[(definitelyDelete || definitelyInsert)],
-      Which[
-        True,
-          definitelyDelete = True
-      ]
+      definitelyAutomatic = True
     ];
 
     If[$Debug,
-      Print["comma choice: ", {definitelyDelete, definitelyInsert, definitelyAutomatic}];
+      Print["NewlinesBetweenCommas choice: ", {definitelyDelete, definitelyInsert, definitelyAutomatic}];
     ];
 
     Which[
@@ -787,14 +831,31 @@ indent[InfixNode[Comma, graphs_, data_], OptionsPattern[]] :=
         split = {indentedGraphs};
       ,
       TrueQ[definitelyAutomatic],
-        split = Split[indentedGraphs, (!MatchQ[#1, LeafNode[Token`Comment, _, _]] && MatchQ[#2, LeafNode[Token`Comma, _, _]])&]
+        split = {indentedGraphs};
     ];
     
     If[$Debug,
       Print["Comma split: ", split];
     ];
 
-    baseOperatorNodeIndent[InfixNode, Comma, data, split, ratorsPat, anyIndentedGraphsMultiline, False]
+    Which[
+      TrueQ[definitelyInsert],
+        baseOperatorNodeIndent[InfixNode, Comma, data, split, ratorsPat, anyIndentedGraphsMultiline, False]
+      ,
+      TrueQ[definitelyDelete],
+        baseOperatorNodeIndent[InfixNode, Comma, data, split, ratorsPat, anyIndentedGraphsMultiline, False]
+      ,
+      TrueQ[definitelyAutomatic],
+        res = baseOperatorNodeIndent[InfixNode, Comma, data, split, ratorsPat, anyIndentedGraphsMultiline, False];
+        extent = res[[3, Key["Extent"]]];
+        If[extent[[1]] >= $CurrentStyle["LineWidth"],
+          (*
+          exceeding LineWidth, so re-indent with "NewlinesBetweenCommas" -> Insert
+          *)
+          Throw[indent[node, "NewlinesBetweenCommas" -> Insert]]
+        ];
+        res
+    ]
   ]]
 
 
@@ -920,11 +981,12 @@ This is the big function for all BinaryNodes, InfixNodes, and TernaryNodes
 The logic for all 3 is so similar, it should all be in a single function
 
 *)
-indent[(type:BinaryNode|InfixNode|TernaryNode|QuaternaryNode)[tag_, graphs_, data_], OptionsPattern[]] :=
+indent[node:(type:BinaryNode|InfixNode|TernaryNode|QuaternaryNode)[tag_, graphs_, data_], OptionsPattern[]] :=
   Catch[
   Module[{aggs, rators, ratorsPat, split,
-    definitelyDelete, definitelyInsert, definitelyAutomatic, indentedGraphs, anyIndentedGraphsMultiline, lastRator, lastRatorPos,
-    infixRatorSurroundedByLeafs},
+    definitelyDelete, definitelyInsert, definitelyAutomatic, indentedGraphs, anyIndentedGraphsMultiline,
+    infixRatorSurroundedByLeafs,
+    res, extent},
 
     If[$Debug,
       Print["inside indent operator"]
@@ -967,19 +1029,23 @@ indent[(type:BinaryNode|InfixNode|TernaryNode|QuaternaryNode)[tag_, graphs_, dat
 
     Which[
       TrueQ[$Toplevel],
-        definitelyDelete = $CurrentStyle["NewlinesBetweenOperators"] === Delete;
+        definitelyDelete = OptionValue["NewlinesBetweenOperators"] === Delete || $CurrentStyle["NewlinesBetweenOperators"] === Delete;
+
+        If[!TrueQ[(definitelyDelete || definitelyInsert)],
+          definitelyAutomatic = True;
+        ];
       ,
       True,
-        definitelyDelete = $CurrentStyle["NewlinesBetweenOperators"] === Delete;
-        definitelyInsert = $CurrentStyle["NewlinesBetweenOperators"] === Insert;
-    ];
+        definitelyDelete = OptionValue["NewlinesBetweenOperators"] === Delete || $CurrentStyle["NewlinesBetweenOperators"] === Delete;
+        definitelyInsert = OptionValue["NewlinesBetweenOperators"] === Insert || $CurrentStyle["NewlinesBetweenOperators"] === Insert;
 
-    If[!TrueQ[(definitelyDelete || definitelyInsert)],
-      definitelyAutomatic = True;
+        If[!TrueQ[(definitelyDelete || definitelyInsert)],
+          definitelyAutomatic = True;
+        ];
     ];
 
     If[$Debug,
-      Print["indent operator choice: ", {definitelyDelete, definitelyInsert, definitelyAutomatic}]
+      Print["NewlinesBetweenOperators choice: ", {definitelyDelete, definitelyInsert, definitelyAutomatic}]
     ];
 
     Which[
@@ -1050,10 +1116,28 @@ indent[(type:BinaryNode|InfixNode|TernaryNode|QuaternaryNode)[tag_, graphs_, dat
           MemberQ[$SpecialBreakAfterLastRator, tag] && $Toplevel,
             blockAfterLastRator @
               baseOperatorNodeIndent[type, tag, data, split, ratorsPat, anyIndentedGraphsMultiline, infixRatorSurroundedByLeafs]
+            (*
+            $Toplevel, so do not re-format if exceeding LineWidth, cannot re-indent safely at $Toplevel
+            *)
           ,
-          True,
+          $Toplevel,
             increment @
               baseOperatorNodeIndent[type, tag, data, split, ratorsPat, anyIndentedGraphsMultiline, infixRatorSurroundedByLeafs]
+            (*
+            $Toplevel, so do not re-format if exceeding LineWidth, cannot re-indent safely at $Toplevel
+            *)
+          ,
+          True,
+            res = increment @
+              baseOperatorNodeIndent[type, tag, data, split, ratorsPat, anyIndentedGraphsMultiline, infixRatorSurroundedByLeafs];
+            extent = res[[3, Key["Extent"]]];
+            If[extent[[1]] >= $CurrentStyle["LineWidth"],
+              (*
+              exceeding LineWidth, so re-indent with "NewlinesBetweenOperators" -> Insert
+              *)
+              Throw[indent[node, "NewlinesBetweenOperators" -> Insert]]
+            ];
+            res
         ]
     ]
   ]]
@@ -1183,13 +1267,13 @@ Module[{children,
   ]
 ]
 
-indent[GroupNode[tag_, {
+indent[node:GroupNode[tag_, {
       opener_, 
       graphSeq___,
       closer_
     }, data_], OptionsPattern[]] :=
-  Module[{graphs, aggs, x,
-    definitelyDelete, definitelyInsert,
+Catch[
+  Module[{definitelyDelete, definitelyInsert, definitelyAutomatic,
     indentedOpener, indentedGraphs, indentedCloser,
     anyIndentedGraphsMultiline,
     children,
@@ -1217,32 +1301,16 @@ indent[GroupNode[tag_, {
     ];
 
     If[!TrueQ[(definitelyDelete || definitelyInsert)],
-      definitelyDelete = OptionValue["NewlinesInGroups"] === Delete;
-      definitelyInsert = OptionValue["NewlinesInGroups"] === Insert;
-    ];
-
-    If[$Debug,
-      Print["1 indent Group definitely: ", {definitelyDelete, definitelyInsert}];
+      definitelyDelete = OptionValue["NewlinesInGroups"] === Delete || $CurrentStyle["NewlinesInGroups"] === Delete;
+      definitelyInsert = OptionValue["NewlinesInGroups"] === Insert || $CurrentStyle["NewlinesInGroups"] === Insert;
     ];
 
     If[!TrueQ[(definitelyDelete || definitelyInsert)],
-      definitelyDelete = $CurrentStyle["NewlinesInGroups"] === Delete;
-      definitelyInsert = $CurrentStyle["NewlinesInGroups"] === Insert;
+      definitelyAutomatic = True
     ];
 
     If[$Debug,
-      Print["2 indent Group definitely: ", {definitelyDelete, definitelyInsert}];
-    ];
-
-    If[!TrueQ[(definitelyDelete || definitelyInsert)],
-      Which[
-        True,
-          definitelyDelete = True
-      ];
-    ];
-
-    If[$Debug,
-      Print["indent Group definitely: ", {definitelyDelete, definitelyInsert}];
+      Print["NewlinesInGroups choice: ", {definitelyDelete, definitelyInsert, definitelyAutomatic}];
     ];
 
     Which[
@@ -1285,8 +1353,37 @@ indent[GroupNode[tag_, {
           *)
           <| data, "Extent" -> extent |>
         ]
+      ,
+      TrueQ[definitelyAutomatic],
+
+        children =
+          Flatten[{
+            indentedOpener,
+            indentedGraphs,
+            indentedCloser
+          }];
+
+        extent = computeExtent[children];
+
+        If[extent[[1]] >= $CurrentStyle["LineWidth"],
+          (*
+          exceeding LineWidth, so re-indent with "NewlinesInGroups" -> Insert
+          *)
+          Throw[indent[node, "NewlinesInGroups" -> Insert]]
+        ];
+
+        GroupNode[tag,
+          children
+          ,
+          (*
+          may want to do:
+          <| data, "Multiline" -> anyIndentedGraphsMultiline |>
+          *)
+          <| data, "Extent" -> extent |>
+        ]
     ]
   ]]
+]
 
 indent[n:GroupMissingCloserNode[_, _, _], OptionsPattern[]] :=
   n
@@ -1323,16 +1420,21 @@ indent[node:CallNode[head:{LeafNode[Symbol, "Module" | "Block" | "With" | "Funct
         data1_
       ]
     }, data_], OptionsPattern[]] :=
+Catch[
   Module[{indentedHead,
     definitelyDelete, definitelyInsert, definitelyAutomatic,
     commaChildren, groupChildren, children,
     commaExtent, groupExtent, extent},
 
-    definitelyDelete = $CurrentStyle["NewlinesInScoping"] === Delete;
-    definitelyInsert = $CurrentStyle["NewlinesInScoping"] === Insert;
+    definitelyDelete = OptionValue["NewlinesInScoping"] === Delete || $CurrentStyle["NewlinesInScoping"] === Delete;
+    definitelyInsert = OptionValue["NewlinesInScoping"] === Insert || $CurrentStyle["NewlinesInScoping"] === Insert;
 
     If[!TrueQ[(definitelyDelete || definitelyInsert)],
       definitelyAutomatic = True
+    ];
+
+    If[$Debug,
+      Print["NewlinesInScoping choice: ", {definitelyDelete, definitelyInsert, definitelyAutomatic}];
     ];
 
     Which[
@@ -1383,6 +1485,13 @@ indent[node:CallNode[head:{LeafNode[Symbol, "Module" | "Block" | "With" | "Funct
           extent = computeExtent[indentedHead ~Join~ children];
         ];
 
+        If[extent[[1]] >= $CurrentStyle["LineWidth"],
+          (*
+          exceeding LineWidth, so re-indent with "NewlinesInScoping" -> Insert
+          *)
+          Throw[indent[node, "NewlinesInScoping" -> Insert]]
+        ];
+
         CallNode[
           indentedHead
           ,
@@ -1392,6 +1501,7 @@ indent[node:CallNode[head:{LeafNode[Symbol, "Module" | "Block" | "With" | "Funct
         ]
     ]
   ]
+]
 
 
 (*
@@ -1428,16 +1538,21 @@ indent[node:CallNode[head:{LeafNode[Symbol, "With" | {FragmentNode[Symbol, "With
         data1_
       ]
     }, data_], OptionsPattern[]] :=
+Catch[
   Module[{indentedHead,
     definitelyDelete, definitelyInsert, definitelyAutomatic,
     commaChildren, groupChildren, children,
     commaExtent, groupExtent, extent},
 
-    definitelyDelete = $CurrentStyle["NewlinesInScoping"] === Delete;
-    definitelyInsert = $CurrentStyle["NewlinesInScoping"] === Insert;
+    definitelyDelete = OptionValue["NewlinesInScoping"] === Delete || $CurrentStyle["NewlinesInScoping"] === Delete;
+    definitelyInsert = OptionValue["NewlinesInScoping"] === Insert || $CurrentStyle["NewlinesInScoping"] === Insert;
 
     If[!TrueQ[(definitelyDelete || definitelyInsert)],
       definitelyAutomatic = True
+    ];
+
+    If[$Debug,
+      Print["NewlinesInScoping choice: ", {definitelyDelete, definitelyInsert, definitelyAutomatic}];
     ];
 
     Which[
@@ -1485,6 +1600,13 @@ indent[node:CallNode[head:{LeafNode[Symbol, "With" | {FragmentNode[Symbol, "With
           extent = computeExtent[indentedHead ~Join~ children];
         ];
 
+        If[extent[[1]] >= $CurrentStyle["LineWidth"],
+          (*
+          exceeding LineWidth, so re-indent with "NewlinesInScoping" -> Insert
+          *)
+          Throw[indent[node, "NewlinesInScoping" -> Insert]]
+        ];
+
         CallNode[
           indentedHead
           ,
@@ -1494,6 +1616,7 @@ indent[node:CallNode[head:{LeafNode[Symbol, "With" | {FragmentNode[Symbol, "With
         ]
     ]
   ]
+]
 
 
 (*
@@ -1534,16 +1657,21 @@ indent[node:CallNode[head:{LeafNode[Symbol, "If" | "Switch" | {FragmentNode[Symb
         data1_
       ]
     }, data_], OptionsPattern[]] :=
+Catch[
   Module[{indentedHead,
     definitelyDelete, definitelyInsert, definitelyAutomatic,
     commaChildren, groupChildren, children,
     commaExtent, groupExtent, extent},
 
-    definitelyDelete = $CurrentStyle["NewlinesInControl"] === Delete;
-    definitelyInsert = $CurrentStyle["NewlinesInControl"] === Insert;
+    definitelyDelete = OptionValue["NewlinesInControl"] === Delete || $CurrentStyle["NewlinesInControl"] === Delete;
+    definitelyInsert = OptionValue["NewlinesInControl"] === Insert || $CurrentStyle["NewlinesInControl"] === Insert;
 
     If[!TrueQ[(definitelyDelete || definitelyInsert)],
       definitelyAutomatic = True;
+    ];
+
+    If[$Debug,
+      Print["NewlinesInControl choice: ", {definitelyDelete, definitelyInsert, definitelyAutomatic}];
     ];
 
     Which[
@@ -1595,6 +1723,13 @@ indent[node:CallNode[head:{LeafNode[Symbol, "If" | "Switch" | {FragmentNode[Symb
           extent = computeExtent[indentedHead ~Join~ children];
         ];
 
+        If[extent[[1]] >= $CurrentStyle["LineWidth"],
+          (*
+          exceeding LineWidth, so re-indent with "NewlinesInControl" -> Insert
+          *)
+          Throw[indent[node, "NewlinesInControl" -> Insert]]
+        ];
+        
         CallNode[
           indentedHead
           ,
@@ -1604,13 +1739,15 @@ indent[node:CallNode[head:{LeafNode[Symbol, "If" | "Switch" | {FragmentNode[Symb
         ]
     ]
   ]
+]
 
 
-indent[ClauseNode[tag_, {
+indent[node:ClauseNode[tag_, {
     test:Except[LeafNode[Token`Comma, _, _]], testSeq:Except[LeafNode[Token`Comma, _, _]]...,
     comma1:LeafNode[Token`Comma, _, _],
     val:Except[LeafNode[Token`Comma, _, _]], valSeq:Except[LeafNode[Token`Comma, _, _]]...
   }, data_], OptionsPattern[]] :=
+Catch[
 Module[{indentedTest, indentedTestSeq, indentedComma1, indentedVal, indentedValSeq,
     definitelyDelete, definitelyInsert, definitelyAutomatic,
     children,
@@ -1622,11 +1759,15 @@ Module[{indentedTest, indentedTestSeq, indentedComma1, indentedVal, indentedValS
   indentedVal = indent[val];
   indentedValSeq = indent /@ {valSeq};
 
-  definitelyDelete = $CurrentStyle["NewlinesInControl"] === Delete;
-  definitelyInsert = $CurrentStyle["NewlinesInControl"] === Insert;
+  definitelyDelete = OptionValue["NewlinesInControl"] === Delete || $CurrentStyle["NewlinesInControl"] === Delete;
+  definitelyInsert = OptionValue["NewlinesInControl"] === Insert || $CurrentStyle["NewlinesInControl"] === Insert;
 
   If[!TrueQ[(definitelyDelete || definitelyInsert)],
     definitelyAutomatic = True;
+  ];
+
+  If[$Debug,
+    Print["NewlinesInControl choice: ", {definitelyDelete, definitelyInsert, definitelyAutomatic}];
   ];
 
   Which[
@@ -1675,6 +1816,13 @@ Module[{indentedTest, indentedTestSeq, indentedComma1, indentedVal, indentedValS
 
       extent = computeExtent[children];
 
+      If[extent[[1]] >= $CurrentStyle["LineWidth"],
+        (*
+        exceeding LineWidth, so re-indent with "NewlinesInControl" -> Insert
+        *)
+        Throw[indent[node, "NewlinesInControl" -> Insert]]
+      ];
+
       increment @
         ClauseNode[
           tag
@@ -1684,7 +1832,7 @@ Module[{indentedTest, indentedTestSeq, indentedComma1, indentedVal, indentedValS
           <| data, "Multiline" -> True, "Extent" -> extent |>
         ]
   ]
-]
+]]
 
 
 
@@ -1716,16 +1864,21 @@ indent[node:CallNode[head:{LeafNode[Symbol, "Which" | {FragmentNode[Symbol, "Whi
         data1_
       ]
     }, data_], OptionsPattern[]] :=
+Catch[
   Module[{indentedHead,
     definitelyDelete, definitelyInsert, definitelyAutomatic,
     commaChildren, groupChildren, children,
     commaExtent, groupExtent, extent},
 
-    definitelyDelete = $CurrentStyle["NewlinesInControl"] === Delete;
-    definitelyInsert = $CurrentStyle["NewlinesInControl"] === Insert;
+    definitelyDelete = OptionValue["NewlinesInControl"] === Delete || $CurrentStyle["NewlinesInControl"] === Delete;
+    definitelyInsert = OptionValue["NewlinesInControl"] === Insert || $CurrentStyle["NewlinesInControl"] === Insert;
 
     If[!TrueQ[(definitelyDelete || definitelyInsert)],
       definitelyAutomatic = True
+    ];
+
+    If[$Debug,
+      Print["NewlinesInControl choice: ", {definitelyDelete, definitelyInsert, definitelyAutomatic}];
     ];
 
     Which[
@@ -1773,6 +1926,13 @@ indent[node:CallNode[head:{LeafNode[Symbol, "Which" | {FragmentNode[Symbol, "Whi
           extent = computeExtent[indentedHead ~Join~ children];
         ];
 
+        If[extent[[1]] >= $CurrentStyle["LineWidth"],
+          (*
+          exceeding LineWidth, so re-indent with "NewlinesInControl" -> Insert
+          *)
+          Throw[indent[node, "NewlinesInControl" -> Insert]]
+        ];
+
         CallNode[
           indentedHead
           ,
@@ -1782,6 +1942,7 @@ indent[node:CallNode[head:{LeafNode[Symbol, "Which" | {FragmentNode[Symbol, "Whi
         ]
     ]
   ]
+]
 
 
 (*
@@ -1820,16 +1981,21 @@ indent[node:CallNode[head:{LeafNode[Symbol, "For" | {FragmentNode[Symbol, "For",
         data1_
       ]
     }, data_], OptionsPattern[]] :=
+Catch[
   Module[{indentedHead,
     definitelyDelete, definitelyInsert, definitelyAutomatic,
     commaChildren, groupChildren, children,
     commaExtent, groupExtent, extent},
 
-    definitelyDelete = $CurrentStyle["NewlinesInControl"] === Delete;
-    definitelyInsert = $CurrentStyle["NewlinesInControl"] === Insert;
+    definitelyDelete = OptionValue["NewlinesInControl"] === Delete || $CurrentStyle["NewlinesInControl"] === Delete;
+    definitelyInsert = OptionValue["NewlinesInControl"] === Insert || $CurrentStyle["NewlinesInControl"] === Insert;
 
     If[!TrueQ[(definitelyDelete || definitelyInsert)],
       definitelyAutomatic = True;
+    ];
+
+    If[$Debug,
+      Print["NewlinesInControl choice: ", {definitelyDelete, definitelyInsert, definitelyAutomatic}];
     ];
 
     Which[
@@ -1890,6 +2056,13 @@ indent[node:CallNode[head:{LeafNode[Symbol, "For" | {FragmentNode[Symbol, "For",
           extent = computeExtent[indentedHead ~Join~ children];
         ];
 
+        If[extent[[1]] >= $CurrentStyle["LineWidth"],
+          (*
+          exceeding LineWidth, so re-indent with "NewlinesInControl" -> Insert
+          *)
+          Throw[indent[node, "NewlinesInControl" -> Insert]]
+        ];
+
         CallNode[
           indentedHead
           ,
@@ -1899,6 +2072,7 @@ indent[node:CallNode[head:{LeafNode[Symbol, "For" | {FragmentNode[Symbol, "For",
         ]
     ]
   ]
+]
 
 indent[node:CallNode[head_, graphs_, data_], OptionsPattern[]] :=
   commonCallNodeIndent[node]
@@ -1919,9 +2093,9 @@ commonCallNodeIndent[CallNode[head_, children_, data_]] :=
 Module[{indentedHead, indentedChildren, anyIndentedChildrenMultiline,
   extent},
 
-  indentedHead = indent[#,"NewlinesInGroups" -> Delete]& /@ head;
+  indentedHead = indent[#,"NewlinesInGroups" -> Automatic]& /@ head;
 
-  indentedChildren = indent[#, "NewlinesInGroups" -> Delete]& /@ children;
+  indentedChildren = indent[#, "NewlinesInGroups" -> Automatic]& /@ children;
 
   anyIndentedChildrenMultiline = AnyTrue[indentedChildren, Lookup[#[[3]], "Multiline", False]&];
 

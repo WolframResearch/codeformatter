@@ -1,4 +1,4 @@
-(* ::Package::"Tags"-><|"NoVariables" -> <|"Module" -> <|Enabled -> False|>|>|>:: *)
+(* ::Package::"Tags"-><|"NoParameters" -> <|"With" -> <|Enabled -> False|>|>, "NoVariables" -> <|"Module" -> <|Enabled -> False|>|>|>:: *)
 
 BeginPackage["CodeFormatter`Indent`"]
 
@@ -80,7 +80,7 @@ Module[{indented},
     ];
     
     line[] :=
-      Sequence @@ ({LeafNode[Token`Newline, $CurrentNewlineString, <||>]} ~Join~ $CurrentIndentationLevelNodeList);
+      Sequence @@ ({LeafNode[Token`Newline, $CurrentNewlineString, <| "Extent" -> {0, 2, 0, 0} |>]} ~Join~ $CurrentIndentationLevelNodeList);
     
     (* :!CodeAnalysis::BeginBlock:: *)
     (* :!CodeAnalysis::Disable::SelfAssignment:: *)
@@ -99,11 +99,11 @@ Module[{indented},
 
 
 (* line[] :=
-  {LeafNode[Token`Newline, $CurrentNewlineString, <||>], $CurrentIndentationLevelNodeList}
+  {LeafNode[Token`Newline, $CurrentNewlineString, <| "Extent" -> {0, 2, 0, 0} |>], $CurrentIndentationLevelNodeList}
 *)
 
 space[] =
-  LeafNode[Whitespace, " ", <||>]
+  LeafNode[Whitespace, " ", <| "Extent" -> {1, 1, 1, 1} |>]
 
 
 (*
@@ -131,7 +131,8 @@ needs to be s_ /; ... because we do not want to use the value of $CurrentNewline
   Sequence @@ ({nl} ~Join~ $CurrentIndentationCommentFragmentNodeList) *)
 
 (* increment[CallNode[headIn_, childrenIn_, data_]] :=
-Module[{head, children},
+Module[{head, children,
+  extent},
 
   If[$Debug,
     Print["calling increment: ", {CallNode, headIn}];
@@ -145,7 +146,9 @@ Module[{head, children},
 
   children = Flatten[{increment /@ children}];
 
-  CallNode[head, children, <| data |>]
+  extent = computeExtent[head ~Join~ children];
+
+  CallNode[head, children, <| data, "Extent" -> extent |>]
 ] *)
 
 (* increment[n:LeafNode[_, _, _]] :=
@@ -154,7 +157,8 @@ Module[{},
 ] *)
 
 (* increment[type_[tag_, childrenIn_, data_]] :=
-Module[{children},
+Module[{children,
+  extent},
 
   If[$Debug,
     Print["calling increment: ", {type, tag}];
@@ -164,7 +168,9 @@ Module[{children},
 
   children = Flatten[{increment /@ children}];
 
-  type[tag, children, <| data |>]
+  extent = computeExtent[children];
+
+  type[tag, children, <| data, "Extent" -> extent |>]
 ] *)
 
 
@@ -173,7 +179,8 @@ short-hand for IndentationNode[Increment, ...]
 *)
 increment[n_] :=
 Catch[
-Module[{multiline},
+Module[{multiline, children,
+  extent},
 
   If[$Debug,
     Print["inside increment"];
@@ -181,7 +188,16 @@ Module[{multiline},
 
   multiline = Lookup[n[[3]], "Multiline", False];
 
-  IndentationNode[Increment, {n}, <| "Multiline" -> multiline |>]
+  children = n[[2]];
+  
+  (*
+  ignore pre-computed extent of n
+  recompute extent of n with newlines properly indented
+  *)
+  
+  extent = computeIndentedExtent[children];
+
+  IndentationNode[Increment, {n}, <| "Multiline" -> multiline, "Extent" -> extent |>]
 ]]
 
 
@@ -189,7 +205,8 @@ Module[{multiline},
 short-hand for IndentationNode[Block, ...]
 *)
 block[childrenIn_List] :=
-Module[{children, len},
+Module[{children, len,
+  extent},
 
   children = childrenIn;
 
@@ -205,12 +222,24 @@ Module[{children, len},
   len = LengthWhile[children, MatchQ[#, ws]&];
   children = Drop[children, len];
 
-  IndentationNode[Block, children, <| "Multiline" -> True, "Toplevel" -> $Toplevel |>]
+  extent = computeExtent[children];
+
+  If[$Toplevel,
+    (*
+    do not add trailing newline if top-level
+    *)
+    extent = {extent[[1]] + $CurrentIndentationStringLength, extent[[2]] + 1, 0, extent[[4]] + $CurrentIndentationStringLength}
+    ,
+    extent = {extent[[1]] + $CurrentIndentationStringLength, extent[[2]] + 2, 0, 0}
+  ];
+
+  IndentationNode[Block, children, <| "Multiline" -> True, "Toplevel" -> $Toplevel, "Extent" -> extent |>]
 ]
 
 blockAfterFirstRator[type_[tag_, graphs_, data_]] :=
 Catch[
-Module[{aggs, rators, firstRatorPos, first, rest, children},
+Module[{aggs, rators, firstRatorPos, first, rest, children,
+  extent},
 
   If[$Debug,
     Print["inside blockAfterFirstRator"];
@@ -230,12 +259,14 @@ Module[{aggs, rators, firstRatorPos, first, rest, children},
 
   children = first ~Join~ {block[rest]};
 
-  type[tag, children, <| data |>]
+  extent = computeExtent[children];
+
+  type[tag, children, <| data, "Extent" -> extent |>]
 ]]
 
 blockAfterLastRator[type_[tag_, graphs_, data_]] :=
 Catch[
-Module[{aggs, rators, lastRatorPos, first, rest, children},
+Module[{aggs, rators, lastRatorPos, first, rest, children, extent},
 
   If[$Debug,
     Print["inside blockAfterLastRator"];
@@ -255,7 +286,9 @@ Module[{aggs, rators, lastRatorPos, first, rest, children},
 
   children = first ~Join~ {block[rest]};
 
-  type[tag, children, <| data |>]
+  extent = computeExtent[children];
+
+  type[tag, children, <| data, "Extent" -> extent |>]
 ]]
 
 
@@ -285,7 +318,8 @@ indent[LeafNode[Token`Comment, fsIn:{
   FragmentNode[Token`Comment, "*)", _]}, data_], OptionsPattern[]] :=
 Module[{fs, min, replaced, origSpaces, strs, minStr, indentStr, frags, inserted, split, fragGroups, nlGroups, firstStrs, replacedStrs, replacedFirstStrs,
   replacedOrigSpaces, level,
-  children},
+  children,
+  extent},
 
   If[$Debug,
     Print["calling indent multiline Comment"];
@@ -383,12 +417,14 @@ Module[{fs, min, replaced, origSpaces, strs, minStr, indentStr, frags, inserted,
         (Function[{replacedStr}, indent[FragmentNode[Token`Comment, #, <||>]]& /@ replacedStr] /@ replacedStrs)
       ];
 
+    extent = computeExtent[children];
+
     LeafNode[
       Token`Comment
       ,
       children
       ,
-      <| data |>
+      <| data, "Extent" -> extent |>
     ]
     ,
 
@@ -398,13 +434,15 @@ Module[{fs, min, replaced, origSpaces, strs, minStr, indentStr, frags, inserted,
         replacedOrigSpaces ~Join~
         betterRiffle[{fragGroups[[1]]} ~Join~ (Function[{replacedStr}, indent[FragmentNode[Token`Comment, #, <||>]]& /@ replacedStr] /@ replacedStrs), nlGroups]
       ];
+    
+    extent = computeExtent[children];
 
     LeafNode[
       Token`Comment
       ,
       children
       ,
-      <| data, "Multiline" -> True |>
+      <| data, "Multiline" -> True, "Extent" -> extent |>
     ]
   ]
 ]
@@ -417,7 +455,7 @@ With[{len = StringLength[str]},
     Print["indent comment"];
   ];
 
-  LeafNode[Token`Comment, str, <| data |>]
+  LeafNode[Token`Comment, str, <| data, "Extent" -> {len, 1, len, len} |>]
 ]
 
 (*
@@ -431,9 +469,8 @@ so keep track of top-level ; and absorb newlines later as needed
 
 *)
 indent[LeafNode[Token`Semi, str_String, data_], OptionsPattern[]] :=
-With[{len = StringLength[str]},
-
-  LeafNode[Token`Semi, str, <| data, "Toplevel" -> $Toplevel |>]
+With[{},
+  LeafNode[Token`Semi, str, <| data, "Toplevel" -> $Toplevel, "Extent" -> {1, 1, 1, 1} |>]
 ]
 
 (*
@@ -448,36 +485,44 @@ All other leafs:
 *)
 indent[LeafNode[tag_, str_String, data_], OptionsPattern[]] :=
 With[{len = StringLength[str]},
-  LeafNode[tag, str, <| data |>]
+  LeafNode[tag, str, <| data, "Extent" -> {len, 1, len, len} |>]
 ]
 
 indent[LeafNode[tag_, frags_, data_], OptionsPattern[]] :=
 With[
   {children = indent /@ frags}
   ,
-  LeafNode[tag, children, <| data |>]
+  {extent = computeExtent[children]}
+  ,
+  LeafNode[tag, children, <| data, "Extent" -> extent |>]
 ]
 
 (*
-Temporary line continuation
+Temporary line continuation, do not give a real extent, just use identity
 *)
 (*
 needs to be s_ /; ... because we do not want to use the value of $CurrentNewlineString at definition time
 *)
 indent[FragmentNode[Token`Comment, s_ /; s == $CurrentLineContinuationString, data_]] :=
-  FragmentNode[Token`Comment, s, <| data |>]
+  FragmentNode[Token`Comment, s, <| data, "Extent" -> identityExtent |>]
 
 indent[FragmentNode[Token`Comment, s_ /; s == $CurrentNewlineString, data_]] :=
-  FragmentNode[Token`Comment, s, <| data |>]
+  FragmentNode[Token`Comment, s, <| data, "Extent" -> {0, 2, 0, 0} |>]
+
+indent[FragmentNode[String, s_ /; s == $CurrentLineContinuationString, data_]] :=
+  FragmentNode[String, s, <| data, "Extent" -> identityExtent |>]
+
+indent[FragmentNode[String, s_ /; s == $CurrentNewlineString, data_]] :=
+  FragmentNode[String, s, <| data, "Extent" -> {0, 2, 0, 0} |>]
 
 indent[FragmentNode[tag_, str_String, data_], OptionsPattern[]] :=
 With[{len = StringLength[str]},
-  FragmentNode[tag, str, <| data |>]
+  FragmentNode[tag, str, <| data, "Extent" -> {len, 1, len, len} |>]
 ]
 
 indent[ErrorNode[tag_, str_String, data_], OptionsPattern[]] :=
 With[{len = StringLength[str]},
-  ErrorNode[tag, str, <| data |>]
+  ErrorNode[tag, str, <| data, "Extent" -> {len, 1, len, len} |>]
 ]
 
 
@@ -492,7 +537,8 @@ indentPostfixRator[Function][rator_, level_] :=
 
 indent[PrefixNode[tag_, {rator_, randSeq:comment..., rand_}, data_], OptionsPattern[]] :=
 Module[{indentedRator, indentedRandSeq, indentedRand, indentedRandMultiline,
-  children},
+  children,
+  extent},
 
   indentedRator = indent[rator];
   indentedRandSeq = indent /@ {randSeq};
@@ -512,16 +558,19 @@ Module[{indentedRator, indentedRandSeq, indentedRand, indentedRandMultiline,
       indentedRand
     }];
 
+  extent = computeExtent[children];
+
   PrefixNode[tag,
     children
     ,
-    <| data, "Multiline" -> indentedRandMultiline |>
+    <| data, "Multiline" -> indentedRandMultiline, "Extent" -> extent |>
   ]
 ]
 
 indent[PostfixNode[tag_, {rand_, randSeq:comment..., rator_}, data_], OptionsPattern[]] :=
 Module[{indentedRand, indentedRandSeq, indentedRator, indentedRandMultiline,
-  children},
+  children,
+  extent},
 
   indentedRand = indent[rand];
   indentedRandSeq = indent /@ {randSeq};
@@ -541,17 +590,20 @@ Module[{indentedRand, indentedRandSeq, indentedRator, indentedRandMultiline,
       indentedRator
     }];
 
+  extent = computeExtent[children];
+
   PostfixNode[tag,
     children
     ,
-    <| data, "Multiline" -> indentedRandMultiline |>
+    <| data, "Multiline" -> indentedRandMultiline, "Extent" -> extent |>
   ]
 ]
 
 
 indent[PrefixBinaryNode[tag_, {rator_, rand1Seq:comment..., rand1_, rand2Seq:comment..., rand2_}, data_], OptionsPattern[]] :=
 Module[{indentedRator, indentedRand1Seq, indentedRand1, indentedRand2Seq, indentedRand2, indentedRandMultiline,
-  children},
+  children,
+  extent},
 
   indentedRator = indent[rator];
   indentedRand1Seq = indent /@ {rand1Seq};
@@ -576,10 +628,12 @@ Module[{indentedRator, indentedRand1Seq, indentedRand1, indentedRand2Seq, indent
       indentedRand2
     }];
   
+  extent = computeExtent[children];
+  
   PrefixBinaryNode[tag,
     children
     ,
-    <| data, "Multiline" -> indentedRandMultiline |>
+    <| data, "Multiline" -> indentedRandMultiline, "Extent" -> extent |>
   ]
 ]
 
@@ -1007,7 +1061,8 @@ indent[(type:BinaryNode|InfixNode|TernaryNode|QuaternaryNode)[tag_, graphs_, dat
 
 baseOperatorNodeIndent[type_, tag_, data_, split_, ratorsPat_, anyIndentedGraphsMultiline_, infixRatorSurroundedByLeafs_] :=
 Catch[
-Module[{children, grouped},
+Module[{children, grouped,
+  extent},
 
   If[$Debug,
     Print["inside baseOperatorNodeIndent"];
@@ -1037,11 +1092,13 @@ Module[{children, grouped},
         }, {1}]
       ];
 
+    extent = computeExtent[children];
+
     Throw[
       type[tag,
         children
         ,
-        <| data, "Multiline" -> anyIndentedGraphsMultiline |>
+        <| data, "Multiline" -> anyIndentedGraphsMultiline, "Extent" -> extent |>
       ]
     ]
   ];
@@ -1089,10 +1146,12 @@ Module[{children, grouped},
     ]
     ];
 
+  extent = computeExtent[children];
+
   type[tag,
     children
     ,
-    <| data, "Multiline" -> True |>
+    <| data, "Multiline" -> True, "Extent" -> extent |>
   ]
 ]]
 
@@ -1104,7 +1163,8 @@ indent[GroupNode[tag_, {
       opener_,
       closer_
     }, data_], OptionsPattern[]] :=
-Module[{children},
+Module[{children,
+  extent},
 
   children =
     {
@@ -1112,11 +1172,13 @@ Module[{children},
       indent[closer]
     };
 
+  extent = computeExtent[children];
+
   Block[{$Toplevel = False},
     GroupNode[tag,
       children
       ,
-      <| data |>
+      <| data, "Extent" -> extent |>
     ]
   ]
 ]
@@ -1130,7 +1192,8 @@ indent[GroupNode[tag_, {
     definitelyDelete, definitelyInsert,
     indentedOpener, indentedGraphs, indentedCloser,
     anyIndentedGraphsMultiline,
-    children},
+    children,
+    extent},
   
   Block[{$Toplevel = False},
 
@@ -1194,10 +1257,12 @@ indent[GroupNode[tag_, {
             indentedCloser
           }];
 
+        extent = computeExtent[children];
+
         GroupNode[tag,
           children
           ,
-          <| data, "Multiline" -> True |>
+          <| data, "Multiline" -> True, "Extent" -> extent |>
         ]
       ,
       TrueQ[definitelyDelete],
@@ -1209,6 +1274,8 @@ indent[GroupNode[tag_, {
             indentedCloser
           }];
 
+        extent = computeExtent[children];
+
         GroupNode[tag,
           children
           ,
@@ -1216,7 +1283,7 @@ indent[GroupNode[tag_, {
           may want to do:
           <| data, "Multiline" -> anyIndentedGraphsMultiline |>
           *)
-          <| data |>
+          <| data, "Extent" -> extent |>
         ]
     ]
   ]]
@@ -1258,7 +1325,8 @@ indent[node:CallNode[head:{LeafNode[Symbol, "Module" | "Block" | "With" | "Funct
     }, data_], OptionsPattern[]] :=
   Module[{indentedHead,
     definitelyDelete, definitelyInsert, definitelyAutomatic,
-    commaChildren, groupChildren, children},
+    commaChildren, groupChildren, children,
+    commaExtent, groupExtent, extent},
 
     definitelyDelete = $CurrentStyle["NewlinesInScoping"] === Delete;
     definitelyInsert = $CurrentStyle["NewlinesInScoping"] === Insert;
@@ -1286,6 +1354,8 @@ indent[node:CallNode[head:{LeafNode[Symbol, "Module" | "Block" | "With" | "Funct
               indent /@ {bodySeq}
             }];
 
+          commaExtent = computeExtent[commaChildren];
+
           groupChildren =
             Flatten[{
               indent[opener],
@@ -1294,19 +1364,23 @@ indent[node:CallNode[head:{LeafNode[Symbol, "Module" | "Block" | "With" | "Funct
                 InfixNode[Comma,
                   commaChildren
                   ,
-                  <| data2 |>
+                  <| data2, "Extent" -> commaExtent |>
                 ],
               indent[Insert[#, StartOfLine -> True, {3, 1}]]& /@ {closerSeq},
               indent[closer]
             }];
 
+          groupExtent = computeExtent[groupChildren];
+
           children = {
               GroupNode[GroupSquare,
                 groupChildren
                 ,
-                <| data1 |>
+                <| data1, "Extent" -> groupExtent |>
               ]
             };
+
+          extent = computeExtent[indentedHead ~Join~ children];
         ];
 
         CallNode[
@@ -1314,7 +1388,7 @@ indent[node:CallNode[head:{LeafNode[Symbol, "Module" | "Block" | "With" | "Funct
           ,
           children
           ,
-          <| data, "Multiline" -> True |>
+          <| data, "Multiline" -> True, "Extent" -> extent |>
         ]
     ]
   ]
@@ -1356,7 +1430,8 @@ indent[node:CallNode[head:{LeafNode[Symbol, "With" | {FragmentNode[Symbol, "With
     }, data_], OptionsPattern[]] :=
   Module[{indentedHead,
     definitelyDelete, definitelyInsert, definitelyAutomatic,
-    commaChildren, groupChildren, children},
+    commaChildren, groupChildren, children,
+    commaExtent, groupExtent, extent},
 
     definitelyDelete = $CurrentStyle["NewlinesInScoping"] === Delete;
     definitelyInsert = $CurrentStyle["NewlinesInScoping"] === Insert;
@@ -1379,6 +1454,8 @@ indent[node:CallNode[head:{LeafNode[Symbol, "With" | {FragmentNode[Symbol, "With
 
           commaChildren =
             Flatten[betterRiffle[Flatten[indent /@ {varsFirstSeq, comma1, varsSecondSeq, comma2, varsRestSeq, bodySeq}], line[]]];
+          
+          commaExtent = computeExtent[commaChildren];
 
           groupChildren =
             Flatten[{
@@ -1388,20 +1465,24 @@ indent[node:CallNode[head:{LeafNode[Symbol, "With" | {FragmentNode[Symbol, "With
                 InfixNode[Comma,
                   commaChildren
                   ,
-                  <| data2 |>
+                  <| data2, "Extent" -> commaExtent |>
                 ]
               },
               indent[Insert[#, StartOfLine -> True, {3, 1}]]& /@ {closerSeq},
               indent[closer]
             }];
 
+          groupExtent = computeExtent[groupChildren];
+
           children = {
               GroupNode[GroupSquare,
                 groupChildren
                 ,
-                <| data1 |>
+                <| data1, "Extent" -> groupExtent |>
               ]
             };
+          
+          extent = computeExtent[indentedHead ~Join~ children];
         ];
 
         CallNode[
@@ -1409,7 +1490,7 @@ indent[node:CallNode[head:{LeafNode[Symbol, "With" | {FragmentNode[Symbol, "With
           ,
           children
           ,
-          <| data, "Multiline" -> True |>
+          <| data, "Multiline" -> True, "Extent" -> extent |>
         ]
     ]
   ]
@@ -1455,7 +1536,8 @@ indent[node:CallNode[head:{LeafNode[Symbol, "If" | "Switch" | {FragmentNode[Symb
     }, data_], OptionsPattern[]] :=
   Module[{indentedHead,
     definitelyDelete, definitelyInsert, definitelyAutomatic,
-    commaChildren, groupChildren, children},
+    commaChildren, groupChildren, children,
+    commaExtent, groupExtent, extent},
 
     definitelyDelete = $CurrentStyle["NewlinesInControl"] === Delete;
     definitelyInsert = $CurrentStyle["NewlinesInControl"] === Insert;
@@ -1484,6 +1566,8 @@ indent[node:CallNode[head:{LeafNode[Symbol, "If" | "Switch" | {FragmentNode[Symb
               betterRiffle[indent /@ {rest}, line[]]
             }];
 
+          commaExtent = computeExtent[commaChildren];
+
           groupChildren =
             Flatten[{
               indent[opener],
@@ -1492,19 +1576,23 @@ indent[node:CallNode[head:{LeafNode[Symbol, "If" | "Switch" | {FragmentNode[Symb
                 InfixNode[Comma,
                   commaChildren
                   ,
-                  <| data2 |>
+                  <| data2, "Extent" -> commaExtent |>
                 ],
               indent[Insert[#, StartOfLine -> True, {3, 1}]]& /@ {closerSeq},
               indent[closer]
             }];
 
+          groupExtent = computeExtent[groupChildren];
+
           children = {
               GroupNode[GroupSquare,
                 groupChildren
                 ,
-                <| data1 |>
+                <| data1, "Extent" -> groupExtent |>
               ]
             };
+          
+          extent = computeExtent[indentedHead ~Join~ children];
         ];
 
         CallNode[
@@ -1512,7 +1600,7 @@ indent[node:CallNode[head:{LeafNode[Symbol, "If" | "Switch" | {FragmentNode[Symb
           ,
           children
           ,
-          <| data, "Multiline" -> True |>
+          <| data, "Multiline" -> True, "Extent" -> extent |>
         ]
     ]
   ]
@@ -1525,7 +1613,8 @@ indent[ClauseNode[tag_, {
   }, data_], OptionsPattern[]] :=
 Module[{indentedTest, indentedTestSeq, indentedComma1, indentedVal, indentedValSeq,
     definitelyDelete, definitelyInsert, definitelyAutomatic,
-    children},
+    children,
+    extent},
 
   indentedTest = indent[test];
   indentedTestSeq = indent /@ {testSeq};
@@ -1551,12 +1640,14 @@ Module[{indentedTest, indentedTestSeq, indentedComma1, indentedVal, indentedValS
           indentedVal, indentedValSeq
         }];
 
+      extent = computeExtent[children];
+
       ClauseNode[
         tag
         ,
         children
         ,
-        <| data |>
+        <| data, "Extent" -> extent |>
       ]
     ,
     TrueQ[definitelyInsert],
@@ -1564,12 +1655,14 @@ Module[{indentedTest, indentedTestSeq, indentedComma1, indentedVal, indentedValS
       children =
         Flatten[betterRiffle[Flatten[{indentedTest, indentedTestSeq, indentedComma1, indentedVal, indentedValSeq}], line[]]];
 
+      extent = computeExtent[children];
+
       ClauseNode[
         tag
         ,
         children
         ,
-        <| data, "Multiline" -> True |>
+        <| data, "Multiline" -> True, "Extent" -> extent |>
       ]
     ,
     TrueQ[definitelyAutomatic],
@@ -1580,13 +1673,15 @@ Module[{indentedTest, indentedTestSeq, indentedComma1, indentedVal, indentedValS
           indentedVal, indentedValSeq  
         }];
 
+      extent = computeExtent[children];
+
       increment @
         ClauseNode[
           tag
           ,
           children
           ,
-          <| data, "Multiline" -> True |>
+          <| data, "Multiline" -> True, "Extent" -> extent |>
         ]
   ]
 ]
@@ -1623,7 +1718,8 @@ indent[node:CallNode[head:{LeafNode[Symbol, "Which" | {FragmentNode[Symbol, "Whi
     }, data_], OptionsPattern[]] :=
   Module[{indentedHead,
     definitelyDelete, definitelyInsert, definitelyAutomatic,
-    commaChildren, groupChildren, children},
+    commaChildren, groupChildren, children,
+    commaExtent, groupExtent, extent},
 
     definitelyDelete = $CurrentStyle["NewlinesInControl"] === Delete;
     definitelyInsert = $CurrentStyle["NewlinesInControl"] === Insert;
@@ -1647,6 +1743,8 @@ indent[node:CallNode[head:{LeafNode[Symbol, "Which" | {FragmentNode[Symbol, "Whi
           commaChildren =
             Flatten[betterRiffle[indent /@ commaChildrenIn, line[]]];
 
+          commaExtent = computeExtent[commaChildren];
+
           groupChildren =
             Flatten[{
               indent[opener],
@@ -1655,20 +1753,24 @@ indent[node:CallNode[head:{LeafNode[Symbol, "Which" | {FragmentNode[Symbol, "Whi
                 InfixNode[Comma,
                   commaChildren
                   ,
-                  <| data2 |>
+                  <| data2, "Extent" -> commaExtent |>
                 ]
               },
               indent[Insert[#, StartOfLine -> True, {3, 1}]]& /@ {closerSeq},
               indent[closer]
             }];
 
+          groupExtent = computeExtent[groupChildren];
+
           children = {
               GroupNode[GroupSquare,
                 groupChildren
                 ,
-                <| data1 |>
+                <| data1, "Extent" -> groupExtent |>
               ]
             };
+          
+          extent = computeExtent[indentedHead ~Join~ children];
         ];
 
         CallNode[
@@ -1676,7 +1778,7 @@ indent[node:CallNode[head:{LeafNode[Symbol, "Which" | {FragmentNode[Symbol, "Whi
           ,
           children
           ,
-          <| data, "Multiline" -> True |>
+          <| data, "Multiline" -> True, "Extent" -> extent |>
         ]
     ]
   ]
@@ -1720,7 +1822,8 @@ indent[node:CallNode[head:{LeafNode[Symbol, "For" | {FragmentNode[Symbol, "For",
     }, data_], OptionsPattern[]] :=
   Module[{indentedHead,
     definitelyDelete, definitelyInsert, definitelyAutomatic,
-    commaChildren, groupChildren, children},
+    commaChildren, groupChildren, children,
+    commaExtent, groupExtent, extent},
 
     definitelyDelete = $CurrentStyle["NewlinesInControl"] === Delete;
     definitelyInsert = $CurrentStyle["NewlinesInControl"] === Insert;
@@ -1758,6 +1861,8 @@ indent[node:CallNode[head:{LeafNode[Symbol, "For" | {FragmentNode[Symbol, "For",
               indent /@ {bodySeq}
             }];
 
+          commaExtent = computeExtent[commaChildren];
+
           groupChildren =
             Flatten[{
               indent[opener],
@@ -1766,19 +1871,23 @@ indent[node:CallNode[head:{LeafNode[Symbol, "For" | {FragmentNode[Symbol, "For",
                 InfixNode[Comma,
                   commaChildren
                   ,
-                  <| data2 |>
+                  <| data2, "Extent" -> commaExtent |>
                 ],
               indent[Insert[#, StartOfLine -> True, {3, 1}]]& /@ {closerSeq},
               indent[closer]
             }];
 
+          groupExtent = computeExtent[groupChildren];
+
           children = {
               GroupNode[GroupSquare,
                 groupChildren
                 ,
-                <| data1 |>
+                <| data1, "Extent" -> groupExtent |>
               ]
             };
+          
+          extent = computeExtent[indentedHead ~Join~ children];
         ];
 
         CallNode[
@@ -1786,7 +1895,7 @@ indent[node:CallNode[head:{LeafNode[Symbol, "For" | {FragmentNode[Symbol, "For",
           ,
           children
           ,
-          <| data, "Multiline" -> True |>
+          <| data, "Multiline" -> True, "Extent" -> extent |>
         ]
     ]
   ]
@@ -1807,7 +1916,8 @@ UnterminatedGroupNode[GroupDoubleBracket, ...]
 
 *)
 commonCallNodeIndent[CallNode[head_, children_, data_]] :=
-Module[{indentedHead, indentedChildren, anyIndentedChildrenMultiline},
+Module[{indentedHead, indentedChildren, anyIndentedChildrenMultiline,
+  extent},
 
   indentedHead = indent[#,"NewlinesInGroups" -> Delete]& /@ head;
 
@@ -1815,12 +1925,14 @@ Module[{indentedHead, indentedChildren, anyIndentedChildrenMultiline},
 
   anyIndentedChildrenMultiline = AnyTrue[indentedChildren, Lookup[#[[3]], "Multiline", False]&];
 
+  extent = computeExtent[indentedHead ~Join~ indentedChildren];
+
   CallNode[
     indentedHead
     ,
     indentedChildren
     ,
-    <| data, "Multiline" -> anyIndentedChildrenMultiline |>
+    <| data, "Multiline" -> anyIndentedChildrenMultiline, "Extent" -> extent |>
   ]
 ]
 
@@ -1828,18 +1940,22 @@ Module[{indentedHead, indentedChildren, anyIndentedChildrenMultiline},
 
 
 indent[SyntaxErrorNode[tag_, ts_, data_], OptionsPattern[]] :=
-Module[{children},
+Module[{children,
+  extent},
 
   children = indent /@ ts;
 
-  SyntaxErrorNode[tag, children, <| data |>]
+  extent = computeExtent[children];
+
+  SyntaxErrorNode[tag, children, <| data, "Extent" -> extent |>]
 ]
 
 
 indent[ContainerNode[tag_, graphs_, data_], OptionsPattern[]] :=
   Catch[
   Module[{indented,
-    children},
+    children,
+    extent},
 
     indented = indent /@ graphs;
 
@@ -1853,27 +1969,32 @@ indent[ContainerNode[tag_, graphs_, data_], OptionsPattern[]] :=
       AppendTo[indented, line[]]
     ];
 
+    extent = computeExtent[indented];
+
     ContainerNode[
       tag
       ,
       indented
       ,
-      <| data |>
+      <| data, "Extent" -> extent |>
     ]
   ]]
 
 
 
 indent[BoxNode[RowBox, {graphs_}, data_], OptionsPattern[]] :=
-  Module[{children},
+  Module[{children,
+    extent},
 
     children = indent /@ graphs;
+
+    extent = computeExtent[children];
 
     BoxNode[RowBox
       ,
       children
       ,
-      <| data |>
+      <| data, "Extent" -> extent |>
     ]
   ]
 
@@ -1882,6 +2003,76 @@ indent[node:BoxNode[_, _, _], OptionsPattern[]] :=
 
 
 indent[args___] := Failure["InternalUnhandled", <| "Function" -> indent, "Args" -> {args} |>]
+
+
+
+
+identityExtent = {0, 1, 0, 0}
+
+combineExtents[{w1_, h1_, l1_, t1_}, {w2_, h2_, l2_, t2_}] := {
+  (*
+  width of result
+
+  Conceptually, extent2 is positioned after t1 on the last line of extent1
+
+  So the width of the resulting combined extent is either:
+  w1 itself if w2 is too small, or
+  t1 + l2 if they combine to be wider than either, or
+  w2 itself if w1 is too small
+  *)
+  Max[w1, t1 + l2, w2]
+  ,
+  (*
+  height of result
+
+  heights add like:
+  1 + 1 == 1
+  1 + 2 == 2
+  etc.
+  *)
+  h1 + h2 - 1
+  ,
+  (*
+  leadingWidth of result
+  
+  If h1 == 1, then that means that there is no newline in extent1
+  The leadingWidth of the result is l1 + l2
+  Otherwise, extent1 DOES have a newline, so leadingWidth of result is just l1
+  *)
+  If[h1 == 1, l1 + l2, l1]
+  ,
+  (*
+  trailingWidth of result
+  
+  If h2 == 1, then that means that there is no newline in extent2
+  The trailingWidth of the result is t1 + t2
+  Otherwise, extent2 DOES have a newline, so trailingWidth of result is just t2
+  *)
+  If[h2 == 1, t1 + t2, t2]
+}
+
+combineExtents[args___] :=
+  Failure["InternalUnhandled", <| "Function" -> combineExtents, "Arguments" -> {args} |>]
+
+computeExtent[children_] :=
+  Fold[combineExtents, identityExtent, getExtent /@ children]
+
+computeIndentedExtent[children_] :=
+  Fold[combineExtents, identityExtent, getIndentedExtent /@ children]
+
+(*
+getExtent[line[]] := {0, 2, 0, 0}
+
+getExtent[IndentationNode[type_, children_, data_]] := {a, b, c}
+*)
+getExtent[line[]] := {0, 2, 0, 0}
+
+getExtent[n_] := n[[3, Key["Extent"]]]
+
+
+getIndentedExtent[line[]] := {0, 2, 0, 0} + {$CurrentIndentationStringLength, 0, 0, $CurrentIndentationStringLength}
+
+getIndentedExtent[n_] := If[#[[2]] == 1, #, # + {$CurrentIndentationStringLength, 0, 0, $CurrentIndentationStringLength}]&[getExtent[n]]
 
 
 End[]

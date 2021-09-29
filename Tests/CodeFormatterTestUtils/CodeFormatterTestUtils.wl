@@ -76,6 +76,7 @@ formatTest[file_String, i_Integer, OptionsPattern[]] :=
     Check[
     
     implicitTimesInserted = False;
+    CodeFormatter`Private`$LastExtent = Indeterminate;
 
     res = CodeFormat[File[file], "LineWidth" -> lineWidth, "SafetyMargin" -> margin, Airiness -> airiness, PerformanceGoal -> performanceGoal];
     ,
@@ -107,6 +108,25 @@ formatTest[file_String, i_Integer, OptionsPattern[]] :=
       Export[file, res, "Text"]
     ];
 
+    If[CodeFormatter`Private`$LastExtent === CodeFormatter`Private`$OutOfDate,
+      Throw[Failure["OutOfDateExtent", <|"File" -> File[file]|>]]
+    ];
+
+    If[!MatchQ[CodeFormatter`Private`$LastExtent, {_Integer, _Integer, _Integer, _Integer}],
+      Print[
+         Style[Row[{"index: ", i, " ", File[file]}], 
+          Red]];
+      Throw[CodeFormatter`Private`$LastExtent, "UncaughtBadExtent"]
+    ];
+
+    actual = actualExtent[res];
+    If[!(actual[[1]] === CodeFormatter`Private`$LastExtent[[1]] && actual[[2]] === CodeFormatter`Private`$LastExtent[[2]]),
+      Print[
+         Style[Row[{"index: ", i, " ", File[file]}], 
+          Red]];
+      Throw[<| "PrecomputedExtent" -> CodeFormatter`Private`$LastExtent, "ActualExtent" -> actual|>, "UncaughtMiscalculatedExtent"]
+    ]
+
     ,
     If[!implicitTimesInserted,
       (*
@@ -120,6 +140,19 @@ formatTest[file_String, i_Integer, OptionsPattern[]] :=
     ];
   ]
 ]]
+
+
+actualExtent[s_String] :=
+Module[{split, width, height, firstWidth, lastWidth},
+  split = StringSplit[s, "\n", All];
+  width = Max[StringLength /@ split];
+  height = Length[split];
+  firstWidth = StringLength[First[split]];
+  lastWidth = StringLength[Last[split]];
+  {width, height, firstWidth, lastWidth}
+]
+
+
 
 
 Options[formatPackageEditorTest] = {

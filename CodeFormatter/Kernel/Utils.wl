@@ -206,7 +206,7 @@ Used by CodeMinifier also
 *)
 
 insertNecessarySpaces[tokensIn_] :=
-  Module[{poss, tokens, toInsert, poss1, poss2},
+  Module[{poss, tokens, toInsert, poss1, poss2, changed},
 
     If[$Debug,
       Print["insertNecessarySpaces: ", tokensIn];
@@ -329,7 +329,9 @@ insertNecessarySpaces[tokensIn_] :=
     tokens = ReplacePart[tokens, poss1 -> LeafNode[Token`Star, "*", <||>]];
     tokens = ReplacePart[tokens, poss2 -> LeafNode[Token`Fake`ImplicitTimes, " ", <||>]];
 
-    tokens
+    changed = !empty[toInsert] || !empty[poss];
+
+    {tokens, changed}
   ]
 
 

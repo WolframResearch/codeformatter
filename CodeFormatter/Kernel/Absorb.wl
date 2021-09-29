@@ -13,7 +13,7 @@ Needs["CodeParser`Utils`"]
 
 
 absorbNewlinesIntoComments[fsIn_] :=
-Module[{fs, poss, toDelete, i, isWhitespacePos, isNewlinePos, len, toInsert, lastInserted1, lastInserted2},
+Module[{fs, poss, toDelete, i, isWhitespacePos, isNewlinePos, len, toInsert, lastInserted1, lastInserted2, changed},
 
   fs = fsIn;
 
@@ -99,7 +99,9 @@ Module[{fs, poss, toDelete, i, isWhitespacePos, isNewlinePos, len, toInsert, las
 
   fs = Delete[fs, toDelete];
 
-  fs
+  changed = !empty[toDelete];
+
+  {fs, changed}
 ]
 
 

@@ -361,7 +361,7 @@ Catch[
 Module[{
   indentationString, newline, tabWidth, style, airiness,
   lineWidth, safetyMargin, lineWidth1, lineWidth2, breakLinesMethod,
-  cst, gst,
+  cst, gst, changed,
   indented, linearized, merged, absorbed, spaced, breaked,
   strs, formattedStr},
 
@@ -434,11 +434,11 @@ Module[{
 
     $CurrentTabWidth = tabWidth;
 
-    $CurrentIndentationNodeList = LeafNode[Whitespace, #, <||>]& /@ Characters[$CurrentIndentationString];
+    $CurrentIndentationNodeList = LeafNode[Whitespace, #, <| "Extent" -> {1, 1, 1, 1} |>]& /@ Characters[$CurrentIndentationString];
 
     $CurrentIndentationLevelNodeList = {};
 
-    $CurrentIndentationCommentFragmentNodeList = FragmentNode[Token`Comment, #, <||>]& /@ Characters[$CurrentIndentationString];
+    $CurrentIndentationCommentFragmentNodeList = FragmentNode[Token`Comment, #, <| "Extent" -> {1, 1, 1, 1} |>]& /@ Characters[$CurrentIndentationString];
 
     $CurrentNewlineString = newline;
 
@@ -530,6 +530,8 @@ Module[{
       Throw[indented]
     ];
 
+    $LastExtent = indented[[3, Key["Extent"]]];
+
     (*
     linearized is a list of leafs
     *)
@@ -552,10 +554,14 @@ Module[{
       Print["after mergeTemporaryLineContinuations: ", merged];
     ];
 
-    absorbed = absorbNewlinesIntoComments[merged];
+    {absorbed, changed} = absorbNewlinesIntoComments[merged];
 
     If[$Debug,
       Print["after absorbNewlinesIntoComments: ", absorbed];
+    ];
+
+    If[changed,
+      $LastExtent = $OutOfDate
     ];
 
     absorbed = absorbNewlinesIntoSemis[absorbed];
@@ -567,10 +573,14 @@ Module[{
     (*
     spaced is a list of leafs
     *)
-    spaced = insertNecessarySpaces[absorbed];
+    {spaced, changed} = insertNecessarySpaces[absorbed];
 
     If[$Debug,
       Print["after insertNecessarySpaces: ", spaced];
+    ];
+
+    If[changed,
+      $LastExtent = $OutOfDate
     ];
     
     

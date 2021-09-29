@@ -73,6 +73,14 @@ Test[
 
 
 
+CodeFormat["123 + 456"]
 
+Test[
+	CodeFormatter`Private`$LastExtent
+	,
+	{9, 2, 9, 0}
+	,
+	TestID->"LineBreakerV2-20211005-X6H3D4"
+]
 
 

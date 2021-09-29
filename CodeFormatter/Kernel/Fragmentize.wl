@@ -334,7 +334,7 @@ mergeTemporaryLineContinuations[fsIn_] :=
           (*
           Make sure to treat implicit Times as " "
           *)
-          StringLength /@ (Take[fs, takeSpec] /. LeafNode[Token`Fake`ImplicitTimes, _, _] -> LeafNode[Whitespace, _, <||>])[[All, 2]]
+          StringLength /@ (Take[fs, takeSpec] /. LeafNode[Token`Fake`ImplicitTimes, _, _] -> LeafNode[Whitespace, " ", <||>])[[All, 2]]
         ];
 
       If[$Debug,

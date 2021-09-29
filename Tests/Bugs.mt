@@ -212,3 +212,22 @@ Test[
 
 
 
+(*
+was giving StringLength::string messages
+*)
+TestMatch[
+	CodeFormat["(Sum[a b c, {i, 1, 9}](*+
+xxx*))
+"]
+	,
+	_String
+	,
+	TestID->"Bugs-20210929-O7G2W2"
+]
+
+
+
+
+
+
+

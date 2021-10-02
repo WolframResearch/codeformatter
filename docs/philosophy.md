@@ -36,6 +36,12 @@ Formatting is a function concrete -> concrete
 PrettyPrinting is a function expr -> concrete
 
 
+clang-format also largely only modified whitespace and newlines
+
+one exception: insert namespace comments?
+
+
+
 
 ## Silently fixes FormatIssues
 
@@ -52,5 +58,10 @@ It is slightly confusing to report issues like this if the formatter can just fi
 These sorts of issues "belong" to the formatter, not the linter
 
 
+
+
+## Why have a formatter?
+
+https://github.com/dart-lang/dart_style/wiki/FAQ#why-have-a-formatter
 
 

@@ -1,96 +1,92 @@
 # canonicalization
 
-effort to canonicalize output of CodeFormatter
+strips all whitespace and newlines before formatting: canonicalizes
 
-
+introduced in CodeFormatter 1.4
 
 fixes hysteresis problem with Airiness
 
 
 
+## hysteresis problem
 
-largely done by simply removing newlines and whitespace before formatting.
+in CodeFormatter 1.3:
+
+If[a,
+ b;
+ c
+ ]
+
+format with Airiness 0.0 first
+
+If[a,
+     b;
+     c
+ ]
+
+format with Airiness -1.0
+
+If[a, b; c]
+
+then format again with Airiness 0.0
+
+If[a,
+     b; c
+ ]
 
 
-
-
-But there are some places where newlines cannot be removed
-
-
-
-
-## Comments at start/end of lines
-
-
-how to solve this problem?
-
-f[
-1;
-2; (*2a*)
-3;
-4;
-]
-
-
-
-
-
-first remove all whitespace and newlines:
-
-f[1;2;(*2a*)3;4;]
+expected to be original formatting, but it is not
 
 
 
 
-How to distinguish between:
+the default "Preserve newline" behavior means that there is a hysteresis
+
+there is not a "canonicalization"
+
+this is because it is "hard" to format WL
+when to keep unknown constructs on single line vs. multiple lines?
+
+i originally just said "preserve the given newlines unless otherwise specified"
+
+But this "no canonicalization" is bad for some reasons
+
+1. changing Airiness has a hysteresis
+
+the exact path taken through the Airiness slider matters, this is confusing
+
+Airiness is not "state-based"
 
 
-f[
-1;
-2; (*2a*)
-3;
-4;
-]
+2. generated code 
 
+generated code may not have any newlines, so it will look bad if formatted
 
-and
-
-
-
-
-
-f[
-1;
-2;
-(*2a*)
-3;
-4;
-]
-
-
+it will look "different" than hand-written same code
 
 
 
 
-also comments like this:
+After thinking about the problem for a bit, I have a plan for fixing everything.
 
-state = runFun[
-    state, proposals, lrun, {bdUniforms, ratioUniforms},
-    {ratioCommonFactor, p (*must be machprec*)}, args, machPrecQ
-];
+need to "canonicalize" first, remove automatic behavior of "Preserve"
+
+
+remove "Preserve" behavior
+for groups: maybe just always do "Delete" as the default behavior?
+for CompoundExpressions: maybe just always do "Insert" ?
+what are all of the "Preserve" behaviors?
 
 
 
 
 
+## some exceptions
+
+Not all newlines and whitespace are stripped
 
 
-
-
-
-
-
-
+It is desired that this comment stay at end of line:
 
 f[
 1;
@@ -99,29 +95,8 @@ f[
 4;
 ]
 
-strips as:
 
-f[1;2;(*2a*)
-3;4;]
-
-
-
-
-
-
-f[
-1;
-2;
-(*2a*)
-3;
-4;
-]
-
-strips as:
-
-f[1;2;
-(*2a*)
-3;4;]
+This information must be kept track of
 
 
 
@@ -129,9 +104,8 @@ f[1;2;
 
 
 
-at start of line, comment "absorbs" the leading newline
 
-at end of line, comment "absorbs" the trailing newline
+
 
 
 

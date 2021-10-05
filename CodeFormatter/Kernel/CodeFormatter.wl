@@ -499,6 +499,8 @@ Module[{
     ];
 
     (*
+    Canonicalize to Graphical Syntax
+    
     It is nice to go to Graphical Syntax before abstracting
 
     graphical is Graphical Syntax == Concrete Syntax - (whitespace + newlines) == Aggregate Syntax + Comments

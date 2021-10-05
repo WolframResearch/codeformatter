@@ -608,7 +608,7 @@ Module[{ratorsPat, definitelyDelete, definitelyInsert, split, indentedGraphs, an
 
   anyIndentedGraphsMultiline = AnyTrue[indentedGraphs, Lookup[#[[3]], "Multiline", False]&];
 
-  ratorsPat = LeafNode[Token`Semi, _, _];
+  ratorsPat = LeafNode[Token`Semi | Token`Fake`SemiBeforeImplicitNull, _, _];
 
   (*
   Override settings and always definitely delete newlines for CompoundExpression at top-level
@@ -641,9 +641,18 @@ Module[{ratorsPat, definitelyDelete, definitelyInsert, split, indentedGraphs, an
     definitelyInsert = True
   ];
 
+  If[$Debug,
+    Print["semi choice: ", {definitelyDelete, definitelyInsert}];
+  ];
+
   Which[
     TrueQ[definitelyInsert],
-      split = Split[indentedGraphs, MatchQ[#2, LeafNode[Token`Semi, _, _]]&];
+      (*
+      special case the implicit Null at the end:
+      a;implicit Null
+      leave it on same line as ;
+      *)
+      split = Split[indentedGraphs, MatchQ[#2, LeafNode[Token`Semi | Token`Fake`SemiBeforeImplicitNull | Token`Fake`ImplicitNull, _, _]]&];
     ,
     TrueQ[definitelyDelete],
       split = {indentedGraphs};
@@ -774,10 +783,19 @@ indentInfixRatorGroupedOnly[Times][LeafNode[Token`Fake`ImplicitTimes, _, _]] :=
 
 
 (*
+no space before or after Token`Fake`SemiBeforeImplicitNull
+*)
+indentInfixRator[Comma | CompoundExpression][rator:LeafNode[Token`Fake`SemiBeforeImplicitNull, _, _]] :=
+  rator
+
+(*
 no space before commas or semi
 *)
 indentInfixRator[Comma | CompoundExpression][rator_] :=
   {rator, space[]}
+
+indentInfixRatorGrouped[Comma | CompoundExpression][rator:LeafNode[Token`Fake`SemiBeforeImplicitNull, _, _]] :=
+  rator
 
 indentInfixRatorGrouped[Comma | CompoundExpression][rator_] :=
   {rator, space[]}

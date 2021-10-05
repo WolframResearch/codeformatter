@@ -185,6 +185,19 @@ abstractFormatNodes[
   ]
 
 
+abstractFormatNodes[InfixNode[CompoundExpression, children_, data_]] :=
+Module[{},
+  If[MatchQ[children, {___, LeafNode[Token`Semi, _, _], LeafNode[Token`Fake`ImplicitNull, _, _]}],
+    (*
+    rename the ; before implicit null for easier processing later
+    *)
+    InfixNode[CompoundExpression, abstractFormatNodes /@ (Drop[children, -2] ~Join~ {LeafNode[Token`Fake`SemiBeforeImplicitNull, children[[-2, 2]], children[[-2, 3]]], children[[-1]]}), data]
+    ,
+    InfixNode[CompoundExpression, abstractFormatNodes /@ children, data]
+  ]
+]
+
+
 abstractFormatNodes[node_LeafNode] :=
   node
 

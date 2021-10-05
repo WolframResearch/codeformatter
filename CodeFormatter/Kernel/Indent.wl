@@ -45,17 +45,11 @@ Module[{indented},
     Attributes[IndentationNode] = {HoldAll};
 
     IndentationNode[Block, childrenIn_, data_] :=
-    Module[{children, blocked, len},
+    Module[{children, blocked},
 
       Internal`InheritedBlock[{$CurrentIndentationLevelNodeList = $CurrentIndentationLevelNodeList ~Join~ $CurrentIndentationNodeList},
 
         children = childrenIn;
-
-        (*
-        There may be leading whitespace from breaking after an operator such as :=, so make sure to remove
-        *)
-        len = LengthWhile[children, MatchQ[#, ws]&];
-        children = Drop[children, len];
 
         blocked =
           {line[]} ~Join~
@@ -179,21 +173,25 @@ short-hand for IndentationNode[Increment, ...]
 *)
 increment[n_] :=
 Catch[
-Module[{aggs, rators, firstRatorPos, first, rest, children},
+Module[{multiline},
 
   If[$Debug,
     Print["inside increment"];
   ];
 
-  IndentationNode[Increment, {n}, <||>]
+  multiline = Lookup[n[[3]], "Multiline", False];
+
+  IndentationNode[Increment, {n}, <| "Multiline" -> multiline |>]
 ]]
 
 
 (*
 short-hand for IndentationNode[Block, ...]
 *)
-block[children_List] :=
-Module[{},
+block[childrenIn_List] :=
+Module[{children, len},
+
+  children = childrenIn;
 
   If[$Debug,
     Print["inside block"];
@@ -201,7 +199,13 @@ Module[{},
     Print["$Toplevel: ", $Toplevel];
   ];
 
-  IndentationNode[Block, children, <| "Toplevel" -> $Toplevel |>]
+  (*
+  There may be leading whitespace from breaking after an operator such as :=, so make sure to remove
+  *)
+  len = LengthWhile[children, MatchQ[#, ws]&];
+  children = Drop[children, len];
+
+  IndentationNode[Block, children, <| "Multiline" -> True, "Toplevel" -> $Toplevel |>]
 ]
 
 blockAfterFirstRator[type_[tag_, graphs_, data_]] :=

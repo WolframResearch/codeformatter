@@ -1378,7 +1378,7 @@ indent[node:CallNode[head:{LeafNode[Symbol, "With" | {FragmentNode[Symbol, "With
         Block[{$Toplevel = False},
 
           commaChildren =
-            Flatten[betterRiffle[indent /@ {varsFirstSeq, comma1, varsSecondSeq, comma2, varsRestSeq, bodySeq}, line[]]];
+            Flatten[betterRiffle[Flatten[indent /@ {varsFirstSeq, comma1, varsSecondSeq, comma2, varsRestSeq, bodySeq}], line[]]];
 
           groupChildren =
             Flatten[{
@@ -1562,7 +1562,7 @@ Module[{indentedTest, indentedTestSeq, indentedComma1, indentedVal, indentedValS
     TrueQ[definitelyInsert],
 
       children =
-        Flatten[betterRiffle[{indentedTest, indentedTestSeq, indentedComma1, indentedVal,  indentedValSeq}, line[]]];
+        Flatten[betterRiffle[Flatten[{indentedTest, indentedTestSeq, indentedComma1, indentedVal, indentedValSeq}], line[]]];
 
       ClauseNode[
         tag

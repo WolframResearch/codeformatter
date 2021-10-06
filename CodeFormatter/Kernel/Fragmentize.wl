@@ -308,7 +308,7 @@ mergeTemporaryLineContinuations[fsIn_] :=
       (*
       Count how many spaces after the line continuation
       *)
-      onePast = NestWhile[(# + 1)&, pos[[1]] + 1, (# <= Length[fs] && MatchQ[fs[[#]], (LeafNode|FragmentNode)[Whitespace, _, _]])&];
+      onePast = NestWhile[(# + 1)&, pos[[1]] + 1, (# <= Length[fs] && MatchQ[fs[[#]], (LeafNode|FragmentNode)[_, " ", _]])&];
 
       originalSpacesSpec = {pos[[1]] + 1, onePast};
 
@@ -455,7 +455,7 @@ mergeTemporaryLineContinuations[fsIn_] :=
           *)
           Null
         ,
-        MatchQ[fs[[pos[[1]]]], FragmentNode[Token`String, "\\" <> $CurrentNewlineString, _]],
+        MatchQ[fs[[pos[[1]]]], FragmentNode[String, "\\" <> $CurrentNewlineString, _]],
           (*
 
           Something like:

@@ -136,7 +136,11 @@ And SW thought it was a good idea to follow RFC 2822 for the default
 *)
 $DefaultLineWidth = 78
 
-$DefaultBreakLinesMethod = "LineBreakerV2"
+(*
+other possible values for BreakLinesMethod:
+  the experimental "LineBreakerV2"
+*)
+$DefaultBreakLinesMethod = "LineBreakerV1"
 
 (*
 Line Breaker V1

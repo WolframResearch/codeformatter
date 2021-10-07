@@ -2,8 +2,8 @@
 Needs["CodeFormatter`"]
 
 Test[
-	CodeFormat["
-f[
+	CodeFormat[
+"f[
 1
 ,
 2
@@ -52,24 +52,6 @@ Test[
 
 
 
-(*
-OPEN BUG: Airiness -> 1 and anchored comments that absorb newlines do not play well together
-*)
-Test[
-	CodeFormat["If(*1*)[(*2*)a(*3*),(*4*)b(*5*)]", Airiness -> 1]
-	,
-"If(*1*)[
-    (*2*)
-    a
-    (*3*)
-    ,
-    (*4*)
-    b
-    (*5*)
-]"
-	,
-	TestID->"Newlines-20210113-C5B5D4"
-]
 
 
 

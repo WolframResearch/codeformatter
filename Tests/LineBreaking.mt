@@ -88,12 +88,20 @@ str = "\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 
 Test[
 	Block[{CodeFormatter`LineBreakerV1`$AllowSplittingTokens = True},
-		CodeFormat[str, "LineWidth" -> 120]
+		CodeFormat[str, "LineWidth" -> 120, "BreakLinesMethod" -> "LineBreakerV1"]
 	]
 	,
 	"\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\\\n\\[DiscretionaryParagraphSeparator]\""
 	,
 	TestID->"LineBreaking-20200805-A0T7P8"
+]
+
+Test[
+	CodeFormat[str, "LineWidth" -> 120, "BreakLinesMethod" -> "LineBreakerV2"]
+	,
+	"\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\\[DiscretionaryParagraphSeparator]\""
+	,
+	TestID->"LineBreaking-20211007-X4E1B8"
 ]
 
 
@@ -154,8 +162,8 @@ str = "(aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 
 TestMatch[
 	Block[{CodeFormatter`Private`$DisableSanityChecking = True,
-		CodeFormatter`BreakLines`Private`$AllowSplittingTokens = True},
-		CodeFormat[str, "LineWidth" -> 120]
+		CodeFormatter`LineBreakerV1`$AllowSplittingTokens = True},
+		CodeFormat[str, "LineWidth" -> 120, "BreakLinesMethod" -> "LineBreakerV1"]
 	]
 	,
 "(aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
@@ -216,16 +224,36 @@ resourcePublisherNameSpaceFreeQ[name_String] :=
 
 *)
 Test[
-	CodeFormat["\
-resourcePublisherNameSpaceFreeQ[name_String] :=
+	CodeFormat[
+"resourcePublisherNameSpaceFreeQ[name_String] :=
 	With[{ns = DeleteMissing[publisherResourceNameSpace /@ allPublisherInfo[][\"Publishers\"]]},
 		!MatchQ[name, Alternatives @@ ns]
-	]"]
+	]", "LineWidth" -> 80, "BreakLinesMethod" -> "LineBreakerV1"]
 	,
-	"\
-resourcePublisherNameSpaceFreeQ[name_String] :=
+"resourcePublisherNameSpaceFreeQ[name_String] :=
     With[{ns = DeleteMissing[publisherResourceNameSpace /@ allPublisherInfo[
         ][\"Publishers\"]]},
+        !MatchQ[name, Alternatives @@ ns]
+    ]"
+	,
+	TestID->"LineBreaking-20210304-N7V4P5"
+]
+
+Test[
+	CodeFormat[
+"resourcePublisherNameSpaceFreeQ[name_String] :=
+	With[{ns = DeleteMissing[publisherResourceNameSpace /@ allPublisherInfo[][\"Publishers\"]]},
+		!MatchQ[name, Alternatives @@ ns]
+	]", "LineWidth" -> 80, "BreakLinesMethod" -> "LineBreakerV2"]
+	,
+"resourcePublisherNameSpaceFreeQ[name_String] :=
+    With[
+        {
+            ns
+            =
+            DeleteMissing[publisherResourceNameSpace /@ allPublisherInfo[][\"Publishers\"]]
+        }
+        ,
         !MatchQ[name, Alternatives @@ ns]
     ]"
 	,
@@ -244,6 +272,14 @@ Test[
 	"aaaaaaaa[[]]"
 	,
 	TestID->"LineBreaking-20211007-T6O3Z1"
+]
+
+Test[
+	CodeFormat["aaaaaaaa[[]]", "LineWidth" -> 20, "BreakLinesMethod" -> "LineBreakerV2"]
+	,
+	"aaaaaaaa[[]]"
+	,
+	TestID->"LineBreaking-20211007-N3A7W7"
 ]
 
 

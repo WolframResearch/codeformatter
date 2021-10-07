@@ -23,7 +23,7 @@ Test[
 
 
 Test[
-	CodeFormat["1 + 2222222222222222222222222 + 3", "LineWidth" -> 20]
+	CodeFormat["1 + 2222222222222222222222222 + 3", "LineWidth" -> 20, "BreakLinesMethod" -> "LineBreakerV1"]
 	,
 "1 + 2222222222222222222222222 +
      3"
@@ -41,47 +41,134 @@ Bug 404109
 
 input = ToString[Nest[f, x, 30], InputForm, PageWidth -> Infinity]
 
-formatted = CodeFormat[input, "LineWidth" -> 20]
-
 Test[
-	!FailureQ[formatted]
+	CodeFormat[input, "LineWidth" -> 20, "BreakLinesMethod" -> "LineBreakerV1"]
 	,
-	True
+"f[f[f[f[f[f[
+    f[f[f[f[f[f[
+    f[f[f[f[f[f[
+    f[f[f[f[f[f[
+    f[f[f[f[f[f[
+    x]]]]]]]]]]
+    ]]]]]]]]]]]
+    ]]]]]]]]]"
 	,
 	TestID->"Bugs-20210112-W2I4Y2"
 ]
 
-lines = StringSplit[formatted, "\n"]
 
-Test[
-	AllTrue[lines, (StringLength[#] <= 20)&]
-	,
-	True
-	,
-	TestID->"Bugs-20210112-M6K5E2"
-]
 
 
 input = StringJoin["f[", Table["#1 ", {40}], "]"]
 
-formatted = CodeFormat[input, "LineWidth" -> 20]
-
 Test[
-	!FailureQ[formatted]
+	CodeFormat[input, "LineWidth" -> 20, "BreakLinesMethod" -> "LineBreakerV1"]
 	,
-	True
+"f[#1 #1 #1 
+    #1 #1 #1 #1
+     #1 #1 #1 #1
+     #1 #1 #1 #1
+     #1 #1 #1 #1
+     #1 #1 #1 #1
+     #1 #1 #1 #1
+     #1 #1 #1 #1
+     #1 #1 #1 #1
+     #1 #1 #1 #1
+     #1]"
 	,
 	TestID->"Bugs-20210112-U7K8N2"
 ]
 
-lines = StringSplit[formatted, "\n"]
 
+(*
+is this strange?
+*)
 Test[
-	AllTrue[lines, (StringLength[#] <= 20)&]
+	CodeFormat[input, "LineWidth" -> 20, "BreakLinesMethod" -> "LineBreakerV2"]
 	,
-	True
+"f[
+    #1
+    
+    #1
+    
+    #1
+    
+    #1
+    
+    #1
+    
+    #1
+    
+    #1
+    
+    #1
+    
+    #1
+    
+    #1
+    
+    #1
+    
+    #1
+    
+    #1
+    
+    #1
+    
+    #1
+    
+    #1
+    
+    #1
+    
+    #1
+    
+    #1
+    
+    #1
+    
+    #1
+    
+    #1
+    
+    #1
+    
+    #1
+    
+    #1
+    
+    #1
+    
+    #1
+    
+    #1
+    
+    #1
+    
+    #1
+    
+    #1
+    
+    #1
+    
+    #1
+    
+    #1
+    
+    #1
+    
+    #1
+    
+    #1
+    
+    #1
+    
+    #1
+    
+    #1
+]"
 	,
-	TestID->"Bugs-20210112-S5Z1M8"
+	TestID->"Bugs-20211007-C8M2O4"
 ]
 
 
@@ -93,27 +180,32 @@ ML5sVIr1faA9MP0wPsx8GB9mP0w/zH3o7ofxG4JLVKb/f2DP3jjVuTtHAM4/
 AXLf3wf2NuHRG/cDxWF8mH0w/gwtialXTmo6wPTv/NP+5Xa5Adx8GJ/r+uIC
 21OacP6nS75JAhUGDjD9MD7MfBgfZj9MP8x96O4HAGYxoDo=\"]"
 
-formatted = CodeFormat[input, "LineWidth" -> 20]
-
 Test[
-	!FailureQ[formatted]
+	CodeFormat[input, "LineWidth" -> 20, "BreakLinesMethod" -> "LineBreakerV1"]
 	,
-	True
+"f[\"1:eJxTTMoPSmVmYGBgAmJeKA0Big4Wru5FP/n1HU4vdN32uVYIzpfQv6vC1vjd
+3kzqQLTCQQ04X/r1IzMpoD4Yn6mCW0WjTgiuv+N0vcf+2u/2MPNhfCmQeqA5
+ML5sVIr1faA9MP0wPsx8GB9mP0w/zH3o7ofxG4JLVKb/f2DP3jjVuTtHAM4/
+AXLf3wf2NuHRG/cDxWF8mH0w/gwtialXTmo6wPTv/NP+5Xa5Adx8GJ/r+uIC
+21OacP6nS75JAhUGDjD9MD7MfBgfZj9MP8x96O4HAGYxoDo=\"
+    ]"
 	,
 	TestID->"Bugs-20210113-K8Y8F3"
 ]
 
-(*lines = StringSplit[formatted, "\n"]
-
 Test[
-	AllTrue[lines, (StringLength[#] <= 20)&]
+	CodeFormat[input, "LineWidth" -> 20, "BreakLinesMethod" -> "LineBreakerV2"]
 	,
-	True
+"f[
+\"1:eJxTTMoPSmVmYGBgAmJeKA0Big4Wru5FP/n1HU4vdN32uVYIzpfQv6vC1vjd
+3kzqQLTCQQ04X/r1IzMpoD4Yn6mCW0WjTgiuv+N0vcf+2u/2MPNhfCmQeqA5
+ML5sVIr1faA9MP0wPsx8GB9mP0w/zH3o7ofxG4JLVKb/f2DP3jjVuTtHAM4/
+AXLf3wf2NuHRG/cDxWF8mH0w/gwtialXTmo6wPTv/NP+5Xa5Adx8GJ/r+uIC
+21OacP6nS75JAhUGDjD9MD7MfBgfZj9MP8x96O4HAGYxoDo=\"
+]"
 	,
-	TestID->"Bugs-20210113-Y6R5G3"
+	TestID->"Bugs-20211007-F2G5T9"
 ]
-*)
-
 
 
 
@@ -127,8 +219,7 @@ bug 407712
 Test[
 	CodeFormat["unSetMyGlobal:=(MyGlobal=.)"]
 	,
-	"\
-unSetMyGlobal :=
+"unSetMyGlobal :=
     (MyGlobal =.)"
 	,
 	TestID->"Bugs-20210406-H6V8N9"
@@ -189,7 +280,7 @@ Test[
 		datasetValidation[[\"BoundingBox\"]] = MapThread[PadCorner[#] /@ #2&,
 		{datasetValidation[[\"Size\"]], datasetValidation[[\"BoundingBox\"]]}];
 	];
-]]", "IndentationString" -> "\t"]
+]]", "IndentationString" -> "\t", "BreakLinesMethod" -> "LineBreakerV1"]
 	,
 "f[] :=
 	Block[{},
@@ -197,13 +288,37 @@ Test[
 			If[validationQ,
 				datasetValidation[[\"BoundingBox\"]] = MapThread[PadCorner[#] /@ #2&,
 					 {datasetValidation[[\"Size\"]], datasetValidation[[\"BoundingBox\"]]}];
-				
 			];
-			
 		]
 	]"
 	,
 	TestID->"Bugs-20210903-D6C3Y9"
+]
+
+Test[
+	CodeFormat[
+ "f[] := Block[{}, Block[{},
+	If[validationQ,
+		datasetValidation[[\"BoundingBox\"]] = MapThread[PadCorner[#] /@ #2&,
+		{datasetValidation[[\"Size\"]], datasetValidation[[\"BoundingBox\"]]}];
+	];
+]]", "IndentationString" -> "\t", "BreakLinesMethod" -> "LineBreakerV2"]
+	,
+"f[] :=
+	Block[{},
+		Block[{},
+			If[validationQ,
+				datasetValidation[[\"BoundingBox\"]] =
+					MapThread[
+						PadCorner[#] /@ #2&
+						,
+						{datasetValidation[[\"Size\"]], datasetValidation[[\"BoundingBox\"]]}
+					];
+			];
+		]
+	]"
+	,
+	TestID->"Bugs-20211007-A3T2R2"
 ]
 
 
@@ -220,7 +335,9 @@ TestMatch[
 xxx*))
 "]
 	,
-	_String
+"(
+    Sum[a b c, {i, 1, 9}](*+
+xxx*) )"
 	,
 	TestID->"Bugs-20210929-O7G2W2"
 ]

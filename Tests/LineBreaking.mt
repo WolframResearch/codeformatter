@@ -235,6 +235,17 @@ resourcePublisherNameSpaceFreeQ[name_String] :=
 
 
 
+(*
+ensure that ]] are not broken
+*)
+Test[
+	CodeFormat["aaaaaaaa[[]]", "LineWidth" -> 20, "BreakLinesMethod" -> "LineBreakerV1"]
+	,
+	"aaaaaaaa[[]]"
+	,
+	TestID->"LineBreaking-20211007-T6O3Z1"
+]
+
 
 
 

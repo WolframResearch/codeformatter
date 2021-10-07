@@ -18,6 +18,17 @@ Undocumented functions
 CodeFormatCST
 
 
+(*
+Formatter-only nodes
+*)
+
+GroupSquareSquare
+
+Token`OpenSquareOpenSquare
+
+Token`CloseSquareCloseSquare
+
+
 $DefaultIndentationString
 
 $DefaultTabWidth

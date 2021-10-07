@@ -1,3 +1,5 @@
+(* ::Package::"Tags"-><|"NoVariables" -> <|"Module" -> <|Enabled -> False|>|>|>:: *)
+
 BeginPackage["CodeFormatter`Abstract`"]
 
 AbstractFormatNodes
@@ -156,6 +158,31 @@ Convert CompoundNode[tag, {child1, child2}] into LeafNode[tag, child1child2]
 
 abstractFormatNodes[CompoundNode[tag_, children_, data_]] :=
   LeafNode[tag, StringJoin[abstractFormatNodes[#][[2]]& /@ children], data]
+
+
+(*
+Abstract the outer [] and inner [] groups into a single [[]] group
+
+Do not worry about mis-labeling bad syntax such as a[[[[]]]]
+*)
+abstractFormatNodes[
+  GroupNode[GroupSquare, {
+    LeafNode[Token`OpenSquare, str6_, _],
+    GroupNode[GroupSquare, {
+      LeafNode[Token`OpenSquare, str5_, _],
+      contentsSeq___,
+      LeafNode[Token`CloseSquare, str4_, _]},
+      _
+    ],
+    LeafNode[Token`CloseSquare, str2_, _]},
+    data1_
+  ]
+] :=
+  GroupNode[GroupSquareSquare, {
+    LeafNode[Token`OpenSquareOpenSquare, str6 <> str5, <||>],
+    Sequence @@ (abstractFormatNodes /@ {contentsSeq}),
+    LeafNode[Token`CloseSquareCloseSquare, str4 <> str2, <||>]}, data1
+  ]
 
 
 abstractFormatNodes[node_LeafNode] :=

@@ -596,7 +596,10 @@ Module[{
 
     tmp = spaced;
     
-    If[breakLinesMethod === "LineBreakerV1",
+    (*
+    allow mixing both LineBreakerV1 and LineBreakerV2
+    *)
+    If[StringContainsQ[breakLinesMethod, "LineBreakerV1"],
       
       (*
       Line Breaker V1

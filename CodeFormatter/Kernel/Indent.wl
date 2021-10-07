@@ -35,8 +35,10 @@ Module[{indented, lineWidth, breakLinesMethod},
 
     (*
     Only use provided lineWidth in indent[] if using LineBreakerV2
+
+    allow mixing both LineBreakerV1 and LineBreakerV2
     *)
-    If[breakLinesMethod == "LineBreakerV2",
+    If[StringContainsQ[breakLinesMethod, "LineBreakerV2"],
       $CurrentStyle["LineWidth"] = lineWidth
       ,
       $CurrentStyle["LineWidth"] = Infinity

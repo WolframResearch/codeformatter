@@ -7,6 +7,16 @@ BeginPackage["CodeFormatter`Generate`Palette`"]
 Begin["`Private`"]
 
 (*
+auto-load any symbols that require the PacletManager that may appear later
+
+AppearanceRules appears in CodeFormatter`Generate`UIElements`
+
+this prevents e.g. "Get::noopen: Cannot open Forms`." messages when building
+
+related bugs: 415177
+*)
+AppearanceRules
+(*
 Do not allow PacletManager to participate in finding `Generate` files
 
 PacletManager will find e.g. CodeParser/Kernel/TokenEnum.wl when asked to find CodeParser`Generate`TokenEnum`

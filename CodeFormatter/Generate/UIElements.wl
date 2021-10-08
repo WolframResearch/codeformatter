@@ -1,3 +1,5 @@
+(* ::Package::"Tags"-><|"NoVariables" -> <|"DynamicModule" -> <|Enabled -> False|>|>|>:: *)
+
 (* ::Package:: *)
 
 (* ::Section::Closed:: *)
@@ -389,11 +391,14 @@ Button[
 				n, Dynamic[{Switch[settingIndex, n, {fm, fm}, n-1, {fm, 2*halfShrinkSize + fm}, _, {fm, halfShrinkSize + fm}], {tbfm, tbfm}}],
 				_, Dynamic[{Switch[settingIndex, i, {fm, fm}, i-1, {fm, halfShrinkSize + fm}, i+1, {halfShrinkSize + 3, fm}, _, {fm, fm}], {tbfm, tbfm}}]],
 		FrameStyle -> fs,
+		(* :!CodeAnalysis::BeginBlock:: *)
+		(* :!CodeAnalysis::Disable::DynamicImageSize:: *)
 		ImageSize ->
 			Switch[i,
 				1, Dynamic[Switch[settingIndex, 1, size,   2, size-2*halfShrinkSize, _, size-halfShrinkSize]],
 				n, Dynamic[Switch[settingIndex, n, size, n-1, size-2*halfShrinkSize, _, size-halfShrinkSize]],
-				_, Dynamic[Switch[settingIndex, i, size, i-1 | i+1, size-3*halfShrinkSize, _, size-2*halfShrinkSize]]],
+				_, Dynamic[Switch[settingIndex, i, size, i-1 | i+1, size-3*halfShrinkSize, _, size-2*halfShrinkSize]]]
+		(* :!CodeAnalysis::EndBlock:: *),
 		RoundingRadius -> rr],
 	(settingIndex = i; action),
 	Appearance -> FEPrivate`FrontEndResource["CodeFormatterExpressions", "SuppressMouseDownNinePatchAppearance"]]

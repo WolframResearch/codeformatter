@@ -103,7 +103,7 @@ If[PacletFind["Format"] != {},
 ]
 
 
-CodeFormatter::versions = "CodeParser version `1` and CodeFormatter version `2` are different. There may be unexpected problems."
+CodeFormatter::versions = "CodeParser version `1` and CodeFormatter version `2` are different. There may be unexpected problems. Evaluate PacletInstall /@ {\"CodeParser\", \"CodeFormatter\"} to get the latest versions."
 
 codeParserVersion = "Version" /. PacletInformation["CodeParser"]
 codeFormatterVersion = "Version" /. PacletInformation["CodeFormatter"]

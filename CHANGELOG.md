@@ -107,3 +107,88 @@ is weird
 Notes on compatibility have been added to docs/compatibility.md
 
 Change default Airiness to be Automatic
+
+
+## 1.4 - 25 Oct, 2021
+
+Do not allow PacletManager to participate in finding `Generate` files
+
+
+Palette Feature 1: Airiness Slider or Newline Togglers
+
+The airiness of code formatting is controlled via the familiar slider
+control or a new set of toggler controls. Both update the same
+underlying options. The slider can be considered a coarse-grained control
+while the togglers individually target various newline formatting
+options. These fine-grained options include visualizations and tooltips
+to describe the formatting behavior that they modify.
+
+Palette Feature 2: Presets
+
+The state of the formatting options can be saved between desktop
+sessions and recalled at a later time. Multiple formatting presets can
+be saved. The most recently selected preset is remembered automatically
+between desktop sessions. Presets can be updated to match the current
+state of the formatting options. The indentation style is included as
+part of the preset.
+
+Naming and editing the presets is done via subdialogs because editable
+InputFields are not allowed in floating palettes.
+
+Implementation Details:
+
+* some formatting controls exist in the Package and Script editors. The
+highlight colors are controlled from "CodeFormatterHighlightColor"
+styles defined in the paclet's Package.nb and Script.nb stylesheets
+* speech bubble popups are modeled after those from Drawing Tools
+* the palette state is saved between sessions via key-values stored in
+CurrentValue[$FrontEnd, {CodeAssistOptions, "CodeToolsOptions",
+"CodeFormat"}]
+
+
+Abstract the outer [] and inner [] groups into a single [[]] group
+
+Ensure that ]] are not broken
+
+
+Canonicalize input before indenting
+
+Rely on graphical syntax; no more reliance on whitespace / newlines that were passed in
+
+2 stages: top-down indenting, then symbolic rendering
+
+
+If ; is last in CompoundExpression, then rename to something special
+
+Rename Token\`Semi -> Token\`Fake\`SemiBeforeImplicitNull
+
+Allow for easier processing later
+
+
+Compute Extents and use to trigger line breaking
+
+Update LineBreakerV1 -> LineBreakerV2
+
+
+### Fixes
+
+Related to 413985: CodeFormat does not handle empty list of bytes
+
+Return unevaluated for now
+
+
+Explicitly handle CodeFormat[{}]
+
+Fix 414042: & on newline giving linter warnings
+
+Fix unreported bug: malformed Whitespace could be generated in certain edge cases
+
+Fix problems with merging temporary line continuations
+
+Fix 415177: "Get::noopen: Cannot open Forms\`." message when building
+
+Fix 415178: spurious DynamicImageSize warning
+
+
+
+

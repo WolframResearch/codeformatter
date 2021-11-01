@@ -85,12 +85,18 @@ formatSelectedCell[] :=
 
 
 (*
-input: cell is a Cell[] expression
+input: cell is a Cell[] expression, can be Input, Code, cell group, etc.
+
+handles CellGroups recursively
+
 return the formatted contents
 *)
 formatContents[cell_] :=
 Module[{formatted},
     Switch[cell,
+        (*
+        "Program" base case
+        *)
         Cell[_, "Program", ___],
 
             formatted = cell;
@@ -114,6 +120,7 @@ Module[{formatted},
             ]
         ,
         (*
+        "Input" | "Code" base case
         only RowBoxes are supported for now
         *)
         Cell[BoxData[b_], "Input" | "Code", ___] /; Union[Cases[b, _Symbol, Infinity, Heads -> True]] === {List, RowBox},
@@ -149,40 +156,37 @@ Module[{formatted},
             ]
         ,
         (*
-        Also support Code cells that have been evaluated and have Output grouped with them
+        "Output" base case
+        just pass through
         *)
-        Cell[CellGroupData[{Cell[BoxData[b_], "Input" | "Code", ___] /; Union[Cases[b, _Symbol, Infinity, Heads -> True]] === {List, RowBox}, Cell[_, "Output", ___]}, _]],
+        Cell[BoxData[_], "Output", ___],
+            cell
+        ,
 
+        (*
+        unrecognized BoxData cell
+        *)
+        Cell[BoxData[_], _, ___],
+            Message[CodeFormat::cellfailure];
             (*
-            The Input cell
+            just return the bad input cell
             *)
-            formatted = cell[[1, 1, 1]];
-
-            If[CodeFormatter`$InteractiveReparse,
-                formatted = FrontEndExecute[FrontEnd`ReparseBoxStructurePacket[formatted]]
-            ];
-
-            formatted = formatInputContents[formatted[[1, 1]]];
-
-            If[!FailureQ[formatted],
-                (*
-                return the successful formatted cell
-                *)
-                Cell[CellGroupData[{Cell[BoxData[formatted], Sequence @@ cell[[1, 1, 1, 2;;]]], cell[[1, 1, 2]]}, cell[[1, 2]]]]
-                ,
-                Message[CodeFormat::cellfailure];
-                (*
-                just return the bad input cell
-                *)
-                cell
-            ]
+            cell
+        ,
+        
+        (*
+        Recursively handle CellGroups
+        Supports Code cells that have been evaluated and have Output grouped with them
+        *)
+        Cell[CellGroupData[_, _]],
+            Cell[CellGroupData[formatContents /@ cell[[1, 1]], cell[[1, 2]]]]
         ,
         (*
         Anything else
-        Some other box
+        Section cells, etc.
+        just pass through
         *)
         _,
-            Message[CodeFormat::cellfailure];
             cell
     ]
 ]

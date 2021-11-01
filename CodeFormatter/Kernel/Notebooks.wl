@@ -23,7 +23,7 @@ $LintTextFontWeight = "Medium"
 
 formatSelectedCell[] :=
   Catch[
-  Module[{nb, read, formatted, toWrite},
+  Module[{nb, read, toWrite},
 
     nb = InputNotebook[];
 
@@ -73,8 +73,25 @@ formatSelectedCell[] :=
 
     toWrite = MapIndexed[Function[{cell, index},
         Function[val, CurrentValue[nb, WindowStatusArea] = "Formatting selected cell... " <> ToString[Floor[100 index[[1]]/Length[read]]] <> "%"; val]@
-        Switch[cell,
-          Cell[_, "Program", ___],
+            formatContents[cell]
+        ], read];
+
+    NotebookWrite[nb, toWrite, All];
+
+    CurrentValue[nb, WindowStatusArea] = "";
+
+    Null
+  ]]
+
+
+(*
+input: cell is a Cell[] expression
+return the formatted contents
+*)
+formatContents[cell_] :=
+Module[{formatted},
+    Switch[cell,
+        Cell[_, "Program", ___],
 
             formatted = cell;
 
@@ -95,11 +112,11 @@ formatSelectedCell[] :=
                 *)
                 cell
             ]
-          ,
-          (*
-          only RowBoxes are supported for now
-          *)
-          Cell[BoxData[b_], "Input" | "Code", ___] /; Union[Cases[b, _Symbol, Infinity, Heads -> True]] === {List, RowBox},
+        ,
+        (*
+        only RowBoxes are supported for now
+        *)
+        Cell[BoxData[b_], "Input" | "Code", ___] /; Union[Cases[b, _Symbol, Infinity, Heads -> True]] === {List, RowBox},
 
             formatted = cell;
 
@@ -130,11 +147,11 @@ formatSelectedCell[] :=
                 *)
                 cell
             ]
-          ,
-          (*
-          Also support Code cells that have been evaluated and have Output grouped with them
-          *)
-          Cell[CellGroupData[{Cell[BoxData[b_], "Input" | "Code", ___] /; Union[Cases[b, _Symbol, Infinity, Heads -> True]] === {List, RowBox}, Cell[_, "Output", ___]}, _]],
+        ,
+        (*
+        Also support Code cells that have been evaluated and have Output grouped with them
+        *)
+        Cell[CellGroupData[{Cell[BoxData[b_], "Input" | "Code", ___] /; Union[Cases[b, _Symbol, Infinity, Heads -> True]] === {List, RowBox}, Cell[_, "Output", ___]}, _]],
 
             (*
             The Input cell
@@ -159,22 +176,17 @@ formatSelectedCell[] :=
                 *)
                 cell
             ]
-          ,
-          (*
-          Some other box
-          *)
-          _,
+        ,
+        (*
+        Anything else
+        Some other box
+        *)
+        _,
             Message[CodeFormat::cellfailure];
             cell
-        ]
-    ], read];
+    ]
+]
 
-    NotebookWrite[nb, toWrite, All];
-
-    CurrentValue[nb, WindowStatusArea] = "";
-
-    Null
-  ]]
 
 (*
 

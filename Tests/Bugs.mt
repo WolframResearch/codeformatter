@@ -348,3 +348,36 @@ xxx*) )"
 
 
 
+(*
+bug 417300
+*)
+
+cst = CodeConcreteParse["add[a_, b_]"]
+
+first = cst[[2, 1]]
+
+Test[
+	CodeFormatCST[first]
+	,
+"add[a_, b_]
+"
+	,
+	TestID->"Bugs-20211117-D2N8Q0"
+]
+
+cst = CodeConcreteParse["(a+b)"]
+
+first = cst[[2, 1]]
+
+Test[
+	CodeFormatCST[first]
+	,
+"(a + b)
+"
+	,
+	TestID->"Bugs-20211117-K3G2M8"
+]
+
+
+
+

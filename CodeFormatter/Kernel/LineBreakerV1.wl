@@ -30,7 +30,22 @@ breakLinesV1[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
 
     tokens = tokensIn;
 
-    lines = Most /@ Split[tokens, !MatchQ[#1, LeafNode[Token`Newline, _, _] | FragmentNode[Token`Comment, $CurrentNewlineString, _]]&];
+    lines = Function[{split},
+      (*
+      we know most of the lines end with newlines
+      *)
+      (Most /@ Most[split]) ~Join~
+      ({
+        (*
+        last line may not end with newline
+        *)
+        If[MatchQ[Last[#], LeafNode[Token`Newline, _, _] | FragmentNode[Token`Comment, $CurrentNewlineString, _]],
+          Most[#]
+          ,
+          #
+        ]&[Last[split]]
+      })
+    ][Split[tokens, !MatchQ[#1, LeafNode[Token`Newline, _, _] | FragmentNode[Token`Comment, $CurrentNewlineString, _]]&]];
 
     If[$Debug,
       Print["lines: ", lines];

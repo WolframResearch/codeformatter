@@ -175,6 +175,10 @@ breakLine[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
         ];
 
         (*
+        width > lineWidth2
+        *)
+
+        (*
         Only add to toSplit if $AllowSplittingTokens is True
         *)
         If[TrueQ[$AllowSplittingTokens],
@@ -191,7 +195,8 @@ breakLine[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
           ]
           ,
           (*
-          if not adding to toSplit, then we still want to try to break after an acceptable operator
+          !TrueQ[$AllowSplittingTokens]
+          even if not adding to toSplit, we still want to try to break after an acceptable operator
           *)
           If[isPossiblyAcceptable[tok] &&
             (!toplevel || isAcceptableOperator[tok[[1]]]) &&
@@ -213,7 +218,7 @@ breakLine[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
       ] (* While[True] *)
       ,
       {i, firstNonWhitespaceIndex, Length[tokens]}
-    ];
+    ]; (* Do *)
 
     If[$Debug,
       Print["toSplit 1: ", toSplit];
@@ -236,7 +241,7 @@ breakLine[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
               kTmp = k;
               Catch[
               (*
-              need to loop because there may be mutiple escapes to handle in a row
+              need to loop because there may be multiple escapes to handle in a row
               *)
               While[True,
                 If[$Debug,
@@ -324,8 +329,8 @@ breakLine[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
           ,
           True,
             key -> val
-        ]
-      ]
+        ] (* Which *)
+      ] (* Function *)
       ,
       toSplit
     ]];

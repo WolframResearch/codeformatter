@@ -165,9 +165,7 @@ Rename Token\`Semi -> Token\`Fake\`SemiBeforeImplicitNull
 Allow for easier processing later
 
 
-Compute Extents and use to trigger line breaking
-
-Update LineBreakerV1 -> LineBreakerV2
+Add LineBreakerV2 method, off by default
 
 
 ### Fixes
@@ -189,6 +187,8 @@ Fix 415177: "Get::noopen: Cannot open Forms\`." message when building
 
 Fix 415178: spurious DynamicImageSize warning
 
+Handle selecting Section cells and pressing "Format Cell"
 
+Add a menu position for the CodeFormatter palette so that the Code related palettes appear in their own section of the Palettes menu.
 
 

@@ -1042,7 +1042,11 @@ With[
 				Cell[BoxData[ToBoxes[footer]], "DialogFooter", CellMargins -> {Inherited, {0, 0}}]},
 			Initialization :> Replace[AbsoluteCurrentValue[$FrontEnd, {$optsPath, "Presets"}], Except[_Association] -> <||>],
 			TaggingRules -> {"PresetName" -> ""},
-			WindowSize -> {300, All},
+			WindowSize ->
+				{
+					300,
+					(* 416665: There is a fundamental drawing issue on Mac if WindowSize is All. Fix the height on Mac as a workaround. *)
+					If[$OperatingSystem === "MacOSX", 188, All]},
 			Modal -> True,
 			Background -> Dynamic[CurrentValue[{"SystemColors", "Window"}]],
 			StyleDefinitions -> "Dialog.nb"],

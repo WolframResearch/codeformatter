@@ -4,6 +4,8 @@ BeginPackage["CodeFormatter`Abstract`"]
 
 AbstractFormatNodes
 
+cleanLexicalVariables
+
 Begin["`Private`"]
 
 Needs["CodeFormatter`"]
@@ -23,12 +25,26 @@ is a SetDelayed node, with a Set node on the RHS
 
 But this really should be formatted as if it were a single TernaryNode
 *)
-AbstractFormatNodes[gst_] :=
+AbstractFormatNodes[gstIn_] :=
 Catch[
-  abstractFormatNodes[gst]
-  ,
-  abstractFormatNodesTag
-]
+Module[{gst},
+  
+  gst = gstIn;
+
+  (*
+  rely on abstractFormatNodes not yet run, and CompoundNode[tag, {child1, child2}] is still preserved
+  *)
+  If[$CleanLexicalVariables,
+    gst = cleanLexicalVariables[gst];
+  ];
+
+  (*
+  Now run and convert CompoundNode[tag, {child1, child2}] into LeafNode[tag, child1child2]
+  *)
+  gst = abstractFormatNodes[gst];
+  
+  gst
+], abstractFormatNodesTag]
 
 (*
 abstract
@@ -151,6 +167,344 @@ Module[{replaced},
 ]
 
 
+(*
+may have already been aggregated, so preserve
+*)
+cleanLexicalVariables[n:CallNode[head:LeafNode[Symbol, "Module", _], {
+  GroupNode[GroupSquare, {
+      opener_, 
+      InfixNode[Comma, commaChildren_, data2_],
+      closer_}, data1_]
+    }, data_]] :=
+Catch[
+Module[{ast, children, params, vars, rules},
+
+  ast = CodeParser`Abstract`Abstract[n];
+
+  children = ast[[2]];
+
+  Which[
+    Length[children] != 2,
+      rules = {}
+    ,
+    !MatchQ[children[[1]], CallNode[LeafNode[Symbol, "List", _], _, _]],
+      rules = {}
+    ,
+    True,
+      params = children[[1, 2]];
+      vars = # /. {
+        CallNode[LeafNode[Symbol, "Set" | "SetDelayed", _], {
+          sym:LeafNode[Symbol, _, _], _}, _] :> sym,
+        sym:LeafNode[Symbol, _, _] :> sym,
+        _ :> Nothing
+      }& /@ params;
+      vars = Cases[vars, LeafNode[Symbol, name_ /; StringContainsQ[name, "`"], _]];
+      rules = (LeafNode[Symbol, #[[2]], _] -> LeafNode[Symbol, Last[StringSplit[#[[2]], "`"]], <||>])& /@ vars;
+  ];
+
+  CallNode[head, {
+    GroupNode[GroupSquare, {
+      opener,
+      InfixNode[Comma, cleanLexicalVariables /@ (commaChildren /. rules), data2],
+      closer
+    }, data1]
+  }, data]
+]]
+
+(*
+may have NOT YET been aggregated, so preserve
+*)
+cleanLexicalVariables[n:CallNode[{head:LeafNode[Symbol, "Module", _], headSeq___}, {
+  GroupNode[GroupSquare, {
+      opener_, openerSeq:comment...,
+      InfixNode[Comma, commaChildren_, data2_],
+      closerSeq:comment..., closer_}, data1_]
+    }, data_]] :=
+Catch[
+Module[{agg, ast, children, params, vars, rules},
+
+  agg = CodeParser`Abstract`Aggregate[n];
+  ast = CodeParser`Abstract`Abstract[agg];
+
+  children = ast[[2]];
+
+  Which[
+    Length[children] != 2,
+      rules = {}
+    ,
+    !MatchQ[children[[1]], CallNode[LeafNode[Symbol, "List", _], _, _]],
+      rules = {}
+    ,
+    True,
+      params = children[[1, 2]];
+      vars = # /. {
+        CallNode[LeafNode[Symbol, "Set" | "SetDelayed", _], {
+          sym:LeafNode[Symbol, _, _], _}, _] :> sym,
+        sym:LeafNode[Symbol, _, _] :> sym,
+        _ :> Nothing
+      }& /@ params;
+      vars = Cases[vars, LeafNode[Symbol, name_ /; StringContainsQ[name, "`"], _]];
+      rules = (LeafNode[Symbol, #[[2]], _] -> LeafNode[Symbol, Last[StringSplit[#[[2]], "`"]], <||>])& /@ vars;
+  ];
+
+  CallNode[{head, headSeq}, {
+    GroupNode[GroupSquare, {
+      opener, openerSeq,
+      InfixNode[Comma, cleanLexicalVariables /@ (commaChildren /. rules), data2],
+      closerSeq, closer
+    }, data1]
+  }, data]
+]]
+
+
+(*
+may have already been aggregated, so preserve
+*)
+cleanLexicalVariables[n:CallNode[head:LeafNode[Symbol, "With", _], {
+  GroupNode[GroupSquare, {
+      opener_, 
+      InfixNode[Comma, commaChildren_, data2_],
+      closer_}, data1_]
+    }, data_]] :=
+Catch[
+Module[{ast, children, params, vars, rules},
+
+  ast = CodeParser`Abstract`Abstract[n];
+
+  children = ast[[2]];
+
+  Which[
+    Length[children] != 2,
+      rules = {}
+    ,
+    !MatchQ[children[[1]], CallNode[LeafNode[Symbol, "List", _], _, _]],
+      rules = {}
+    ,
+    True,
+      params = children[[1, 2]];
+      vars = # /. {
+        CallNode[LeafNode[Symbol, "Set" | "SetDelayed", _], {
+          sym:LeafNode[Symbol, _, _], _}, _] :> sym,
+        _ :> Nothing
+      }& /@ params;
+      vars = Cases[vars, LeafNode[Symbol, name_ /; StringContainsQ[name, "`"], _]];
+      rules = (LeafNode[Symbol, #[[2]], _] -> LeafNode[Symbol, Last[StringSplit[#[[2]], "`"]], <||>])& /@ vars;
+  ];
+
+  CallNode[head, {
+    GroupNode[GroupSquare, {
+      opener,
+      InfixNode[Comma, cleanLexicalVariables /@ (commaChildren /. rules), data2],
+      closer
+    }, data1]
+  }, data]
+]]
+
+(*
+may have NOT YET been aggregated, so preserve
+*)
+cleanLexicalVariables[n:CallNode[{head:LeafNode[Symbol, "With", _], headSeq___}, {
+  GroupNode[GroupSquare, {
+      opener_, openerSeq:comment...,
+      InfixNode[Comma, commaChildren_, data2_],
+      closerSeq:comment..., closer_}, data1_]
+    }, data_]] :=
+Catch[
+Module[{agg, ast, children, params, vars, rules},
+
+  agg = CodeParser`Abstract`Aggregate[n];
+  ast = CodeParser`Abstract`Abstract[agg];
+
+  children = ast[[2]];
+
+  Which[
+    Length[children] != 2,
+      rules = {}
+    ,
+    !MatchQ[children[[1]], CallNode[LeafNode[Symbol, "List", _], _, _]],
+      rules = {}
+    ,
+    True,
+      params = children[[1, 2]];
+      vars = # /. {
+        CallNode[LeafNode[Symbol, "Set" | "SetDelayed", _], {
+          sym:LeafNode[Symbol, _, _], _}, _] :> sym,
+        _ :> Nothing
+      }& /@ params;
+      vars = Cases[vars, LeafNode[Symbol, name_ /; StringContainsQ[name, "`"], _]];
+      rules = (LeafNode[Symbol, #[[2]], _] -> LeafNode[Symbol, Last[StringSplit[#[[2]], "`"]], <||>])& /@ vars;
+  ];
+
+  CallNode[{head, headSeq}, {
+    GroupNode[GroupSquare, {
+      opener, openerSeq,
+      InfixNode[Comma, cleanLexicalVariables /@ (commaChildren /. rules), data2],
+      closerSeq, closer
+    }, data1]
+  }, data]
+]]
+
+
+(*
+may have already been aggregated, so preserve
+*)
+cleanLexicalVariables[n:CallNode[head:LeafNode[Symbol, "Function", _], {
+  GroupNode[GroupSquare, {
+      opener_, 
+      InfixNode[Comma, commaChildren_, data2_],
+      closer_}, data1_]
+    }, data_]] :=
+Catch[
+Module[{ast, children, param, params, rules},
+
+  ast = CodeParser`Abstract`Abstract[n];
+
+  children = ast[[2]];
+
+  Which[
+    !(2 <= Length[children] <= 3),
+      rules = {}
+    ,
+    MatchQ[children[[1]], LeafNode[Symbol, "Null", _]],
+      rules = {}
+    ,
+    MatchQ[children[[1]], LeafNode[Symbol, _, _]],
+      param = children[[1]];
+      params = Cases[{param}, LeafNode[Symbol, name_ /; StringContainsQ[name, "`"], _]];
+      rules = (LeafNode[Symbol, #[[2]], _] -> LeafNode[Symbol, Last[StringSplit[#[[2]], "`"]], <||>])& /@ params;
+    ,
+    !MatchQ[children[[1]], CallNode[LeafNode[Symbol, "List", _], _, _]],
+      rules = {}
+    ,
+    True,
+      params = children[[1, 2]];
+      params = # /. {
+        sym:LeafNode[Symbol, _, _] :> sym,
+        _ :> Nothing
+      }& /@ params;
+      params = Cases[params, LeafNode[Symbol, name_ /; StringContainsQ[name, "`"], _]];
+      rules = (LeafNode[Symbol, #[[2]], _] -> LeafNode[Symbol, Last[StringSplit[#[[2]], "`"]], <||>])& /@ params;
+  ];
+
+  CallNode[head, {
+    GroupNode[GroupSquare, {
+      opener,
+      InfixNode[Comma, cleanLexicalVariables /@ (commaChildren /. rules), data2],
+      closer
+    }, data1]
+  }, data]
+]]
+
+(*
+may have NOT YET been aggregated, so preserve
+*)
+cleanLexicalVariables[n:CallNode[{head:LeafNode[Symbol, "Function", _], headSeq___}, {
+  GroupNode[GroupSquare, {
+      opener_, openerSeq:comment...,
+      InfixNode[Comma, commaChildren_, data2_],
+      closerSeq:comment..., closer_}, data1_]
+    }, data_]] :=
+Catch[
+Module[{agg, ast, children, param, params, rules},
+
+  agg = CodeParser`Abstract`Aggregate[n];
+  ast = CodeParser`Abstract`Abstract[agg];
+
+  children = ast[[2]];
+
+  Which[
+    !(2 <= Length[children] <= 3),
+      rules = {}
+    ,
+    MatchQ[children[[1]], LeafNode[Symbol, "Null", _]],
+      rules = {}
+    ,
+    MatchQ[children[[1]], LeafNode[Symbol, _, _]],
+      param = children[[1]];
+      params = Cases[{param}, LeafNode[Symbol, name_ /; StringContainsQ[name, "`"], _]];
+      rules = (LeafNode[Symbol, #[[2]], _] -> LeafNode[Symbol, Last[StringSplit[#[[2]], "`"]], <||>])& /@ params;
+    ,
+    !MatchQ[children[[1]], CallNode[LeafNode[Symbol, "List", _], _, _]],
+      rules = {}
+    ,
+    True,
+      params = children[[1, 2]];
+      params = # /. {
+        sym:LeafNode[Symbol, _, _] :> sym,
+        _ :> Nothing
+      }& /@ params;
+      params = Cases[params, LeafNode[Symbol, name_ /; StringContainsQ[name, "`"], _]];
+      rules = (LeafNode[Symbol, #[[2]], _] -> LeafNode[Symbol, Last[StringSplit[#[[2]], "`"]], <||>])& /@ params;
+  ];
+
+  CallNode[{head, headSeq}, {
+    GroupNode[GroupSquare, {
+      opener, openerSeq,
+      InfixNode[Comma, cleanLexicalVariables /@ (commaChildren /. rules), data2],
+      closerSeq, closer
+    }, data1]
+  }, data]
+]]
+
+
+cleanLexicalVariables[BinaryNode[SetDelayed, {
+  lhs_,
+  seq1___,
+  op:LeafNode[Token`ColonEqual, _, _],
+  seq2___,
+  rhs_ }, data_]] :=
+Catch[
+Module[{potential, params, rules},
+
+  Which[
+    True,
+      potential = Cases[lhs, CompoundNode[PatternBlank, {LeafNode[Symbol, _, _], _}, _], Infinity];
+      params = # /. {
+        CompoundNode[PatternBlank, {
+          sym:LeafNode[Symbol, _, _], _}, _] :> sym
+      }& /@ potential;
+      params = Cases[params, LeafNode[Symbol, name_ /; StringContainsQ[name, "`"], _]];
+      rules = (LeafNode[Symbol, #[[2]], _] -> LeafNode[Symbol, Last[StringSplit[#[[2]], "`"]], <||>])& /@ params;
+  ];
+  BinaryNode[SetDelayed, cleanLexicalVariables /@ {
+    lhs /. rules,
+    seq1,
+    op,
+    seq2,
+    rhs /. rules
+  }, data]
+]]
+
+
+cleanLexicalVariables[BinaryNode[RuleDelayed, {
+  lhs_,
+  seq1___,
+  op:LeafNode[Token`ColonGreater | Token`LongName`RuleDelayed, _, _],
+  seq2___,
+  rhs_ }, data_]] :=
+Catch[
+Module[{potential, params, rules},
+
+  Which[
+    True,
+      potential = Cases[lhs, CompoundNode[PatternBlank, {LeafNode[Symbol, _, _], _}, _], Infinity];
+      params = # /. {
+        CompoundNode[PatternBlank, {
+          sym:LeafNode[Symbol, _, _], _}, _] :> sym
+      }& /@ potential;
+      params = Cases[params, LeafNode[Symbol, name_ /; StringContainsQ[name, "`"], _]];
+      rules = (LeafNode[Symbol, #[[2]], _] -> LeafNode[Symbol, Last[StringSplit[#[[2]], "`"]], <||>])& /@ params;
+  ];
+  
+  BinaryNode[RuleDelayed, cleanLexicalVariables /@ {
+    lhs /. rules,
+    seq1,
+    op,
+    seq2,
+    rhs /. rules
+  }, data]
+]]
+
 
 (*
 Convert CompoundNode[tag, {child1, child2}] into LeafNode[tag, child1child2]
@@ -236,6 +590,37 @@ abstractFormatNodes[head_[tag_, ts_, data_Association]] :=
 
 abstractFormatNodes[args___] :=
   Throw[Failure["InternalUnhandled", <| "Function" -> abstractFormatNodes, "Args" -> {args} |>], abstractFormatNodesTag]
+
+
+cleanLexicalVariables[node_LeafNode] :=
+  node
+
+(*
+maybe being called in formatter pass sequence, where whitespace has been removed and heads still have list
+*)
+cleanLexicalVariables[CallNode[{head_, headSeq___}, ts_, data_]] :=
+  CallNode[{cleanLexicalVariables @ head, headSeq}, cleanLexicalVariables /@ ts, data]
+
+(*
+maybe being called in sanity check, where proper aggregation has happened, and head is a node
+*)
+cleanLexicalVariables[CallNode[head_, ts_, data_]] :=
+  CallNode[cleanLexicalVariables @ head, cleanLexicalVariables /@ ts, data]
+
+cleanLexicalVariables[BoxNode[RowBox, {ts_}, data_]] :=
+  BoxNode[RowBox, {cleanLexicalVariables /@ ts}, data]
+
+cleanLexicalVariables[node:CodeNode[_, _, _]] :=
+  node
+
+(*
+Bad args such as List[1, 2, 3] used to match this, so changed data_ => data_Association to try to reduce bad hits
+*)
+cleanLexicalVariables[head_[tag_, ts_, data_Association]] :=
+  head[tag, cleanLexicalVariables /@ ts, data]
+
+cleanLexicalVariables[args___] :=
+  Throw[Failure["InternalUnhandled", <| "Function" -> cleanLexicalVariables, "Args" -> {args} |>], abstractFormatNodesTag]
 
 
 sameDefinitionSymbols[lhs1_, lhs2_] :=

@@ -348,6 +348,13 @@ formatInputContents[contentsBox_] :=
         agg = coalesceLineContinuation[agg];
         agg = flattenGroupMissingCloserNode[agg];
 
+        (*
+        $CleanLexicalVariables changes the aggregate syntax, so must also run here in sanity check
+        *)
+        If[$CleanLexicalVariables,
+            agg = CodeFormatter`Abstract`cleanLexicalVariables[agg]
+        ];
+
         cst2 = CodeConcreteParse[formatted];
 
         If[MatchQ[cst2[[3]], KeyValuePattern[SyntaxIssues -> {___, SyntaxIssue["UnrecognizedCharacter", _, _, _], ___}]],

@@ -49,6 +49,18 @@ $DefaultSafetyMargin
 
 
 (*
+Undocumented flags
+*)
+
+(*
+clean lexical variables:
+remove contexts
+*)
+$CleanLexicalVariables
+
+
+
+(*
 Messages
 *)
 CodeFormatter
@@ -218,6 +230,13 @@ Module[{cst, tabWidth, formattedStr, agg, cst2, agg2, aggToCompare, agg2ToCompar
   
   agg = CodeParser`Abstract`Aggregate[cst];
   agg = normalizeTokens[agg, "FormatOnly" -> True, "NewlineString" -> newline, "TabWidth" -> tabWidth];
+  
+  (*
+  $CleanLexicalVariables changes the aggregate syntax, so must also run here in sanity check
+  *)
+  If[$CleanLexicalVariables,
+      agg = CodeFormatter`Abstract`cleanLexicalVariables[agg]
+  ];
 
   cst2 = CodeConcreteParse[formattedStr];
 
@@ -276,6 +295,13 @@ Module[{cst, tabWidth, newline, formattedStr, agg, cst2, agg2, aggToCompare, agg
 
   agg = CodeParser`Abstract`Aggregate[cst];
   agg = normalizeTokens[agg, "FormatOnly" -> True, "NewlineString" -> newline, "TabWidth" -> tabWidth];
+
+  (*
+  $CleanLexicalVariables changes the aggregate syntax, so must also run here in sanity check
+  *)
+  If[$CleanLexicalVariables,
+      agg = CodeFormatter`Abstract`cleanLexicalVariables[agg]
+  ];
 
   cst2 = CodeConcreteParse[formattedStr];
 
@@ -341,6 +367,13 @@ Module[{cst, tabWidth, formattedStr, agg, cst2, agg2, aggToCompare, agg2ToCompar
   agg = CodeParser`Abstract`Aggregate[cst];
   agg = normalizeTokens[agg, "FormatOnly" -> True, "NewlineString" -> newline, "TabWidth" -> tabWidth];
 
+  (*
+  $CleanLexicalVariables changes the aggregate syntax, so must also run here in sanity check
+  *)
+  If[$CleanLexicalVariables,
+      agg = CodeFormatter`Abstract`cleanLexicalVariables[agg]
+  ];
+  
   cst2 = CodeConcreteParse[formattedStr];
 
   If[MatchQ[cst2[[3]], KeyValuePattern[SyntaxIssues -> {___, SyntaxIssue["UnrecognizedCharacter", _, _, _], ___}]],

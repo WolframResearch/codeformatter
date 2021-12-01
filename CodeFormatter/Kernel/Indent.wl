@@ -1,4 +1,4 @@
-(* ::Package::"Tags"-><|"NoParameters" -> <|"With" -> <|Enabled -> False|>|>, "NoVariables" -> <|"Module" -> <|Enabled -> False|>|>|>:: *)
+(* ::Package::"Tags"-><|"NoParameters" -> <|"With" -> <|Enabled -> False|>|>, "NoVariables" -> <|"Module" -> <|Enabled -> False|>|>, "SuspiciousSessionSymbol" -> <|Enabled -> False|>|>:: *)
 
 BeginPackage["CodeFormatter`Indent`"]
 

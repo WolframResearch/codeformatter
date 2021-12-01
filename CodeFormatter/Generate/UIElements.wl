@@ -112,7 +112,9 @@ DynamicModule[{mouseUp = True},
 					!CurrentValue[Enabled],               "Disabled",
 					CurrentValue["MouseOver"] && mouseUp, "Hover",
 					CurrentValue["MouseOver"],            "Pressed",
-					True,                                 "Default"]],
+					True,                                 "Default"
+				]
+			],
 			ImageSize -> Automatic],
 		{
 			"MouseDown" :> FEPrivate`Set[mouseUp, False],
@@ -1094,7 +1096,7 @@ With[{$optsPath = CodeFormatter`$optsPath},
 SetAttributes[
 	{
 		editPresetInterfaceBody, editPresetInterfaceFooter, editPresetNameButton,
-		deletePresetNameButton, presetBubbleDisplayMode, presetBubbleEditMode,
+		deletePresetNameButton, presetBubbleDisplayMode,
 		PresetBubbleList},
 	{HoldAll}]
 
@@ -1334,8 +1336,10 @@ With[{$optsPath = CodeFormatter`$optsPath},
 						activePresetKey === None,
 							Dynamic[FEPrivate`FrontEndResource["CodeFormatterStrings", "PresetsPopupLabel"]],
 						True,
-							Row[{If[presetIsEqualToCurrentSettingsQ[activePresetKey], "", "* "], activePresetKey}]],
-					TrackedSymbols :> {activePresetKey}],
+							Row[{If[presetIsEqualToCurrentSettingsQ[activePresetKey], "", "* "], activePresetKey}]
+					],
+					TrackedSymbols :> {activePresetKey}
+				],
 				Chevron[Dynamic[Down]]}},
 			BaseStyle -> "CodeFormatterText",
 			Alignment -> {{Left, Right}},
@@ -1427,7 +1431,9 @@ ActionMenu[
 						width === "4", Dynamic[FEPrivate`FrontEndResource["CodeFormatterStrings", "Space4MenuItem"]],
 						width === "6", Dynamic[FEPrivate`FrontEndResource["CodeFormatterStrings", "Space6MenuItem"]],
 						width === "8", Dynamic[FEPrivate`FrontEndResource["CodeFormatterStrings", "Space8MenuItem"]],
-						True, ""]],
+						True, ""
+					]
+				],
 				"",
 				Chevron[Dynamic[Down]]}},
 			ItemSize -> {{Automatic, Fit, Automatic}},

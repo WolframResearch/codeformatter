@@ -1,3 +1,5 @@
+(* ::Package::"Tags"-><|"SuspiciousSessionSymbol" -> <|Enabled -> False|>|>:: *)
+
 BeginPackage["CodeFormatter`"]
 
 (*

@@ -1,3 +1,5 @@
+(* ::Package::"Tags"-><|"SuspiciousSessionSymbol" -> <|Enabled -> False|>|>:: *)
+
 BeginPackage["CodeFormatter`Fragmentize`"]
 
 Fragmentize
@@ -186,8 +188,8 @@ Module[{origSpaces},
     Token`Comment
     ,
     Flatten[{
-      FragmentNode[Token`Comment, "\\" <> $CurrentNewlineString, <|"Temporary" -> True|>],
-      Table[FragmentNode[Token`Comment, " ", <|"Temporary" -> True|>], origSpaces],
+      FragmentNode[Token`Comment, "\\" <> $CurrentNewlineString, <| "Temporary" -> True |>],
+      Table[FragmentNode[Token`Comment, " ", <| "Temporary" -> True |>], origSpaces],
       FragmentNode[Token`Comment, #, <||>]& /@ DeleteCases[StringSplit[s, x:"(*"|"*)"|$CurrentNewlineString :> x], ""]
     }]
     ,
@@ -201,7 +203,7 @@ Could be processed because it has the same Source as a multiline leaf node
 fragmentizeMultilineLeafNode[n:LeafNode[Token`Fake`ImplicitNull, _, _]] :=
   n
 
-fragmentizeMultilineLeafNode[args___] := Failure["InternalUnhandled", <|"Function"->fragmentizeMultilineLeafNode, "Arguments"->{args}|>]
+fragmentizeMultilineLeafNode[args___] := Failure["InternalUnhandled", <| "Function" -> fragmentizeMultilineLeafNode, "Arguments" -> {args} |>]
 
 
 (*
@@ -262,8 +264,8 @@ Module[{leafs, src, origSpaces},
     LeafNode[
       Token`Comment
       ,
-      {FragmentNode[Token`Comment, "\\" <> $CurrentNewlineString, <|"Temporary" -> True|>]} ~Join~
-        Table[FragmentNode[String, " ", <|"Temporary" -> True|>], origSpaces] ~Join~
+      {FragmentNode[Token`Comment, "\\" <> $CurrentNewlineString, <| "Temporary" -> True |>]} ~Join~
+        Table[FragmentNode[String, " ", <| "Temporary" -> True |>], origSpaces] ~Join~
         (FragmentNode[Token`Comment, #[[2]], <||>]& /@ leafs)
       ,
       data

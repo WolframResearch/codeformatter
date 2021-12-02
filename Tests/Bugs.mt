@@ -381,3 +381,107 @@ Test[
 
 
 
+
+
+(*
+bug 417935
+*)
+Test[
+	CodeFormat["Module[{x = 10}, x + 1]", "NewlinesInScoping" -> Insert]
+	,
+	"\
+Module[
+    {x = 10}
+    ,
+    x + 1
+]"
+	,
+	TestID->"Bugs-20211202-Z3N3I9"
+]
+
+Test[
+	CodeFormat["With[{a=1},{b=2},{c=3},a]", "NewlinesInScoping" -> Insert]
+	,
+	"\
+With[
+    {a = 1}
+    ,
+    {b = 2}
+    ,
+    {c = 3}
+    ,
+    a
+]"
+	,
+	TestID->"Bugs-20211202-X4S6G6"
+]
+
+Test[
+	CodeFormat["If[a,b,c]", "NewlinesInControl" -> Insert]
+	,
+	"\
+If[
+    a
+    ,
+    b
+    ,
+    c
+]"
+	,
+	TestID->"Bugs-20211202-V3O6H9"
+]
+
+Test[
+	CodeFormat["Switch[a,b,c,d,e]", "NewlinesInControl" -> Insert]
+	,
+	"\
+Switch[
+    a
+    ,
+    b
+    ,
+    c
+    ,
+    d
+    ,
+    e
+]"
+	,
+	TestID->"Bugs-20211202-C8Q5W0"
+]
+
+Test[
+	CodeFormat["Which[a,b,c,d]", "NewlinesInControl" -> Insert]
+	,
+	"\
+Which[
+    a
+    ,
+    b
+    ,
+    c
+    ,
+    d
+]"
+	,
+	TestID->"Bugs-20211202-N0K6F5"
+]
+
+Test[
+	CodeFormat["For[start,test,inc,body]", "NewlinesInControl" -> Insert]
+	,
+	"\
+For[
+    start
+    ,
+    test
+    ,
+    inc
+    ,
+    body
+]"
+	,
+	TestID->"Bugs-20211202-B7O2N0"
+]
+
+

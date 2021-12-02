@@ -1407,7 +1407,7 @@ indent[node:CallNode[head:{LeafNode[Symbol, "Module" | "Block" | "With" | "Funct
       GroupNode[GroupSquare, {
           opener_,
           openerSeq:comment...,
-          InfixNode[Comma, {
+          commaNode:InfixNode[Comma, {
               varsSeq:Except[LeafNode[Token`Comma, _, _]]...,
               comma1:LeafNode[Token`Comma, _, _],
               bodySeq:Except[LeafNode[Token`Comma, _, _]...]
@@ -1423,7 +1423,7 @@ indent[node:CallNode[head:{LeafNode[Symbol, "Module" | "Block" | "With" | "Funct
       ]
     }, data_], OptionsPattern[]] :=
 Catch[
-  Module[{indentedHead,
+  Module[{indentedHead, indentedCommaNode,
     definitelyDelete, definitelyInsert, definitelyAutomatic,
     commaChildren, groupChildren, children,
     commaExtent, groupExtent, extent},
@@ -1444,7 +1444,49 @@ Catch[
         commonCallNodeIndent[node]
       ,
       TrueQ[definitelyInsert],
-        commonCallNodeIndent[node]
+
+        (*
+          NewlinesInScoping -> Insert is equivalent to:
+            NewlinesBetweenCommas -> Insert for the Comma node child of the scoping construct
+            And also block the Comma node child
+        *)
+
+        indentedHead = indent /@ head;
+        Block[{$Toplevel = False},
+
+          indentedCommaNode = indent[commaNode, "NewlinesBetweenCommas" -> Insert];
+
+          groupChildren =
+            Flatten[{
+              indent[opener],
+              indent[Insert[#, EndOfLine -> True, {3, 1}]]& /@ {openerSeq},
+              block @ {
+                indentedCommaNode
+              },
+              indent[Insert[#, StartOfLine -> True, {3, 1}]]& /@ {closerSeq},
+              indent[closer]
+            }];
+
+          groupExtent = computeExtent[groupChildren];
+
+          children = {
+              GroupNode[GroupSquare,
+                groupChildren
+                ,
+                <| data1, "Extent" -> groupExtent |>
+              ]
+            };
+
+          extent = computeExtent[indentedHead ~Join~ children];
+        ];
+
+        CallNode[
+          indentedHead
+          ,
+          children
+          ,
+          <| data, "Multiline" -> True, "Extent" -> extent |>
+        ]
       ,
       TrueQ[definitelyAutomatic],
 
@@ -1517,6 +1559,8 @@ With[
   a + b
 ]
 
+This form is currently undocumented but is nice to support
+
 *)
 indent[node:CallNode[head:{LeafNode[Symbol, "With" | {FragmentNode[Symbol, "With", _], ___}, _], ___}, {
       GroupNode[GroupSquare, {
@@ -1561,10 +1605,11 @@ Catch[
       TrueQ[definitelyDelete],
         commonCallNodeIndent[node]
       ,
-      TrueQ[definitelyInsert],
-        commonCallNodeIndent[node]
-      ,
-      TrueQ[definitelyAutomatic],
+      TrueQ[definitelyInsert] || TrueQ[definitelyAutomatic],
+
+        (*
+          Use same rules for NewlinesInScoping -> Insert and NewlinesInScoping -> Automatic
+        *)
 
         indentedHead = indent /@ head;
         Block[{$Toplevel = False},
@@ -1643,7 +1688,7 @@ indent[node:CallNode[head:{LeafNode[Symbol, "If" | "Switch" | {FragmentNode[Symb
       GroupNode[GroupSquare, {
           opener_,
           openerSeq:comment...,
-          InfixNode[Comma, {
+          commaNode:InfixNode[Comma, {
               expr:Except[LeafNode[Token`Comma, _, _]],
               exprSeq:Except[LeafNode[Token`Comma, _, _]]...,
               comma1:LeafNode[Token`Comma, _, _],
@@ -1660,7 +1705,7 @@ indent[node:CallNode[head:{LeafNode[Symbol, "If" | "Switch" | {FragmentNode[Symb
       ]
     }, data_], OptionsPattern[]] :=
 Catch[
-  Module[{indentedHead,
+  Module[{indentedHead, indentedCommaNode,
     definitelyDelete, definitelyInsert, definitelyAutomatic,
     commaChildren, groupChildren, children,
     commaExtent, groupExtent, extent},
@@ -1681,7 +1726,49 @@ Catch[
         commonCallNodeIndent[node]
       ,
       TrueQ[definitelyInsert],
-        commonCallNodeIndent[node]
+
+        (*
+          NewlinesInControl -> Insert is equivalent to:
+            NewlinesBetweenCommas -> Insert for the Comma node child of the control structure
+            And also block the Comma node child
+        *)
+
+        indentedHead = indent /@ head;
+        Block[{$Toplevel = False},
+
+          indentedCommaNode = indent[commaNode, "NewlinesBetweenCommas" -> Insert];
+
+          groupChildren =
+            Flatten[{
+              indent[opener],
+              indent[Insert[#, EndOfLine -> True, {3, 1}]]& /@ {openerSeq},
+              block @ {
+                indentedCommaNode
+              },
+              indent[Insert[#, StartOfLine -> True, {3, 1}]]& /@ {closerSeq},
+              indent[closer]
+            }];
+
+          groupExtent = computeExtent[groupChildren];
+
+          children = {
+              GroupNode[GroupSquare,
+                groupChildren
+                ,
+                <| data1, "Extent" -> groupExtent |>
+              ]
+            };
+          
+          extent = computeExtent[indentedHead ~Join~ children];
+        ];
+        
+        CallNode[
+          indentedHead
+          ,
+          children
+          ,
+          <| data, "Multiline" -> True, "Extent" -> extent |>
+        ]
       ,
       TrueQ[definitelyAutomatic],
 
@@ -1854,7 +1941,7 @@ indent[node:CallNode[head:{LeafNode[Symbol, "Which" | {FragmentNode[Symbol, "Whi
       GroupNode[GroupSquare, {
           opener_,
           openerSeq:comment...,
-          InfixNode[Comma,
+          commaNode:InfixNode[Comma,
             commaChildrenIn_
             ,
             data2_
@@ -1867,7 +1954,7 @@ indent[node:CallNode[head:{LeafNode[Symbol, "Which" | {FragmentNode[Symbol, "Whi
       ]
     }, data_], OptionsPattern[]] :=
 Catch[
-  Module[{indentedHead,
+  Module[{indentedHead, indentedCommaNode,
     definitelyDelete, definitelyInsert, definitelyAutomatic,
     commaChildren, groupChildren, children,
     commaExtent, groupExtent, extent},
@@ -1888,7 +1975,49 @@ Catch[
         commonCallNodeIndent[node]
       ,
       TrueQ[definitelyInsert],
-        commonCallNodeIndent[node]
+
+        (*
+          NewlinesInControl -> Insert is equivalent to:
+            NewlinesBetweenCommas -> Insert for the Comma node child of the control structure
+            And also block the Comma node child
+        *)
+        
+        indentedHead = indent /@ head;
+        Block[{$Toplevel = False},
+
+          indentedCommaNode = indent[commaNode, "NewlinesBetweenCommas" -> Insert];
+
+          groupChildren =
+            Flatten[{
+              indent[opener],
+              indent[Insert[#, EndOfLine -> True, {3, 1}]]& /@ {openerSeq},
+              block @ {
+                indentedCommaNode
+              },
+              indent[Insert[#, StartOfLine -> True, {3, 1}]]& /@ {closerSeq},
+              indent[closer]
+            }];
+
+          groupExtent = computeExtent[groupChildren];
+
+          children = {
+              GroupNode[GroupSquare,
+                groupChildren
+                ,
+                <| data1, "Extent" -> groupExtent |>
+              ]
+            };
+          
+          extent = computeExtent[indentedHead ~Join~ children];
+        ];
+
+        CallNode[
+          indentedHead
+          ,
+          children
+          ,
+          <| data, "Multiline" -> True, "Extent" -> extent |>
+        ]
       ,
       TrueQ[definitelyAutomatic],
 
@@ -1960,7 +2089,7 @@ indent[node:CallNode[head:{LeafNode[Symbol, "For" | {FragmentNode[Symbol, "For",
       GroupNode[GroupSquare, {
           opener_,
           openerSeq:comment...,
-          InfixNode[Comma, {
+          commaNode:InfixNode[Comma, {
               start:Except[LeafNode[Token`Comma, _, _]],
               startSeq:Except[LeafNode[Token`Comma, _, _]]...,
               comma1:LeafNode[Token`Comma, _, _],
@@ -1984,7 +2113,7 @@ indent[node:CallNode[head:{LeafNode[Symbol, "For" | {FragmentNode[Symbol, "For",
       ]
     }, data_], OptionsPattern[]] :=
 Catch[
-  Module[{indentedHead,
+  Module[{indentedHead, indentedCommaNode,
     definitelyDelete, definitelyInsert, definitelyAutomatic,
     commaChildren, groupChildren, children,
     commaExtent, groupExtent, extent},
@@ -2005,7 +2134,49 @@ Catch[
         commonCallNodeIndent[node]
       ,
       TrueQ[definitelyInsert],
-        commonCallNodeIndent[node]
+
+        (*
+          NewlinesInControl -> Insert is equivalent to:
+            NewlinesBetweenCommas -> Insert for the Comma node child of the control structure
+            And also block the Comma node child
+        *)
+
+        indentedHead = indent /@ head;
+        Block[{$Toplevel = False},
+
+          indentedCommaNode = indent[commaNode, "NewlinesBetweenCommas" -> Insert];
+
+          groupChildren =
+            Flatten[{
+              indent[opener],
+              indent[Insert[#, EndOfLine -> True, {3, 1}]]& /@ {openerSeq},
+              block @ {
+                indentedCommaNode
+              },
+              indent[Insert[#, StartOfLine -> True, {3, 1}]]& /@ {closerSeq},
+              indent[closer]
+            }];
+
+          groupExtent = computeExtent[groupChildren];
+
+          children = {
+              GroupNode[GroupSquare,
+                groupChildren
+                ,
+                <| data1, "Extent" -> groupExtent |>
+              ]
+            };
+          
+          extent = computeExtent[indentedHead ~Join~ children];
+        ];
+
+        CallNode[
+          indentedHead
+          ,
+          children
+          ,
+          <| data, "Multiline" -> True, "Extent" -> extent |>
+        ]
       ,
       TrueQ[definitelyAutomatic],
 

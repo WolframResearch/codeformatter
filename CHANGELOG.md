@@ -9,7 +9,7 @@ Added CodeFormat function
 
 Added Code Formatting palette
 
-Added "Format Cell" button to Package Editor toolbar
+Added `"Format Cell"` button to Package Editor toolbar
 
 
 ## 1.1.1 - 8 Dec, 2020
@@ -18,7 +18,7 @@ Included in Mathematica 12.2
 
 ### Fixes
 
-The formatter side of what needs to be fixed for 398836: Code Formatting palette turns a b into ab
+The formatter side of what needs to be fixed for 398836: Code Formatting palette turns `a b` into `ab`
 
 Remove excess implicit Times tokens where needed.
 
@@ -61,9 +61,9 @@ Provide a message for when a cell cannot currently be formatted
 
 Give slightly saner error message when CodeFormat is given bad arguments
 
-Renaming various "Newline" things to "NewlineString" and "CompoundExpressions" things to "Semicolons"
+Renaming various `"Newline"` things to `"NewlineString"` and `"CompoundExpressions"` things to `"Semicolons"`
 
-Allow f[ to be formatted in FE
+Allow `f[` to be formatted in FE
 
 Massive refactoring effort for 12.3
 
@@ -74,12 +74,12 @@ Canonicalize what the formatter outputs as not caring about newlines and whitesp
 
 ### Fixes
 
-Fix formatting a_b ..
+Fix formatting `a_b ..`
 
 Fix bug that resulted in multiple newlines being inserted
 
 Demonstrate bug by doing:
-
+```
 CodeFormat["
 f[
 1
@@ -87,6 +87,7 @@ f[
 2
 ]
 ", "NewlinesBetweenCommas" -> Insert]
+```
 
 and see that there are multiple newlines inserted.
 
@@ -95,10 +96,12 @@ Fix 404196, bad formatting of CompoundExpression in places
 Fix 399281, formatter was not handling grouped cells
 
 Fix 406342, line breaking and having:
+```
 {
 f
 []
 }
+```
 is weird
 
 
@@ -111,7 +114,7 @@ Change default Airiness to be Automatic
 
 ## 1.4 - 25 Oct, 2021
 
-Do not allow PacletManager to participate in finding `Generate` files
+Do not allow PacletManager to participate in finding \`Generate\` files
 
 
 Palette Feature 1: Airiness Slider or Newline Togglers
@@ -146,9 +149,9 @@ CurrentValue[$FrontEnd, {CodeAssistOptions, "CodeToolsOptions",
 "CodeFormat"}]
 
 
-Abstract the outer [] and inner [] groups into a single [[]] group
+Abstract the outer `[]` and inner `[]` groups into a single `[[]]` group
 
-Ensure that ]] are not broken
+Ensure that `]]` are not broken
 
 
 Canonicalize input before indenting
@@ -158,7 +161,7 @@ Rely on graphical syntax; no more reliance on whitespace / newlines that were pa
 2 stages: top-down indenting, then symbolic rendering
 
 
-If ; is last in CompoundExpression, then rename to something special
+If `;` is last in CompoundExpression, then rename to something special
 
 Rename Token\`Semi -> Token\`Fake\`SemiBeforeImplicitNull
 
@@ -175,19 +178,19 @@ Related to 413985: CodeFormat does not handle empty list of bytes
 Return unevaluated for now
 
 
-Explicitly handle CodeFormat[{}]
+Explicitly handle `CodeFormat[{}]`
 
-Fix 414042: & on newline giving linter warnings
+Fix 414042: `&` on newline giving linter warnings
 
 Fix unreported bug: malformed Whitespace could be generated in certain edge cases
 
 Fix problems with merging temporary line continuations
 
-Fix 415177: "Get::noopen: Cannot open Forms\`." message when building
+Fix 415177: ``"Get::noopen: Cannot open Forms`." `` message when building
 
 Fix 415178: spurious DynamicImageSize warning
 
-Handle selecting Section cells and pressing "Format Cell"
+Handle selecting Section cells and pressing `"Format Cell"`
 
 Add a menu position for the CodeFormatter palette so that the Code related palettes appear in their own section of the Palettes menu.
 

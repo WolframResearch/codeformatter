@@ -104,15 +104,17 @@ Module[{nb, res},
 							If[$VersionNumber >= 12.2,
 				
 								CurrentValue[$FrontEnd, {CodeAssistOptions, "CodeToolsOptions", "CodeFormat", "InteractiveReparse"}] = True;
-								CurrentValue[$FrontEnd, {CodeAssistOptions, "CodeToolsOptions", "CodeFormat", "FormatMethod"}] =
-									Replace[CurrentValue[$FrontEnd, {CodeAssistOptions, "CodeToolsOptions", "CodeFormat", "FormatMethod"}], Except[_String] -> "AirinessSlider"];
 								opts = Replace[CurrentValue[$FrontEnd, {CodeAssistOptions, "CodeToolsOptions", "CodeFormat"}], Except[_Association] -> <||>];
 
+								(* fill the options with those from the last used preset if it exists; override values from the previous session *)
 								activePresetKey = AbsoluteCurrentValue[$FrontEnd, {CodeAssistOptions, "CodeToolsOptions", "CodeFormat", "LastPresetUsed"}, None];
 								If[KeyExistsQ[AbsoluteCurrentValue[$FrontEnd, {CodeAssistOptions, "CodeToolsOptions", "CodeFormat", "Presets"}, <||>], activePresetKey],
 									opts = <|opts, AbsoluteCurrentValue[$FrontEnd, {CodeAssistOptions, "CodeToolsOptions", "CodeFormat", "Presets", activePresetKey}]|>
 								];
+								(* "FormatMethod" is saved in a preset so don't redefine it if not needed *)
+								CurrentValue[$FrontEnd, {CodeAssistOptions, "CodeToolsOptions", "CodeFormat", "FormatMethod"}] = Lookup[opts, "FormatMethod", "AirinessSlider"];
 								
+								(* If a preset exists then these symbols take the existing preset values, or the indicated default if no preset or preset value exists *)
 								CodeFormatter`$InteractiveAiriness = Lookup[opts, "Airiness", 0];
 								CodeFormatter`$InteractiveTabWidth = Lookup[opts, "InteractiveTabWidth", "4"];
 								CodeFormatter`$InteractiveIndentationCharacter = Lookup[opts, "InteractiveIndentationCharacter", "space"];
@@ -134,7 +136,6 @@ Module[{nb, res},
 									"InteractiveIndentationCharacter" -> CodeFormatter`$InteractiveIndentationCharacter,
 									"InteractiveTabWidth" -> CodeFormatter`$InteractiveTabWidth,
 									"Airiness" -> CodeFormatter`$InteractiveAiriness,
-									"FormatMethod" -> CurrentValue[$FrontEnd, {CodeAssistOptions, "CodeToolsOptions", "CodeFormat", "FormatMethod"}, "AirinessSlider"],
 									"NewlinesBetweenSemicolons" -> semicolons,
 									"NewlinesBetweenOperators" -> operators,
 									"NewlinesInGroups" -> groups,

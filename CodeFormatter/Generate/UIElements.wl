@@ -906,7 +906,7 @@ Module[{baseValues, presetValues, currentSettings},
 			Join[
 				KeyTake[<|baseValues, AbsoluteCurrentValue[$FrontEnd, {$optsPath}, <||>]|>, airinessKeys],
 				KeyTake[AbsoluteCurrentValue[$FrontEnd, {$optsPath}, <||>], indentKeys],
-				<|"FormatMethod" -> Replace[AbsoluteCurrentValue[$FrontEnd, {$optsPath, "FormatMethod"}], (Inherited | $Failed) -> <||>]|>];
+				<|"FormatMethod" -> Replace[AbsoluteCurrentValue[$FrontEnd, {$optsPath, "FormatMethod"}], Except[_String] -> "AirinessSlider"]|>];
 	presetValues === currentSettings];
 
 presetIsEqualToCurrentSettingsQ[presetName_] := False;
@@ -1261,7 +1261,9 @@ With[{$optsPath = CodeFormatter`$optsPath},
 					deleteIcon[Dynamic[FontColor /. CurrentValue[{StyleDefinitions, "CodeFormatterHighlightColor"}]]]],
 				"MouseClicked" :> (
 					CurrentValue[$FrontEnd, {$optsPath, "Presets"}] = KeyDrop[AbsoluteCurrentValue[$FrontEnd, {$optsPath, "Presets"}], displayName];
-					If[activePresetKey == displayName, activePresetKey = None];
+					If[activePresetKey == displayName,
+						activePresetKey = None;
+						CurrentValue[$FrontEnd, {$optsPath, "LastPresetUsed"}] = None];
 					If[CurrentValue[$FrontEnd, {$optsPath, "Presets"}] === <||>,
 						NotebookDelete[EvaluationCell[]]
 						,
@@ -1311,6 +1313,7 @@ buttonAppearance[(* gives rounded rect appearance *)
 							<|
 								currentSettings,
 								Automatic& /@ KeyTake[currentSettings, airinessKeys],
+								KeyTake[presetValues, "FormatMethod"],
 								KeyTake[presetValues, airinessKeys]|>;
 						(* Indentation settings were an early feature and are stored in a different FrontEnd setting *)
 						CurrentValue[$FrontEnd, {$optsPath, indentKeys[[1]]}] = indentationParameters[[1]];

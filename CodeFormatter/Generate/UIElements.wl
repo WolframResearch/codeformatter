@@ -1390,7 +1390,8 @@ With[
 	},
 	Button[
 		presetPopupMenuAppearance[Dynamic[activePresetKey]],
-		AttachCell[
+		(* Paclet 1.5 targets 12.1+. System`AttachCell did not exist until 12.2. Use the legacy call signature. *)
+		MathLink`CallFrontEnd[FrontEnd`AttachCell[
 			EvaluationBox[],
 			Cell[BoxData[ToBoxes[
 				Panel[
@@ -1404,10 +1405,9 @@ With[
 						"Default" -> FrontEnd`ToFileName[{"Misc"}, "popupRightBottom.9.png"],
 						"Hover" -> FrontEnd`ToFileName[{"Misc"}, "popupRightBottom.9.png"],
 						"Pressed" -> FrontEnd`ToFileName[{"Misc"}, "popupRightBottom.9.png"]}]]]],
-			{Right, Top},
-			0,
+			{0, {Right, Top}},
 			{Right, Bottom},
-			RemovalConditions -> {"MouseClickOutside"}],
+			"ClosingActions" -> {"OutsideMouseClick"}]],
 		ImageSize -> All,
 		Appearance -> FEPrivate`FrontEndResource["CodeFormatterExpressions", "SuppressMouseDownNinePatchAppearance"]]
 ]

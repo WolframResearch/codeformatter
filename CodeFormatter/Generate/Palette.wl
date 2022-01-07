@@ -69,6 +69,7 @@ Module[{nb, res},
 
 						Style[tr["IndentationLabel"], "CodeFormatterText"],
 
+						(* This needs a Spacings override so it's not too far from the IndentationLabel *)
 						DynamicWrapper[(* DynamicWrapper is part of fix 402825 *)
 							#,
 							{CodeFormatter`$InteractiveIndentationCharacter, CodeFormatter`$InteractiveTabWidth} =
@@ -91,7 +92,7 @@ Module[{nb, res},
 							Dynamic[{semicolons, operators, groups, commas, ctrlStruct, scopingStruct, comments}],
 							Dynamic[{CodeFormatter`$InteractiveIndentationCharacter, CodeFormatter`$InteractiveTabWidth}]
 						]
-					}, ItemSize -> {0, 0}, Spacings -> 2, Alignment -> Left],
+					}, ItemSize -> {0, 0}, Spacings -> {{}, {{{2}}, 4 -> 0.5}}, Alignment -> Left],
 	
 					SaveDefinitions -> True,
 

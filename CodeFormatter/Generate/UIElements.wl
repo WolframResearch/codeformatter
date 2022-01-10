@@ -1426,7 +1426,7 @@ Pane[
 (*Indentation Menu*)
 
 
-IndentationMenu[Dynamic[indentation_, fi___], Dynamic[width_, fw___]] :=
+IndentationMenu[Dynamic[indentation_], iFunc_Function, Dynamic[width_], wFunc_Function, formatCell_Function] :=
 ActionMenu[
 	Framed[
 		Grid[
@@ -1459,12 +1459,12 @@ ActionMenu[
 	],
 		
 	{
-		tr["TabMenuItem"] :> (indentation = "tab"; Through[Flatten[{fi}][indentation]]; Through[Flatten[{fw}][width]]),
+		tr["TabMenuItem"] :> (indentation = "tab"; iFunc[indentation]),
 		Delimiter,
-		tr["Space2MenuItem"] :> (indentation = "space"; width = "2"; Through[Flatten[{fi}][indentation]]; Through[Flatten[{fw}][width]]),
-		tr["Space4MenuItem"] :> (indentation = "space"; width = "4"; Through[Flatten[{fi}][indentation]]; Through[Flatten[{fw}][width]]),
-		tr["Space6MenuItem"] :> (indentation = "space"; width = "6"; Through[Flatten[{fi}][indentation]]; Through[Flatten[{fw}][width]]),
-		tr["Space8MenuItem"] :> (indentation = "space"; width = "8"; Through[Flatten[{fi}][indentation]]; Through[Flatten[{fw}][width]])
+		tr["Space2MenuItem"] :> (indentation = "space"; width = "2"; iFunc[indentation]; wFunc[width]; formatCell[]),
+		tr["Space4MenuItem"] :> (indentation = "space"; width = "4"; iFunc[indentation]; wFunc[width]; formatCell[]),
+		tr["Space6MenuItem"] :> (indentation = "space"; width = "6"; iFunc[indentation]; wFunc[width]; formatCell[]),
+		tr["Space8MenuItem"] :> (indentation = "space"; width = "8"; iFunc[indentation]; wFunc[width]; formatCell[])
 	},
 	Appearance -> None
 ]	

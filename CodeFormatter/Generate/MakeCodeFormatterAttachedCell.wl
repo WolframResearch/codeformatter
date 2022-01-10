@@ -65,17 +65,11 @@ DynamicModule[{},
 			Style[tr["IndentationLabel"], "CodeFormatterText"],
 			Spacer[10],
 			IndentationMenu[
-				Dynamic[
-					CodeFormatter`$InteractiveIndentationCharacter,
-					Function[{val},
-						If[$VersionNumber >= 12.2, CurrentValue[$FrontEnd, {CodeAssistOptions, "CodeToolsOptions", "CodeFormat", "InteractiveIndentationCharacter"}] = val]]], 
-				Dynamic[
-					CodeFormatter`$InteractiveTabWidth,
-					Function[{val},
-						If[$VersionNumber >= 12.2, CurrentValue[$FrontEnd, {CodeAssistOptions, "CodeToolsOptions", "CodeFormat", "InteractiveTabWidth"}] = val]],
-					Function[{val},
-						If[$VersionNumber >= 12.2, CodeFormatter`Notebooks`formatSelectedCell[]],
-						HoldAll]]
+				Dynamic[CodeFormatter`$InteractiveIndentationCharacter],
+				Function[{val}, If[$VersionNumber >= 12.2, CurrentValue[$FrontEnd, {CodeAssistOptions, "CodeToolsOptions", "CodeFormat", "InteractiveIndentationCharacter"}] = val]],
+				Dynamic[CodeFormatter`$InteractiveTabWidth],
+				Function[{val}, If[$VersionNumber >= 12.2, CurrentValue[$FrontEnd, {CodeAssistOptions, "CodeToolsOptions", "CodeFormat", "InteractiveTabWidth"}] = val]],
+				Function[If[$VersionNumber >= 12.2, CodeFormatter`Notebooks`formatSelectedCell[]]]
 			]
 		}},
 		Spacings -> {0, 0}, Alignment -> {Center, Center}, BaseStyle -> "CodeFormatterText"

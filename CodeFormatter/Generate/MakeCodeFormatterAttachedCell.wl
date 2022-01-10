@@ -32,6 +32,17 @@ DynamicModule[{},
 			Dynamic[FEPrivate`FrontEndResource["CodeFormatterStrings", "AirinessLabel"]],
 			Spacer[10],
 			DynamicModule[{semicolons, operators, groups, commas, ctrlStruct, scopingStruct, comments},
+				DynamicWrapper[(* DynamicWrapper is part of fix 402825 *)
+					#,
+					{semicolons, operators, groups, commas, ctrlStruct, scopingStruct, comments, CodeFormatter`$InteractiveAiriness} =
+						Lookup[
+							CurrentValue[$FrontEnd, {CodeAssistOptions, "CodeToolsOptions", "CodeFormat"}],
+							{
+								"NewlinesBetweenSemicolons", "NewlinesBetweenOperators", "NewlinesInGroups", "NewlinesBetweenCommas", "NewlinesInControl",
+								"NewlinesInScoping", "NewlinesInComments", "Airiness"},
+							Automatic],
+					TrackedSymbols :> {} (* only trigger if the CurrentValue changes *)
+				]& @
 				AirinessSlider[
 					Dynamic[
 						CodeFormatter`$InteractiveAiriness, 
@@ -64,6 +75,15 @@ DynamicModule[{},
 			
 			Style[tr["IndentationLabel"], "CodeFormatterText"],
 			Spacer[10],
+			DynamicWrapper[(* DynamicWrapper is part of fix 402825 *)
+				#,
+				{CodeFormatter`$InteractiveIndentationCharacter, CodeFormatter`$InteractiveTabWidth} =
+					Lookup[
+						CurrentValue[$FrontEnd, {CodeAssistOptions, "CodeToolsOptions", "CodeFormat"}],
+						{"InteractiveIndentationCharacter", "InteractiveTabWidth"},
+						Automatic],
+				TrackedSymbols :> {} (* only trigger if the CurrentValue changes *)
+			]& @
 			IndentationMenu[
 				Dynamic[CodeFormatter`$InteractiveIndentationCharacter],
 				Function[{val}, If[$VersionNumber >= 12.2, CurrentValue[$FrontEnd, {CodeAssistOptions, "CodeToolsOptions", "CodeFormat", "InteractiveIndentationCharacter"}] = val]],

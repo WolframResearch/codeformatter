@@ -479,62 +479,64 @@
       TemplateBox[{10},
        "Spacer1"], 
       DynamicModuleBox[{CodeFormatter`Generate`UIElements`semicolons$$ = 
-       Automatic, CodeFormatter`Generate`UIElements`operators$$ = Automatic, 
-       CodeFormatter`Generate`UIElements`groups$$ = Automatic, 
+       False, CodeFormatter`Generate`UIElements`operators$$ = False, 
+       CodeFormatter`Generate`UIElements`groups$$ = False, 
        CodeFormatter`Generate`UIElements`commas$$ = Automatic, 
        CodeFormatter`Generate`UIElements`ctrlStruct$$ = Automatic, 
        CodeFormatter`Generate`UIElements`scopingStruct$$ = Automatic, 
        CodeFormatter`Generate`UIElements`comments$$ = Automatic}, 
-       TemplateBox[{
-         GraphicsBox[{
-           AbsoluteThickness[1.5], 
-           GrayLevel[0.4], 
-           CapForm["Butt"], 
-           LineBox[{{
-              Offset[{0, 4.949999999999999}, {0, 0}], 
-              Offset[{8.6, 4.949999999999999}, {0, 0}]}, {
-              Offset[{10.6, 4.949999999999999}, {0, 0}], 
-              Offset[{17.2, 4.949999999999999}, {0, 0}]}, {
-              Offset[{0, 1.65}, {0, 0}], 
-              Offset[{4.3, 1.65}, {0, 0}]}, {
-              Offset[{6.3, 1.65}, {0, 0}], 
-              Offset[{12.899999999999999`, 1.65}, {0, 0}]}, {
-              Offset[{14.899999999999999`, 1.65}, {0, 0}], 
-              Offset[{19.349999999999998`, 1.65}, {0, 0}]}, {
-              Offset[{0, -1.65}, {0, 0}], 
-              Offset[{6.449999999999999, -1.65}, {0, 0}]}, {
-              Offset[{8.45, -1.65}, {0, 0}], 
-              Offset[{16.34, -1.65}, {0, 0}]}, {
-              Offset[{0, -4.949999999999999}, {0, 0}], 
-              Offset[{10.75, -4.949999999999999}, {0, 0}]}, {
-              Offset[{12.75, -4.949999999999999}, {0, 0}], 
-              Offset[{17.2, -4.949999999999999}, {0, 0}]}}]}, 
-          ImageSize -> {22, 15}, ImagePadding -> All], 
-         DynamicModuleBox[{
-          CodeFormatter`Generate`UIElements`highlightQ$$ = False, 
-           CodeFormatter`Generate`UIElements`pressedQ$$ = False}, 
-          DynamicWrapperBox[
-           TagBox[
-            LocatorPaneBox[
-             Dynamic[{
-               Replace[CodeFormatter`$InteractiveAiriness, Except[
-                  PatternTest[
-                   Blank[], NumericQ]] -> 0.], 0}, {(Null& )[
-                First[#], CodeFormatter`$InteractiveAiriness]& , 
-               Composition[
-               Function[{
-                 CodeFormatter`Generate`UIElements`val, 
-                  CodeFormatter`Generate`UIElements`expr}, 
-                 CodeFormatter`Generate`UIElements`expr = 
-                 CodeFormatter`Generate`UIElements`val, HoldRest][#, 
-                 CodeFormatter`$InteractiveAiriness]& , ({
-                  CodeFormatter`Generate`UIElements`semicolons$$, 
-                   CodeFormatter`Generate`UIElements`operators$$, 
-                   CodeFormatter`Generate`UIElements`groups$$, 
-                   CodeFormatter`Generate`UIElements`commas$$, 
-                   CodeFormatter`Generate`UIElements`ctrlStruct$$, 
-                   CodeFormatter`Generate`UIElements`scopingStruct$$, 
-                   CodeFormatter`Generate`UIElements`comments$$} = <|-1. -> {
+       DynamicWrapperBox[
+        TemplateBox[{
+          GraphicsBox[{
+            AbsoluteThickness[1.5], 
+            GrayLevel[0.4], 
+            CapForm["Butt"], 
+            LineBox[{{
+               Offset[{0, 4.949999999999999}, {0, 0}], 
+               Offset[{8.6, 4.949999999999999}, {0, 0}]}, {
+               Offset[{10.6, 4.949999999999999}, {0, 0}], 
+               Offset[{17.2, 4.949999999999999}, {0, 0}]}, {
+               Offset[{0, 1.65}, {0, 0}], 
+               Offset[{4.3, 1.65}, {0, 0}]}, {
+               Offset[{6.3, 1.65}, {0, 0}], 
+               Offset[{12.899999999999999`, 1.65}, {0, 0}]}, {
+               Offset[{14.899999999999999`, 1.65}, {0, 0}], 
+               Offset[{19.349999999999998`, 1.65}, {0, 0}]}, {
+               Offset[{0, -1.65}, {0, 0}], 
+               Offset[{6.449999999999999, -1.65}, {0, 0}]}, {
+               Offset[{8.45, -1.65}, {0, 0}], 
+               Offset[{16.34, -1.65}, {0, 0}]}, {
+               Offset[{0, -4.949999999999999}, {0, 0}], 
+               Offset[{10.75, -4.949999999999999}, {0, 0}]}, {
+               Offset[{12.75, -4.949999999999999}, {0, 0}], 
+               Offset[{17.2, -4.949999999999999}, {0, 0}]}}]}, 
+           ImageSize -> {22, 15}, ImagePadding -> All], 
+          
+          DynamicModuleBox[{
+           CodeFormatter`Generate`UIElements`highlightQ$$ = False, 
+            CodeFormatter`Generate`UIElements`pressedQ$$ = False}, 
+           DynamicWrapperBox[
+            TagBox[
+             LocatorPaneBox[
+              Dynamic[{
+                Replace[CodeFormatter`$InteractiveAiriness, Except[
+                   PatternTest[
+                    Blank[], NumericQ]] -> 0.], 0}, {(Null& )[
+                 First[#], CodeFormatter`$InteractiveAiriness]& , 
+                Composition[
+                Function[{
+                  CodeFormatter`Generate`UIElements`val, 
+                   CodeFormatter`Generate`UIElements`expr}, 
+                  CodeFormatter`Generate`UIElements`expr = 
+                  CodeFormatter`Generate`UIElements`val, HoldRest][#, 
+                  CodeFormatter`$InteractiveAiriness]& , ({
+                   CodeFormatter`Generate`UIElements`semicolons$$, 
+                    CodeFormatter`Generate`UIElements`operators$$, 
+                    CodeFormatter`Generate`UIElements`groups$$, 
+                    CodeFormatter`Generate`UIElements`commas$$, 
+                    CodeFormatter`Generate`UIElements`ctrlStruct$$, 
+                    CodeFormatter`Generate`UIElements`scopingStruct$$, 
+                    CodeFormatter`Generate`UIElements`comments$$} = <|-1. -> {
                     False, False, False, False, False, False, 
                     False}, -0.8 -> {
                     False, False, False, False, False, False, 
@@ -545,46 +547,46 @@
                     Automatic}, -0.2 -> {
                     False, Automatic, Automatic, Automatic, Automatic, 
                     Automatic, Automatic}, 
-                   0. -> {Automatic, Automatic, Automatic, Automatic, 
+                    0. -> {Automatic, Automatic, Automatic, Automatic, 
                     Automatic, Automatic, Automatic}, 
-                   0.2 -> {
+                    0.2 -> {
                     True, Automatic, Automatic, Automatic, Automatic, 
                     Automatic, Automatic}, 
-                   0.4 -> {
+                    0.4 -> {
                     True, True, Automatic, Automatic, Automatic, Automatic, 
                     Automatic}, 
-                   0.6 -> {
+                    0.6 -> {
                     True, True, True, Automatic, Automatic, Automatic, 
                     Automatic}, 
-                   0.8 -> {True, True, True, True, True, True, Automatic}, 
-                   1. -> {True, True, True, True, True, True, True}|>[
-                   Round[
+                    0.8 -> {True, True, True, True, True, True, Automatic}, 
+                    1. -> {True, True, True, True, True, True, True}|>[
+                    Round[
                     Replace[
                     First[#], Except[
                     PatternTest[
                     Blank[], NumericQ]] -> 0.], 0.2]]; First[#])& ], 
-               Composition[
-               Function[{
-                 CodeFormatter`Generate`UIElements`val, 
-                  CodeFormatter`Generate`UIElements`expr}, 
-                 CodeFormatter`Generate`UIElements`expr = 
-                  CodeFormatter`Generate`UIElements`val; 
-                 If[$VersionNumber >= 12.2, 
-                   CodeFormatter`Notebooks`formatSelectedCell[]], HoldAll][#, 
-                 CodeFormatter`$InteractiveAiriness]& , (
-                CurrentValue[$FrontEnd, {
+                Composition[
+                Function[{
+                  CodeFormatter`Generate`UIElements`val, 
+                   CodeFormatter`Generate`UIElements`expr}, 
+                  CodeFormatter`Generate`UIElements`expr = 
+                   CodeFormatter`Generate`UIElements`val; 
+                  If[$VersionNumber >= 12.2, 
+                    CodeFormatter`Notebooks`formatSelectedCell[]], HoldAll][#,
+                   CodeFormatter`$InteractiveAiriness]& , (
+                 CurrentValue[$FrontEnd, {
                     
                     Splice[{
                     CodeAssistOptions, "CodeToolsOptions", 
                     "CodeFormat"}]}] = <|
-                   CurrentValue[$FrontEnd, {
+                    CurrentValue[$FrontEnd, {
                     
                     Splice[{
                     CodeAssistOptions, "CodeToolsOptions", 
                     "CodeFormat"}]}, <||>], "Airiness" -> First[#], 
-                   "FormatMethod" -> "AirinessSlider", 
-                   
-                   AssociationThread[{
+                    "FormatMethod" -> "AirinessSlider", 
+                    
+                    AssociationThread[{
                     "NewlinesBetweenSemicolons", "NewlinesBetweenOperators", 
                     "NewlinesInGroups", "NewlinesBetweenCommas", 
                     "NewlinesInControl", "NewlinesInScoping", 
@@ -596,44 +598,44 @@
                     CodeFormatter`Generate`UIElements`ctrlStruct$$, 
                     CodeFormatter`Generate`UIElements`scopingStruct$$, 
                     CodeFormatter`Generate`UIElements`comments$$}]|>; 
-                First[#])& ]}], 
-             GraphicsBox[{
-               AbsoluteThickness[2.5], 
-               GrayLevel[0.75], 
-               CapForm["Round"], 
-               LineBox[{
-                 Offset[{-8, 0}, {-1, 0}], 
-                 Offset[{8, 0}, {1, 0}]}], {
-                DiskBox[{-1., 0}, 
-                 Offset[2.5]], 
-                DiskBox[{-0.8, 0}, 
-                 Offset[2.5]], 
-                DiskBox[{-0.6, 0}, 
-                 Offset[2.5]], 
-                DiskBox[{-0.3999999999999999, 0}, 
-                 Offset[2.5]], 
-                DiskBox[{-0.19999999999999996`, 0}, 
-                 Offset[2.5]], 
-                DiskBox[{0., 0}, 
-                 Offset[2.5]], 
-                DiskBox[{0.20000000000000018`, 0}, 
-                 Offset[2.5]], 
-                DiskBox[{0.40000000000000013`, 0}, 
-                 Offset[2.5]], 
-                DiskBox[{0.6000000000000001, 0}, 
-                 Offset[2.5]], 
-                DiskBox[{0.8, 0}, 
-                 Offset[2.5]], 
-                DiskBox[{1., 0}, 
-                 Offset[2.5]]}, 
-               FaceForm[
-                GrayLevel[1]], 
-               DynamicBox[
-                Typeset`ToBoxes[
-                 EdgeForm[
-                  Directive[
-                   AbsoluteThickness[1], 
-                   If[
+                 First[#])& ]}], 
+              GraphicsBox[{
+                AbsoluteThickness[2.5], 
+                GrayLevel[0.75], 
+                CapForm["Round"], 
+                LineBox[{
+                  Offset[{-8, 0}, {-1, 0}], 
+                  Offset[{8, 0}, {1, 0}]}], {
+                 DiskBox[{-1., 0}, 
+                  Offset[2.5]], 
+                 DiskBox[{-0.8, 0}, 
+                  Offset[2.5]], 
+                 DiskBox[{-0.6, 0}, 
+                  Offset[2.5]], 
+                 DiskBox[{-0.3999999999999999, 0}, 
+                  Offset[2.5]], 
+                 DiskBox[{-0.19999999999999996`, 0}, 
+                  Offset[2.5]], 
+                 DiskBox[{0., 0}, 
+                  Offset[2.5]], 
+                 DiskBox[{0.20000000000000018`, 0}, 
+                  Offset[2.5]], 
+                 DiskBox[{0.40000000000000013`, 0}, 
+                  Offset[2.5]], 
+                 DiskBox[{0.6000000000000001, 0}, 
+                  Offset[2.5]], 
+                 DiskBox[{0.8, 0}, 
+                  Offset[2.5]], 
+                 DiskBox[{1., 0}, 
+                  Offset[2.5]]}, 
+                FaceForm[
+                 GrayLevel[1]], 
+                DynamicBox[
+                 Typeset`ToBoxes[
+                  EdgeForm[
+                   Directive[
+                    AbsoluteThickness[1], 
+                    If[
                     TrueQ[Replace[
                     
                     FirstPosition[<|-1. -> {
@@ -674,52 +676,70 @@
                     CodeFormatter`$InteractiveAiriness], 
                     Dashing[{}], 
                     AbsoluteDashing[{3, 3}]]]], StandardForm, Graphics]], 
-               DynamicBox[
-                Typeset`ToBoxes[
-                 Style[
-                  Disk[
-                   Dynamic[{
+                DynamicBox[
+                 Typeset`ToBoxes[
+                  Style[
+                   Disk[
+                    Dynamic[{
                     Replace[CodeFormatter`$InteractiveAiriness, Except[
                     PatternTest[
                     Blank[], NumericQ]] -> 0.], 0}], 
-                   Offset[7]], 
-                  If[
-                  CodeFormatter`Generate`UIElements`highlightQ$$, 
-                   "CodeFormatterHighlightColor", EdgeColor -> 
-                   GrayLevel[0.6]]], StandardForm, Graphics], 
-                TrackedSymbols :> {
-                 CodeFormatter`Generate`UIElements`highlightQ$$}]}, 
-              PlotRange -> {{-1, 1}, {-1, 1}}, 
-              ImagePadding -> {{10, 10}, {0, 0}}, AspectRatio -> Full, 
-              ImageSize -> {150, 20}], {{-1, 0}, {1, 0}, {0.2, 1}}, 
-             Appearance -> None], 
-            
-            EventHandlerTag[{
-             "MouseDown" :> 
-              FEPrivate`Set[
-               CodeFormatter`Generate`UIElements`pressedQ$$, True], "MouseUp" :> 
-              FEPrivate`Set[
-               CodeFormatter`Generate`UIElements`pressedQ$$, False], 
-              PassEventsDown -> True, Method -> "Preemptive", PassEventsUp -> 
-              True}]], CodeFormatter`Generate`UIElements`highlightQ$$ = Or[
-             CurrentValue["MouseOver"], 
-             CodeFormatter`Generate`UIElements`pressedQ$$]], 
-          DynamicModuleValues :> {}], 
-         GraphicsBox[{
-           AbsoluteThickness[1.5], 
-           GrayLevel[0.4], 
-           CapForm["Butt"], 
-           LineBox[{{
-              Offset[{0, 4.949999999999999}, {0, 0}], 
-              Offset[{7.74, 4.949999999999999}, {0, 0}]}, {
-              Offset[{4.3, 1.65}, {0, 0}], 
-              Offset[{10.75, 1.65}, {0, 0}]}, {
-              Offset[{8.6, -1.65}, {0, 0}], 
-              Offset[{15.049999999999999`, -1.65}, {0, 0}]}, {
-              Offset[{4.3, -4.949999999999999}, {0, 0}], 
-              Offset[{8.6, -4.949999999999999}, {0, 0}]}}]}, 
-          ImageSize -> {17, 15}, ImagePadding -> All]},
-        "RowDefault"],
+                    Offset[7]], 
+                   If[
+                   CodeFormatter`Generate`UIElements`highlightQ$$, 
+                    "CodeFormatterHighlightColor", EdgeColor -> 
+                    GrayLevel[0.6]]], StandardForm, Graphics], 
+                 TrackedSymbols :> {
+                  CodeFormatter`Generate`UIElements`highlightQ$$}]}, 
+               PlotRange -> {{-1, 1}, {-1, 1}}, 
+               ImagePadding -> {{10, 10}, {0, 0}}, AspectRatio -> Full, 
+               ImageSize -> {150, 20}], {{-1, 0}, {1, 0}, {0.2, 1}}, 
+              Appearance -> None], 
+             
+             EventHandlerTag[{
+              "MouseDown" :> 
+               FEPrivate`Set[
+                CodeFormatter`Generate`UIElements`pressedQ$$, True], 
+               "MouseUp" :> 
+               FEPrivate`Set[
+                CodeFormatter`Generate`UIElements`pressedQ$$, False], 
+               PassEventsDown -> True, Method -> "Preemptive", PassEventsUp -> 
+               True}]], CodeFormatter`Generate`UIElements`highlightQ$$ = Or[
+              CurrentValue["MouseOver"], 
+              CodeFormatter`Generate`UIElements`pressedQ$$]], 
+           DynamicModuleValues :> {}], 
+          GraphicsBox[{
+            AbsoluteThickness[1.5], 
+            GrayLevel[0.4], 
+            CapForm["Butt"], 
+            LineBox[{{
+               Offset[{0, 4.949999999999999}, {0, 0}], 
+               Offset[{7.74, 4.949999999999999}, {0, 0}]}, {
+               Offset[{4.3, 1.65}, {0, 0}], 
+               Offset[{10.75, 1.65}, {0, 0}]}, {
+               Offset[{8.6, -1.65}, {0, 0}], 
+               Offset[{15.049999999999999`, -1.65}, {0, 0}]}, {
+               Offset[{4.3, -4.949999999999999}, {0, 0}], 
+               Offset[{8.6, -4.949999999999999}, {0, 0}]}}]}, 
+           ImageSize -> {17, 15}, ImagePadding -> All]},
+         "RowDefault"], {
+         CodeFormatter`Generate`UIElements`semicolons$$, 
+          CodeFormatter`Generate`UIElements`operators$$, 
+          CodeFormatter`Generate`UIElements`groups$$, 
+          CodeFormatter`Generate`UIElements`commas$$, 
+          CodeFormatter`Generate`UIElements`ctrlStruct$$, 
+          CodeFormatter`Generate`UIElements`scopingStruct$$, 
+          CodeFormatter`Generate`UIElements`comments$$, 
+          CodeFormatter`$InteractiveAiriness} = Lookup[
+          
+          CurrentValue[$FrontEnd, {
+           CodeAssistOptions, "CodeToolsOptions", "CodeFormat"}], {
+          "NewlinesBetweenSemicolons", "NewlinesBetweenOperators", 
+           "NewlinesInGroups", "NewlinesBetweenCommas", "NewlinesInControl", 
+           "NewlinesInScoping", "NewlinesInComments", "Airiness"}, Automatic],
+        
+        ImageSizeCache->{195., {10.3544921875, 15.6455078125}},
+        TrackedSymbols:>{}],
        DynamicModuleValues:>{},
        Initialization:>(
         With[{CodeFormatter`Generate`UIElements`optVals$ = Replace[
@@ -761,205 +781,183 @@
        StripOnInput->False], 
       TemplateBox[{10},
        "Spacer1"], 
-      ActionMenuBox[
-       FrameBox[
-        TagBox[GridBox[{
-           {
-            DynamicBox[ToBoxes[
-              Which[
-              CodeFormatter`$InteractiveIndentationCharacter === "tab", 
-               Dynamic[
-                FEPrivate`FrontEndResource[
-                "CodeFormatterStrings", "TabMenuItem"]], 
-               CodeFormatter`$InteractiveTabWidth === "2", 
-               Dynamic[
-                FEPrivate`FrontEndResource[
-                "CodeFormatterStrings", "Space2MenuItem"]], 
-               CodeFormatter`$InteractiveTabWidth === "4", 
-               Dynamic[
-                FEPrivate`FrontEndResource[
-                "CodeFormatterStrings", "Space4MenuItem"]], 
-               CodeFormatter`$InteractiveTabWidth === "6", 
-               Dynamic[
-                FEPrivate`FrontEndResource[
-                "CodeFormatterStrings", "Space6MenuItem"]], 
-               CodeFormatter`$InteractiveTabWidth === "8", 
-               Dynamic[
-                FEPrivate`FrontEndResource[
-                "CodeFormatterStrings", "Space8MenuItem"]], True, ""], 
-              StandardForm],
-             ImageSizeCache->{34.65087890625, {2., 7.}}], "\<\"\"\>", 
-            GraphicsBox[
-             {AbsoluteThickness[2], CapForm["Round"], JoinForm["Round"], 
-              StyleBox[
-               DynamicBox[Typeset`ToBoxes[
-                 Line[
-                  Switch[
-                  Down, Left, {{0.5, -1}, {-0.5, 0}, {0.5, 1}}, 
-                   Right, {{-0.5, -1}, {0.5, 0}, {-0.5, 1}}, 
-                   Up, {{-1, -0.5}, {0, 0.5}, {1, -0.5}}, 
-                   Blank[], {{-1, 0.5}, {0, -0.5}, {1, 0.5}}]], StandardForm, 
-                 Graphics],
-                
-                ImageSizeCache->{{-2.2393066909899018`, 
-                 12.239306690989903`}, {-11.239306690989903`, \
+      DynamicWrapperBox[
+       ActionMenuBox[
+        FrameBox[
+         TagBox[GridBox[{
+            {
+             DynamicBox[ToBoxes[
+               Which[CodeFormatter`$InteractiveIndentationCharacter === "tab", 
+                Dynamic[
+                 FEPrivate`FrontEndResource[
+                 "CodeFormatterStrings", "TabMenuItem"]], 
+                CodeFormatter`$InteractiveTabWidth === "2", 
+                Dynamic[
+                 FEPrivate`FrontEndResource[
+                 "CodeFormatterStrings", "Space2MenuItem"]], 
+                CodeFormatter`$InteractiveTabWidth === "4", 
+                Dynamic[
+                 FEPrivate`FrontEndResource[
+                 "CodeFormatterStrings", "Space4MenuItem"]], 
+                CodeFormatter`$InteractiveTabWidth === "6", 
+                Dynamic[
+                 FEPrivate`FrontEndResource[
+                 "CodeFormatterStrings", "Space6MenuItem"]], 
+                CodeFormatter`$InteractiveTabWidth === "8", 
+                Dynamic[
+                 FEPrivate`FrontEndResource[
+                 "CodeFormatterStrings", "Space8MenuItem"]], True, ""], 
+               StandardForm],
+              ImageSizeCache->{34.65087890625, {2., 7.}}], "\<\"\"\>", 
+             GraphicsBox[
+              {AbsoluteThickness[2], CapForm["Round"], JoinForm["Round"], 
+               StyleBox[
+                DynamicBox[Typeset`ToBoxes[
+                  Line[
+                   Switch[
+                   Down, Left, {{0.5, -1}, {-0.5, 0}, {0.5, 1}}, 
+                    Right, {{-0.5, -1}, {0.5, 0}, {-0.5, 1}}, 
+                    Up, {{-1, -0.5}, {0, 0.5}, {1, -0.5}}, 
+                    Blank[], {{-1, 0.5}, {0, -0.5}, {1, 0.5}}]], StandardForm,
+                   Graphics],
+                 
+                 ImageSizeCache->{{-2.2393066909899018`, 
+                  12.239306690989903`}, {-11.239306690989903`, \
 -0.7606933090100982}}], "CodeFormatterHighlightColor",
-               StripOnInput->False]},
-             BaselinePosition->Bottom,
-             ImageMargins->{{0, 1}, {1, 0}},
-             ImageSize->{10, 10}]}
-          },
-          AutoDelete->False,
-          BaseStyle->"CodeFormatterText",
+                StripOnInput->False]},
+              BaselinePosition->Bottom,
+              ImageMargins->{{0, 1}, {1, 0}},
+              ImageSize->{10, 10}]}
+           },
+           AutoDelete->False,
+           BaseStyle->"CodeFormatterText",
+           
+           GridBoxAlignment->{
+            "Columns" -> {Left, Center, Right}, "Rows" -> {{Baseline}}},
+           GridBoxItemSize->{"Columns" -> {Automatic, Fit, Automatic}},
+           GridBoxSpacings->{"Columns" -> {{0}}}],
+          "Grid"],
+         Background->GrayLevel[1],
+         FrameMargins->{{5, 5}, {4, 4}},
+         FrameStyle->Dynamic[
+           If[
+            CurrentValue["MouseOver"], 
+            Directive["CodeFormatterHighlightColor", 
+             AbsoluteThickness[1]], 
+            Directive[
+             GrayLevel[0.7], 
+             AbsoluteThickness[1]]]],
+         ImageSize->{120, Automatic},
+         RoundingRadius->3,
+         StripOnInput->False], {
+        DynamicBox[ToBoxes[
+          FEPrivate`FrontEndResource["CodeFormatterStrings", "TabMenuItem"], 
+          StandardForm]]:>(
+        CodeFormatter`$InteractiveIndentationCharacter = "tab"; 
+        Function[{CodeFormatter`Generate`UIElements`val}, 
           
-          GridBoxAlignment->{
-           "Columns" -> {Left, Center, Right}, "Rows" -> {{Baseline}}},
-          GridBoxItemSize->{"Columns" -> {Automatic, Fit, Automatic}},
-          GridBoxSpacings->{"Columns" -> {{0}}}],
-         "Grid"],
-        Background->GrayLevel[1],
-        FrameMargins->{{5, 5}, {4, 4}},
-        FrameStyle->Dynamic[
-          If[
-           CurrentValue["MouseOver"], 
-           Directive["CodeFormatterHighlightColor", 
-            AbsoluteThickness[1]], 
-           Directive[
-            GrayLevel[0.7], 
-            AbsoluteThickness[1]]]],
-        ImageSize->{119, Automatic},
-        RoundingRadius->3,
-        StripOnInput->False], {
-       DynamicBox[ToBoxes[
-         FEPrivate`FrontEndResource["CodeFormatterStrings", "TabMenuItem"], 
-         StandardForm]]:>(
-       CodeFormatter`$InteractiveIndentationCharacter = "tab"; Through[
-         Flatten[{
-           Function[{CodeFormatter`Generate`UIElements`val}, 
-            
-            If[$VersionNumber >= 12.2, 
-             CurrentValue[$FrontEnd, {
-               CodeAssistOptions, "CodeToolsOptions", "CodeFormat", 
-                "InteractiveIndentationCharacter"}] = 
-             CodeFormatter`Generate`UIElements`val]]}][
-         CodeFormatter`$InteractiveIndentationCharacter]]; Through[
-         Flatten[{
-           Function[{CodeFormatter`Generate`UIElements`val}, 
-            
-            If[$VersionNumber >= 12.2, 
-             CurrentValue[$FrontEnd, {
-               CodeAssistOptions, "CodeToolsOptions", "CodeFormat", 
-                "InteractiveTabWidth"}] = 
-             CodeFormatter`Generate`UIElements`val]], 
-           Function[{CodeFormatter`Generate`UIElements`val}, 
-            If[$VersionNumber >= 12.2, 
-             CodeFormatter`Notebooks`formatSelectedCell[]], HoldAll]}][
-         CodeFormatter`$InteractiveTabWidth]]), Delimiter, 
-       DynamicBox[ToBoxes[
-         FEPrivate`FrontEndResource["CodeFormatterStrings", "Space2MenuItem"],
-          StandardForm]]:>(
-       CodeFormatter`$InteractiveIndentationCharacter = "space"; 
-       CodeFormatter`$InteractiveTabWidth = "2"; Through[
-         Flatten[{
-           Function[{CodeFormatter`Generate`UIElements`val}, 
-            
-            If[$VersionNumber >= 12.2, 
-             CurrentValue[$FrontEnd, {
-               CodeAssistOptions, "CodeToolsOptions", "CodeFormat", 
-                "InteractiveIndentationCharacter"}] = 
-             CodeFormatter`Generate`UIElements`val]]}][
-         CodeFormatter`$InteractiveIndentationCharacter]]; Through[
-         Flatten[{
-           Function[{CodeFormatter`Generate`UIElements`val}, 
-            
-            If[$VersionNumber >= 12.2, 
-             CurrentValue[$FrontEnd, {
-               CodeAssistOptions, "CodeToolsOptions", "CodeFormat", 
-                "InteractiveTabWidth"}] = 
-             CodeFormatter`Generate`UIElements`val]], 
-           Function[{CodeFormatter`Generate`UIElements`val}, 
-            If[$VersionNumber >= 12.2, 
-             CodeFormatter`Notebooks`formatSelectedCell[]], HoldAll]}][
-         CodeFormatter`$InteractiveTabWidth]]), 
-       DynamicBox[ToBoxes[
-         FEPrivate`FrontEndResource["CodeFormatterStrings", "Space4MenuItem"],
-          StandardForm]]:>(
-       CodeFormatter`$InteractiveIndentationCharacter = "space"; 
-       CodeFormatter`$InteractiveTabWidth = "4"; Through[
-         Flatten[{
-           Function[{CodeFormatter`Generate`UIElements`val}, 
-            
-            If[$VersionNumber >= 12.2, 
-             CurrentValue[$FrontEnd, {
-               CodeAssistOptions, "CodeToolsOptions", "CodeFormat", 
-                "InteractiveIndentationCharacter"}] = 
-             CodeFormatter`Generate`UIElements`val]]}][
-         CodeFormatter`$InteractiveIndentationCharacter]]; Through[
-         Flatten[{
-           Function[{CodeFormatter`Generate`UIElements`val}, 
-            
-            If[$VersionNumber >= 12.2, 
-             CurrentValue[$FrontEnd, {
-               CodeAssistOptions, "CodeToolsOptions", "CodeFormat", 
-                "InteractiveTabWidth"}] = 
-             CodeFormatter`Generate`UIElements`val]], 
-           Function[{CodeFormatter`Generate`UIElements`val}, 
-            If[$VersionNumber >= 12.2, 
-             CodeFormatter`Notebooks`formatSelectedCell[]], HoldAll]}][
-         CodeFormatter`$InteractiveTabWidth]]), 
-       DynamicBox[ToBoxes[
-         FEPrivate`FrontEndResource["CodeFormatterStrings", "Space6MenuItem"],
-          StandardForm]]:>(
-       CodeFormatter`$InteractiveIndentationCharacter = "space"; 
-       CodeFormatter`$InteractiveTabWidth = "6"; Through[
-         Flatten[{
-           Function[{CodeFormatter`Generate`UIElements`val}, 
-            
-            If[$VersionNumber >= 12.2, 
-             CurrentValue[$FrontEnd, {
-               CodeAssistOptions, "CodeToolsOptions", "CodeFormat", 
-                "InteractiveIndentationCharacter"}] = 
-             CodeFormatter`Generate`UIElements`val]]}][
-         CodeFormatter`$InteractiveIndentationCharacter]]; Through[
-         Flatten[{
-           Function[{CodeFormatter`Generate`UIElements`val}, 
-            
-            If[$VersionNumber >= 12.2, 
-             CurrentValue[$FrontEnd, {
-               CodeAssistOptions, "CodeToolsOptions", "CodeFormat", 
-                "InteractiveTabWidth"}] = 
-             CodeFormatter`Generate`UIElements`val]], 
-           Function[{CodeFormatter`Generate`UIElements`val}, 
-            If[$VersionNumber >= 12.2, 
-             CodeFormatter`Notebooks`formatSelectedCell[]], HoldAll]}][
-         CodeFormatter`$InteractiveTabWidth]]), 
-       DynamicBox[ToBoxes[
-         FEPrivate`FrontEndResource["CodeFormatterStrings", "Space8MenuItem"],
-          StandardForm]]:>(
-       CodeFormatter`$InteractiveIndentationCharacter = "space"; 
-       CodeFormatter`$InteractiveTabWidth = "8"; Through[
-         Flatten[{
-           Function[{CodeFormatter`Generate`UIElements`val}, 
-            
-            If[$VersionNumber >= 12.2, 
-             CurrentValue[$FrontEnd, {
-               CodeAssistOptions, "CodeToolsOptions", "CodeFormat", 
-                "InteractiveIndentationCharacter"}] = 
-             CodeFormatter`Generate`UIElements`val]]}][
-         CodeFormatter`$InteractiveIndentationCharacter]]; Through[
-         Flatten[{
-           Function[{CodeFormatter`Generate`UIElements`val}, 
-            
-            If[$VersionNumber >= 12.2, 
-             CurrentValue[$FrontEnd, {
-               CodeAssistOptions, "CodeToolsOptions", "CodeFormat", 
-                "InteractiveTabWidth"}] = 
-             CodeFormatter`Generate`UIElements`val]], 
-           Function[{CodeFormatter`Generate`UIElements`val}, 
-            If[$VersionNumber >= 12.2, 
-             CodeFormatter`Notebooks`formatSelectedCell[]], HoldAll]}][
-         CodeFormatter`$InteractiveTabWidth]])},
-       Appearance->None]}
+          If[$VersionNumber >= 12.2, 
+           CurrentValue[$FrontEnd, {
+             CodeAssistOptions, "CodeToolsOptions", "CodeFormat", 
+              "InteractiveIndentationCharacter"}] = 
+           CodeFormatter`Generate`UIElements`val]][
+         CodeFormatter`$InteractiveIndentationCharacter]), Delimiter, 
+        DynamicBox[ToBoxes[
+          FEPrivate`FrontEndResource[
+          "CodeFormatterStrings", "Space2MenuItem"], StandardForm]]:>(
+        CodeFormatter`$InteractiveIndentationCharacter = "space"; 
+        CodeFormatter`$InteractiveTabWidth = "2"; 
+        Function[{CodeFormatter`Generate`UIElements`val}, 
+          
+          If[$VersionNumber >= 12.2, 
+           CurrentValue[$FrontEnd, {
+             CodeAssistOptions, "CodeToolsOptions", "CodeFormat", 
+              "InteractiveIndentationCharacter"}] = 
+           CodeFormatter`Generate`UIElements`val]][
+         CodeFormatter`$InteractiveIndentationCharacter]; 
+        Function[{CodeFormatter`Generate`UIElements`val}, 
+          
+          If[$VersionNumber >= 12.2, 
+           CurrentValue[$FrontEnd, {
+             CodeAssistOptions, "CodeToolsOptions", "CodeFormat", 
+              "InteractiveTabWidth"}] = 
+           CodeFormatter`Generate`UIElements`val]][
+         CodeFormatter`$InteractiveTabWidth]; (If[$VersionNumber >= 12.2, 
+          CodeFormatter`Notebooks`formatSelectedCell[]]& )[]), 
+        DynamicBox[ToBoxes[
+          FEPrivate`FrontEndResource[
+          "CodeFormatterStrings", "Space4MenuItem"], StandardForm]]:>(
+        CodeFormatter`$InteractiveIndentationCharacter = "space"; 
+        CodeFormatter`$InteractiveTabWidth = "4"; 
+        Function[{CodeFormatter`Generate`UIElements`val}, 
+          
+          If[$VersionNumber >= 12.2, 
+           CurrentValue[$FrontEnd, {
+             CodeAssistOptions, "CodeToolsOptions", "CodeFormat", 
+              "InteractiveIndentationCharacter"}] = 
+           CodeFormatter`Generate`UIElements`val]][
+         CodeFormatter`$InteractiveIndentationCharacter]; 
+        Function[{CodeFormatter`Generate`UIElements`val}, 
+          
+          If[$VersionNumber >= 12.2, 
+           CurrentValue[$FrontEnd, {
+             CodeAssistOptions, "CodeToolsOptions", "CodeFormat", 
+              "InteractiveTabWidth"}] = 
+           CodeFormatter`Generate`UIElements`val]][
+         CodeFormatter`$InteractiveTabWidth]; (If[$VersionNumber >= 12.2, 
+          CodeFormatter`Notebooks`formatSelectedCell[]]& )[]), 
+        DynamicBox[ToBoxes[
+          FEPrivate`FrontEndResource[
+          "CodeFormatterStrings", "Space6MenuItem"], StandardForm]]:>(
+        CodeFormatter`$InteractiveIndentationCharacter = "space"; 
+        CodeFormatter`$InteractiveTabWidth = "6"; 
+        Function[{CodeFormatter`Generate`UIElements`val}, 
+          
+          If[$VersionNumber >= 12.2, 
+           CurrentValue[$FrontEnd, {
+             CodeAssistOptions, "CodeToolsOptions", "CodeFormat", 
+              "InteractiveIndentationCharacter"}] = 
+           CodeFormatter`Generate`UIElements`val]][
+         CodeFormatter`$InteractiveIndentationCharacter]; 
+        Function[{CodeFormatter`Generate`UIElements`val}, 
+          
+          If[$VersionNumber >= 12.2, 
+           CurrentValue[$FrontEnd, {
+             CodeAssistOptions, "CodeToolsOptions", "CodeFormat", 
+              "InteractiveTabWidth"}] = 
+           CodeFormatter`Generate`UIElements`val]][
+         CodeFormatter`$InteractiveTabWidth]; (If[$VersionNumber >= 12.2, 
+          CodeFormatter`Notebooks`formatSelectedCell[]]& )[]), 
+        DynamicBox[ToBoxes[
+          FEPrivate`FrontEndResource[
+          "CodeFormatterStrings", "Space8MenuItem"], StandardForm]]:>(
+        CodeFormatter`$InteractiveIndentationCharacter = "space"; 
+        CodeFormatter`$InteractiveTabWidth = "8"; 
+        Function[{CodeFormatter`Generate`UIElements`val}, 
+          
+          If[$VersionNumber >= 12.2, 
+           CurrentValue[$FrontEnd, {
+             CodeAssistOptions, "CodeToolsOptions", "CodeFormat", 
+              "InteractiveIndentationCharacter"}] = 
+           CodeFormatter`Generate`UIElements`val]][
+         CodeFormatter`$InteractiveIndentationCharacter]; 
+        Function[{CodeFormatter`Generate`UIElements`val}, 
+          
+          If[$VersionNumber >= 12.2, 
+           CurrentValue[$FrontEnd, {
+             CodeAssistOptions, "CodeToolsOptions", "CodeFormat", 
+              "InteractiveTabWidth"}] = 
+           CodeFormatter`Generate`UIElements`val]][
+         CodeFormatter`$InteractiveTabWidth]; (If[$VersionNumber >= 12.2, 
+          CodeFormatter`Notebooks`formatSelectedCell[]]& )[])},
+        Appearance->None], {
+        CodeFormatter`$InteractiveIndentationCharacter, 
+         CodeFormatter`$InteractiveTabWidth} = Lookup[
+         CurrentValue[$FrontEnd, {
+          CodeAssistOptions, "CodeToolsOptions", "CodeFormat"}], {
+         "InteractiveIndentationCharacter", "InteractiveTabWidth"}, Automatic],
+       ImageSizeCache->{120., {11., 15.}},
+       TrackedSymbols:>{}]}
     },
     AutoDelete->False,
     BaseStyle->"CodeFormatterText",

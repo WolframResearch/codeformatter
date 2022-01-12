@@ -172,7 +172,7 @@ CodeFormat::cellfailure = "This cell cannot currently be formatted."
 
 
 CodeFormat::usage = "CodeFormat[code] returns a string of formatted WL code. \
-code can be a string, a file, or a list of bytes."
+code can be a string, a File, or a list of bytes."
 
 Options[CodeFormat] = {
   "IndentationString" :> $DefaultIndentationString,

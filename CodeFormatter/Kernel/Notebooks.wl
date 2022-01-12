@@ -122,8 +122,10 @@ Module[{formatted},
         (*
         "Input" | "Code" base case
         only RowBoxes are supported for now
+
+        This also handles case where b is a single token with no RowBoxes or anything
         *)
-        Cell[BoxData[b_], "Input" | "Code", ___] /; Union[Cases[b, _Symbol, Infinity, Heads -> True]] === {List, RowBox},
+        Cell[BoxData[b_], "Input" | "Code", ___] /; Complement[Union[Cases[b, _Symbol, Infinity, Heads -> True]], {List, RowBox}] === {},
 
             formatted = cell;
 

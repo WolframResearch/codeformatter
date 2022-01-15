@@ -977,6 +977,29 @@ $SpecialBreakAfterLastRator = {
 
 
 (*
+newline after each rator
+
+e.g.:
+a //
+b //
+c
+
+other operators may be considered chained
+
+e.g.:
+a /* b /* c
+a @* b @* c
+a @ b @ c
+
+but these should be on same line, not newlines
+*)
+$SpecialChained = {
+
+  InfixSlashSlash
+}
+
+
+(*
 
 This is the big function for all BinaryNodes, InfixNodes, and TernaryNodes
 
@@ -1070,6 +1093,14 @@ indent[node:(type:BinaryNode|InfixNode|TernaryNode|QuaternaryNode)[tag_, graphs_
             split = TakeDrop[indentedGraphs, lastRatorPos[[1]]]; *)
             split = {indentedGraphs};
           ,
+          (*
+          Special hard-coded
+
+          Break after each rator
+          *)
+          MemberQ[$SpecialChained, tag],
+            split = Split[indentedGraphs, MatchQ[#2, ratorsPat]&];
+          ,
           True,
             split =
               Split[indentedGraphs,
@@ -1121,6 +1152,12 @@ indent[node:(type:BinaryNode|InfixNode|TernaryNode|QuaternaryNode)[tag_, graphs_
             (*
             $Toplevel, so do not re-format if exceeding LineWidth, cannot re-indent safely at $Toplevel
             *)
+          ,
+          MemberQ[$SpecialChained, tag],
+            (*
+            do not increment
+            *)
+            baseOperatorNodeIndent[type, tag, data, split, ratorsPat, anyIndentedGraphsMultiline, infixRatorSurroundedByLeafs]
           ,
           $Toplevel,
             increment @

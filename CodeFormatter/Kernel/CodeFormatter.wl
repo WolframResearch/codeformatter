@@ -24,6 +24,8 @@ CodeFormatCST
 Formatter-only nodes
 *)
 
+InfixSlashSlash
+
 GroupSquareSquare
 
 Token`OpenSquareOpenSquare

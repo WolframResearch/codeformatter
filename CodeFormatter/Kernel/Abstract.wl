@@ -198,6 +198,24 @@ Module[{},
 ]
 
 
+(*
+Abstract binary  (a // b) // c  into  infix  a // b // c
+*)
+abstractFormatNodes[n:BinaryNode[BinarySlashSlash, {BinaryNode[BinarySlashSlash, _, _], _, _}, _]] :=
+Module[{flattenedChildren},
+
+  flattenedChildren = List @@ Flatten[flattenBinarySlashSlash[n], Infinity, binarySlashSlashHead];
+
+  abstractFormatNodes[InfixNode[InfixSlashSlash, flattenedChildren, <||>]]
+]
+
+
+flattenBinarySlashSlash[BinaryNode[BinarySlashSlash, {rand1_, rator_, rand2_}, _]] :=
+  binarySlashSlashHead[flattenBinarySlashSlash[rand1], rator, rand2]
+
+flattenBinarySlashSlash[n_] := n
+
+
 abstractFormatNodes[node_LeafNode] :=
   node
 

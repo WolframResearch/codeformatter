@@ -82,7 +82,7 @@ With[{grid = Grid[{{##}}, ItemSize -> {0, 0}, Spacings -> 0]&},
 	If the paclet targetd 13.0+ then we could use the new Dialog.nb styles and "RoundedRectangleEnabledButtonAppearance" in MiscExpressions.tr.
 	Moreover, "SuppressMouseDownNinePatchAppearance" did not exist until 12.2+.
 	Instead we copy the 13.0 Dialog.nb and the text resource from 12.2+ into this paclet to continue targeting 12.1+. *)
-roundedRectButtonAppearance[content_, type_, frameBoxOptions___] :=
+roundedRectButtonAppearance[content_, type_, Dynamic[enabledCondition_], frameBoxOptions___] :=
 DynamicModule[{mouseUp = True},
 	EventHandler[
 		PaneSelector[
@@ -109,7 +109,7 @@ DynamicModule[{mouseUp = True},
 						frameBoxOptions]},
 			Dynamic[
 				Which[
-					!CurrentValue[Enabled],               "Disabled",
+					Not[enabledCondition],                "Disabled",
 					CurrentValue["MouseOver"] && mouseUp, "Hover",
 					CurrentValue["MouseOver"],            "Pressed",
 					True,                                 "Default"
@@ -122,11 +122,18 @@ DynamicModule[{mouseUp = True},
 		PassEventsDown -> True]]
 
 
+extractEnabledCondition[opts_List] :=
+FirstCase[
+	opts,
+	HoldPattern[(Rule|RuleDelayed)[Enabled, d_]] :> If[MatchQ[d, _Dynamic], d, Dynamic[d]],
+	Dynamic[True]]
+
+
 Attributes[roundedRectButton] = {HoldFirst};
 
 roundedRectButton[action_, content_, colorType_String, {buttonOpts___}, {frameOpts___}] :=
 Button[
-	roundedRectButtonAppearance[content, colorType, frameOpts],
+	roundedRectButtonAppearance[content, colorType, extractEnabledCondition[{buttonOpts}], frameOpts],
 	action,
 	buttonOpts]
 
@@ -983,11 +990,17 @@ With[{$optsPath = CodeFormatter`$optsPath},
 					roundedRectButtonAppearance[
 						Dynamic[FEPrivate`FrontEndResourceString["okButtonText"]],
 						FEPrivate`Switch[FEPrivate`$ProductIDName, "WolframAlphaNB", "Orange1", "WolframFinancePlatform", "Blue1", _, "Red1"],
+						Dynamic[
+							Not[
+								Or[
+									CurrentValue[EvaluationNotebook[], {TaggingRules, "PresetName"}] == "",
+									CurrentValue[EvaluationNotebook[], {TaggingRules, "NameAlreadyExists"}]]]],
 						ImageSize -> {{38, Full}, 25},
 						ImageMargins -> {{Inherited, Inherited}, {3, 3}}],
 					roundedRectButtonAppearance[
 						Dynamic[FEPrivate`FrontEndResourceString["cancelButtonText"]],
 						"Gray1",
+						Dynamic[True],
 						ImageSize -> {{38, Full}, 25},
 						ImageMargins -> {{Inherited, Inherited}, {3, 3}}]},
 				{(* actions *)
@@ -1142,12 +1155,20 @@ With[{$optsPath = CodeFormatter`$optsPath},
 					roundedRectButtonAppearance[
 						Dynamic[FEPrivate`FrontEndResourceString["okButtonText"]],
 						FEPrivate`Switch[FEPrivate`$ProductIDName, "WolframAlphaNB", "Orange1", "WolframFinancePlatform", "Blue1", _, "Red1"],
+						Dynamic[
+							Or[
+								CurrentValue[EvaluationNotebook[], {TaggingRules, "PresetName"}] == currentName, (* allow no change to occur *)
+								Not[
+									Or[
+										CurrentValue[EvaluationNotebook[], {TaggingRules, "PresetName"}] == "",
+										CurrentValue[EvaluationNotebook[], {TaggingRules, "NameAlreadyExists"}]]]]],
 						ImageSize -> {{38, Full}, 25},
 						(* KMD: not sure why margins are off in the footer cell, so zero out top/bottom CellMargins. This leaves 12pts of space, so add 3 *)
 						ImageMargins -> {{Inherited, Inherited}, {3, 3}}], 
 					roundedRectButtonAppearance[
 						Dynamic[FEPrivate`FrontEndResourceString["cancelButtonText"]],
 						"Gray1",
+						Dynamic[True],
 						ImageSize -> {{38, Full}, 25},
 						ImageMargins -> {{Inherited, Inherited}, {3, 3}}]},
 				{(* actions *)

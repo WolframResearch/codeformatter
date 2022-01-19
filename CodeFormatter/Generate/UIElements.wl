@@ -1310,15 +1310,14 @@ buttonAppearance[(* gives rounded rect appearance *)
 from kevind:
 PresetBubbleList (HoldAll) needs to be evaluated so that it can be fully defined and self-contained within the preset popup menu's button action.
 PresetBubble (HoldRest) also needs to be evaluated so its function is fully defined and self-contained within the DynamicModule's Initialization option.
-I use With to inject a fully-resolved PresetBubble function where the first argument is to be filled.
-The "presetList" argument remains held due to the wrapping Function and becomes associated with the "presetList" of the DynamicModule variable.
+presetBubbleFunction is resolved at build-time (evaluation of the DynamicModule) and properly localizes the DM variable 'presetList'.
 *)
 PresetBubbleList[activePresetKey_, parameters_, indentationParameters_] :=
-With[{$optsPath = CodeFormatter`$optsPath, bubbleFunc = Evaluate[PresetBubble[#, presetList, activePresetKey, parameters, indentationParameters]]&},
+With[{$optsPath = CodeFormatter`$optsPath},
 	DynamicModule[{presetList, presetBubbleFunction},
+		presetBubbleFunction = Quiet @ Function[Evaluate[PresetBubble[#, presetList, activePresetKey, parameters, indentationParameters]]];
 		Dynamic[presetList],
 		Initialization :> (
-			presetBubbleFunction = bubbleFunc;
 			presetList =
 				Pane[
 					Column[presetBubbleFunction /@ Keys[AbsoluteCurrentValue[$FrontEnd, {$optsPath, "Presets"}, <||>]]],

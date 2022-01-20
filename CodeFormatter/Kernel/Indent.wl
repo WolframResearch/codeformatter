@@ -321,7 +321,8 @@ Options[indent] = {
   "NewlinesBetweenOperators" -> Automatic,
   "NewlinesInControl" -> Automatic,
   "NewlinesInGroups" -> Automatic,
-  "NewlinesInScoping" -> Automatic
+  "NewlinesInScoping" -> Automatic,
+  "SpecialChained" -> Automatic
 }
 
 
@@ -772,21 +773,16 @@ Module[{ratorsPat, definitelyDelete, definitelyInsert, definitelyAutomatic, spli
 (*
 special casing commas:
 
-Automatic behavior for Comma:
-
-if fewer than 10 elements (not counting Token`Comma), then just do Delete
-
+if "SpecialChained"]:
+  format like:
+    a,
+    b,
+    c
 else:
-format with commas on same line as preceding element:
-
-a,
-b,
-c,
-d,
-e
+  format like:
+    a, b, c
 
 *)
-
 indent[node:InfixNode[Comma, graphs_, data_], OptionsPattern[]] :=
   Catch[
   Module[{aggs, ratorsPat, split, definitelyDelete, definitelyInsert, definitelyAutomatic,
@@ -833,7 +829,18 @@ indent[node:InfixNode[Comma, graphs_, data_], OptionsPattern[]] :=
         split = {indentedGraphs};
       ,
       TrueQ[definitelyAutomatic],
-        split = {indentedGraphs};
+        Which[
+          (*
+          Special hard-coded
+
+          Break after each comma
+          *)
+          OptionValue["SpecialChained"] === True,
+            split = Split[indentedGraphs, MatchQ[#2, ratorsPat]&];
+          ,
+          True,
+            split = {indentedGraphs};
+        ]
     ];
     
     If[$Debug,
@@ -2283,6 +2290,62 @@ Catch[
     ]
   ]
 ]
+
+
+(*
+format as:
+LibraryFunction["sqlite3_bind_int64"][
+    statement,
+    Cast[i, "Integer32", "ReinterpretCast"],
+    Cast[v, "Integer64"]
+]
+*)
+indent[CallNode[head:{
+  CallNode[{LeafNode[Symbol, "LibraryFunction", _]}, {
+    GroupNode[GroupSquare, {_, LeafNode[_, _, _], _}, _]}, _]}, {
+  GroupNode[GroupSquare, {
+    opener_,
+    commaNode:InfixNode[Comma, _, _],
+    closer_ }, data1_]}, data_], OptionsPattern[]] :=
+Module[{indentedHead, indentedCommaNode, groupChildren, groupExtent,
+  children, extent},
+
+  indentedHead = indent /@ head;
+
+  Block[{$Toplevel = False},
+    indentedCommaNode = indent[commaNode, "SpecialChained" -> True];
+  
+    groupChildren =
+      Flatten[{
+        indent[opener],
+        block @ {
+          indentedCommaNode
+        },
+        indent[closer]
+      }];
+
+    groupExtent = computeExtent[groupChildren];
+
+    children = {
+      GroupNode[GroupSquare,
+        groupChildren
+        ,
+        <| data1, "Extent" -> groupExtent |>
+      ]
+    };
+    
+    extent = computeExtent[indentedHead ~Join~ children];
+  ];
+
+  CallNode[
+    indentedHead
+    ,
+    children
+    ,
+    <| data, "Multiline" -> True, "Extent" -> extent |>
+  ]
+]
+
 
 indent[node:CallNode[head_, graphs_, data_], OptionsPattern[]] :=
   commonCallNodeIndent[node]

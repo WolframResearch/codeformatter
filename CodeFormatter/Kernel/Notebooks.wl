@@ -334,7 +334,7 @@ formatInputContents[contentsBox_] :=
             If[FailureQ[formattedBox],
                 Throw[formattedBox]
             ];
-            formattedBox
+            Throw[formattedBox]
         ];
 
         (*

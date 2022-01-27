@@ -26,6 +26,10 @@ Module[{cst, data, embeddedNewlines, mapSpecs, tuples, poss, tokStartLocs, group
     Throw[cst]
   ];
 
+  If[MissingQ[cst[[2, 1]]],
+    Throw[cst]
+  ];
+
   childData = cst[[2, 1, 3]];
 
   (*
@@ -112,6 +116,10 @@ Module[{cst, data, embeddedTabs, mapSpecs, tuples, poss, tokStartLocs, grouped, 
     Throw[cst]
   ];
 
+  If[MissingQ[cst[[2, 1]]],
+    Throw[cst]
+  ];
+  
   childData = cst[[2, 1, 3]];
 
   (*

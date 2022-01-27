@@ -53,6 +53,10 @@ Module[{commentPoss, nonCommentPoss, poss, cst, tokStartLocs, grouped, data, emb
     Throw[cst]
   ];
 
+  If[MissingQ[cst[[2, 1]]],
+    Throw[cst]
+  ];
+  
   firstChildData = cst[[2, 1, 3]];
 
   (*

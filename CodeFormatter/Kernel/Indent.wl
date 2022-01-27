@@ -2410,6 +2410,10 @@ indent[ContainerNode[tag_, graphs_, data_], OptionsPattern[]] :=
       Throw[FirstCase[indented, _?FailureQ]]
     ];
 
+    If[AnyTrue[indented, MissingQ],
+      Throw[FirstCase[indented, _?MissingQ]]
+    ];
+
     indented = Flatten[betterRiffle[indented, {{line[], line[]}}]];
 
     If[Length[indented] >= 1 && !MatchQ[graphs[[-1]], nl],
@@ -2448,6 +2452,8 @@ indent[BoxNode[RowBox, {graphs_}, data_], OptionsPattern[]] :=
 indent[node:BoxNode[_, _, _], OptionsPattern[]] :=
   node
 
+indent[m_?MissingQ, OptionsPattern[]] :=
+  m
 
 indent[args___] := Failure["InternalUnhandled", <| "Function" -> indent, "Args" -> {args} |>]
 

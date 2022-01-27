@@ -581,6 +581,10 @@ Module[{
       Throw[indented]
     ];
 
+    If[MissingQ[indented],
+      Throw[indented]
+    ];
+    
     $LastExtent = indented[[3, Key["Extent"]]];
 
     (*

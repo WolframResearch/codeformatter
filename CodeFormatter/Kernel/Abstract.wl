@@ -582,6 +582,9 @@ abstractFormatNodes[BoxNode[RowBox, {ts_}, data_]] :=
 abstractFormatNodes[node:CodeNode[_, _, _]] :=
   node
 
+abstractFormatNodes[m_?MissingQ] :=
+  m
+
 (*
 Bad args such as List[1, 2, 3] used to match this, so changed data_ => data_Association to try to reduce bad hits
 *)
@@ -612,6 +615,9 @@ cleanLexicalVariables[BoxNode[RowBox, {ts_}, data_]] :=
 
 cleanLexicalVariables[node:CodeNode[_, _, _]] :=
   node
+
+cleanLexicalVariables[m_?MissingQ] :=
+  m
 
 (*
 Bad args such as List[1, 2, 3] used to match this, so changed data_ => data_Association to try to reduce bad hits

@@ -357,6 +357,10 @@ formatInputContents[contentsBox_] :=
 
         cst2 = CodeConcreteParse[formatted];
 
+        If[FailureQ[cst2],
+            Throw[cst2]
+        ];
+
         If[MatchQ[cst2[[3]], KeyValuePattern[SyntaxIssues -> {___, SyntaxIssue["UnrecognizedCharacter", _, _, _], ___}]],
             
             issues = Lookup[cst2[[3]], SyntaxIssues];

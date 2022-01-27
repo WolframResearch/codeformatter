@@ -43,6 +43,10 @@ Module[{data, cst, tokStartLocs, simpleLineContinuations, grouped, poss, tuples,
     Throw[cst]
   ];
 
+  If[MissingQ[cst[[2, 1]]],
+    Throw[cst]
+  ];
+  
   childData = cst[[2, 1, 3]];
 
   (*
@@ -148,6 +152,10 @@ Module[{data, cst, tokStartLocs, grouped, poss, tuples, mapSpecs,
   data = cst[[3]];
 
   If[empty[cst[[2]]],
+    Throw[cst]
+  ];
+
+  If[MissingQ[cst[[2, 1]]],
     Throw[cst]
   ];
 
@@ -262,6 +270,10 @@ Module[{data, cst, tokStartLocs, simpleLineContinuations, grouped, poss, tuples,
   data = cst[[3]];
 
   If[empty[cst[[2]]],
+    Throw[cst]
+  ];
+
+  If[MissingQ[cst[[2, 1]]],
     Throw[cst]
   ];
 

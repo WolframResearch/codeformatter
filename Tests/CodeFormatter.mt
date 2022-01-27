@@ -42,7 +42,7 @@ Bad UTF-8 encoding
 Test[
 	CodeFormat[{206}]
 	,
-	"\[UnknownGlyph]"
+	Missing["UnsafeCharacterEncoding"]
 	,
 	TestID -> "CodeFormatter-20191111-W3S9H1"
 ]

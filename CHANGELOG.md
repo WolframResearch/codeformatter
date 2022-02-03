@@ -1,4 +1,47 @@
 
+## 1.5 - 7 Mar, 2022
+
+Treat `a // b // c` as single InfixSlashSlash node and format as:
+```
+a //
+b //
+c
+```
+
+https://github.com/WolframResearch/codeformatter/issues/2
+
+Add undocumented flag $CleanLexicalVariables
+
+Implement 419551: special formatting for LibraryFunction
+
+
+### Fixes
+
+Fix 417300: CodeFormatCST strips last token of child node
+
+Fix 416665: fix the SaveAs dialog's window height on MacOS
+
+Fix 417935: `"Break in scoping structures" -> Always` did not have proper effect
+
+Also fix `"Break in control structures" -> Always`
+
+Fix 419285: Cannot format single tokens
+
+Bugfix 402825: let the palette and package toolbars communicate updates
+
+Bugfix 418025: impose stronger condition on appearance of Update button
+
+Fix unreported bug $DisableSanityChecking was not being respected in box formatting
+
+Bugfix 418228: formatter marked dirty after reset
+
+Two issues with the key "FormatMethod".
+* 1. it was not properly set during initialization so did not take the value of any existing preset.
+* 2. when a preset resets, the key also did not take the preset value
+
+Fix 420185: Cannot format `a~b~c` in a notebook
+
+
 ## 1.4 - 25 Oct, 2021
 
 Do not allow PacletManager to participate in finding \`Generate\` files

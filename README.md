@@ -61,3 +61,8 @@ Make sure that the paclets can be found on your system:
 ```
 Needs["CodeFormatter`"]
 ```
+
+and try a basic example:
+```
+CodeFormat["If[a, b, c]"]
+```

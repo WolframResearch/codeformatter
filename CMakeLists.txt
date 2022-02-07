@@ -223,6 +223,9 @@ endforeach()
 # generated srcs
 #
 
+#
+# AcceptableOperators files
+#
 add_custom_command(
 	OUTPUT
 		${PROJECT_BINARY_DIR}/generated/wl/Kernel/AcceptableOperators.wl
@@ -242,6 +245,9 @@ add_custom_command(
 		${PROJECT_SOURCE_DIR}
 )
 
+#
+# CodeFormatter.nb
+#
 add_custom_command(
 	OUTPUT
 		${PROJECT_BINARY_DIR}/generated/wl/FrontEnd/Palettes/CodeFormatter.nb
@@ -256,7 +262,6 @@ add_custom_command(
 	WORKING_DIRECTORY
 		${PROJECT_SOURCE_DIR}
 )
-
 
 
 #

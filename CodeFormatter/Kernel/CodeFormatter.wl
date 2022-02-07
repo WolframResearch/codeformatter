@@ -194,7 +194,7 @@ Options[CodeFormat] = {
   
   "TabWidth" :> $DefaultTabWidth,
   "BreakLinesMethod" :> $DefaultBreakLinesMethod,
-  (* Undocumented options for  LineBreakerV1 *)
+  (* Undocumented options for LineBreakerV1 *)
   "SafetyMargin" :> $DefaultSafetyMargin,
 
   PerformanceGoal -> "Speed"

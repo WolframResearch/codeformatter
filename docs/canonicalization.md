@@ -85,6 +85,7 @@ what are all of the "Preserve" behaviors?
 
 Not all newlines and whitespace are stripped
 
+multi-line comments need to remember original indentation
 
 It is desired that this comment stay at end of line:
 
@@ -97,13 +98,6 @@ f[
 
 
 This information must be kept track of
-
-
-
-
-
-
-
 
 
 

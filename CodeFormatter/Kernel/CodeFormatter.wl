@@ -235,7 +235,7 @@ Module[{cst, tabWidth, formattedStr, agg, cst2, agg2, aggToCompare, agg2ToCompar
   $CleanLexicalVariables changes the aggregate syntax, so must also run here in sanity check
   *)
   If[$CleanLexicalVariables,
-      agg = CodeFormatter`Abstract`cleanLexicalVariables[agg]
+    agg = CodeFormatter`Abstract`cleanLexicalVariables[agg]
   ];
 
   cst2 = CodeConcreteParse[formattedStr];
@@ -300,7 +300,7 @@ Module[{cst, tabWidth, newline, formattedStr, agg, cst2, agg2, aggToCompare, agg
   $CleanLexicalVariables changes the aggregate syntax, so must also run here in sanity check
   *)
   If[$CleanLexicalVariables,
-      agg = CodeFormatter`Abstract`cleanLexicalVariables[agg]
+    agg = CodeFormatter`Abstract`cleanLexicalVariables[agg]
   ];
 
   cst2 = CodeConcreteParse[formattedStr];
@@ -371,7 +371,7 @@ Module[{cst, tabWidth, formattedStr, agg, cst2, agg2, aggToCompare, agg2ToCompar
   $CleanLexicalVariables changes the aggregate syntax, so must also run here in sanity check
   *)
   If[$CleanLexicalVariables,
-      agg = CodeFormatter`Abstract`cleanLexicalVariables[agg]
+    agg = CodeFormatter`Abstract`cleanLexicalVariables[agg]
   ];
   
   cst2 = CodeConcreteParse[formattedStr];

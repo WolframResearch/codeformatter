@@ -344,6 +344,7 @@ formatInputContents[contentsBox_] :=
         agg = CodeParser`Abstract`Aggregate[cst];
         agg = expandMultiSingleQuote[agg];
         agg = expandTernaryOptionalPattern[agg];
+        agg = expandInfixTilde[agg];
         agg = expandEqualDot[agg];
         agg = coalesceLineContinuation[agg];
         agg = flattenGroupMissingCloserNode[agg];
@@ -433,6 +434,23 @@ expandTernaryOptionalPattern[agg_] :=
     agg //. {
         TernaryNode[TernaryOptionalPattern, {a_, op1_, b_, op2_, c_}, _] :>
             BinaryNode[Optional, {BinaryNode[Pattern, {a, op1, b}, <||>], op2, c}, <||>]
+    }
+
+(*
+boxes use a single RowBox for a ~ b ~ c ~ d ~ e
+and text uses 2 nested TernaryNodes
+
+must make sure that they are the same when we do a sanity check
+
+it is easier to expand the single RowBox into multiple TernaryNodes
+*)
+expandInfixTilde[agg_] :=
+    agg //. {
+        InfixNode[InfixTilde, {a_, op1_, b_, op2_, c_}, _] :>
+            TernaryNode[TernaryTilde, {a, op1, b, op2, c}, <||>]
+        ,
+        InfixNode[InfixTilde, {a_, op1_, b_, op2_, c_, rest___}, _] :>
+            TernaryNode[TernaryTilde, {TernaryNode[TernaryTilde, {a, op1, b, op2, c}, <||>], rest}, <||>]
     }
 
 expandEqualDot[agg_] :=

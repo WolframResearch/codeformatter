@@ -46,9 +46,9 @@ Also fix `"Break in control structures" -> Always`
 
 Fix 419285: Cannot format single tokens
 
-Bugfix 402825: let the palette and package toolbars communicate updates
+Fix 402825: let the palette and package toolbars communicate updates
 
-Bugfix 418025: impose stronger condition on appearance of Update button
+Fix 418025: impose stronger condition on appearance of Update button
 
 Fix unreported bug $DisableSanityChecking was not being respected in box formatting
 

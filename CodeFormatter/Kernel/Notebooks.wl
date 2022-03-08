@@ -345,7 +345,6 @@ Module[{cst, formatted, formattedBox, airiness, indentationString, tabWidth, agg
   agg = expandMultiSingleQuote[agg];
   agg = expandTernaryOptionalPattern[agg];
   agg = expandInfixTilde[agg];
-  agg = expandEqualDot[agg];
   agg = coalesceLineContinuation[agg];
   agg = flattenGroupMissingCloserNode[agg];
 
@@ -451,12 +450,6 @@ expandInfixTilde[agg_] :=
     ,
     InfixNode[InfixTilde, {a_, op1_, b_, op2_, c_, rest___}, _] :>
       TernaryNode[TernaryTilde, {TernaryNode[TernaryTilde, {a, op1, b, op2, c}, <||>], rest}, <||>]
-  }
-
-expandEqualDot[agg_] :=
-  agg /. {
-    BinaryNode[Unset, {rand_, LeafNode[Token`Boxes`EqualDot, _, _]}, _] :>
-      BinaryNode[Unset, {rand, LeafNode[Token`Equal, "=", <||>], LeafNode[Token`Dot, ".", <||>]}, <||>]
   }
 
 (*

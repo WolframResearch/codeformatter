@@ -95,6 +95,8 @@ DynamicModule[{},
 		Spacings -> {0, 0}, Alignment -> {Center, Center}, BaseStyle -> "CodeFormatterText"
 	],
 	
+	SynchronousInitialization -> False,
+
 	Initialization :> (
 		Module[{opts},
 
@@ -113,7 +115,7 @@ DynamicModule[{},
 		];
 		
 		(* Make sure the open/close button in the Toolbar package is displayed *)
-		CurrentValue[$FrontEnd, {PrivateFrontEndOptions, "InterfaceSettings", "CodeFormatter", "ShowDropDown"}] = True;
+		CurrentValue[$FrontEnd, {PrivateFrontEndOptions, "InterfaceSettings", "CodeFormatter", "ShowDropDown"}] = True
 		
 	)
 ];

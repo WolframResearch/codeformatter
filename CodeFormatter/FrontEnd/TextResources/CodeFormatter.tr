@@ -478,13 +478,13 @@
        ImageSizeCache->{65.9765625, {0., 9.}}], 
       TemplateBox[{10},
        "Spacer1"], 
-      DynamicModuleBox[{CodeFormatter`Generate`UIElements`semicolons$$ = 
-       False, CodeFormatter`Generate`UIElements`operators$$ = False, 
-       CodeFormatter`Generate`UIElements`groups$$ = False, 
-       CodeFormatter`Generate`UIElements`commas$$ = Automatic, 
-       CodeFormatter`Generate`UIElements`ctrlStruct$$ = Automatic, 
-       CodeFormatter`Generate`UIElements`scopingStruct$$ = Automatic, 
-       CodeFormatter`Generate`UIElements`comments$$ = Automatic}, 
+      DynamicModuleBox[{CodeFormatter`Generate`UIElements`semicolons$$, 
+       CodeFormatter`Generate`UIElements`operators$$, 
+       CodeFormatter`Generate`UIElements`groups$$, 
+       CodeFormatter`Generate`UIElements`commas$$, 
+       CodeFormatter`Generate`UIElements`ctrlStruct$$, 
+       CodeFormatter`Generate`UIElements`scopingStruct$$, 
+       CodeFormatter`Generate`UIElements`comments$$}, 
        DynamicWrapperBox[
         TemplateBox[{
           GraphicsBox[{
@@ -511,7 +511,6 @@
                Offset[{12.75, -4.949999999999999}, {0, 0}], 
                Offset[{17.2, -4.949999999999999}, {0, 0}]}}]}, 
            ImageSize -> {22, 15}, ImagePadding -> All], 
-          
           DynamicModuleBox[{
            CodeFormatter`Generate`UIElements`highlightQ$$ = False, 
             CodeFormatter`Generate`UIElements`pressedQ$$ = False}, 
@@ -807,8 +806,7 @@
                 Dynamic[
                  FEPrivate`FrontEndResource[
                  "CodeFormatterStrings", "Space8MenuItem"]], True, ""], 
-               StandardForm],
-              ImageSizeCache->{34.65087890625, {2., 7.}}], "\<\"\"\>", 
+               StandardForm]], "\<\"\"\>", 
              GraphicsBox[
               {AbsoluteThickness[2], CapForm["Round"], JoinForm["Round"], 
                StyleBox[
@@ -819,11 +817,7 @@
                     Right, {{-0.5, -1}, {0.5, 0}, {-0.5, 1}}, 
                     Up, {{-1, -0.5}, {0, 0.5}, {1, -0.5}}, 
                     Blank[], {{-1, 0.5}, {0, -0.5}, {1, 0.5}}]], StandardForm,
-                   Graphics],
-                 
-                 ImageSizeCache->{{-2.2393066909899018`, 
-                  12.239306690989903`}, {-11.239306690989903`, \
--0.7606933090100982}}], "CodeFormatterHighlightColor",
+                   Graphics]], "CodeFormatterHighlightColor",
                 StripOnInput->False]},
               BaselinePosition->Bottom,
               ImageMargins->{{0, 1}, {1, 0}},
@@ -956,7 +950,7 @@
          CurrentValue[$FrontEnd, {
           CodeAssistOptions, "CodeToolsOptions", "CodeFormat"}], {
          "InteractiveIndentationCharacter", "InteractiveTabWidth"}, Automatic],
-       ImageSizeCache->{120., {11., 15.}},
+       ImageSizeCache->{120., {15., 20.}},
        TrackedSymbols:>{}]}
     },
     AutoDelete->False,
@@ -990,5 +984,6 @@
           True]; Null]; Null]; 
    CurrentValue[$FrontEnd, {
       PrivateFrontEndOptions, "InterfaceSettings", "CodeFormatter", 
-       "ShowDropDown"}] = True; Null)]]]}
+       "ShowDropDown"}] = True),
+  SynchronousInitialization->False]]]}
 @|

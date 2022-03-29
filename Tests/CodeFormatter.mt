@@ -1,7 +1,7 @@
 (* Wolfram Language Test file *)
 
 Needs["CodeFormatter`"]
-
+Needs["CodeParser`"]
 
 
 
@@ -42,7 +42,7 @@ Bad UTF-8 encoding
 Test[
 	CodeFormat[{206}]
 	,
-	Missing["UnsafeCharacterEncoding"]
+	Missing["UnsafeCharacterEncoding_IncompleteUTF8Sequence"]
 	,
 	TestID -> "CodeFormatter-20191111-W3S9H1"
 ]
@@ -348,3 +348,17 @@ Test[
 	,
 	TestID->"CodeFormatter-20210902-R7Y1U6"
 ]
+
+
+
+(*
+bug 421585
+*)
+Test[
+	CodeFormatCST[LeafNode[Symbol, "x", <||>]]
+	,
+	"x\n"
+	,
+	TestID->"CodeFormatter-20220329-E0H9Q0"
+]
+

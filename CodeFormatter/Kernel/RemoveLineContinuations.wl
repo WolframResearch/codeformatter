@@ -30,10 +30,27 @@ outside of strings or comments
 
 RemoveSimpleLineContinuations::usage = "RemoveSimpleLineContinuations[cst] removes simple line continuations from cst."
 
-RemoveSimpleLineContinuations[cstIn_] :=
+RemoveSimpleLineContinuations[cstIn:_[_, _String, _]] :=
 Catch[
-Module[{data, cst, tokStartLocs, simpleLineContinuations, grouped, poss, tuples, mapSpecs,
-  embeddedNewlineStartLocs, extracted, complexLineContinuations, childData},
+Module[{data, cst},
+
+  cst = cstIn;
+
+  data = cst[[3]];
+
+  (*
+  Only proceed if LineColumn convention
+  *)
+  If[!MatchQ[data, KeyValuePattern[Source -> {{_, _}, {_, _}}]],
+    Throw[cst]
+  ];
+
+  removeSimpleLineContinuations[cst]
+]]
+
+RemoveSimpleLineContinuations[cstIn:_[_, _List, _]] :=
+Catch[
+Module[{data, cst, firstChild, firstChildData},
 
   cst = cstIn;
 
@@ -43,18 +60,36 @@ Module[{data, cst, tokStartLocs, simpleLineContinuations, grouped, poss, tuples,
     Throw[cst]
   ];
 
-  If[MissingQ[cst[[2, 1]]],
+  (*
+  cst may be a ContainerNode with no source info
+  so look at first child to determine source convention
+  *)
+  firstChild = cst[[2, 1]];
+
+  If[MissingQ[firstChild],
     Throw[cst]
   ];
-  
-  childData = cst[[2, 1, 3]];
+
+  firstChildData = firstChild[[3]];
 
   (*
   Only proceed if LineColumn convention
   *)
-  If[!MatchQ[childData, KeyValuePattern[Source -> {{_, _}, {_, _}}]],
+  If[!MatchQ[firstChildData, KeyValuePattern[Source -> {{_, _}, {_, _}}]],
     Throw[cst]
   ];
+
+  removeSimpleLineContinuations[cst]
+]]
+
+removeSimpleLineContinuations[cstIn_] :=
+Catch[
+Module[{data, cst, tokStartLocs, simpleLineContinuations, grouped, poss, tuples, mapSpecs,
+  embeddedNewlineStartLocs, extracted, complexLineContinuations},
+
+  cst = cstIn;
+
+  data = cst[[3]];
 
   If[KeyExistsQ[data, "SimpleLineContinuations"],
 
@@ -142,10 +177,28 @@ Module[{data, cst, tokStartLocs, simpleLineContinuations, grouped, poss, tuples,
 
 RemoveComplexLineContinuations::usage = "RemoveComplexLineContinuations[cst] removes complex line continuations from cst."
 
-RemoveComplexLineContinuations[cstIn_] :=
+RemoveComplexLineContinuations[cstIn:_[_, _String, _]] :=
 Catch[
 Module[{data, cst, tokStartLocs, grouped, poss, tuples, mapSpecs,
-  extracted, complexLineContinuations, childData},
+  extracted, complexLineContinuations, firstChildData},
+
+  cst = cstIn;
+
+  data = cst[[3]];
+
+  (*
+  Only proceed if LineColumn convention
+  *)
+  If[!MatchQ[data, KeyValuePattern[Source -> {{_, _}, {_, _}}]],
+    Throw[cst]
+  ];
+
+  removeComplexLineContinuations[cst]
+]]
+
+RemoveComplexLineContinuations[cstIn:_[_, _List, _]] :=
+Catch[
+Module[{data, cst, firstChild, firstChildData},
 
   cst = cstIn;
 
@@ -155,18 +208,36 @@ Module[{data, cst, tokStartLocs, grouped, poss, tuples, mapSpecs,
     Throw[cst]
   ];
 
-  If[MissingQ[cst[[2, 1]]],
+  (*
+  cst may be a ContainerNode with no source info
+  so look at first child to determine source convention
+  *)
+  firstChild = cst[[2, 1]];
+
+  If[MissingQ[firstChild],
     Throw[cst]
   ];
 
-  childData = cst[[2, 1, 3]];
+  firstChildData = firstChild[[3]];
 
   (*
   Only proceed if LineColumn convention
   *)
-  If[!MatchQ[childData, KeyValuePattern[Source -> {{_, _}, {_, _}}]],
+  If[!MatchQ[firstChildData, KeyValuePattern[Source -> {{_, _}, {_, _}}]],
     Throw[cst]
   ];
+
+  removeComplexLineContinuations[cst]
+]]
+
+removeComplexLineContinuations[cstIn_] :=
+Catch[
+Module[{data, cst, tokStartLocs, grouped, poss, tuples, mapSpecs,
+  extracted, complexLineContinuations},
+
+  cst = cstIn;
+
+  data = cst[[3]];
 
   If[KeyExistsQ[data, "ComplexLineContinuations"],
 
@@ -261,9 +332,27 @@ Need to recompute Source because it is used later
 RemoveRemainingSimpleLineContinuations::usage =
   "RemoveRemainingSimpleLineContinuations[cst] removes simple line continuations from cst."
 
-RemoveRemainingSimpleLineContinuations[cstIn_] :=
+RemoveRemainingSimpleLineContinuations[cstIn:_[_, _String, _]] :=
 Catch[
-Module[{data, cst, tokStartLocs, simpleLineContinuations, grouped, poss, tuples, mapSpecs, extracted, childData},
+Module[{data, cst},
+
+  cst = cstIn;
+
+  data = cst[[3]];
+
+  (*
+  Only proceed if LineColumn convention
+  *)
+  If[!MatchQ[data, KeyValuePattern[Source -> {{_, _}, {_, _}}]],
+    Throw[cst]
+  ];
+
+  removeRemainingSimpleLineContinuations[cst]
+]]
+
+RemoveRemainingSimpleLineContinuations[cstIn:_[_, _List, _]] :=
+Catch[
+Module[{data, cst, firstChild, firstChildData},
 
   cst = cstIn;
 
@@ -273,18 +362,31 @@ Module[{data, cst, tokStartLocs, simpleLineContinuations, grouped, poss, tuples,
     Throw[cst]
   ];
 
-  If[MissingQ[cst[[2, 1]]],
+  firstChild = cst[[2, 1]];
+
+  If[MissingQ[firstChild],
     Throw[cst]
   ];
 
-  childData = cst[[2, 1, 3]];
+  firstChildData = firstChild[[3]];
 
   (*
   Only proceed if LineColumn convention
   *)
-  If[!MatchQ[childData, KeyValuePattern[Source -> {{_, _}, {_, _}}]],
+  If[!MatchQ[firstChildData, KeyValuePattern[Source -> {{_, _}, {_, _}}]],
     Throw[cst]
   ];
+
+  removeRemainingSimpleLineContinuations[cst]
+]]
+
+removeRemainingSimpleLineContinuations[cstIn_] :=
+Catch[
+Module[{data, cst, tokStartLocs, simpleLineContinuations, grouped, poss, tuples, mapSpecs, extracted},
+
+  cst = cstIn;
+
+  data = cst[[3]];
 
   If[KeyExistsQ[data, "SimpleLineContinuations"],
 

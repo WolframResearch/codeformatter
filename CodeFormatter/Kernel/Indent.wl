@@ -2410,10 +2410,6 @@ indent[ContainerNode[tag_, graphs_, data_], OptionsPattern[]] :=
       Throw[FirstCase[indented, _?FailureQ]]
     ];
 
-    If[AnyTrue[indented, MissingQ],
-      Throw[FirstCase[indented, _?MissingQ]]
-    ];
-
     indented = Flatten[betterRiffle[indented, {{line[], line[]}}]];
 
     If[Length[indented] >= 1 && !MatchQ[graphs[[-1]], nl],
@@ -2519,6 +2515,8 @@ getExtent[line[]] := {0, 2, 0, 0}
 getExtent[IndentationNode[type_, children_, data_]] := {a, b, c}
 *)
 getExtent[line[]] := {0, 2, 0, 0}
+
+getExtent[_?MissingQ] := {0, 0, 0, 0}
 
 getExtent[n_] := n[[3, Key["Extent"]]]
 

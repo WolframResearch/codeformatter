@@ -148,7 +148,13 @@ breakLine[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
       ];
       toplevel = ($groupDepth == 0);
 
-      width += StringLength[tok[[2]]];
+      Switch[tok,
+        _?MissingQ,
+          Null
+        ,
+        _,
+          width += StringLength[tok[[2]]];
+      ];
       If[$Debug,
         Print["width is (tentatively) now 1: ", width];
       ];

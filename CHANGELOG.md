@@ -1,6 +1,10 @@
 
 ## 1.6 - XX May, 2022
 
+### Fixes
+
+Fix 421585: `CodeFormatCST[LeafNode[...]]` fails
+
 
 ## 1.5.1 - 28 Mar, 2022
 

@@ -670,11 +670,17 @@ Module[{
     ]
   ]; (* Block *)
 
-  strs = collectStr /@ tmp;
+  Catch[
+    If[AnyTrue[tmp, MissingQ],
+      Throw[FirstCase[tmp, _?MissingQ]]
+    ];
 
-  formattedStr = StringJoin[strs];
+    strs = collectStr /@ tmp;
 
-  formattedStr
+    formattedStr = StringJoin[strs];
+
+    formattedStr
+  ]
 ]]
 
 

@@ -38,10 +38,29 @@ multiline comments have temporary line continuations introduced
 others?
 
 *)
-Fragmentize[cstIn_] :=
+Fragmentize[cstIn:_[_, _String, _]] :=
 Catch[
-Module[{commentPoss, nonCommentPoss, poss, cst, tokStartLocs, grouped, data, embeddedNewlines, mapSpecs, embeddedNewlinePoss, tuples,
-  allOtherCommentPoss, firstChildData},
+Module[{cst, data},
+
+  cst = cstIn;
+  
+  cst = fragmentizeCommentGroups[cst];
+  
+  data = cst[[3]];
+
+  (*
+  Only proceed if LineColumn convention
+  *)
+  If[!MatchQ[data, KeyValuePattern[Source -> {{_, _}, {_, _}}]],
+    Throw[cst]
+  ];
+
+  fragmentize[cst]
+]]
+
+Fragmentize[cstIn:_[_, _List, _]] :=
+Catch[
+Module[{cst, data, firstChild, firstChildData},
 
   cst = cstIn;
   
@@ -53,11 +72,17 @@ Module[{commentPoss, nonCommentPoss, poss, cst, tokStartLocs, grouped, data, emb
     Throw[cst]
   ];
 
-  If[MissingQ[cst[[2, 1]]],
+  firstChild = cst[[2, 1]];
+
+  If[MissingQ[firstChild],
     Throw[cst]
   ];
   
-  firstChildData = cst[[2, 1, 3]];
+  (*
+  cst may be a ContainerNode with no source info
+  so look at first child to determine source convention
+  *)
+  firstChildData = firstChild[[3]];
 
   (*
   Only proceed if LineColumn convention
@@ -65,6 +90,18 @@ Module[{commentPoss, nonCommentPoss, poss, cst, tokStartLocs, grouped, data, emb
   If[!MatchQ[firstChildData, KeyValuePattern[Source -> {{_, _}, {_, _}}]],
     Throw[cst]
   ];
+
+  fragmentize[cst]
+]]
+
+fragmentize[cstIn_] :=
+Catch[
+Module[{commentPoss, nonCommentPoss, poss, cst, tokStartLocs, grouped, data, embeddedNewlines, mapSpecs, embeddedNewlinePoss, tuples,
+  allOtherCommentPoss},
+
+  cst = cstIn;
+  
+  data = cst[[3]];
 
   (*
   Special case multiline strings and multiline comments with LineColumn convention

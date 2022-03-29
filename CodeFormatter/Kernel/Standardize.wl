@@ -14,9 +14,27 @@ Needs["CodeParser`Utils`"]
 
 StandardizeEmbeddedNewlines::usage = "StandardizeEmbeddedNewlines[cst, newline] standardizes the newlines in cst."
 
-StandardizeEmbeddedNewlines[cstIn_, newline_String] :=
+StandardizeEmbeddedNewlines[cstIn:_[_, _String, _], newline_String] :=
 Catch[
-Module[{cst, data, embeddedNewlines, mapSpecs, tuples, poss, tokStartLocs, grouped, childData},
+Module[{cst, data},
+
+  cst = cstIn;
+
+  data = cst[[3]];
+
+  (*
+  Only proceed if LineColumn convention
+  *)
+  If[!MatchQ[data, KeyValuePattern[Source -> {{_, _}, {_, _}}]],
+    Throw[cst]
+  ];
+
+  standardizeEmbeddedNewlines[cst, newline]
+]]
+
+StandardizeEmbeddedNewlines[cstIn:_[_, _List, _], newline_String] :=
+Catch[
+Module[{cst, data, firstChild, firstChildData},
 
   cst = cstIn;
 
@@ -26,18 +44,35 @@ Module[{cst, data, embeddedNewlines, mapSpecs, tuples, poss, tokStartLocs, group
     Throw[cst]
   ];
 
-  If[MissingQ[cst[[2, 1]]],
+  firstChild = cst[[2, 1]];
+
+  If[MissingQ[firstChild],
     Throw[cst]
   ];
 
-  childData = cst[[2, 1, 3]];
+  (*
+  cst may be a ContainerNode with no source info
+  so look at first child to determine source convention
+  *)
+  firstChildData = firstChild[[3]];
 
   (*
   Only proceed if LineColumn convention
   *)
-  If[!MatchQ[childData, KeyValuePattern[Source -> {{_, _}, {_, _}}]],
+  If[!MatchQ[firstChildData, KeyValuePattern[Source -> {{_, _}, {_, _}}]],
     Throw[cst]
   ];
+
+  standardizeEmbeddedNewlines[cst, newline]
+]]
+
+standardizeEmbeddedNewlines[cstIn_, newline_String] :=
+Catch[
+Module[{cst, data, embeddedNewlines, mapSpecs, tuples, poss, tokStartLocs, grouped},
+
+  cst = cstIn;
+
+  data = cst[[3]];
 
   If[KeyExistsQ[data, "EmbeddedNewlines"],
 
@@ -104,9 +139,27 @@ Module[{cst, data, embeddedNewlines, mapSpecs, tuples, poss, tokStartLocs, group
 
 StandardizeEmbeddedTabs::usage = "StandardizeEmbeddedTabs[cst, newline, tabWidth] standardizes tabs in cst."
 
-StandardizeEmbeddedTabs[cstIn_, newline_String, tabWidth_Integer] :=
+StandardizeEmbeddedTabs[cstIn:_[_, _String, _], newline_String, tabWidth_Integer] :=
 Catch[
-Module[{cst, data, embeddedTabs, mapSpecs, tuples, poss, tokStartLocs, grouped, childData},
+Module[{cst, data},
+
+  cst = cstIn;
+
+  data = cst[[3]];
+
+  (*
+  Only proceed if LineColumn convention
+  *)
+  If[!MatchQ[data, KeyValuePattern[Source -> {{_, _}, {_, _}}]],
+    Throw[cst]
+  ];
+
+  standardizeEmbeddedTabs[cst, newline, tabWidth]
+]]
+
+StandardizeEmbeddedTabs[cstIn:_[_, _List, _], newline_String, tabWidth_Integer] :=
+Catch[
+Module[{cst, data, firstChild, firstChildData},
 
   cst = cstIn;
 
@@ -116,18 +169,35 @@ Module[{cst, data, embeddedTabs, mapSpecs, tuples, poss, tokStartLocs, grouped, 
     Throw[cst]
   ];
 
-  If[MissingQ[cst[[2, 1]]],
+  firstChild = cst[[2, 1]];
+
+  If[MissingQ[firstChild],
     Throw[cst]
   ];
   
-  childData = cst[[2, 1, 3]];
+  (*
+  cst may be a ContainerNode with no source info
+  so look at first child to determine source convention
+  *)
+  firstChildData = firstChild[[3]];
 
   (*
   Only proceed if LineColumn convention
   *)
-  If[!MatchQ[childData, KeyValuePattern[Source -> {{_, _}, {_, _}}]],
+  If[!MatchQ[firstChildData, KeyValuePattern[Source -> {{_, _}, {_, _}}]],
     Throw[cst]
   ];
+
+  standardizeEmbeddedTabs[cst, newline, tabWidth]
+]]
+
+standardizeEmbeddedTabs[cstIn_, newline_String, tabWidth_Integer] :=
+Catch[
+Module[{cst, data, embeddedTabs, mapSpecs, tuples, poss, tokStartLocs, grouped},
+
+  cst = cstIn;
+
+  data = cst[[3]];
 
   If[KeyExistsQ[data, "EmbeddedTabs"],
 

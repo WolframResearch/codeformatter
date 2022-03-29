@@ -1,6 +1,9 @@
 
 ## 1.6 - XX May, 2022
 
+
+## 1.5.1 - 28 Mar, 2022
+
 ### Fixes
 
 Fixes 421036: asynchronous initialization of Package Editor toolbar

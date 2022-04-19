@@ -275,7 +275,7 @@ Module[{aggs, rators, firstRatorPos, first, rest, children,
 
   rators = aggs[[2;;;;2]];
 
-  firstRatorPos = Position[graphs, rators[[1]]][[1]];
+  firstRatorPos = FirstPosition[graphs, rators[[1]], $Failed, {1}];
 
   {first, rest} = TakeDrop[graphs, firstRatorPos[[1]]];
 
@@ -302,7 +302,7 @@ Module[{aggs, rators, lastRatorPos, first, rest, children, extent},
 
   rators = aggs[[2;;;;2]];
 
-  lastRatorPos = Position[graphs, rators[[-1]]][[1]];
+  lastRatorPos = FirstPosition[graphs, rators[[-1]], $Failed, {1}];
 
   {first, rest} = TakeDrop[graphs, lastRatorPos[[1]]];
 

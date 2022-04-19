@@ -485,3 +485,32 @@ For[
 ]
 
 
+cst =
+  ContainerNode[
+   String, {CallNode[{LeafNode[Symbol, "Module", <||>]}, {GroupNode[
+       GroupSquare, {LeafNode[Token`OpenSquare, "[", <||>],
+        InfixNode[
+         Comma, {GroupNode[
+           List, {LeafNode[Token`OpenCurly, "{", <||>],
+            InfixNode[
+             Comma, {LeafNode[Symbol, "a", <||>],
+              LeafNode[Token`Comma, ",", <||>],
+              LeafNode[Symbol, "b", <||>]}, <||>],
+            LeafNode[Token`CloseCurly, "}", <||>]}, <||>],
+          LeafNode[Token`Comma, ",", <||>],
+          LeafNode[Symbol, "foo", <||>]}, <||>],
+        LeafNode[Token`CloseSquare, "]", <||>]}, <||>]}, <||>]}, <||>]
+
+Test[
+	CodeFormatCST[cst]
+	,
+	"\
+Module[{a, b},
+    foo
+]
+"
+	,
+	TestID->"Bugs-20220429-S6P7I8"
+]
+
+

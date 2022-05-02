@@ -31,30 +31,30 @@ normalInfixParselets = Normal[importedInfixParselets]
 
 
 acceptableOperators =
-	
-	(*
-	Remove prefix operators that are also postfix operators
-	*)
-	Complement[
-		Cases[normalPrefixParselets, Verbatim[Rule][tok_, Parselet`PrefixOperatorParselet[_, _, _]] :> tok],
-		Cases[normalInfixParselets, Verbatim[Rule][tok_, Parselet`PostfixOperatorParselet[_, _, _]] :> tok]
-	] ~Join~
+  
+  (*
+  Remove prefix operators that are also postfix operators
+  *)
+  Complement[
+    Cases[normalPrefixParselets, Verbatim[Rule][tok_, Parselet`PrefixOperatorParselet[_, _, _]] :> tok],
+    Cases[normalInfixParselets, Verbatim[Rule][tok_, Parselet`PostfixOperatorParselet[_, _, _]] :> tok]
+  ] ~Join~
 
-	Cases[normalPrefixParselets, Verbatim[Rule][tok_, Parselet`GroupParselet[_, _]] :> tok] ~Join~
-	Cases[normalInfixParselets, Verbatim[Rule][tok_, Parselet`BinaryOperatorParselet[_, _, _]] :> tok] ~Join~
-	Complement[
-		Cases[normalInfixParselets, Verbatim[Rule][tok_, Parselet`InfixOperatorParselet[_, _, _]] :> tok],
-		(*
-		Manually remove Token`Fake`ImplicitTimes
+  Cases[normalPrefixParselets, Verbatim[Rule][tok_, Parselet`GroupParselet[_, _]] :> tok] ~Join~
+  Cases[normalInfixParselets, Verbatim[Rule][tok_, Parselet`BinaryOperatorParselet[_, _, _]] :> tok] ~Join~
+  Complement[
+    Cases[normalInfixParselets, Verbatim[Rule][tok_, Parselet`InfixOperatorParselet[_, _, _]] :> tok],
+    (*
+    Manually remove Token`Fake`ImplicitTimes
 
-		Manually remove Token`Dot, because we do not want to break after  a =.
-		*)
-		{Token`Fake`ImplicitTimes, Token`Dot}
-	] ~Join~
-	Cases[normalInfixParselets, Verbatim[Rule][tok_, Parselet`TildeParselet[]] :> tok] ~Join~
-	Cases[normalInfixParselets, Verbatim[Rule][tok_, Parselet`SlashColonParselet[]] :> tok] ~Join~
-	Cases[normalInfixParselets, Verbatim[Rule][tok_, Parselet`ColonParselet[]] :> tok] ~Join~
-	Cases[normalInfixParselets, Verbatim[Rule][tok_, Parselet`CommaParselet[]] :> tok]
+    Manually remove Token`Dot, because we do not want to break after  a =.
+    *)
+    {Token`Fake`ImplicitTimes, Token`Dot}
+  ] ~Join~
+  Cases[normalInfixParselets, Verbatim[Rule][tok_, Parselet`TildeParselet[]] :> tok] ~Join~
+  Cases[normalInfixParselets, Verbatim[Rule][tok_, Parselet`SlashColonParselet[]] :> tok] ~Join~
+  Cases[normalInfixParselets, Verbatim[Rule][tok_, Parselet`ColonParselet[]] :> tok] ~Join~
+  Cases[normalInfixParselets, Verbatim[Rule][tok_, Parselet`CommaParselet[]] :> tok]
 
 
 generate[] := (

@@ -327,234 +327,234 @@ Module[{leafs, src, origSpaces},
 
 
 mergeTemporaryLineContinuations[fsIn_] :=
-  Module[{fs, poss, lc, onePast, numberOfOriginalSpaces, numberOfBeforeChars, originalSpacesSpec, deleteSpecs, takeSpec,
-    commentReplaceSpecs},
+Module[{fs, poss, lc, onePast, numberOfOriginalSpaces, numberOfBeforeChars, originalSpacesSpec, deleteSpecs, takeSpec,
+  commentReplaceSpecs},
 
-    fs = fsIn;
+  fs = fsIn;
+
+  If[$Debug,
+    Print["fs: ", fs];
+  ];
+
+  lc = FragmentNode[_, "\\" <> $CurrentNewlineString, _];
+
+  poss = Position[fs, lc, {1}];
+
+  deleteSpecs = Internal`Bag[];
+  commentReplaceSpecs = {};
+  Function[{pos},
 
     If[$Debug,
-      Print["fs: ", fs];
+      Print["pos: ", pos];
     ];
 
-    lc = FragmentNode[_, "\\" <> $CurrentNewlineString, _];
+    (*
+    Count how many spaces after the line continuation
+    *)
+    onePast = NestWhile[(# + 1)&, pos[[1]] + 1, (# <= Length[fs] && MatchQ[fs[[#]], (LeafNode|FragmentNode)[_, " ", _]])&];
 
-    poss = Position[fs, lc, {1}];
+    originalSpacesSpec = {pos[[1]] + 1, onePast};
 
-    deleteSpecs = Internal`Bag[];
-    commentReplaceSpecs = {};
-    Function[{pos},
+    If[$Debug,
+      Print["originalSpacesSpec: ", originalSpacesSpec];
+    ];
 
-      If[$Debug,
-        Print["pos: ", pos];
+    numberOfOriginalSpaces = (onePast) - (pos[[1]] + 1);
+
+    (*
+    Count how many characters before the line continuation (but after any previous newline)
+    *)
+    onePast = NestWhile[(# - 1)&, pos[[1]] - 1, (# >= 1 && !MatchQ[fs[[#]], (LeafNode|FragmentNode)[_, $CurrentNewlineString, _]])&];
+
+    takeSpec = {onePast + 1, pos[[1]] - 1};
+
+    If[$Debug,
+      Print["takeSpec: ", takeSpec];
+    ];
+
+    numberOfBeforeChars =
+      Total[
+        (*
+        Make sure to treat implicit Times as " "
+        *)
+        StringLength /@ (Take[fs, takeSpec] /. LeafNode[Token`Fake`ImplicitTimes, _, _] -> LeafNode[Whitespace, " ", <||>])[[All, 2]]
       ];
 
+    If[$Debug,
+      Print["numberOfBeforeChars: ", numberOfBeforeChars];
+      Print["numberOfOriginalSpaces: ", numberOfOriginalSpaces];
+    ];
+
+    Which[
       (*
-      Count how many spaces after the line continuation
+      numberOfBeforeChars == 0 && numberOfOriginalSpaces == 0,
+        (*
+        not mergeable; the line continuation will be dropped later 
+        *)
+        If[$Debug,
+          Print["not mergeable 1"];
+        ];
+        Nothing
+      ,
       *)
-      onePast = NestWhile[(# + 1)&, pos[[1]] + 1, (# <= Length[fs] && MatchQ[fs[[#]], (LeafNode|FragmentNode)[_, " ", _]])&];
-
-      originalSpacesSpec = {pos[[1]] + 1, onePast};
-
-      If[$Debug,
-        Print["originalSpacesSpec: ", originalSpacesSpec];
-      ];
-
-      numberOfOriginalSpaces = (onePast) - (pos[[1]] + 1);
-
       (*
-      Count how many characters before the line continuation (but after any previous newline)
+      either there are more original spaces (so fine to merge back)
+
+      a::usage = \
+                  "text
+      text"
+
+      turns into =>
+
+      a::usage = "text
+      text"
+
       *)
-      onePast = NestWhile[(# - 1)&, pos[[1]] - 1, (# >= 1 && !MatchQ[fs[[#]], (LeafNode|FragmentNode)[_, $CurrentNewlineString, _]])&];
-
-      takeSpec = {onePast + 1, pos[[1]] - 1};
-
-      If[$Debug,
-        Print["takeSpec: ", takeSpec];
-      ];
-
-      numberOfBeforeChars =
-        Total[
-          (*
-          Make sure to treat implicit Times as " "
-          *)
-          StringLength /@ (Take[fs, takeSpec] /. LeafNode[Token`Fake`ImplicitTimes, _, _] -> LeafNode[Whitespace, " ", <||>])[[All, 2]]
+      numberOfBeforeChars <= numberOfOriginalSpaces,
+        (*
+        make sure to include the line continuation itself to be removed
+        *)
+        If[$Debug,
+          Print["mergeable 1"];
         ];
 
-      If[$Debug,
-        Print["numberOfBeforeChars: ", numberOfBeforeChars];
-        Print["numberOfOriginalSpaces: ", numberOfOriginalSpaces];
-      ];
-
-      Which[
-        (*
-        numberOfBeforeChars == 0 && numberOfOriginalSpaces == 0,
-          (*
-          not mergeable; the line continuation will be dropped later 
-          *)
-          If[$Debug,
-            Print["not mergeable 1"];
-          ];
-          Nothing
-        ,
-        *)
-        (*
-        either there are more original spaces (so fine to merge back)
-
-        a::usage = \
-                   "text
-        text"
-
-        turns into =>
-
-        a::usage = "text
-        text"
-
-        *)
-        numberOfBeforeChars <= numberOfOriginalSpaces,
-          (*
-          make sure to include the line continuation itself to be removed
-          *)
-          If[$Debug,
-            Print["mergeable 1"];
-          ];
-
-          Scan[Internal`StuffBag[deleteSpecs, {#}]&, Range[pos[[1]], originalSpacesSpec[[2]] - (numberOfOriginalSpaces - numberOfBeforeChars) - 1]];
-        ,
-        (*
-        or whatever is overlapping is spaces, so also fine to merge back
-
-        a::usage =
-              \
-        "text
-        text"
-
-        turns into =>
-
-        a::usage =
-        "text
-        text"
-
-        *)
-        MatchQ[Take[fs, takeSpec], {(LeafNode|FragmentNode)[_, " ", _]...}],
-          If[$Debug,
-            Print["mergeable 2"];
-          ];
-          (*
-          make sure to include the line continuation itself
-          *)
-          Scan[Internal`StuffBag[deleteSpecs, {#}]&, Range[takeSpec[[1]], pos[[1]]]];
-        ,
-        (*
-
-        If the string itself starts with " and then immediately a newline, then it is fine to merge
-        (we will not mess up any alignment, because there is no alignment on the first line)
-
-        a::usage = \
-                 "
-        xxx"
-
-        turns into =>
-
-        a::usage = "
-        xxx"
-
-        *)
-        MatchQ[fs[[originalSpacesSpec[[2]]]], FragmentNode[String, "\"", _] | FragmentNode[Token`Comment, "(*", _]],
-          (*
-          make sure to include the line continuation itself to be removed
-          *)
-          If[$Debug,
-            Print["mergeable 3"];
-          ];
-          Scan[Internal`StuffBag[deleteSpecs, {#}]&,  Range[pos[[1]], originalSpacesSpec[[2]] - 1]];
-        ,
-        MatchQ[Take[fs, {Max[pos[[1]] - (numberOfBeforeChars - numberOfOriginalSpaces), 1], pos[[1]] - 1}], {(LeafNode|FragmentNode)[Whitespace, _, _]...}],
-          (*
-          
-          If[  \
-              "x
-          x"
-          ]
-
-          turns into
-
-          If[ "x
-          x"
-          ]
-
-          *)
-          If[$Debug,
-            Print["mergeable 4"];
-          ];
-          Scan[Internal`StuffBag[deleteSpecs, {#}]&, Range[Max[pos[[1]] - (numberOfBeforeChars - numberOfOriginalSpaces), 1], pos[[1]] + numberOfOriginalSpaces]];
-        ,
-        MatchQ[fs[[pos[[1]]]], FragmentNode[Token`Comment, "\\" <> $CurrentNewlineString, _]],
-          (*
-          Always ok to remove line continuation from a comment
-          But make sure to leave a newline
-          *)
-          (*
-          AppendTo[commentReplaceSpecs, pos]
-          *)
-          Null
-        ,
-        MatchQ[fs[[pos[[1]]]], FragmentNode[String, "\\" <> $CurrentNewlineString, _]],
-          (*
-
-          Something like:
-
-          a::usage = \
-                   "xx
-          xx"
-
-          turns into
-
-          a::usage = "xx
-          xx"
-
-          The internal alignment of the string is changed.
-          Give a message.
-
-          *)
-          If[TrueQ[$DisableBadMerging],
-            Message[CodeFormat::multiline];
-            ,
-            Scan[Internal`StuffBag[deleteSpecs, {#}]&, Range[pos[[1]], originalSpacesSpec[[2]] - 1]];
-          ]
-      ]
-
-    ] /@ poss;
-
-    deleteSpecs = Internal`BagPart[deleteSpecs, All];
-
-    If[$Debug,
-      Print["commentReplaceSpecs: ", commentReplaceSpecs];
-      Print["deleteSpecs: ", deleteSpecs];
-    ];
-
-    fs = ReplacePart[fs, commentReplaceSpecs -> FragmentNode[Token`Comment, $CurrentNewlineString, <||>]];
-    fs = Delete[fs, deleteSpecs];
-
-    If[$Debug,
-      Print["newFs: ", fs];
-    ];
-
-    (*
-    cleanup any remaining line continuations
-    *)
-    (*
-    newFs = newFs /. {
-      lc :> Sequence @@ line[0],
+        Scan[Internal`StuffBag[deleteSpecs, {#}]&, Range[pos[[1]], originalSpacesSpec[[2]] - (numberOfOriginalSpaces - numberOfBeforeChars) - 1]];
+      ,
       (*
-      space fragments are now orphaned, so need to convert back to LeafNodes
-      *)
-      FragmentNode[_, " ", data_] :> LeafNode[Whitespace, " ", data],
-      FragmentNode[tag_, str_, data_] :> LeafNode[tag, str, data]
-    };
-    *)
+      or whatever is overlapping is spaces, so also fine to merge back
 
-    fs
-  ]
+      a::usage =
+            \
+      "text
+      text"
+
+      turns into =>
+
+      a::usage =
+      "text
+      text"
+
+      *)
+      MatchQ[Take[fs, takeSpec], {(LeafNode|FragmentNode)[_, " ", _]...}],
+        If[$Debug,
+          Print["mergeable 2"];
+        ];
+        (*
+        make sure to include the line continuation itself
+        *)
+        Scan[Internal`StuffBag[deleteSpecs, {#}]&, Range[takeSpec[[1]], pos[[1]]]];
+      ,
+      (*
+
+      If the string itself starts with " and then immediately a newline, then it is fine to merge
+      (we will not mess up any alignment, because there is no alignment on the first line)
+
+      a::usage = \
+                "
+      xxx"
+
+      turns into =>
+
+      a::usage = "
+      xxx"
+
+      *)
+      MatchQ[fs[[originalSpacesSpec[[2]]]], FragmentNode[String, "\"", _] | FragmentNode[Token`Comment, "(*", _]],
+        (*
+        make sure to include the line continuation itself to be removed
+        *)
+        If[$Debug,
+          Print["mergeable 3"];
+        ];
+        Scan[Internal`StuffBag[deleteSpecs, {#}]&,  Range[pos[[1]], originalSpacesSpec[[2]] - 1]];
+      ,
+      MatchQ[Take[fs, {Max[pos[[1]] - (numberOfBeforeChars - numberOfOriginalSpaces), 1], pos[[1]] - 1}], {(LeafNode|FragmentNode)[Whitespace, _, _]...}],
+        (*
+        
+        If[  \
+            "x
+        x"
+        ]
+
+        turns into
+
+        If[ "x
+        x"
+        ]
+
+        *)
+        If[$Debug,
+          Print["mergeable 4"];
+        ];
+        Scan[Internal`StuffBag[deleteSpecs, {#}]&, Range[Max[pos[[1]] - (numberOfBeforeChars - numberOfOriginalSpaces), 1], pos[[1]] + numberOfOriginalSpaces]];
+      ,
+      MatchQ[fs[[pos[[1]]]], FragmentNode[Token`Comment, "\\" <> $CurrentNewlineString, _]],
+        (*
+        Always ok to remove line continuation from a comment
+        But make sure to leave a newline
+        *)
+        (*
+        AppendTo[commentReplaceSpecs, pos]
+        *)
+        Null
+      ,
+      MatchQ[fs[[pos[[1]]]], FragmentNode[String, "\\" <> $CurrentNewlineString, _]],
+        (*
+
+        Something like:
+
+        a::usage = \
+                  "xx
+        xx"
+
+        turns into
+
+        a::usage = "xx
+        xx"
+
+        The internal alignment of the string is changed.
+        Give a message.
+
+        *)
+        If[TrueQ[$DisableBadMerging],
+          Message[CodeFormat::multiline];
+          ,
+          Scan[Internal`StuffBag[deleteSpecs, {#}]&, Range[pos[[1]], originalSpacesSpec[[2]] - 1]];
+        ]
+    ]
+
+  ] /@ poss;
+
+  deleteSpecs = Internal`BagPart[deleteSpecs, All];
+
+  If[$Debug,
+    Print["commentReplaceSpecs: ", commentReplaceSpecs];
+    Print["deleteSpecs: ", deleteSpecs];
+  ];
+
+  fs = ReplacePart[fs, commentReplaceSpecs -> FragmentNode[Token`Comment, $CurrentNewlineString, <||>]];
+  fs = Delete[fs, deleteSpecs];
+
+  If[$Debug,
+    Print["newFs: ", fs];
+  ];
+
+  (*
+  cleanup any remaining line continuations
+  *)
+  (*
+  newFs = newFs /. {
+    lc :> Sequence @@ line[0],
+    (*
+    space fragments are now orphaned, so need to convert back to LeafNodes
+    *)
+    FragmentNode[_, " ", data_] :> LeafNode[Whitespace, " ", data],
+    FragmentNode[tag_, str_, data_] :> LeafNode[tag, str, data]
+  };
+  *)
+
+  fs
+]
 
 
 End[]

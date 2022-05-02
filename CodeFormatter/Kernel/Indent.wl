@@ -2560,7 +2560,11 @@ indent[node:BoxNode[_, _, _], OptionsPattern[]] :=
 indent[m_?MissingQ, OptionsPattern[]] :=
   m
 
-indent[args___] := Failure["InternalUnhandled", <| "Function" -> indent, "Args" -> {args} |>]
+indent[f_?FailureQ, OptionsPattern[]] :=
+  f
+
+indent[args___] :=
+  Failure["Unhandled", <| "Function" -> indent, "Arguments" -> HoldForm[{args}] |>]
 
 
 
@@ -2610,7 +2614,7 @@ combineExtents[{w1_, h1_, l1_, t1_}, {w2_, h2_, l2_, t2_}] := {
 }
 
 combineExtents[args___] :=
-  Failure["InternalUnhandled", <| "Function" -> combineExtents, "Arguments" -> {args} |>]
+  Failure["Unhandled", <| "Function" -> combineExtents, "Arguments" -> HoldForm[{args}] |>]
 
 computeExtent[children_] :=
   Fold[combineExtents, identityExtent, getExtent /@ children]

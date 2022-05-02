@@ -244,7 +244,8 @@ Could be processed because it has the same Source as a multiline leaf node
 fragmentizeMultilineLeafNode[n:LeafNode[Token`Fake`ImplicitNull, _, _]] :=
   n
 
-fragmentizeMultilineLeafNode[args___] := Failure["InternalUnhandled", <| "Function" -> fragmentizeMultilineLeafNode, "Arguments" -> {args} |>]
+fragmentizeMultilineLeafNode[args___] :=
+  Failure["Unhandled", <| "Function" -> fragmentizeMultilineLeafNode, "Arguments" -> HoldForm[{args}] |>]
 
 
 (*

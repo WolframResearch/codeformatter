@@ -675,6 +675,10 @@ Module[{
       Throw[FirstCase[tmp, _?MissingQ]]
     ];
 
+    If[AnyTrue[tmp, FailureQ],
+      Throw[FirstCase[tmp, _?FailureQ]]
+    ];
+
     strs = collectStr /@ tmp;
 
     formattedStr = StringJoin[strs];

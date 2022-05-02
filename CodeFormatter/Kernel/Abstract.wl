@@ -26,7 +26,6 @@ is a SetDelayed node, with a Set node on the RHS
 But this really should be formatted as if it were a single TernaryNode
 *)
 AbstractFormatNodes[gstIn_] :=
-Catch[
 Module[{gst},
   
   gst = gstIn;
@@ -44,7 +43,7 @@ Module[{gst},
   gst = abstractFormatNodes[gst];
   
   gst
-], abstractFormatNodesTag]
+]
 
 (*
 abstract
@@ -585,6 +584,9 @@ abstractFormatNodes[node:CodeNode[_, _, _]] :=
 abstractFormatNodes[m_?MissingQ] :=
   m
 
+abstractFormatNodes[f_?FailureQ] :=
+  f
+
 (*
 Bad args such as List[1, 2, 3] used to match this, so changed data_ => data_Association to try to reduce bad hits
 *)
@@ -592,7 +594,7 @@ abstractFormatNodes[head_[tag_, ts_, data_Association]] :=
   head[tag, abstractFormatNodes /@ ts, data]
 
 abstractFormatNodes[args___] :=
-  Throw[Failure["InternalUnhandled", <| "Function" -> abstractFormatNodes, "Args" -> {args} |>], abstractFormatNodesTag]
+  Failure["Unhandled", <| "Function" -> abstractFormatNodes, "Arguments" -> HoldForm[{args}] |>]
 
 
 cleanLexicalVariables[node_LeafNode] :=
@@ -626,7 +628,7 @@ cleanLexicalVariables[head_[tag_, ts_, data_Association]] :=
   head[tag, cleanLexicalVariables /@ ts, data]
 
 cleanLexicalVariables[args___] :=
-  Throw[Failure["InternalUnhandled", <| "Function" -> cleanLexicalVariables, "Args" -> {args} |>], abstractFormatNodesTag]
+  Failure["Unhandled", <| "Function" -> cleanLexicalVariables, "Arguments" -> HoldForm[{args}] |>]
 
 
 sameDefinitionSymbols[lhs1_, lhs2_] :=

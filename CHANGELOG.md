@@ -1,9 +1,14 @@
 
 ## 1.6 - XX May, 2022
 
+Format WithCleanup
+
+
 ### Fixes
 
 Fix 421585: `CodeFormatCST[LeafNode[...]]` fails
+
+partial fix for 422410: CodeFormatter has trouble with generated code
 
 
 ## 1.5.1 - 28 Mar, 2022

@@ -327,7 +327,7 @@ Module[{cst, tabWidth, newline, formattedStr, agg, cst2, agg2, aggToCompare, agg
 ]]
 
 
-CodeFormat[bytes:{_Integer, _Integer...}, opts:OptionsPattern[]] :=
+CodeFormat[bytes:{_Integer...}, opts:OptionsPattern[]] :=
 Catch[
 Module[{cst, tabWidth, formattedStr, agg, cst2, agg2, aggToCompare, agg2ToCompare, newline, performanceGoal},
 
@@ -395,8 +395,6 @@ Module[{cst, tabWidth, formattedStr, agg, cst2, agg2, aggToCompare, agg2ToCompar
   formattedStr
 ]]
 
-
-CodeFormat[{}, opts:OptionsPattern[]] := ""
 
 
 Options[CodeFormatCST] = Options[CodeFormat]

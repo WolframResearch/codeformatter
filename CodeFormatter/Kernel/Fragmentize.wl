@@ -38,6 +38,26 @@ multiline comments have temporary line continuations introduced
 others?
 
 *)
+Fragmentize[cstIn:CallNode[_, _, _]] :=
+Catch[
+Module[{cst, data},
+
+  cst = cstIn;
+  
+  cst = fragmentizeCommentGroups[cst];
+  
+  data = cst[[3]];
+
+  (*
+  Only proceed if LineColumn convention
+  *)
+  If[!MatchQ[data, KeyValuePattern[Source -> {{_, _}, {_, _}}]],
+    Throw[cst]
+  ];
+
+  fragmentize[cst]
+]]
+
 Fragmentize[cstIn:_[_, _String, _]] :=
 Catch[
 Module[{cst, data},

@@ -30,6 +30,24 @@ outside of strings or comments
 
 RemoveSimpleLineContinuations::usage = "RemoveSimpleLineContinuations[cst] removes simple line continuations from cst."
 
+RemoveSimpleLineContinuations[cstIn:CallNode[_, _, _]] :=
+Catch[
+Module[{data, cst},
+
+  cst = cstIn;
+
+  data = cst[[3]];
+
+  (*
+  Only proceed if LineColumn convention
+  *)
+  If[!MatchQ[data, KeyValuePattern[Source -> {{_, _}, {_, _}}]],
+    Throw[cst]
+  ];
+
+  removeSimpleLineContinuations[cst]
+]]
+
 RemoveSimpleLineContinuations[cstIn:_[_, _String, _]] :=
 Catch[
 Module[{data, cst},
@@ -176,6 +194,25 @@ Module[{data, cst, tokStartLocs, simpleLineContinuations, grouped, poss, tuples,
 ]]
 
 RemoveComplexLineContinuations::usage = "RemoveComplexLineContinuations[cst] removes complex line continuations from cst."
+
+RemoveComplexLineContinuations[cstIn:CallNode[_, _, _]] :=
+Catch[
+Module[{data, cst, tokStartLocs, grouped, poss, tuples, mapSpecs,
+  extracted, complexLineContinuations, firstChildData},
+
+  cst = cstIn;
+
+  data = cst[[3]];
+
+  (*
+  Only proceed if LineColumn convention
+  *)
+  If[!MatchQ[data, KeyValuePattern[Source -> {{_, _}, {_, _}}]],
+    Throw[cst]
+  ];
+
+  removeComplexLineContinuations[cst]
+]]
 
 RemoveComplexLineContinuations[cstIn:_[_, _String, _]] :=
 Catch[
@@ -331,6 +368,24 @@ Need to recompute Source because it is used later
 *)
 RemoveRemainingSimpleLineContinuations::usage =
   "RemoveRemainingSimpleLineContinuations[cst] removes simple line continuations from cst."
+
+RemoveRemainingSimpleLineContinuations[cstIn:CallNode[_, _, _]] :=
+Catch[
+Module[{data, cst},
+
+  cst = cstIn;
+
+  data = cst[[3]];
+
+  (*
+  Only proceed if LineColumn convention
+  *)
+  If[!MatchQ[data, KeyValuePattern[Source -> {{_, _}, {_, _}}]],
+    Throw[cst]
+  ];
+
+  removeRemainingSimpleLineContinuations[cst]
+]]
 
 RemoveRemainingSimpleLineContinuations[cstIn:_[_, _String, _]] :=
 Catch[

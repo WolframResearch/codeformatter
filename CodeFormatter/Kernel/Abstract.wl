@@ -108,12 +108,12 @@ abstractFormatNodes[
 (*
 wrap ClauseNode around clauses
 *)
-abstractFormatNodes[CallNode[{head:LeafNode[Symbol, "Switch", _], headSeq___}, {
+abstractFormatNodes[CallNode[{head:LeafNode[Symbol, "Switch", _], headSeq___},
   GroupNode[GroupSquare, {
       opener_, openerSeq:comment...,
       InfixNode[Comma, {expr:Except[LeafNode[Token`Comma, _, _]], exprSeq:Except[LeafNode[Token`Comma, _, _]]..., rest___}, data2_],
       closerSeq:comment..., closer_}, data1_]
-    }, data_]] :=
+    , data_]] :=
 Module[{replaced},
 
   replaced =
@@ -126,24 +126,24 @@ Module[{replaced},
         ClauseNode[Switch, {test, testSeq, comm, valSeq}, <||>]
     ];
 
-  CallNode[{head, headSeq}, {
+  CallNode[{head, headSeq}, 
     GroupNode[GroupSquare, {
       opener, openerSeq,
       InfixNode[Comma, abstractFormatNodes /@ ({expr, exprSeq} ~Join~ replaced), data2],
       closerSeq, closer
     }, data1]
-  }, data]
+  , data]
 ]
 
 (*
 wrap ClauseNode around clauses
 *)
-abstractFormatNodes[CallNode[{head:LeafNode[Symbol, "Which", _], headSeq___}, {
+abstractFormatNodes[CallNode[{head:LeafNode[Symbol, "Which", _], headSeq___}, 
   GroupNode[GroupSquare, {
       opener_, openerSeq:comment...,
       InfixNode[Comma, commaChildren_, data2_],
       closerSeq:comment..., closer_}, data1_]
-    }, data_]] :=
+    , data_]] :=
 Module[{replaced},
 
   replaced =
@@ -156,25 +156,25 @@ Module[{replaced},
         ClauseNode[Which, {test, testSeq, comm, valSeq}, <||>]
     ];
 
-  CallNode[{head, headSeq}, {
+  CallNode[{head, headSeq},
     GroupNode[GroupSquare, {
       opener, openerSeq,
       InfixNode[Comma, abstractFormatNodes /@ replaced, data2],
       closerSeq, closer
     }, data1]
-  }, data]
+  , data]
 ]
 
 
 (*
 may have already been aggregated, so preserve
 *)
-cleanLexicalVariables[n:CallNode[head:LeafNode[Symbol, "Module", _], {
+cleanLexicalVariables[n:CallNode[head:LeafNode[Symbol, "Module", _], 
   GroupNode[GroupSquare, {
       opener_, 
       InfixNode[Comma, commaChildren_, data2_],
       closer_}, data1_]
-    }, data_]] :=
+    , data_]] :=
 Catch[
 Module[{ast, children, params, vars, rules},
 
@@ -192,8 +192,8 @@ Module[{ast, children, params, vars, rules},
     True,
       params = children[[1, 2]];
       vars = # /. {
-        CallNode[LeafNode[Symbol, "Set" | "SetDelayed", _], {
-          sym:LeafNode[Symbol, _, _], _}, _] :> sym,
+        CallNode[LeafNode[Symbol, "Set" | "SetDelayed", _],
+          sym:LeafNode[Symbol, _, _], _, _] :> sym,
         sym:LeafNode[Symbol, _, _] :> sym,
         _ :> Nothing
       }& /@ params;
@@ -201,24 +201,24 @@ Module[{ast, children, params, vars, rules},
       rules = (LeafNode[Symbol, #[[2]], _] -> LeafNode[Symbol, Last[StringSplit[#[[2]], "`"]], <||>])& /@ vars;
   ];
 
-  CallNode[head, {
+  CallNode[head,
     GroupNode[GroupSquare, {
       opener,
       InfixNode[Comma, cleanLexicalVariables /@ (commaChildren /. rules), data2],
       closer
     }, data1]
-  }, data]
+  , data]
 ]]
 
 (*
 may have NOT YET been aggregated, so preserve
 *)
-cleanLexicalVariables[n:CallNode[{head:LeafNode[Symbol, "Module", _], headSeq___}, {
+cleanLexicalVariables[n:CallNode[{head:LeafNode[Symbol, "Module", _], headSeq___},
   GroupNode[GroupSquare, {
       opener_, openerSeq:comment...,
       InfixNode[Comma, commaChildren_, data2_],
       closerSeq:comment..., closer_}, data1_]
-    }, data_]] :=
+    , data_]] :=
 Catch[
 Module[{agg, ast, children, params, vars, rules},
 
@@ -246,25 +246,25 @@ Module[{agg, ast, children, params, vars, rules},
       rules = (LeafNode[Symbol, #[[2]], _] -> LeafNode[Symbol, Last[StringSplit[#[[2]], "`"]], <||>])& /@ vars;
   ];
 
-  CallNode[{head, headSeq}, {
+  CallNode[{head, headSeq},
     GroupNode[GroupSquare, {
       opener, openerSeq,
       InfixNode[Comma, cleanLexicalVariables /@ (commaChildren /. rules), data2],
       closerSeq, closer
     }, data1]
-  }, data]
+  , data]
 ]]
 
 
 (*
 may have already been aggregated, so preserve
 *)
-cleanLexicalVariables[n:CallNode[head:LeafNode[Symbol, "With", _], {
+cleanLexicalVariables[n:CallNode[head:LeafNode[Symbol, "With", _], 
   GroupNode[GroupSquare, {
       opener_, 
       InfixNode[Comma, commaChildren_, data2_],
       closer_}, data1_]
-    }, data_]] :=
+    , data_]] :=
 Catch[
 Module[{ast, children, params, vars, rules},
 
@@ -290,24 +290,24 @@ Module[{ast, children, params, vars, rules},
       rules = (LeafNode[Symbol, #[[2]], _] -> LeafNode[Symbol, Last[StringSplit[#[[2]], "`"]], <||>])& /@ vars;
   ];
 
-  CallNode[head, {
+  CallNode[head,
     GroupNode[GroupSquare, {
       opener,
       InfixNode[Comma, cleanLexicalVariables /@ (commaChildren /. rules), data2],
       closer
     }, data1]
-  }, data]
+  , data]
 ]]
 
 (*
 may have NOT YET been aggregated, so preserve
 *)
-cleanLexicalVariables[n:CallNode[{head:LeafNode[Symbol, "With", _], headSeq___}, {
+cleanLexicalVariables[n:CallNode[{head:LeafNode[Symbol, "With", _], headSeq___},
   GroupNode[GroupSquare, {
       opener_, openerSeq:comment...,
       InfixNode[Comma, commaChildren_, data2_],
       closerSeq:comment..., closer_}, data1_]
-    }, data_]] :=
+    , data_]] :=
 Catch[
 Module[{agg, ast, children, params, vars, rules},
 
@@ -334,25 +334,25 @@ Module[{agg, ast, children, params, vars, rules},
       rules = (LeafNode[Symbol, #[[2]], _] -> LeafNode[Symbol, Last[StringSplit[#[[2]], "`"]], <||>])& /@ vars;
   ];
 
-  CallNode[{head, headSeq}, {
+  CallNode[{head, headSeq},
     GroupNode[GroupSquare, {
       opener, openerSeq,
       InfixNode[Comma, cleanLexicalVariables /@ (commaChildren /. rules), data2],
       closerSeq, closer
     }, data1]
-  }, data]
+  , data]
 ]]
 
 
 (*
 may have already been aggregated, so preserve
 *)
-cleanLexicalVariables[n:CallNode[head:LeafNode[Symbol, "Function", _], {
+cleanLexicalVariables[n:CallNode[head:LeafNode[Symbol, "Function", _],
   GroupNode[GroupSquare, {
       opener_, 
       InfixNode[Comma, commaChildren_, data2_],
       closer_}, data1_]
-    }, data_]] :=
+    , data_]] :=
 Catch[
 Module[{ast, children, param, params, rules},
 
@@ -385,24 +385,24 @@ Module[{ast, children, param, params, rules},
       rules = (LeafNode[Symbol, #[[2]], _] -> LeafNode[Symbol, Last[StringSplit[#[[2]], "`"]], <||>])& /@ params;
   ];
 
-  CallNode[head, {
+  CallNode[head,
     GroupNode[GroupSquare, {
       opener,
       InfixNode[Comma, cleanLexicalVariables /@ (commaChildren /. rules), data2],
       closer
     }, data1]
-  }, data]
+  , data]
 ]]
 
 (*
 may have NOT YET been aggregated, so preserve
 *)
-cleanLexicalVariables[n:CallNode[{head:LeafNode[Symbol, "Function", _], headSeq___}, {
+cleanLexicalVariables[n:CallNode[{head:LeafNode[Symbol, "Function", _], headSeq___},
   GroupNode[GroupSquare, {
       opener_, openerSeq:comment...,
       InfixNode[Comma, commaChildren_, data2_],
       closerSeq:comment..., closer_}, data1_]
-    }, data_]] :=
+    , data_]] :=
 Catch[
 Module[{agg, ast, children, param, params, rules},
 
@@ -436,13 +436,13 @@ Module[{agg, ast, children, param, params, rules},
       rules = (LeafNode[Symbol, #[[2]], _] -> LeafNode[Symbol, Last[StringSplit[#[[2]], "`"]], <||>])& /@ params;
   ];
 
-  CallNode[{head, headSeq}, {
+  CallNode[{head, headSeq},
     GroupNode[GroupSquare, {
       opener, openerSeq,
       InfixNode[Comma, cleanLexicalVariables /@ (commaChildren /. rules), data2],
       closerSeq, closer
     }, data1]
-  }, data]
+  , data]
 ]]
 
 
@@ -572,8 +572,8 @@ flattenBinarySlashSlash[n_] := n
 abstractFormatNodes[node_LeafNode] :=
   node
 
-abstractFormatNodes[CallNode[head_, ts_, data_]] :=
-  CallNode[abstractFormatNodes /@ head, abstractFormatNodes /@ ts, data]
+abstractFormatNodes[CallNode[head_, t_, data_]] :=
+  CallNode[abstractFormatNodes /@ head, abstractFormatNodes[t], data]
 
 abstractFormatNodes[BoxNode[RowBox, {ts_}, data_]] :=
   BoxNode[RowBox, {abstractFormatNodes /@ ts}, data]
@@ -603,14 +603,14 @@ cleanLexicalVariables[node_LeafNode] :=
 (*
 maybe being called in formatter pass sequence, where whitespace has been removed and heads still have list
 *)
-cleanLexicalVariables[CallNode[{head_, headSeq___}, ts_, data_]] :=
-  CallNode[{cleanLexicalVariables @ head, headSeq}, cleanLexicalVariables /@ ts, data]
+cleanLexicalVariables[CallNode[{head_, headSeq___}, t_, data_]] :=
+  CallNode[{cleanLexicalVariables[head], headSeq}, cleanLexicalVariables[t], data]
 
 (*
 maybe being called in sanity check, where proper aggregation has happened, and head is a node
 *)
-cleanLexicalVariables[CallNode[head_, ts_, data_]] :=
-  CallNode[cleanLexicalVariables @ head, cleanLexicalVariables /@ ts, data]
+cleanLexicalVariables[CallNode[head_, t_, data_]] :=
+  CallNode[cleanLexicalVariables[head], cleanLexicalVariables[t], data]
 
 cleanLexicalVariables[BoxNode[RowBox, {ts_}, data_]] :=
   BoxNode[RowBox, {cleanLexicalVariables /@ ts}, data]

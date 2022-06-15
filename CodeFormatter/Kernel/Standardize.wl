@@ -14,6 +14,24 @@ Needs["CodeParser`Utils`"]
 
 StandardizeEmbeddedNewlines::usage = "StandardizeEmbeddedNewlines[cst, newline] standardizes the newlines in cst."
 
+StandardizeEmbeddedNewlines[cstIn:CallNode[_, _, _], newline_String] :=
+Catch[
+Module[{cst, data},
+
+  cst = cstIn;
+
+  data = cst[[3]];
+
+  (*
+  Only proceed if LineColumn convention
+  *)
+  If[!MatchQ[data, KeyValuePattern[Source -> {{_, _}, {_, _}}]],
+    Throw[cst]
+  ];
+
+  standardizeEmbeddedNewlines[cst, newline]
+]]
+
 StandardizeEmbeddedNewlines[cstIn:_[_, _String, _], newline_String] :=
 Catch[
 Module[{cst, data},
@@ -138,6 +156,24 @@ Module[{cst, data, embeddedNewlines, mapSpecs, tuples, poss, tokStartLocs, group
 
 
 StandardizeEmbeddedTabs::usage = "StandardizeEmbeddedTabs[cst, newline, tabWidth] standardizes tabs in cst."
+
+StandardizeEmbeddedTabs[cstIn:CallNode[_, _, _], newline_String, tabWidth_Integer] :=
+Catch[
+Module[{cst, data},
+
+  cst = cstIn;
+
+  data = cst[[3]];
+
+  (*
+  Only proceed if LineColumn convention
+  *)
+  If[!MatchQ[data, KeyValuePattern[Source -> {{_, _}, {_, _}}]],
+    Throw[cst]
+  ];
+
+  standardizeEmbeddedTabs[cst, newline, tabWidth]
+]]
 
 StandardizeEmbeddedTabs[cstIn:_[_, _String, _], newline_String, tabWidth_Integer] :=
 Catch[

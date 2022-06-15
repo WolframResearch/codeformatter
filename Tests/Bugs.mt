@@ -487,7 +487,7 @@ For[
 
 cst =
   ContainerNode[
-   String, {CallNode[{LeafNode[Symbol, "Module", <||>]}, {GroupNode[
+   String, {CallNode[{LeafNode[Symbol, "Module", <||>]}, GroupNode[
        GroupSquare, {LeafNode[Token`OpenSquare, "[", <||>],
         InfixNode[
          Comma, {GroupNode[
@@ -499,7 +499,7 @@ cst =
             LeafNode[Token`CloseCurly, "}", <||>]}, <||>],
           LeafNode[Token`Comma, ",", <||>],
           LeafNode[Symbol, "foo", <||>]}, <||>],
-        LeafNode[Token`CloseSquare, "]", <||>]}, <||>]}, <||>]}, <||>]
+        LeafNode[Token`CloseSquare, "]", <||>]}, <||>], <||>]}, <||>]
 
 Test[
 	CodeFormatCST[cst]

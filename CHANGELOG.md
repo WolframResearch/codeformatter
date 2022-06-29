@@ -1,5 +1,7 @@
 
-## 1.7 - XX June, 2022
+## 1.7 - 4 July, 2022
+
+Update various places based on changes in CodeParser
 
 
 ## 1.6 - 12 May, 2022

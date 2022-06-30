@@ -73,6 +73,7 @@ Token`LongName`Square -> Parselet`PrefixOperatorParselet[Token`LongName`Square, 
 
 
 Token`Comma -> Parselet`PrefixCommaParselet[],
+Token`LongName`InvisibleComma -> Parselet`PrefixCommaParselet[],
 
 
 (*
@@ -153,7 +154,7 @@ Token`Hash -> Parselet`HashParselet[],
 Token`HashHash -> Parselet`HashHashParselet[],
 
 Token`Percent -> Parselet`PercentParselet[],
-Token`PercentPercent -> Parselet`PercentPercentParselet[],
+Token`PercentPercent -> Parselet`LeafParselet[],
 
 (*
 prefix, infix, postfix

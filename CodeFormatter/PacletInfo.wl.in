@@ -1,7 +1,7 @@
 
 Paclet[
   Name -> "CodeFormatter",
-  Version -> "1.7",
+  Version -> "1.8",
   WolframVersion -> "12.1+",
   Description -> "Format Wolfram Language code.",
   Creator -> "Brenton Bostick <brenton@wolfram.com>",

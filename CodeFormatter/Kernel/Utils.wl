@@ -101,7 +101,7 @@ $WorkaroundUnreportedSortBug1 = checkUnreportedSortBug1[]
 
 
 (*
-Yes, this slower than it needs to be
+Yes, this is slower than it needs to be
 But it is simple and reliable
 *)
 bubbleLexSort[listIn_] :=

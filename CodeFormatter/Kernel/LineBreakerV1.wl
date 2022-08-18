@@ -27,6 +27,9 @@ $LineBreakWithinComments = False
 $AllowSplittingTokens = False
 
 
+breakLinesV1[{}, _, _] :=
+  {}
+
 breakLinesV1[tokensIn_, lineWidth1_Integer, lineWidth2_Integer] :=
 Module[{tokens, lines},
 

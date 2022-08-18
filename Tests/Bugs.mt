@@ -514,3 +514,10 @@ Module[{a, b},
 ]
 
 
+Test[
+	CodeFormat[""]
+	,
+	""
+	,
+	TestID->"Bugs-20220817-R3W7C9"
+]

@@ -29,6 +29,9 @@ Needs["CodeTools`Generate`GenerateSources`"];
 ]
 
 
+checkBuildDir[]
+
+
 generatePalette[] := 
 Module[{nb, res},
   

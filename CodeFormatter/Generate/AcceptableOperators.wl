@@ -17,6 +17,10 @@ Needs["CodeTools`Generate`GenerateSources`"];
 ]
 
 
+checkBuildDir[]
+checkSrcDir[]
+
+
 dataDir = FileNameJoin[{srcDir, "CodeParser", "Data"}]
 
 

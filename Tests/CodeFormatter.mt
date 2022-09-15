@@ -380,3 +380,20 @@ Test[
 ]
 
 
+Test[
+	CodeFormat["Test[1/0, ComplexInfinity, {Power::infy}, TestID->\"test\"]"]
+	,
+	"\
+Test[
+    1/0
+    ,
+    ComplexInfinity
+    ,
+    {Power::infy}
+    ,
+    TestID -> \"test\"
+]"
+	,
+	TestID->"CodeFormatter-20220915-G5E9I2"
+]
+

@@ -754,10 +754,10 @@ Module[{ratorsPat, definitelyDelete, definitelyInsert, definitelyAutomatic, spli
 
   Which[
     TrueQ[definitelyInsert],
-      baseOperatorNodeIndent[InfixNode, CompoundExpression, data, split, ratorsPat, anyIndentedGraphsMultiline, False]
+      baseOperatorNodeIndent[InfixNode, CompoundExpression, data, split, ratorsPat, anyIndentedGraphsMultiline, None]
     ,
     TrueQ[definitelyDelete],
-      baseOperatorNodeIndent[InfixNode, CompoundExpression, data, split, ratorsPat, anyIndentedGraphsMultiline, False]
+      baseOperatorNodeIndent[InfixNode, CompoundExpression, data, split, ratorsPat, anyIndentedGraphsMultiline, None]
     ,
     TrueQ[definitelyAutomatic],
       (*
@@ -765,7 +765,7 @@ Module[{ratorsPat, definitelyDelete, definitelyInsert, definitelyAutomatic, spli
 
       NewlinesBetweenSemicolons -> Automatic is same as NewlinesBetweenSemicolons -> Insert, so there is nothing to do
       *)
-      baseOperatorNodeIndent[InfixNode, CompoundExpression, data, split, ratorsPat, anyIndentedGraphsMultiline, False]
+      baseOperatorNodeIndent[InfixNode, CompoundExpression, data, split, ratorsPat, anyIndentedGraphsMultiline, None]
   ]
 ]]
 
@@ -849,13 +849,13 @@ Module[{aggs, ratorsPat, split, definitelyDelete, definitelyInsert, definitelyAu
 
   Which[
     TrueQ[definitelyInsert],
-      baseOperatorNodeIndent[InfixNode, Comma, data, split, ratorsPat, anyIndentedGraphsMultiline, False]
+      baseOperatorNodeIndent[InfixNode, Comma, data, split, ratorsPat, anyIndentedGraphsMultiline, None]
     ,
     TrueQ[definitelyDelete],
-      baseOperatorNodeIndent[InfixNode, Comma, data, split, ratorsPat, anyIndentedGraphsMultiline, False]
+      baseOperatorNodeIndent[InfixNode, Comma, data, split, ratorsPat, anyIndentedGraphsMultiline, None]
     ,
     TrueQ[definitelyAutomatic],
-      res = baseOperatorNodeIndent[InfixNode, Comma, data, split, ratorsPat, anyIndentedGraphsMultiline, False];
+      res = baseOperatorNodeIndent[InfixNode, Comma, data, split, ratorsPat, anyIndentedGraphsMultiline, None];
       extent = res[[3, Key["Extent"]]];
       If[extent[[1]] >= $CurrentStyle["LineWidth"],
         (*
@@ -867,6 +867,18 @@ Module[{aggs, ratorsPat, split, definitelyDelete, definitelyInsert, definitelyAu
   ]
 ]]
 
+
+
+(*
+no spaces around Divide with Integers:
+1/0
+
+*)
+indentInfixRatorSurroundedByIntegers[Divide][rator_] :=
+  rator
+
+indentInfixRatorSurroundedByIntegers[tag_][rator_] :=
+  indentInfixRatorSurroundedByLeafs[tag][rator]
 
 
 (*
@@ -1017,7 +1029,7 @@ indent[node:(type:BinaryNode|InfixNode|TernaryNode|QuaternaryNode)[tag_, graphs_
 Catch[
 Module[{aggs, rators, ratorsPat, split,
   definitelyDelete, definitelyInsert, definitelyAutomatic, indentedGraphs, anyIndentedGraphsMultiline,
-  infixRatorSurroundedByLeafs,
+  infixRatorSurroundedBy,
   res, extent},
 
   If[$Debug,
@@ -1032,7 +1044,16 @@ Module[{aggs, rators, ratorsPat, split,
     Print["anyIndentedGraphsMultiline: ", anyIndentedGraphsMultiline]
   ];
 
-  infixRatorSurroundedByLeafs = MatchQ[type, BinaryNode | InfixNode] && MatchQ[graphs, {_LeafNode, _LeafNode, _LeafNode}];
+  Which[
+    MatchQ[type, BinaryNode | InfixNode] && MatchQ[graphs, {LeafNode[Integer, _, _], _LeafNode, LeafNode[Integer, _, _]}],
+      infixRatorSurroundedBy = Integers;
+    ,
+    MatchQ[type, BinaryNode | InfixNode] && MatchQ[graphs, {_LeafNode, _LeafNode, _LeafNode}],
+      infixRatorSurroundedBy = Leafs;
+    ,
+    True,
+      infixRatorSurroundedBy = None;
+  ];
 
   aggs = DeleteCases[indentedGraphs, comment];
 
@@ -1146,16 +1167,16 @@ Module[{aggs, rators, ratorsPat, split,
 
   Which[
     TrueQ[definitelyInsert],
-      baseOperatorNodeIndent[type, tag, data, split, ratorsPat, anyIndentedGraphsMultiline, infixRatorSurroundedByLeafs]
+      baseOperatorNodeIndent[type, tag, data, split, ratorsPat, anyIndentedGraphsMultiline, infixRatorSurroundedBy]
     ,
     TrueQ[definitelyDelete],
-      baseOperatorNodeIndent[type, tag, data, split, ratorsPat, anyIndentedGraphsMultiline, infixRatorSurroundedByLeafs]
+      baseOperatorNodeIndent[type, tag, data, split, ratorsPat, anyIndentedGraphsMultiline, infixRatorSurroundedBy]
     ,
     TrueQ[definitelyAutomatic],
       Which[
         MemberQ[$SpecialBreakAfterLastRator, tag] && $Toplevel,
           blockAfterLastRator @
-            baseOperatorNodeIndent[type, tag, data, split, ratorsPat, anyIndentedGraphsMultiline, infixRatorSurroundedByLeafs]
+            baseOperatorNodeIndent[type, tag, data, split, ratorsPat, anyIndentedGraphsMultiline, infixRatorSurroundedBy]
           (*
           $Toplevel, so do not re-format if exceeding LineWidth, cannot re-indent safely at $Toplevel
           *)
@@ -1164,18 +1185,18 @@ Module[{aggs, rators, ratorsPat, split,
           (*
           do not increment
           *)
-          baseOperatorNodeIndent[type, tag, data, split, ratorsPat, anyIndentedGraphsMultiline, infixRatorSurroundedByLeafs]
+          baseOperatorNodeIndent[type, tag, data, split, ratorsPat, anyIndentedGraphsMultiline, infixRatorSurroundedBy]
         ,
         $Toplevel,
           increment @
-            baseOperatorNodeIndent[type, tag, data, split, ratorsPat, anyIndentedGraphsMultiline, infixRatorSurroundedByLeafs]
+            baseOperatorNodeIndent[type, tag, data, split, ratorsPat, anyIndentedGraphsMultiline, infixRatorSurroundedBy]
           (*
           $Toplevel, so do not re-format if exceeding LineWidth, cannot re-indent safely at $Toplevel
           *)
         ,
         True,
           res = increment @
-            baseOperatorNodeIndent[type, tag, data, split, ratorsPat, anyIndentedGraphsMultiline, infixRatorSurroundedByLeafs];
+            baseOperatorNodeIndent[type, tag, data, split, ratorsPat, anyIndentedGraphsMultiline, infixRatorSurroundedBy];
           extent = res[[3, Key["Extent"]]];
           If[extent[[1]] >= $CurrentStyle["LineWidth"],
             (*
@@ -1189,7 +1210,7 @@ Module[{aggs, rators, ratorsPat, split,
 ]]
 
 
-baseOperatorNodeIndent[type_, tag_, data_, split_, ratorsPat_, anyIndentedGraphsMultiline_, infixRatorSurroundedByLeafs_] :=
+baseOperatorNodeIndent[type_, tag_, data_, split_, ratorsPat_, anyIndentedGraphsMultiline_, infixRatorSurroundedBy_] :=
 Catch[
 Module[{children, grouped,
   extent},
@@ -1200,7 +1221,7 @@ Module[{children, grouped,
     Print["tag: ", tag];
     Print["split: ", split];
     Print["ratorsPat: ", ratorsPat];
-    Print["infixRatorSurroundedByLeafs: ", infixRatorSurroundedByLeafs];
+    Print["infixRatorSurroundedBy: ", infixRatorSurroundedBy];
   ];
 
   If[Length[split] == 1,
@@ -1214,10 +1235,15 @@ Module[{children, grouped,
       Flatten[
         Replace[grouped, {
           rator:ratorsPat :>
-            If[infixRatorSurroundedByLeafs,
-              indentInfixRatorSurroundedByLeafs[tag][rator]
+            Switch[infixRatorSurroundedBy,
+              Integers,
+                indentInfixRatorSurroundedByIntegers[tag][rator]
               ,
-              indentInfixRator[tag][rator]
+              Leafs,
+                indentInfixRatorSurroundedByLeafs[tag][rator]
+              ,
+              _,
+                indentInfixRator[tag][rator]
             ]
         }, {1}]
       ];

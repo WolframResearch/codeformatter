@@ -362,3 +362,21 @@ Test[
 	TestID->"CodeFormatter-20220329-E0H9Q0"
 ]
 
+
+Test[
+	CodeFormat["a/b"]
+	,
+	"a / b"
+	,
+	TestID->"CodeFormatter-20220915-B6S2B8"
+]
+
+Test[
+	CodeFormat["1/0"]
+	,
+	"1/0"
+	,
+	TestID->"CodeFormatter-20220915-V8Q0W0"
+]
+
+

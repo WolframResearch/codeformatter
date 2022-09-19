@@ -1253,7 +1253,7 @@ With[
 ]
 
 
-deletePresetNameButton[presetList_, activePresetKey_, displayName_, mouseOver_] :=
+deletePresetNameButton[popupAttachedCell_, presetList_, activePresetKey_, displayName_, mouseOver_] :=
 With[{$optsPath = CodeFormatter`$optsPath},
   DynamicWrapper[
     Tooltip[
@@ -1267,7 +1267,7 @@ With[{$optsPath = CodeFormatter`$optsPath},
             activePresetKey = None;
             CurrentValue[$FrontEnd, {$optsPath, "LastPresetUsed"}] = None];
           If[CurrentValue[$FrontEnd, {$optsPath, "Presets"}] === <||>,
-            NotebookDelete[EvaluationCell[]]
+            NotebookDelete[popupAttachedCell]
             ,
             presetList =
               Pane[
@@ -1282,14 +1282,14 @@ With[{$optsPath = CodeFormatter`$optsPath},
 ]
 
 
-presetBubbleDisplayMode[presetList_, activePresetKey_, displayName_, mouseOverEditButton_, mouseOverDeleteButton_] :=
+presetBubbleDisplayMode[popupAttachedCell_, presetList_, activePresetKey_, displayName_, mouseOverEditButton_, mouseOverDeleteButton_] :=
 Grid[
   {{
     Dynamic[displayName],
     Grid[
       {{
         editPresetNameButton[presetList, activePresetKey, displayName, mouseOverEditButton],
-        deletePresetNameButton[presetList, activePresetKey, displayName, mouseOverDeleteButton]}}]}},
+        deletePresetNameButton[popupAttachedCell, presetList, activePresetKey, displayName, mouseOverDeleteButton]}}]}},
   Alignment -> {{Left, Right}},
   ItemSize -> {{Automatic, Fit}}]
 
@@ -1301,10 +1301,10 @@ With[{$optsPath = CodeFormatter`$optsPath, airinessKeys = airinessKeys, indentKe
 
 PresetBubble[presetName_(*String*), presetList_, activePresetKey_, parameters_, indentationParameters_] :=
 buttonAppearance[(* gives rounded rect appearance *)
-  DynamicModule[{displayName = presetName, mouseOverEditButton = False, mouseOverDeleteButton = False},
+  DynamicModule[{displayName = presetName, mouseOverEditButton = False, mouseOverDeleteButton = False, popupAttachedCell},
     EventHandler[
       Style[
-        presetBubbleDisplayMode[presetList, activePresetKey, displayName, mouseOverEditButton, mouseOverDeleteButton],
+        presetBubbleDisplayMode[popupAttachedCell, presetList, activePresetKey, displayName, mouseOverEditButton, mouseOverDeleteButton],
         "CodeFormatterText", FontWeight -> "DemiBold"],
       "MouseClicked" :> (
         If[Not[Or[mouseOverEditButton, mouseOverDeleteButton]],
@@ -1325,8 +1325,9 @@ buttonAppearance[(* gives rounded rect appearance *)
           activePresetKey = displayName;
           parameters = Values[KeyTake[AbsoluteCurrentValue[$FrontEnd, {$optsPath}], airinessKeys]];
           indentationParameters = Values[KeyTake[AbsoluteCurrentValue[$FrontEnd, {$optsPath}], indentKeys]];
-          NotebookDelete[EvaluationCell[]]]),
-      PassEventsDown -> True]],
+          NotebookDelete[popupAttachedCell]]),
+      PassEventsDown -> True],
+    Initialization :> (popupAttachedCell = EvaluationCell[])],
   {All, All}]
 
 ]

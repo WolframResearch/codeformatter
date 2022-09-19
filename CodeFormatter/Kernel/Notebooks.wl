@@ -375,7 +375,6 @@ Module[{cst, formatted, formattedBox, airiness, indentationString, tabWidth, agg
 
   agg2 = CodeParser`Abstract`Aggregate[cst2];
   agg2 = reduceSpan[agg2];
-  agg2 = preferGroupMissingCloserNode[agg2];
 
   agg2[[1]] = Box;
 
@@ -494,21 +493,6 @@ lcReplace2[l_] :=
         PrefixNode[tag, {LeafNode[tag1, lc <> str, <||>], rest}, data]
     }
   ]
-
-(*
-Parsing:
-
-f[
-
-as a string gives UnterminatedGroupNode
-
-But parsing RowBox[{"f", "["}] gives GroupMissingCloserNode
-
-Convert all UnterminatedGroupNode to GroupMissingCloserNode
-
-*)
-preferGroupMissingCloserNode[agg_] :=
-  agg /. UnterminatedGroupNode -> GroupMissingCloserNode
 
 (*
 Parsing:

@@ -1459,9 +1459,6 @@ Block[{$Toplevel = False},
 indent[n:GroupMissingCloserNode[_, _, _], OptionsPattern[]] :=
   n
 
-indent[n:UnterminatedGroupNode[_, _, _], OptionsPattern[]] :=
-  n
-
 
 
 (*
@@ -2586,8 +2583,8 @@ g may be:
 GroupNode[GroupSquare, ...]
 GroupNode[GroupDoubleBracket, ...]
 
-UnterminatedGroupNode[GroupSquare, ...]
-UnterminatedGroupNode[GroupDoubleBracket, ...]
+GroupMissingCloserNode[GroupSquare, ...]
+GroupMissingCloserNode[GroupDoubleBracket, ...]
 
 *)
 commonCallNodeIndent[CallNode[head_, child_, data_]] :=

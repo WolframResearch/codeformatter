@@ -1,6 +1,8 @@
 (* ::Package::"Tags"-><|"NoVariables" -> <|"DynamicModule" -> <|Enabled -> False|>|>|>:: *)
 
 (* ::Package:: *)
+(**)
+
 
 (* ::Section::Closed:: *)
 (*Package Header*)
@@ -1441,7 +1443,7 @@ Pane[
         "",
         SaveAsPresetButton[Dynamic[activePresetKey]]}},
     Alignment -> {{Left, Center, Right}},
-    ItemSize -> {{Automatic, Fit, Automatic}}],
+    ItemSize -> {{Automatic, Automatic, Automatic}}],
   ImageSize -> {dialogSuggestedWidth, Automatic}]
 
 

@@ -10,10 +10,11 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[      2299,         65]
-NotebookOptionsPosition[      1488,         48]
-NotebookOutlinePosition[      1908,         64]
-CellTagsIndexPosition[      1865,         61]
+NotebookDataLength[      2337,         67]
+NotebookOptionsPosition[      1504,         49]
+NotebookOutlinePosition[      1946,         66]
+CellTagsIndexPosition[      1903,         63]
+MenuPosition->0
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -48,7 +49,8 @@ Cell[StyleData["CodeFormatterText", StyleDefinitions -> StyleData[
 },
 WindowSize->{581.25, 654.},
 WindowMargins->{{Automatic, 63}, {30.75, Automatic}},
-FrontEndVersion->"13.0 for Microsoft Windows (64-bit) (October 6, 2021)",
+MenuSortingValue->None,
+FrontEndVersion->"12.1 for Microsoft Windows (64-bit) (June 19, 2020)",
 StyleDefinitions->"StylesheetFormatting.nb",
 ExpressionUUID->"7fa73f9a-c115-4504-88bf-a826105a8cc3"
 ]
@@ -63,10 +65,10 @@ CellTagsIndex->{}
 *)
 (*NotebookFileOutline
 Notebook[{
-Cell[558, 20, 103, 0, 30, 48, 0, "StyleData", "StyleDefinitions", "",ExpressionUUID->"3a9c5537-444a-4165-8f1b-2e0b98f11ea5"],
-Cell[664, 22, 337, 8, 40, 46, 0, "StyleData", "CodeFormatterHighlightColor", "All",ExpressionUUID->"b0a1e796-3f9c-4259-9c1a-923a015c53ff"],
-Cell[1004, 32, 297, 9, 43, 40, 0, "StyleData", "CodeFormatterTextBase", "All",ExpressionUUID->"0ce1378d-a9ae-478b-8e24-b77b81a8296f"],
-Cell[1304, 43, 180, 3, 43, 94, 1, "StyleData", "CodeFormatterText", "All",ExpressionUUID->"4b65fc49-6de8-4570-8bd2-376f995c6986"]
+Cell[574, 21, 103, 0, 39, 48, 0, "StyleData", "StyleDefinitions", "",ExpressionUUID->"3a9c5537-444a-4165-8f1b-2e0b98f11ea5"],
+Cell[680, 23, 337, 8, 39, 46, 0, "StyleData", "CodeFormatterHighlightColor", "All",ExpressionUUID->"b0a1e796-3f9c-4259-9c1a-923a015c53ff"],
+Cell[1020, 33, 297, 9, 41, 40, 0, "StyleData", "CodeFormatterTextBase", "All",ExpressionUUID->"0ce1378d-a9ae-478b-8e24-b77b81a8296f"],
+Cell[1320, 44, 180, 3, 41, 94, 1, "StyleData", "CodeFormatterText", "All",ExpressionUUID->"4b65fc49-6de8-4570-8bd2-376f995c6986"]
 }
 ]
 *)

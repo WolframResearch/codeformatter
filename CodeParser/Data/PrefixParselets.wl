@@ -13,10 +13,10 @@ Token`Real -> Parselet`LeafParselet[],
 Token`Rational -> Parselet`LeafParselet[],
 Token`LinearSyntaxBlob -> Parselet`LeafParselet[],
 
-Token`Unknown -> Parselet`PrefixNullPointerParselet[],
-Token`Whitespace -> Parselet`PrefixNullPointerParselet[],
-Token`InternalNewline -> Parselet`PrefixNullPointerParselet[],
-Token`Comment -> Parselet`PrefixNullPointerParselet[],
+Token`Unknown -> Parselet`PrefixErrorParselet[],
+Token`Whitespace -> Parselet`PrefixErrorParselet[],
+Token`InternalNewline -> Parselet`PrefixErrorParselet[],
+Token`Comment -> Parselet`PrefixErrorParselet[],
 
 Token`EndOfFile -> Parselet`PrefixEndOfFileParselet[],
 
@@ -53,53 +53,44 @@ Token`LongName`RightDoubleBracketingBar -> Parselet`PrefixCloserParselet[],
 Token`LongName`RightFloor -> Parselet`PrefixCloserParselet[],
 
 
-Token`Minus -> Parselet`PrefixOperatorParselet[Token`Minus, Precedence`Prefix`Minus, Minus],
-Token`Plus -> Parselet`PrefixOperatorParselet[Token`Plus, Precedence`Prefix`Plus, Plus],
-Token`Bang -> Parselet`PrefixOperatorParselet[Token`Bang, Precedence`Prefix`Bang, Not],
-Token`PlusPlus -> Parselet`PrefixOperatorParselet[Token`PlusPlus, Precedence`Prefix`PlusPlus, PreIncrement],
-Token`MinusMinus -> Parselet`PrefixOperatorParselet[Token`MinusMinus, Precedence`Prefix`MinusMinus, PreDecrement],
+Token`Minus -> Parselet`PrefixOperatorParselet[Precedence`Prefix`Minus, Minus],
+Token`Plus -> Parselet`PrefixOperatorParselet[Precedence`Prefix`Plus, Plus],
+Token`Bang -> Parselet`PrefixOperatorParselet[Precedence`Prefix`Bang, Not],
+Token`PlusPlus -> Parselet`PrefixOperatorParselet[Precedence`Prefix`PlusPlus, PreIncrement],
+Token`MinusMinus -> Parselet`PrefixOperatorParselet[Precedence`Prefix`MinusMinus, PreDecrement],
 
-Token`BangBang -> Parselet`PrefixOperatorParselet[Token`BangBang, Precedence`Fake`Prefix`BangBang, CodeParser`PrefixNot2],
+Token`BangBang -> Parselet`PrefixOperatorParselet[Precedence`Fake`Prefix`BangBang, CodeParser`PrefixNot2],
 
-Token`LongName`PlusMinus -> Parselet`PrefixOperatorParselet[Token`LongName`PlusMinus, Precedence`Prefix`LongName`PlusMinus, PlusMinus],
-Token`LongName`Sum -> Parselet`PrefixOperatorParselet[Token`LongName`Sum, Precedence`LongName`Sum, Sum],
-Token`LongName`Not -> Parselet`PrefixOperatorParselet[Token`LongName`Not, Precedence`LongName`Not, Not],
-Token`LongName`Sqrt -> Parselet`PrefixOperatorParselet[Token`LongName`Sqrt, Precedence`LongName`Sqrt, Sqrt],
-Token`LongName`MinusPlus -> Parselet`PrefixOperatorParselet[Token`LongName`MinusPlus, Precedence`Prefix`LongName`MinusPlus, MinusPlus],
-Token`LongName`DifferentialD -> Parselet`PrefixOperatorParselet[Token`LongName`DifferentialD, Precedence`LongName`DifferentialD, DifferentialD],
-Token`LongName`CapitalDifferentialD -> Parselet`PrefixOperatorParselet[Token`LongName`CapitalDifferentialD, Precedence`LongName`CapitalDifferentialD, CapitalDifferentialD],
-Token`LongName`Minus -> Parselet`PrefixOperatorParselet[Token`LongName`Minus, Precedence`Prefix`LongName`Minus, Minus],
-Token`LongName`Del -> Parselet`PrefixOperatorParselet[Token`LongName`Del, Precedence`LongName`Del, Del],
-Token`LongName`Square -> Parselet`PrefixOperatorParselet[Token`LongName`Square, Precedence`LongName`Square, Square],
+Token`LongName`PlusMinus -> Parselet`PrefixOperatorParselet[Precedence`Prefix`LongName`PlusMinus, PlusMinus],
+Token`LongName`Sum -> Parselet`PrefixOperatorParselet[Precedence`LongName`Sum, Sum],
+Token`LongName`Not -> Parselet`PrefixOperatorParselet[Precedence`LongName`Not, Not],
+Token`LongName`Sqrt -> Parselet`PrefixOperatorParselet[Precedence`LongName`Sqrt, Sqrt],
+Token`LongName`MinusPlus -> Parselet`PrefixOperatorParselet[Precedence`Prefix`LongName`MinusPlus, MinusPlus],
+Token`LongName`DifferentialD -> Parselet`PrefixOperatorParselet[Precedence`LongName`DifferentialD, DifferentialD],
+Token`LongName`CapitalDifferentialD -> Parselet`PrefixOperatorParselet[Precedence`LongName`CapitalDifferentialD, CapitalDifferentialD],
+Token`LongName`Minus -> Parselet`PrefixOperatorParselet[Precedence`Prefix`LongName`Minus, Minus],
+Token`LongName`Del -> Parselet`PrefixOperatorParselet[Precedence`LongName`Del, Del],
+Token`LongName`Square -> Parselet`PrefixOperatorParselet[Precedence`LongName`Square, Square],
 
 
 Token`Comma -> Parselet`PrefixCommaParselet[],
 Token`LongName`InvisibleComma -> Parselet`PrefixCommaParselet[],
 
 
-(*
-Integration operators
-*)
-Token`LongName`ContourIntegral -> Parselet`PrefixOperatorParselet[Token`LongName`ContourIntegral, Precedence`Class`IntegrationOperators, ContourIntegral],
-Token`LongName`DoubleContourIntegral -> Parselet`PrefixOperatorParselet[Token`LongName`DoubleContourIntegral, Precedence`Class`IntegrationOperators, DoubleContourIntegral],
-Token`LongName`ClockwiseContourIntegral -> Parselet`PrefixOperatorParselet[Token`LongName`ClockwiseContourIntegral, Precedence`Class`IntegrationOperators, ClockwiseContourIntegral],
-Token`LongName`CounterClockwiseContourIntegral -> Parselet`PrefixOperatorParselet[Token`LongName`CounterClockwiseContourIntegral, Precedence`Class`IntegrationOperators, CounterClockwiseContourIntegral],
+Token`LongName`Product -> Parselet`PrefixOperatorParselet[Precedence`LongName`Product, Product],
+Token`LongName`ContinuedFractionK -> Parselet`PrefixOperatorParselet[Precedence`LongName`ContinuedFractionK, ContinuedFractionK],
+Token`LongName`CircleTimes -> Parselet`PrefixOperatorParselet[Precedence`Prefix`LongName`CircleTimes, CircleTimes],
+Token`LongName`ForAll -> Parselet`PrefixOperatorParselet[Precedence`LongName`ForAll, ForAll],
+Token`LongName`Exists -> Parselet`PrefixOperatorParselet[Precedence`LongName`Exists, Exists],
+Token`LongName`NotExists -> Parselet`PrefixOperatorParselet[Precedence`LongName`NotExists, NotExists],
+Token`LongName`Coproduct -> Parselet`PrefixOperatorParselet[Precedence`Prefix`LongName`Coproduct, Coproduct],
+Token`LongName`Piecewise -> Parselet`PrefixOperatorParselet[Precedence`LongName`Piecewise, Piecewise],
+Token`LongName`InvisiblePrefixScriptBase -> Parselet`PrefixOperatorParselet[Precedence`LongName`InvisiblePrefixScriptBase, System`InvisiblePrefixScriptBase],
+Token`LongName`ExpectationE -> Parselet`PrefixOperatorParselet[Precedence`LongName`ExpectationE, ExpectationE],
+Token`LongName`CubeRoot -> Parselet`PrefixOperatorParselet[Precedence`LongName`CubeRoot, CubeRoot],
+Token`LongName`ProbabilityPr -> Parselet`PrefixOperatorParselet[Precedence`LongName`ProbabilityPr, ProbabilityPr],
 
-
-Token`LongName`Product -> Parselet`PrefixOperatorParselet[Token`LongName`Product, Precedence`LongName`Product, Product],
-Token`LongName`ContinuedFractionK -> Parselet`PrefixOperatorParselet[Token`LongName`ContinuedFractionK, Precedence`LongName`ContinuedFractionK, ContinuedFractionK],
-Token`LongName`CircleTimes -> Parselet`PrefixOperatorParselet[Token`LongName`CircleTimes, Precedence`Prefix`LongName`CircleTimes, CircleTimes],
-Token`LongName`ForAll -> Parselet`PrefixOperatorParselet[Token`LongName`ForAll, Precedence`LongName`ForAll, ForAll],
-Token`LongName`Exists -> Parselet`PrefixOperatorParselet[Token`LongName`Exists, Precedence`LongName`Exists, Exists],
-Token`LongName`NotExists -> Parselet`PrefixOperatorParselet[Token`LongName`NotExists, Precedence`LongName`NotExists, NotExists],
-Token`LongName`Coproduct -> Parselet`PrefixOperatorParselet[Token`LongName`Coproduct, Precedence`Prefix`LongName`Coproduct, Coproduct],
-Token`LongName`Piecewise -> Parselet`PrefixOperatorParselet[Token`LongName`Piecewise, Precedence`LongName`Piecewise, Piecewise],
-Token`LongName`InvisiblePrefixScriptBase -> Parselet`PrefixOperatorParselet[Token`LongName`InvisiblePrefixScriptBase, Precedence`LongName`InvisiblePrefixScriptBase, System`InvisiblePrefixScriptBase],
-Token`LongName`ExpectationE -> Parselet`PrefixOperatorParselet[Token`LongName`ExpectationE, Precedence`LongName`ExpectationE, ExpectationE],
-Token`LongName`CubeRoot -> Parselet`PrefixOperatorParselet[Token`LongName`CubeRoot, Precedence`LongName`CubeRoot, CubeRoot],
-Token`LongName`ProbabilityPr -> Parselet`PrefixOperatorParselet[Token`LongName`ProbabilityPr, Precedence`LongName`ProbabilityPr, ProbabilityPr],
-
-Token`LinearSyntax`Bang -> Parselet`PrefixOperatorParselet[Token`LinearSyntax`Bang, Precedence`LinearSyntax`Bang, CodeParser`PrefixLinearSyntaxBang],
+Token`LinearSyntax`Bang -> Parselet`PrefixOperatorParselet[Precedence`LinearSyntax`Bang, CodeParser`PrefixLinearSyntaxBang],
 Token`LinearSyntax`At -> Parselet`PrefixUnsupportedTokenParselet[],
 Token`LinearSyntax`Amp -> Parselet`PrefixUnsupportedTokenParselet[],
 Token`LinearSyntax`Star -> Parselet`PrefixUnsupportedTokenParselet[],
@@ -165,7 +156,11 @@ Token`SemiSemi -> Parselet`SemiSemiParselet[],
 (*
 Has to handle \[Integral] f \[DifferentialD] x
 *)
-Token`LongName`Integral -> Parselet`IntegralParselet[],
+Token`LongName`Integral -> Parselet`IntegralParselet[Integrate, Integral],
+Token`LongName`ContourIntegral -> Parselet`IntegralParselet[ContourIntegral, ContourIntegral],
+Token`LongName`DoubleContourIntegral -> Parselet`IntegralParselet[DoubleContourIntegral, DoubleContourIntegral],
+Token`LongName`ClockwiseContourIntegral -> Parselet`IntegralParselet[ClockwiseContourIntegral, ClockwiseContourIntegral],
+Token`LongName`CounterClockwiseContourIntegral -> Parselet`IntegralParselet[CounterClockwiseContourIntegral, CounterClockwiseContourIntegral],
 
 (*
 stringify next token (as a file]

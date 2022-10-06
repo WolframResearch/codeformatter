@@ -221,7 +221,7 @@ Module[{nb, res},
   ];
   
   Print["saving CodeFormatter.nb"];
-  res = NotebookSave[nb, FileNameJoin[{generatedWLDir, "FrontEnd", "Palettes", "CodeFormatter.nb"}]];
+  res = NotebookSave[nb, FileNameJoin[{buildDir, "paclet", "CodeFormatter", "FrontEnd", "Palettes", "CodeFormatter.nb"}]];
 
   Print[res];
 

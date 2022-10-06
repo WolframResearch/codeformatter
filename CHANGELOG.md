@@ -1,5 +1,17 @@
 
-## 1.8 - XX Sep, 2022
+## 1.8 - 10 Oct, 2022
+
+Format `1 / 0` as `1/0`.
+
+Special casing for `Test[input, expected, TestID -> xxx]`.
+
+Prevent palette from becoming blank when removing the last preset.
+
+### Fixes
+
+Fix 427231: CodeFormat on empty quotes throws many errors.
+
+Fix bug where "Save as Present" button is outside the draw area of the palette.
 
 
 ## 1.7 - 4 July, 2022

@@ -101,11 +101,11 @@ set(PACLETINFO_IN_SOURCE
 )
 
 set(GENERATED_WL_PACLET_KERNEL_SOURCES
-	${PROJECT_BINARY_DIR}/generated/wl/Kernel/AcceptableOperators.wl
+	${PROJECT_BINARY_DIR}/paclet/CodeFormatter/Kernel/AcceptableOperators.wl
 )
 
 set(GENERATED_WL_PACLET_FRONTEND_SOURCES
-	${PROJECT_BINARY_DIR}/generated/wl/FrontEnd/Palettes/CodeFormatter.nb
+	${PROJECT_BINARY_DIR}/paclet/CodeFormatter/FrontEnd/Palettes/CodeFormatter.nb
 )
 
 
@@ -135,8 +135,6 @@ endif()
 
 file(MAKE_DIRECTORY
 	${PROJECT_BINARY_DIR}/paclet/${PACLET}
-	${PROJECT_BINARY_DIR}/generated/wl/Kernel/
-	${PROJECT_BINARY_DIR}/generated/wl/FrontEnd/Palettes/
 )
 
 
@@ -198,38 +196,6 @@ foreach(SRC ${STATIC_WL_PACLET_FRONTEND_SOURCES})
 	list(APPEND COPIED_WL_PACLET_SOURCES ${PROJECT_BINARY_DIR}/paclet/${PACLET}/FrontEnd/${REL})
 endforeach()
 
-#
-# generated Kernel sources
-#
-foreach(SRC ${GENERATED_WL_PACLET_KERNEL_SOURCES})
-	file(RELATIVE_PATH REL ${PROJECT_BINARY_DIR}/generated/wl/Kernel/ ${SRC})
-	add_custom_command(
-		OUTPUT
-			${PROJECT_BINARY_DIR}/paclet/${PACLET}/Kernel/${REL}
-		COMMAND
-			${CMAKE_COMMAND} -E copy ${SRC} ${PROJECT_BINARY_DIR}/paclet/${PACLET}/Kernel/${REL}
-		DEPENDS
-			${SRC}
-	)
-	list(APPEND COPIED_WL_PACLET_SOURCES ${PROJECT_BINARY_DIR}/paclet/${PACLET}/Kernel/${REL})
-endforeach()
-
-#
-# generated FrontEnd sources
-#
-foreach(SRC ${GENERATED_WL_PACLET_FRONTEND_SOURCES})
-	file(RELATIVE_PATH REL ${PROJECT_BINARY_DIR}/generated/wl/FrontEnd/ ${SRC})
-	add_custom_command(
-		OUTPUT
-			${PROJECT_BINARY_DIR}/paclet/${PACLET}/FrontEnd/${REL}
-		COMMAND
-			${CMAKE_COMMAND} -E copy ${SRC} ${PROJECT_BINARY_DIR}/paclet/${PACLET}/FrontEnd/${REL}
-		DEPENDS
-			${SRC}
-	)
-	list(APPEND COPIED_WL_PACLET_SOURCES ${PROJECT_BINARY_DIR}/paclet/${PACLET}/FrontEnd/${REL})
-endforeach()
-
 
 
 #
@@ -241,7 +207,7 @@ endforeach()
 #
 add_custom_command(
 	OUTPUT
-		${PROJECT_BINARY_DIR}/generated/wl/Kernel/AcceptableOperators.wl
+		${PROJECT_BINARY_DIR}/paclet/CodeFormatter/Kernel/AcceptableOperators.wl
 	COMMAND
 		${CMAKE_COMMAND} -DSCRIPT=${PROJECT_SOURCE_DIR}/CodeFormatter/Generate/AcceptableOperators.wl -DSRCDIR=${PROJECT_SOURCE_DIR} -DBUILDDIR=${PROJECT_BINARY_DIR} -DWOLFRAMKERNEL=${WOLFRAMKERNEL} -DKERNEL_TIMEOUT=${KERNEL_TIMEOUT} -P ${PROJECT_SOURCE_DIR}/cmake/WolframScript.cmake
 	COMMAND
@@ -263,7 +229,7 @@ add_custom_command(
 #
 add_custom_command(
 	OUTPUT
-		${PROJECT_BINARY_DIR}/generated/wl/FrontEnd/Palettes/CodeFormatter.nb
+		${PROJECT_BINARY_DIR}/paclet/CodeFormatter/FrontEnd/Palettes/CodeFormatter.nb
 	COMMAND
 		${CMAKE_COMMAND} -DSCRIPT=${PROJECT_SOURCE_DIR}/CodeFormatter/Generate/Palette.wl -DSRCDIR=${PROJECT_SOURCE_DIR} -DBUILDDIR=${PROJECT_BINARY_DIR} -DWOLFRAMKERNEL=${WOLFRAMKERNEL} -DKERNEL_TIMEOUT=${KERNEL_TIMEOUT} -P ${PROJECT_SOURCE_DIR}/cmake/WolframScript.cmake
 	DEPENDS
@@ -284,6 +250,8 @@ add_custom_command(
 set(PACLET_SOURCES
 	${REPLACED_PACLETINFO}
 	${COPIED_WL_PACLET_SOURCES}
+	${GENERATED_WL_PACLET_KERNEL_SOURCES}
+	${GENERATED_WL_PACLET_FRONTEND_SOURCES}
 )
 
 

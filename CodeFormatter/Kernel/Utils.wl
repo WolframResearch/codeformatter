@@ -168,6 +168,7 @@ isOpener[Token`LessBar] = True
 isOpener[Token`OpenCurly] = True
 isOpener[Token`OpenParen] = True
 isOpener[Token`OpenSquare] = True
+isOpener[Token`ColonColonOpenSquare] = True
 isOpener[Token`LongName`OpenCurlyDoubleQuote] = True
 isOpener[Token`LongName`OpenCurlyQuote] = True
 isOpener[Token`LongName`LeftAngleBracket] = True

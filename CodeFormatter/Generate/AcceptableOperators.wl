@@ -40,14 +40,14 @@ acceptableOperators =
   Remove prefix operators that are also postfix operators
   *)
   Complement[
-    Cases[normalPrefixParselets, Verbatim[Rule][tok_, Parselet`PrefixOperatorParselet[_, _, _]] :> tok],
-    Cases[normalInfixParselets, Verbatim[Rule][tok_, Parselet`PostfixOperatorParselet[_, _, _]] :> tok]
+    Cases[normalPrefixParselets, Verbatim[Rule][tok_, Parselet`PrefixOperatorParselet[_, _]] :> tok],
+    Cases[normalInfixParselets, Verbatim[Rule][tok_, Parselet`PostfixOperatorParselet[_, _]] :> tok]
   ] ~Join~
 
   Cases[normalPrefixParselets, Verbatim[Rule][tok_, Parselet`GroupParselet[_, _]] :> tok] ~Join~
-  Cases[normalInfixParselets, Verbatim[Rule][tok_, Parselet`BinaryOperatorParselet[_, _, _]] :> tok] ~Join~
+  Cases[normalInfixParselets, Verbatim[Rule][tok_, Parselet`BinaryOperatorParselet[_, _]] :> tok] ~Join~
   Complement[
-    Cases[normalInfixParselets, Verbatim[Rule][tok_, Parselet`InfixOperatorParselet[_, _, _]] :> tok],
+    Cases[normalInfixParselets, Verbatim[Rule][tok_, Parselet`InfixOperatorParselet[_, _]] :> tok],
     (*
     Manually remove Token`Fake`ImplicitTimes
 

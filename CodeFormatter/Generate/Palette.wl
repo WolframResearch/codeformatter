@@ -219,7 +219,9 @@ Module[{nb, res},
     Print["CreatePalette failed: ", nb];
     Quit[1]
   ];
-  
+
+  Quiet[DeleteFile[FileNameJoin[{buildDir, "paclet", "CodeFormatter", "FrontEnd", "Palettes", "CodeFormatter.nb"}]], DeleteFile::fdnfnd];
+
   Print["saving CodeFormatter.nb"];
   res = NotebookSave[nb, FileNameJoin[{buildDir, "paclet", "CodeFormatter", "FrontEnd", "Palettes", "CodeFormatter.nb"}]];
 
@@ -228,6 +230,15 @@ Module[{nb, res},
   If[res =!= Null,
     Quit[1]
   ];
+  ];
+
+  (*
+  NotebookSave may fail, but give no indication,
+  so need to explicitly check that file was created
+  bug 429251
+  *)
+  If[!FileExistsQ[FileNameJoin[{buildDir, "paclet", "CodeFormatter", "FrontEnd", "Palettes", "CodeFormatter.nb"}]],
+    Quit[1]
   ];
 
   Print["Done UsingFrontEnd"];

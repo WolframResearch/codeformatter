@@ -381,6 +381,32 @@ Test[
 
 
 Test[
+	CodeFormat["1/-0"]
+	,
+	"1/-0"
+	,
+	TestID->"CodeFormatter-20221018-Q2X8M9"
+]
+
+Test[
+	CodeFormat["10^9"]
+	,
+	"10^9"
+	,
+	TestID->"CodeFormatter-20221018-Z7H7W5"
+]
+
+Test[
+	CodeFormat["10^-9"]
+	,
+	"10^-9"
+	,
+	TestID->"CodeFormatter-20221018-B5K0S1"
+]
+
+
+
+Test[
 	CodeFormat["Test[1/0, ComplexInfinity, {Power::infy}, TestID->\"test\"]"]
 	,
 	"\

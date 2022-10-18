@@ -897,6 +897,7 @@ a::b
 
 no spaces around Power:
 a^b
+10^-9
 
 *)
 indentInfixRatorSurroundedByLeafs[Pattern | Optional | PatternTest | MessageName | Power][rator_] :=
@@ -1018,6 +1019,8 @@ $SpecialChained = {
 }
 
 
+integerPat = LeafNode[Integer, _, _] | PrefixNode[Minus, {_, LeafNode[Integer, _, _]}, _]
+
 (*
 
 This is the big function for all BinaryNodes, InfixNodes, and TernaryNodes
@@ -1045,7 +1048,7 @@ Module[{aggs, rators, ratorsPat, split,
   ];
 
   Which[
-    MatchQ[type, BinaryNode | InfixNode] && MatchQ[graphs, {LeafNode[Integer, _, _], _LeafNode, LeafNode[Integer, _, _]}],
+    MatchQ[type, BinaryNode | InfixNode] && MatchQ[graphs, {integerPat, _LeafNode, integerPat}],
       infixRatorSurroundedBy = Integers;
     ,
     MatchQ[type, BinaryNode | InfixNode] && MatchQ[graphs, {_LeafNode, _LeafNode, _LeafNode}],

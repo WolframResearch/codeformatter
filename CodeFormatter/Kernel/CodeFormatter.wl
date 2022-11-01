@@ -420,6 +420,11 @@ Module[{
   tabWidth = OptionValue["TabWidth"];
 
   breakLinesMethod = OptionValue["BreakLinesMethod"];
+
+  If[!MemberQ[{"LineBreakerV1", "LineBreakerV2"}, breakLinesMethod],
+    Throw[Failure["UnrecognizedOptionValue", <| "BreakLinesMethod" -> breakLinesMethod |>]]
+  ];
+
   lineWidth = OptionValue["LineWidth"];
   safetyMargin = OptionValue["SafetyMargin"];
 

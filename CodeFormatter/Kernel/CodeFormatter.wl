@@ -48,6 +48,10 @@ Line Breaker V1
 $DefaultSafetyMargin
 
 
+$DefaultAiriness
+
+
+
 (*
 Undocumented flags
 *)
@@ -164,6 +168,9 @@ Line Breaker V1
 $DefaultSafetyMargin = 10
 
 
+$DefaultAiriness = Automatic
+
+
 CodeFormat::implicittimesaftercontinuation = "Replaced implicit Times with explicit * to remove ambiguity."
 
 CodeFormat::syntaxissues = "Input to CodeFormat has syntax issues: `1`"
@@ -179,7 +186,7 @@ Options[CodeFormat] = {
   "NewlineString" :> $DefaultNewlineString,
   "LineWidth" :> $DefaultLineWidth,
 
-  Airiness -> Automatic,
+  Airiness :> $DefaultAiriness,
   "NewlinesBetweenCommas" -> Automatic,
   "NewlinesBetweenSemicolons" -> Automatic,
   "NewlinesBetweenOperators" -> Automatic,

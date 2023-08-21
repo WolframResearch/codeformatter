@@ -87,7 +87,6 @@ set(STATIC_WL_PACLET_KERNEL_SOURCES
 )
 
 set(STATIC_WL_PACLET_FRONTEND_SOURCES
-	${PROJECT_SOURCE_DIR}/CodeFormatter/FrontEnd/StyleSheets/Dialog.nb
 	${PROJECT_SOURCE_DIR}/CodeFormatter/FrontEnd/StyleSheets/Package.nb
 	${PROJECT_SOURCE_DIR}/CodeFormatter/FrontEnd/StyleSheets/Script.nb
 	${PROJECT_SOURCE_DIR}/CodeFormatter/FrontEnd/SystemResources/Bitmaps/Misc/popupRightBottom.9.png

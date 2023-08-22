@@ -41,7 +41,7 @@ Module[{nb, res},
 
   nb =
     CreatePalette[ Deploy @
-      Highlighted[
+      Framed[
         DynamicModule[{semicolons, operators, groups, commas, ctrlStruct, scopingStruct, comments, activePresetKey},
           Column[{
             FormatButton[{dialogSuggestedWidth, 25}],
@@ -149,7 +149,7 @@ Module[{nb, res},
               ];
             ]
         ],
-        Background -> BackgroundCol, RoundingRadius -> 0, FrameMargins -> {{8, 8}, {8, 8}}
+        Background -> BackgroundCol, RoundingRadius -> 0, FrameMargins -> {{8, 8}, {8, 8}}, FrameStyle -> None
       ]
     ,
     (*

@@ -231,7 +231,6 @@ Module[{nb, res},
   If[res =!= Null,
     Quit[1]
   ];
-  ];
 
   (*
   NotebookSave may fail, but give no indication,

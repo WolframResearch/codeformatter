@@ -37,6 +37,8 @@ Module[{nb, res},
   
   Print["UsingFrontEnd... \[WatchIcon]"];
 
+  UsingFrontEnd[
+
   nb =
     CreatePalette[ Deploy @
       Framed[
@@ -157,10 +159,7 @@ Module[{nb, res},
 
     Related bugs: 401490
     *)
-    (*
-      WindowTitle -> FrontEndResource["CodeFormatterStrings", "PaletteTitle"],
-    *)
-    WindowTitle -> "Code Formatting",
+    WindowTitle -> FEPrivate`FrontEndResource["CodeFormatterStrings", "PaletteTitle"],
     Background -> BackgroundCol,
     MenuSortingValue -> 1150, (* Group the Code palettes together -- 416653 *)
     Saveable -> False,
@@ -230,6 +229,7 @@ Module[{nb, res},
 
   If[res =!= Null,
     Quit[1]
+  ];
   ];
 
   (*

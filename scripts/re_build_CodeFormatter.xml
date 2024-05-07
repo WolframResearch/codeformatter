@@ -1,11 +1,11 @@
 <project name='CodeFormatter' basedir='..'>
 
 	<property name='component' value='CodeFormatter' />
-	<property name='system_id' value='### Must be set by Jenkins ###' />
+	<fail message='Property &quot;system_id&quot; must be defined by TeamCity.' unless='system_id' />
 
 	<property name='app.name' value='${component}' />
 	<property name='inputDir' value='${basedir}/${app.name}/Documentation' />
-	<property name='language' value='### Must be set by Jenkins ###' />
+	<fail message='Property &quot;language&quot; must be defined by TeamCity.' unless='language' />
 
 	<property environment='env' />
 	<import file='${env.RE_ANTLIBRARY_HOME}/ant-lib.xml' />

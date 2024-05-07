@@ -39,6 +39,8 @@ Module[{nb, res},
 
   UsingFrontEnd[
 
+    Print["Value of FEPrivate`FrontEndResource["CodeFormatterStrings", "PaletteTitle"]: ", FEPrivate`FrontEndResource["CodeFormatterStrings", "PaletteTitle"]];
+
   nb =
     CreatePalette[ Deploy @
       Framed[

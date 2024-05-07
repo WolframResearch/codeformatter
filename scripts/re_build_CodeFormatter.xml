@@ -1,12 +1,10 @@
 <project name='CodeFormatter' basedir='..'>
 
 	<property name='component' value='CodeFormatter' />
-	<fail message='Property &quot;system_id&quot; must be defined by TeamCity.' unless='system_id' />
-
+	
 	<property name='app.name' value='${component}' />
 	<property name='inputDir' value='${basedir}/${app.name}/Documentation' />
-	<fail message='Property &quot;language&quot; must be defined by TeamCity.' unless='language' />
-
+	
 	<property environment='env' />
 	<import file='${env.RE_ANTLIBRARY_HOME}/ant-lib.xml' />
 

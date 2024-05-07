@@ -39,7 +39,7 @@ Module[{nb, res},
 
   UsingFrontEnd[
 
-    Print["Value of FEPrivate`FrontEndResource[\"CodeFormatterStrings\", \"PaletteTitle\"]: ", FE`Evaluate @ FEPrivate`FrontEndResource["CodeFormatterStrings", "PaletteTitle"]];
+    Print["FrontEndResource[\"CodeFormatterStrings\", \"PaletteTitle\"]: ", FrontEndResource["CodeFormatterStrings", "PaletteTitle"]];
 
   nb =
     CreatePalette[ Deploy @
@@ -161,7 +161,7 @@ Module[{nb, res},
 
     Related bugs: 401490
     *)
-    WindowTitle -> FEPrivate`FrontEndResource["CodeFormatterStrings", "PaletteTitle"],
+    WindowTitle -> FrontEndResource["CodeFormatterStrings", "PaletteTitle"],
     Background -> BackgroundCol,
     MenuSortingValue -> 1150, (* Group the Code palettes together -- 416653 *)
     Saveable -> False,

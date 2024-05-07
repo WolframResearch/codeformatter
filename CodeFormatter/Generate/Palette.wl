@@ -159,7 +159,7 @@ Module[{nb, res},
 
     Related bugs: 401490
     *)
-    WindowTitle -> FEPrivate`FrontEndResource["CodeFormatterStrings", "PaletteTitle"],
+    WindowTitle -> "Code Formatting",
     Background -> BackgroundCol,
     MenuSortingValue -> 1150, (* Group the Code palettes together -- 416653 *)
     Saveable -> False,

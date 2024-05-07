@@ -38,6 +38,9 @@ Module[{nb, res},
   Print["UsingFrontEnd... \[WatchIcon]"];
 
   UsingFrontEnd[
+    Unprotect @ FrontEndResource;
+    FrontEndResource["CodeFormatterStrings", "PaletteTitle"] = "xxx";
+    Protect @ FrontEndResource;
 
     Print["FrontEndResource[\"CodeFormatterStrings\", \"PaletteTitle\"]: ", FrontEndResource["CodeFormatterStrings", "PaletteTitle"]];
 

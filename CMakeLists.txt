@@ -86,13 +86,22 @@ set(STATIC_WL_PACLET_KERNEL_SOURCES
 	${PROJECT_SOURCE_DIR}/CodeFormatter/Kernel/Utils.wl
 )
 
+# The dark versions of the popup bitmaps are ignored by 14.2- front ends
+# Including them here prevents duplication of the light-mode versions in the DarkModeSupport directory
 set(STATIC_WL_PACLET_FRONTEND_SOURCES
 	${PROJECT_SOURCE_DIR}/CodeFormatter/FrontEnd/StyleSheets/Package.nb
 	${PROJECT_SOURCE_DIR}/CodeFormatter/FrontEnd/StyleSheets/Script.nb
 	${PROJECT_SOURCE_DIR}/CodeFormatter/FrontEnd/SystemResources/Bitmaps/Misc/popupRightBottom.9.png
+	${PROJECT_SOURCE_DIR}/CodeFormatter/FrontEnd/SystemResources/Bitmaps/Misc/popupRightBottom.theme-dark.9.png
 	${PROJECT_SOURCE_DIR}/CodeFormatter/FrontEnd/SystemResources/Bitmaps/Misc/popupRightBottom@144dpi.9.png
+	${PROJECT_SOURCE_DIR}/CodeFormatter/FrontEnd/SystemResources/Bitmaps/Misc/popupRightBottom@144dpi.theme-dark.9.png
 	${PROJECT_SOURCE_DIR}/CodeFormatter/FrontEnd/SystemResources/Bitmaps/Misc/TransparentBG.9.png
 	${PROJECT_SOURCE_DIR}/CodeFormatter/FrontEnd/TextResources/CodeFormatter.tr
+)
+
+set(STATIC_WL_PACLET_DARKMODESUPPORT_SOURCES
+	${PROJECT_SOURCE_DIR}/CodeFormatter/DarkModeSupport/StyleSheets/Package.nb
+	${PROJECT_SOURCE_DIR}/CodeFormatter/DarkModeSupport/StyleSheets/Script.nb
 )
 
 set(PACLETINFO_IN_SOURCE
@@ -105,6 +114,7 @@ set(GENERATED_WL_PACLET_KERNEL_SOURCES
 
 set(GENERATED_WL_PACLET_FRONTEND_SOURCES
 	${PROJECT_BINARY_DIR}/paclet/CodeFormatter/FrontEnd/Palettes/CodeFormatter.nb
+	${PROJECT_BINARY_DIR}/paclet/CodeFormatter/DarkModeSupport/Palettes/CodeFormatter.nb
 )
 
 
@@ -135,6 +145,7 @@ endif()
 file(MAKE_DIRECTORY
 	${PROJECT_BINARY_DIR}/paclet/${PACLET}
 	${PROJECT_BINARY_DIR}/paclet/${PACLET}/FrontEnd/Palettes/
+	${PROJECT_BINARY_DIR}/paclet/${PACLET}/DarkModeSupport/Palettes/
 )
 
 
@@ -196,6 +207,22 @@ foreach(SRC ${STATIC_WL_PACLET_FRONTEND_SOURCES})
 	list(APPEND COPIED_WL_PACLET_SOURCES ${PROJECT_BINARY_DIR}/paclet/${PACLET}/FrontEnd/${REL})
 endforeach()
 
+foreach(SRC ${STATIC_WL_PACLET_DARKMODESUPPORT_SOURCES})
+	file(RELATIVE_PATH REL ${PROJECT_SOURCE_DIR}/${PACLET}/DarkModeSupport/ ${SRC})
+	add_custom_command(
+		OUTPUT
+			${PROJECT_BINARY_DIR}/paclet/${PACLET}/DarkModeSupport/${REL}
+		#
+		# Do not inspect FrontEnd sources
+		#
+		COMMAND
+			${CMAKE_COMMAND} -E copy ${SRC} ${PROJECT_BINARY_DIR}/paclet/${PACLET}/DarkModeSupport/${REL}
+		DEPENDS
+			${SRC}
+	)
+	list(APPEND COPIED_WL_PACLET_SOURCES ${PROJECT_BINARY_DIR}/paclet/${PACLET}/DarkModeSupport/${REL})
+endforeach()
+
 
 
 #
@@ -225,11 +252,12 @@ add_custom_command(
 )
 
 #
-# CodeFormatter.nb
+# CodeFormatter.nb, may require minimum cmake 3.2 to avoid http://www.cmake.org/Bug/view.php?id=15116 issue with multiple OUTPUT files
 #
 add_custom_command(
 	OUTPUT
 		${PROJECT_BINARY_DIR}/paclet/CodeFormatter/FrontEnd/Palettes/CodeFormatter.nb
+		${PROJECT_BINARY_DIR}/paclet/CodeFormatter/DarkModeSupport/Palettes/CodeFormatter.nb
 	COMMAND
 		${CMAKE_COMMAND} -DSCRIPT=${PROJECT_SOURCE_DIR}/CodeFormatter/Generate/Palette.wl -DSRCDIR=${PROJECT_SOURCE_DIR} -DBUILDDIR=${PROJECT_BINARY_DIR} -DWOLFRAMKERNEL=${WOLFRAMKERNEL} -DKERNEL_TIMEOUT=${KERNEL_TIMEOUT} -P ${PROJECT_SOURCE_DIR}/cmake/WolframScript.cmake
 	DEPENDS

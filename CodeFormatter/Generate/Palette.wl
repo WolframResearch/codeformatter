@@ -33,7 +33,7 @@ checkBuildDir[]
 
 
 generatePalette[] := 
-Module[{nb, res},
+Module[{nb, res, path},
   
   Print["UsingFrontEnd... \[WatchIcon]"];
 
@@ -41,7 +41,7 @@ Module[{nb, res},
 
   nb =
     CreatePalette[ Deploy @
-      Highlighted[
+      Framed[
         DynamicModule[{semicolons, operators, groups, commas, ctrlStruct, scopingStruct, comments, activePresetKey},
           Column[{
             FormatButton[{dialogSuggestedWidth, 25}],
@@ -149,7 +149,7 @@ Module[{nb, res},
               ];
             ]
         ],
-        Background -> BackgroundCol, RoundingRadius -> 0, FrameMargins -> {{8, 8}, {8, 8}}
+        Background -> BackgroundCol, RoundingRadius -> 0, FrameMargins -> {{8, 8}, {8, 8}}, FrameStyle -> None
       ]
     ,
     (*
@@ -159,7 +159,7 @@ Module[{nb, res},
 
     Related bugs: 401490
     *)
-    WindowTitle -> FEPrivate`FrontEndResource["CodeFormatterStrings", "PaletteTitle"],
+    WindowTitle -> "Code Formatting",
     Background -> BackgroundCol,
     MenuSortingValue -> 1150, (* Group the Code palettes together -- 416653 *)
     Saveable -> False,
@@ -168,17 +168,17 @@ Module[{nb, res},
         {
           Cell[StyleData[StyleDefinitions -> "Palette.nb"]],
           Cell[StyleData["CodeFormatterHighlightColor"],
-            System`EdgeColor -> GrayLevel[0.2],
-            FontColor -> GrayLevel[0.2], (* for FrameStyle *)
-            System`LineColor -> GrayLevel[0.2], (* for joined Line elements *)
+            System`EdgeColor -> grayLevel[{0.2}, {0.9609200}],
+            FontColor -> grayLevel[{0.2}, {0.9609200}], (* for FrameStyle *)
+            System`LineColor -> grayLevel[{0.2}, {0.9609200}], (* for joined Line elements *)
             Opacity[1.]],
           Cell[StyleData["CodeFormatterNewlineColor"],
-            FontColor -> RGBColor[1, 0.5, 0]],
+            FontColor -> rgbColor[{1, 0.5, 0}, {}]],
           Cell[StyleData["CodeFormatterNewlineFillColor"],
-            System`FrontFaceColor -> RGBColor[1, 0.5, 0],
+            System`FrontFaceColor -> rgbColor[{1, 0.5, 0}, {}],
             Opacity[1.]],
           Cell[StyleData["CodeFormatterNewlineFillColorSubtle"],
-            System`FrontFaceColor -> RGBColor[0.988235, 0.882353, 0.780392],
+            System`FrontFaceColor -> rgbColor[{0.988235, 0.882353, 0.780392}, {}],
             Opacity[1.]],
           Cell[StyleData["CodeFormatterTextBase"],
             FontFamily -> "Source Sans Pro",
@@ -189,7 +189,7 @@ Module[{nb, res},
             LineIndent -> 0,
             PrivateFontOptions -> {"OperatorSubstitution" -> False}],
           Cell[StyleData["CodeFormatterText", StyleDefinitions -> StyleData["CodeFormatterTextBase"]],
-            FontColor -> GrayLevel[0.2]],
+            FontColor -> grayLevel[{0.2}, {0.9609200}]],
           Cell[StyleData["ButtonCommonOptions"],
             FrameBoxOptions -> {
               Alignment -> Center,
@@ -197,21 +197,23 @@ Module[{nb, res},
               FrameStyle -> None,
               ImageSize -> {{38, Full}, {19.5, Full}},
               RoundingRadius -> 3}],
+          (* Gray2 is not quite the same as defined in Dialog.nb *)
           Cell[StyleData["ButtonGray2Normal", StyleDefinitions -> StyleData["ButtonCommonOptions"]],
-            FontColor->GrayLevel[0.2],
-            Background->GrayLevel[1],
-            FrameBoxOptions->{FrameStyle->{GrayLevel[166/255]}}],
+            FontColor->grayLevel[{0.2}, {0.9609200}],
+            Background->grayLevel[{1}, {0.27859}],
+            FrameBoxOptions->{FrameStyle->{grayLevel[{166/255}, {}]}}],
           Cell[StyleData["ButtonGray2Hover", StyleDefinitions -> StyleData["ButtonCommonOptions"]],
-            FontColor->GrayLevel[0.2],
-            Background->GrayLevel[1],
-            FrameBoxOptions->{FrameStyle->{GrayLevel[0.2]}}],
+            FontColor->grayLevel[{0.2}, {0.9609200}],
+            Background->grayLevel[{1}, {0.27859}],
+            FrameBoxOptions->{FrameStyle->{grayLevel[{0.2}, {}]}}],
           Cell[StyleData["ButtonGray2Pressed", StyleDefinitions -> StyleData["ButtonCommonOptions"]],
-            FontColor->GrayLevel[1],
-            Background->GrayLevel[166/255]],
+            FontColor->grayLevel[{1}, {0.0669200}],
+            Background->grayLevel[{0.651}, {0.}]],
           Cell[StyleData["ButtonGray2Disabled", StyleDefinitions -> StyleData["ButtonCommonOptions"]],
-            FontColor->GrayLevel[0.7, 0.5],
-            Background->GrayLevel[1, 0.5],
-            FrameBoxOptions->{FrameStyle->{GrayLevel[166/255, 0.5]}}]},
+            FontColor->grayLevel[{0.7}, {0.60033}],
+            FontOpacity->0.5,
+            Background->grayLevel[{1, 0.5}, {0.27859, 0.5}],
+            FrameBoxOptions->{FrameStyle->{grayLevel[{0.651, 0.5}, {0.65119, 0.5}]}}]},
         StyleDefinitions -> "PrivateStylesheetFormatting.nb"]
   ];
 
@@ -220,24 +222,26 @@ Module[{nb, res},
     Quit[1]
   ];
 
-  Quiet[DeleteFile[FileNameJoin[{buildDir, "paclet", "CodeFormatter", "FrontEnd", "Palettes", "CodeFormatter.nb"}]], DeleteFile::fdnfnd];
+  path = FileNameJoin[{buildDir, "paclet", "CodeFormatter", If[TrueQ @ BuildWithDarkModeSupportQ, "DarkModeSupport", "FrontEnd"], "Palettes", "CodeFormatter.nb"}];
+  
+  Quiet[DeleteFile[path], DeleteFile::fdnfnd];
 
-  Print["saving CodeFormatter.nb"];
-  res = NotebookSave[nb, FileNameJoin[{buildDir, "paclet", "CodeFormatter", "FrontEnd", "Palettes", "CodeFormatter.nb"}]];
+  Print["saving CodeFormatter.nb" <> If[TrueQ @ BuildWithDarkModeSupportQ, " (dark)", ""]];
+  res = NotebookSave[nb, path];
 
   Print[res];
 
   If[res =!= Null,
     Quit[1]
   ];
-  ];
+  ]; (* end UsingFrontEnd *)
 
   (*
   NotebookSave may fail, but give no indication,
   so need to explicitly check that file was created
   bug 429251
   *)
-  If[!FileExistsQ[FileNameJoin[{buildDir, "paclet", "CodeFormatter", "FrontEnd", "Palettes", "CodeFormatter.nb"}]],
+  If[!FileExistsQ[path],
     Quit[1]
   ];
 
@@ -246,18 +250,19 @@ Module[{nb, res},
 
 generate[] := (
 
-Print["Generating Palette..."];
+Print["Generating Palette..." <>  If[TrueQ @ BuildWithDarkModeSupportQ, " (dark)", ""]];
 
 generatePalette[];
 
-Print["Done Palette"]
+Print["Done Palette" <> If[TrueQ @ BuildWithDarkModeSupportQ, " (dark)", ""]]
 )
 
 If[!StringQ[script],
   Quit[1]
 ]
 If[AbsoluteFileName[script] === AbsoluteFileName[$InputFileName],
-generate[]
+generate[];
+Block[{BuildWithDarkModeSupportQ = True}, generate[]];
 ]
 
 End[]

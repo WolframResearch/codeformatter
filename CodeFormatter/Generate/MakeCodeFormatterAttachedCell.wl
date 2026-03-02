@@ -25,7 +25,11 @@ If[!MemberQ[$ContextPath, "CodeFormatter`Generate`UIElements`"],
 toCell[contents_] := Cell[BoxData @ ToBoxes[contents]]
 
 
-formatter =
+(*
+  The package/script toolbar for 13.3+ no longer uses this extra docked cell so no need for a dark-mode version.
+  Moreover, as far as the cmake script is concerned, this is a static resource as part of FrontEnd/TextResources/CodeFormatter.tr
+*)
+formatter = Block[{CodeFormatter`Generate`UIElements`BuildWithDarkModeSupportQ = False},
 DynamicModule[{},
   Grid[
     {{
@@ -118,6 +122,7 @@ DynamicModule[{},
     CurrentValue[$FrontEnd, {PrivateFrontEndOptions, "InterfaceSettings", "CodeFormatter", "ShowDropDown"}] = True
     
   )
+]
 ];
 
 
